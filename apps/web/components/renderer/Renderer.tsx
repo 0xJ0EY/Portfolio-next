@@ -73,7 +73,6 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 }
 
 export const Renderer = () => {
-  const mountRef: RefObject<HTMLDivElement> = useRef(null);
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
