@@ -1,3 +1,3 @@
-export const calculateAspectRatio = (elem: HTMLElement): number => {
-  return elem.clientWidth / elem.clientHeight;
+export const calculateAspectRatio = (width: number, height: number): number => {
+  return width / height;
 }

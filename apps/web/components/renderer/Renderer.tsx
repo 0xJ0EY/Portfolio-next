@@ -78,17 +78,16 @@ export const Renderer = () => {
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
-    const domNode = mountRef.current;
     const cssRendererNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
 
-    if (!domNode) { return; }
+    if (cssRendererNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
-    const [width, height] = [domNode.clientWidth, domNode.clientHeight]
+    const [width, height] = [window.innerWidth, window.innerHeight]
 
     const [scene, cutoutScene, cssScene] = createRenderScenes();
-    const camera = createCamera(75, calculateAspectRatio(domNode));
+    const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
     const composer = createComposer(renderer, width, height);
@@ -96,8 +95,8 @@ export const Renderer = () => {
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
 
-    cssRendererNode?.appendChild(cssRenderer.domElement);
-    webglRenderNode?.appendChild(renderer.domElement);
+    cssRendererNode.appendChild(cssRenderer.domElement);
+    webglRenderNode.appendChild(renderer.domElement);
 
     const geo = new BoxGeometry(1, 1, 1);
     const mat = new MeshBasicMaterial({ color: 0x00FF00 });
@@ -116,8 +115,10 @@ export const Renderer = () => {
     }
     
     const onWindowResize = function() {
-      resizeCamera(camera, calculateAspectRatio(domNode));
+      const [width, height] = [window.innerWidth, window.innerHeight]
+
       resizeRenderers(renderer, cssRenderer, width, height);
+      resizeCamera(camera, calculateAspectRatio(width, height));
     }
 
     const onDestroy = function() {
@@ -126,8 +127,8 @@ export const Renderer = () => {
       renderer.dispose();
       renderer.forceContextLoss();
 
-      cssRendererNode?.removeChild(cssRenderer.domElement);
-      webglRenderNode?.removeChild(renderer.domElement);
+      cssRendererNode.removeChild(cssRenderer.domElement);
+      webglRenderNode.removeChild(renderer.domElement);
     }
 
     window.addEventListener('resize', onWindowResize, false);
@@ -136,7 +137,7 @@ export const Renderer = () => {
     return () => onDestroy();
   }, []);
   return (
-    <div className={styles.renderer} ref={mountRef}>
+    <div className={styles.renderer}>
       <div className={styles.cssOutput} ref={cssOutputRef}></div>
       <div className={styles.webglOutput} ref={webglOutputRef}></div>
     </div>
