@@ -5,6 +5,7 @@ import { calculateAspectRatio } from './util';
 import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 
 const createRenderScenes = (): [Scene, Scene, Scene] => {
   return [new Scene(), new Scene(), new Scene()];
@@ -33,7 +34,8 @@ const createRenderers = (width: number, height: number): [WebGLRenderer, CSS3DRe
   return [webglRenderer,  cssRenderer];
 }
 
-const resizeRenderers = (webGlRenderer: WebGLRenderer, cssRenderer: CSS3DRenderer, width: number, height: number): void => {
+const resizeRenderers = (composer: EffectComposer, webGlRenderer: WebGLRenderer, cssRenderer: CSS3DRenderer, width: number, height: number): void => {
+  composer.setSize(width, height);
   webGlRenderer.setSize(width, height);
   cssRenderer.setSize(width, height);
 };
@@ -91,8 +93,8 @@ export const Renderer = () => {
 
     const composer = createComposer(renderer, width, height);
 
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
+    const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
+    composer.addPass(cutoutShaderPass);
 
     cssRendererNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
@@ -116,7 +118,7 @@ export const Renderer = () => {
     const onWindowResize = function() {
       const [width, height] = [window.innerWidth, window.innerHeight]
 
-      resizeRenderers(renderer, cssRenderer, width, height);
+      resizeRenderers(composer, renderer, cssRenderer, width, height);
       resizeCamera(camera, calculateAspectRatio(width, height));
     }
 
