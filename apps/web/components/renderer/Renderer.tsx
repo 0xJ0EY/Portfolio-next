@@ -1,8 +1,10 @@
 import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef } from "react";
-import { BoxGeometry, Camera, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { BoxGeometry, Camera, DepthTexture, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
 import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 
 const createRenderScenes = (): [Scene, Scene, Scene] => {
   return [new Scene(), new Scene(), new Scene()];
@@ -22,7 +24,7 @@ const resizeCamera = (camera: PerspectiveCamera, aspectRatio: number): void => {
 }
 
 const createRenderers = (width: number, height: number): [WebGLRenderer, CSS3DRenderer] => {
-  const webglRenderer = new WebGLRenderer();
+  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
   const cssRenderer = new CSS3DRenderer();
 
   webglRenderer.setSize(width, height);
@@ -35,6 +37,40 @@ const resizeRenderers = (webGlRenderer: WebGLRenderer, cssRenderer: CSS3DRendere
   webGlRenderer.setSize(width, height);
   cssRenderer.setSize(width, height);
 };
+
+const createComposer = (renderer: WebGLRenderer, width: number, height: number): EffectComposer => {
+  const composer = new EffectComposer(renderer, new WebGLRenderTarget(
+    width,
+    height, 
+    { 
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
+      format: RGBAFormat,
+      depthTexture: new DepthTexture(width, height)
+    }));
+
+  return composer;
+}
+
+const renderWebglContext = (composer: EffectComposer): void => {
+  composer.render();
+}
+
+const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: PerspectiveCamera): void => {
+  // The CSS renderer does 2 special things
+  // 1. We scale up the scene, this is so that the dom element of the css scene will be rendered at a higher quality
+  // 2. We manually update the world matrix and inverse the transformations of the css elements.
+  //    This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
+  camera.position.multiplyScalar(10);
+  camera.matrixWorldAutoUpdate = false;
+  camera.updateMatrixWorld();
+  camera.matrixWorldInverse.elements[15] = -1;
+
+  renderer.render(scene, camera);
+
+  camera.matrixWorldAutoUpdate = true;
+  camera.position.divideScalar(10);
+}
 
 export const Renderer = () => {
   const mountRef: RefObject<HTMLDivElement> = useRef(null);
@@ -49,10 +85,16 @@ export const Renderer = () => {
     if (!domNode) { return; }
 
     let animationFrameId: number | null = null;
+    const [width, height] = [domNode.clientWidth, domNode.clientHeight]
 
     const [scene, cutoutScene, cssScene] = createRenderScenes();
     const camera = createCamera(75, calculateAspectRatio(domNode));
-    const [renderer, cssRenderer] = createRenderers(domNode.clientWidth, domNode.clientHeight);
+    const [renderer, cssRenderer] = createRenderers(width, height);
+
+    const composer = createComposer(renderer, width, height);
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
 
     cssRendererNode?.appendChild(cssRenderer.domElement);
     webglRenderNode?.appendChild(renderer.domElement);
@@ -68,13 +110,14 @@ export const Renderer = () => {
 
       mesh.rotation.x += 0.01;
       mesh.rotation.y += 0.01;
-
-      renderer.render(scene, camera);
+      
+      renderWebglContext(composer);
+      renderCssContext(cssScene, cssRenderer, camera);
     }
     
     const onWindowResize = function() {
       resizeCamera(camera, calculateAspectRatio(domNode));
-      resizeRenderers(renderer, cssRenderer, domNode.clientWidth, domNode.clientHeight);
+      resizeRenderers(renderer, cssRenderer, width, height);
     }
 
     const onDestroy = function() {
