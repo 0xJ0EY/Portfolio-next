@@ -5,6 +5,8 @@ export const Renderer = () => {
   const mountRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
+    const domNode = mountRef.current;
+
     const scene = new Scene();
     const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new WebGLRenderer();
@@ -38,7 +40,7 @@ export const Renderer = () => {
     window.addEventListener('resize', onWindowResize, false);
     animate();
 
-    return () => { mountRef.current?.removeChild(renderer.domElement) };
+    return () => { domNode?.removeChild(renderer.domElement) };
   }, []);
   return <div ref={mountRef}></div>;
 };
