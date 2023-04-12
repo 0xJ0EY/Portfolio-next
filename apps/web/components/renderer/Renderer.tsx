@@ -1,17 +1,20 @@
+import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef } from "react";
 import { BoxGeometry, Mesh, MeshBasicMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { calculateAspectRatio } from './util';
 
 export const Renderer = () => {
   const mountRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
     const domNode = mountRef.current;
+    if (!domNode) { return; }
 
     const scene = new Scene();
-    const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new PerspectiveCamera(75, calculateAspectRatio(domNode), 0.1, 1000);
     const renderer = new WebGLRenderer();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(domNode.clientWidth, domNode.clientHeight);
 
     mountRef.current?.appendChild(renderer.domElement);
 
@@ -32,9 +35,9 @@ export const Renderer = () => {
     }
 
     const onWindowResize = function() {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.aspect = calculateAspectRatio(domNode);
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(domNode.clientWidth, domNode.clientHeight);
     }
 
     window.addEventListener('resize', onWindowResize, false);
@@ -42,5 +45,5 @@ export const Renderer = () => {
 
     return () => { domNode?.removeChild(renderer.domElement) };
   }, []);
-  return <div ref={mountRef}></div>;
+  return <div className={styles.renderer} ref={mountRef}></div>;
 };
