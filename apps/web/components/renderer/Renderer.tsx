@@ -11,6 +11,12 @@ const createRenderScenes = (): [Scene, Scene, Scene] => {
   return [new Scene(), new Scene(), new Scene()];
 }
 
+export interface RendererScenes {
+  sourceScene: Scene,
+  cutoutScene: Scene,
+  cssScene: Scene
+};
+
 const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
   const camera = new PerspectiveCamera(fov, aspectRatio, 0.1, 1000);
 
@@ -74,11 +80,14 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   camera.position.divideScalar(10);
 }
 
-export const Renderer = () => {
+export const Renderer = (props: any) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
+
+    console.log(props);
+
     const cssRendererNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
 

@@ -1,9 +1,7 @@
-import { Renderer } from "../components";
+import { AssetLoader, Renderer } from "../components";
 
 export default function Web() {
   return (
-    <>
-      <Renderer />
-    </>
+    <AssetLoader />
   );
 }
