@@ -1,82 +1,65 @@
-import { BoxGeometry, LoadingManager, Mesh, MeshBasicMaterial, Object3D, Scene, Vector3 } from "three";
+import { BoxGeometry, CurveUtils, LoadingManager, Mesh, MeshBasicMaterial, Object3D, Scene, Vector3 } from "three";
 import { RendererScenes } from "../renderer/Renderer";
 
-enum SceneTarget {
-  Source,
-  Cutout,
-  Css
+// TODO: Add deltatime to void call
+export type UpdateAction = (() => void);
+export type UpdateActions = UpdateAction[];
+export type OptionalUpdateActions = UpdateAction | UpdateActions | null;
+
+export const createRenderScenes = (): RendererScenes => {
+  return {
+    sourceScene: new Scene(),
+    cutoutScene: new Scene(),
+    cssScene: new Scene()
+  };
 }
 
-type SceneObject = {
-  target: SceneTarget
-  object: Object3D,
-  updateAction: ((self: Object3D) => void) | null
-}
-
-const createRenderScenes = (): [Scene, Scene, Scene] => {
-  return [new Scene(), new Scene(), new Scene()];
-}
-
-const createLights = async (): Promise<SceneObject[]> => {
+const createLights = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const geo = new BoxGeometry(1, 1, 1);
   const mat = new MeshBasicMaterial({ color: 0x00FF00 });
   const mesh = new Mesh(geo, mat);
 
-  return [{
-    target: SceneTarget.Source,
-    object: mesh,
-    updateAction: null
-  }];
+  rendererScenes.sourceScene.add(mesh);
+
+  return () => {
+    mesh.rotation.x += 0.01;
+    mesh.rotation.y += 0.01;
+  };
 };
 
-const createFloors = async (): Promise<SceneObject[]> => {
-  return [];
+const createFloors = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  return [
+    () => {}
+  ];
 }
 
-const createMonitor = async (): Promise<SceneObject[]> => {
-  return [];
+const createMonitor = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  return null;
 }
 
-export const loadRenderScenes = async (manager: LoadingManager | null): Promise<RendererScenes> => {
-  const [sourceScene, cutoutScene, cssScene] = createRenderScenes();
+export const loadRenderScenes = async (manager: LoadingManager | null): Promise<[RendererScenes, UpdateActions]> => {
+  const rendererScenes = createRenderScenes();
 
   const actions = [
-    createLights(),
-    createFloors(),
-    createMonitor()
+    createLights(rendererScenes),
+    createFloors(rendererScenes),
+    createMonitor(rendererScenes)
   ];
 
-  const updateActions: (() => void)[] = [];
+  const result = await Promise.all(actions);
 
-  const results = await Promise.all(actions);
+  const updateActions: UpdateActions = result
+    .reduce((acc: (() => void)[], cur) => {
+      if (cur === null) return acc;
 
-  results.forEach(result => {
-    result.forEach(entry => {
-      switch (entry.target) {
-        case SceneTarget.Source:
-          sourceScene.add(entry.object);
-          break;
-        case SceneTarget.Cutout:
-          cutoutScene.add(entry.object);
-          break;
-        case SceneTarget.Css:
-          cssScene.add(entry.object);
-          break;
+      if (Array.isArray(cur)) {
+        acc.push(...cur);
+      } else {
+        acc.push(cur);
       }
+      
+      return acc;
+    }, []);
 
-      if (entry.updateAction !== null) {
-        // Create a closure with the update action as target
-        const updateAction = function() {
-          if (entry.updateAction == null) { return; }
-          entry.updateAction(entry.object);
-        }
-
-        updateActions.push(updateAction);
-      };
-    });
-
-    console.log(updateActions);
-  })
-
-  return { sourceScene, cutoutScene, cssScene };
+  return [rendererScenes, updateActions];
 };

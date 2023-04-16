@@ -6,6 +6,7 @@ import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRe
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
+import { UpdateActions } from '../asset-loader/loaders';
 
 const createRenderScenes = (): [Scene, Scene, Scene] => {
   return [new Scene(), new Scene(), new Scene()];
@@ -80,14 +81,16 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   camera.position.divideScalar(10);
 }
 
-export const Renderer = (props: any) => {
+interface RendererProps {
+  scenes: RendererScenes,
+  actions: UpdateActions
+}
+
+export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
-
-    console.log(props);
-
     const cssRendererNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
 
@@ -96,7 +99,7 @@ export const Renderer = (props: any) => {
     let animationFrameId: number | null = null;
     const [width, height] = [window.innerWidth, window.innerHeight]
 
-    const [scene, cutoutScene, cssScene] = createRenderScenes();
+    const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
@@ -108,17 +111,12 @@ export const Renderer = (props: any) => {
     cssRendererNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
 
-    const geo = new BoxGeometry(1, 1, 1);
-    const mat = new MeshBasicMaterial({ color: 0x00FF00 });
-    const mesh = new Mesh(geo, mat);
-
-    scene.add(mesh);
-
     const animate = function() {
       animationFrameId = requestAnimationFrame(animate);
 
-      mesh.rotation.x += 0.01;
-      mesh.rotation.y += 0.01;
+      for (const action of props.actions) {
+        action();
+      }
       
       renderWebglContext(composer);
       renderCssContext(cssScene, cssRenderer, camera);
