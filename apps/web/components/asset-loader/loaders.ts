@@ -1,5 +1,8 @@
-import { BoxGeometry, CurveUtils, LoadingManager, Mesh, MeshBasicMaterial, Object3D, Scene, Vector3 } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CurveUtils, DirectionalLight, Loader, LoadingManager, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, Scene, Vector3 } from "three";
 import { RendererScenes } from "../renderer/Renderer";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { degToRad } from "three/src/math/MathUtils";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type UpdateActions = UpdateAction[];
@@ -13,36 +16,102 @@ export const createRenderScenes = (): RendererScenes => {
   };
 }
 
-const createLights = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
-  const geo = new BoxGeometry(1, 1, 1);
-  const mat = new MeshBasicMaterial({ color: 0x00FF00 });
-  const mesh = new Mesh(geo, mat);
+const createLights = async (scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  const ambientLight = new AmbientLight(0x404040);
+  ambientLight.intensity = .5;
+  scenes.sourceScene.add(ambientLight);
 
-  rendererScenes.sourceScene.add(mesh);
-
-  return () => {
-    mesh.rotation.x += 0.01;
-    mesh.rotation.y += 0.01;
-  };
+  const directionalLight = new DirectionalLight(0xffffff, 1);
+  directionalLight.position.x = .75;
+  directionalLight.position.z = .9;
+  scenes.sourceScene.add(directionalLight);
+  
+  return null;
 };
 
-const createFloors = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
-  return [
-    () => {}
-  ];
-}
+const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActions> => {
 
-const createMonitor = async (rendererScenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  // Floor
+  const geo = new PlaneGeometry(100, 100);
+  const mat = new MeshStandardMaterial({ color: 0xFFFFFF });
+  const plane = new Mesh(geo, mat);
+  plane.rotateX(-Math.PI / 2);
+
+  plane.position.y = -1.5;
+
+  scenes.sourceScene.add(plane.clone());
+  
   return null;
 }
 
-export const loadRenderScenes = async (manager: LoadingManager | null): Promise<[RendererScenes, UpdateActions]> => {
+const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  const gltf = await loader.loadAsync("/assets/Monitor.gltf");
+
+  const display = gltf.scene.children.find((x) => x.name === "Display") as Mesh<BufferGeometry, Material>;        
+  display.material = new MeshBasicMaterial({ color: 0x000000 });
+  display.material.stencilWrite = true;
+  display.material.transparent = true;
+  display.material.opacity = 1;
+
+  const cutoutDisplay = display.clone();
+  display.visible = false;
+
+  const box = display.geometry.boundingBox ?? new Box3();
+
+  const pageWidth = 1000;
+  const pageHeight = 998;
+
+  const width   = (box.max.x - box.min.x) * 10;
+  const height  = (box.max.y - box.min.y) * 10;
+  const depth   = (box.max.z - box.min.z) * 10;
+
+  const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));
+
+  const viewHeightScale = planeHeight / pageHeight;
+  const viewWidthScale  = width / pageWidth;
+
+  // TODO: Calculate the correct aspect ratio for the content
+  const div = document.createElement('div');
+  div.style.width = `${pageWidth}px`;
+  div.style.height = `${pageHeight}px`;
+  div.style.backgroundColor = 'white';
+
+  const iframe = document.createElement('iframe');
+  iframe.classList.add("iframe-container");
+  iframe.style.width = `${pageWidth}px`;
+  iframe.style.height = `${pageHeight}px`;
+  // iframe.style.border = '0px';
+  iframe.src = "https://joeyderuiter.me";
+
+  div.appendChild(iframe);
+
+  const cssPage = new CSS3DObject(div);
+
+  const [x, y, z] = [
+    (box.min.x * 10) + width / 2,
+    (box.min.y * 10) + height / 2,
+    (box.min.z * 10) + depth / 2
+  ];
+
+  cssPage.position.set(x, y, z);
+
+  cssPage.scale.set(viewWidthScale, viewHeightScale, 1);
+  cssPage.rotateX(Math.atan(height / depth) - degToRad(90));
+  scenes.cssScene.add(cssPage);
+  scenes.sourceScene.add(gltf.scene);
+  scenes.cutoutScene.add(cutoutDisplay);
+
+  return null;
+}
+
+export const loadRenderScenes = async (manager: LoadingManager | undefined): Promise<[RendererScenes, UpdateActions]> => {
   const rendererScenes = createRenderScenes();
+  const gltfLoader = new GLTFLoader(manager);
 
   const actions = [
     createLights(rendererScenes),
     createFloors(rendererScenes),
-    createMonitor(rendererScenes)
+    createMonitor(gltfLoader, rendererScenes)
   ];
 
   const result = await Promise.all(actions);

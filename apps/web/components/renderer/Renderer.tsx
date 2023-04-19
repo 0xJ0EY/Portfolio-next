@@ -8,10 +8,6 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { UpdateActions } from '../asset-loader/loaders';
 
-const createRenderScenes = (): [Scene, Scene, Scene] => {
-  return [new Scene(), new Scene(), new Scene()];
-}
-
 export interface RendererScenes {
   sourceScene: Scene,
   cutoutScene: Scene,
