@@ -1,4 +1,5 @@
 import styles from './Renderer.module.css'
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
@@ -100,12 +101,13 @@ export const Renderer = (props: RendererProps) => {
     if (cssRendererNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
-    const [width, height] = [window.innerWidth, window.innerHeight]
+    const [width, height] = [window.innerWidth, window.innerHeight];
 
     const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
+    const controls = new OrbitControls(camera, webglRenderNode);
     const composer = createComposer(renderer, width, height);
 
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
@@ -127,6 +129,8 @@ export const Renderer = (props: RendererProps) => {
       
       renderWebglContext(composer);
       renderCssContext(cssScene, cssRenderer, camera);
+
+      controls.update();
     }
     
     const onWindowResize = function() {
