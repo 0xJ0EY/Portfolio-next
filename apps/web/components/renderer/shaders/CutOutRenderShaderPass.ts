@@ -52,7 +52,7 @@ export class CutOutRenderShaderPass extends Pass {
       // 4. Do normal composition
       this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
       this.sourceTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: false, 
+        depthBuffer: true, 
         samples: RENDER_SAMPLES
       });
 
