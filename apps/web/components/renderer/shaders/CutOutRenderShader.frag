@@ -5,11 +5,13 @@ uniform sampler2D cutoutDepthMap;
 
 in vec2 texCoord;
 
+layout(location = 0) out vec4 diffuseColor;
+
 void main() {
     float sourceDepth = 1.0 - texture2D(sourceDepthMap, texCoord).r;
     float cutoutDepth = 1.0 - texture2D(cutoutDepthMap, texCoord).r;
 
     if (sourceDepth > cutoutDepth) {
-        gl_FragColor = texture2D(sourceTexture, texCoord);
+        diffuseColor = texture2D(sourceTexture, texCoord);
     }
 }

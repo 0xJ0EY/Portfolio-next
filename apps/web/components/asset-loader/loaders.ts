@@ -74,7 +74,6 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const div = document.createElement('div');
   div.style.width = `${pageWidth}px`;
   div.style.height = `${pageHeight}px`;
-  div.style.backgroundColor = 'white';
 
   const iframe = document.createElement('iframe');
   iframe.classList.add("iframe-container");

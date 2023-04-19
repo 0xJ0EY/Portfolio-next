@@ -1,10 +1,9 @@
 import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef } from "react";
-import { BoxGeometry, Camera, DepthTexture, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
+import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
-import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { UpdateActions } from '../asset-loader/loaders';
 
@@ -43,8 +42,8 @@ const resizeRenderers = (composer: EffectComposer, webGlRenderer: WebGLRenderer,
   cssRenderer.setSize(width, height);
 };
 
-const createComposer = (renderer: WebGLRenderer, width: number, height: number): EffectComposer => {
-  const composer = new EffectComposer(renderer, new WebGLRenderTarget(
+const createComposerTarget = (renderer: WebGLRenderer, width: number, height: number): WebGLRenderTarget => {
+  const target = new WebGLRenderTarget(
     width,
     height, 
     { 
@@ -52,7 +51,14 @@ const createComposer = (renderer: WebGLRenderer, width: number, height: number):
       magFilter: LinearFilter,
       format: RGBAFormat,
       depthTexture: new DepthTexture(width, height)
-    }));
+    }
+  );
+
+  return target;
+}
+
+const createComposer = (renderer: WebGLRenderer, width: number, height: number): EffectComposer => {
+  const composer = new EffectComposer(renderer, createComposerTarget(renderer, width, height));
 
   return composer;
 }
