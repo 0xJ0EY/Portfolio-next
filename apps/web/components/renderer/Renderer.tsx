@@ -89,6 +89,7 @@ interface RendererProps {
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+  let then: number | null = null;
 
   useEffect(() => {
     const cssRendererNode = cssOutputRef.current;
@@ -111,11 +112,15 @@ export const Renderer = (props: RendererProps) => {
     cssRendererNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
 
-    const animate = function() {
+    const animate = function(now: number) {
+      if (then == null) { then = now; }
+      const deltaTime = (now - then) * 0.001; // Get delta time in seconds
+      then = now;
+
       animationFrameId = requestAnimationFrame(animate);
 
       for (const action of props.actions) {
-        action();
+        action(deltaTime);
       }
       
       renderWebglContext(composer);
@@ -140,7 +145,7 @@ export const Renderer = (props: RendererProps) => {
     }
 
     window.addEventListener('resize', onWindowResize, false);
-    animate();
+    animate(performance.now());
 
     return () => onDestroy();
   }, []);

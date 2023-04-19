@@ -1,8 +1,7 @@
 import { BoxGeometry, CurveUtils, LoadingManager, Mesh, MeshBasicMaterial, Object3D, Scene, Vector3 } from "three";
 import { RendererScenes } from "../renderer/Renderer";
 
-// TODO: Add deltatime to void call
-export type UpdateAction = (() => void);
+export type UpdateAction = ((deltaTime: number) => void);
 export type UpdateActions = UpdateAction[];
 export type OptionalUpdateActions = UpdateAction | UpdateActions | null;
 
@@ -49,7 +48,7 @@ export const loadRenderScenes = async (manager: LoadingManager | null): Promise<
   const result = await Promise.all(actions);
 
   const updateActions: UpdateActions = result
-    .reduce((acc: (() => void)[], cur) => {
+    .reduce((acc: UpdateActions, cur) => {
       if (cur === null) return acc;
 
       if (Array.isArray(cur)) {
