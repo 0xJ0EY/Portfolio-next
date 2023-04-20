@@ -15,7 +15,7 @@ import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass";
 import { isFirefox } from '../util';
 import { CutOutShader } from "./CutOutRenderShader";
 
-const RENDER_SAMPLES: number = 8;
+const RENDER_SAMPLES: number = 4;
 
 export class CutOutRenderShaderPass extends Pass {
   private uniforms: {[uniform: string]: IUniform};

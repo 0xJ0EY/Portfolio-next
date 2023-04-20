@@ -61,8 +61,10 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const pageWidth = 1000;
   const pageHeight = 998;
 
-  const width   = (box.max.x - box.min.x) * 10;
-  const height  = (box.max.y - box.min.y) * 10;
+  const margin = 0.5;
+
+  const width   = (box.max.x - box.min.x) * 10 + margin;
+  const height  = (box.max.y - box.min.y) * 10 + margin;
   const depth   = (box.max.z - box.min.z) * 10;
 
   const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));
@@ -78,17 +80,19 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const iframe = document.createElement('iframe');
   iframe.classList.add("iframe-container");
   iframe.style.width = `${pageWidth}px`;
-  iframe.style.height = `${pageHeight}px`;
-  // iframe.style.border = '0px';
-  iframe.src = "https://joeyderuiter.me";
+  iframe.style.height = `${pageHeight + 0}px`;
+  iframe.style.backgroundColor = 'white';
+  iframe.style.border = '32px solid black';
+  iframe.style.boxSizing = 'border-box';
+  // iframe.src = "https://joeyderuiter.me";
 
   div.appendChild(iframe);
 
   const cssPage = new CSS3DObject(div);
 
   const [x, y, z] = [
-    (box.min.x * 10) + width / 2,
-    (box.min.y * 10) + height / 2,
+    ((box.min.x * 10) - margin / 2) + width / 2,
+    ((box.min.y * 10) - margin / 2) + height / 2,
     (box.min.z * 10) + depth / 2
   ];
 

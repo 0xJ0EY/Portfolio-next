@@ -13,5 +13,7 @@ void main() {
 
     if (sourceDepth > cutoutDepth) {
         diffuseColor = texture2D(sourceTexture, texCoord);
+    } else {
+        diffuseColor = vec4(.0, .0, .0, .0);
     }
 }

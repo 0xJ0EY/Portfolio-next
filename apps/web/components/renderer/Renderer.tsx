@@ -7,6 +7,9 @@ import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { UpdateActions } from '../asset-loader/loaders';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -112,6 +115,9 @@ export const Renderer = (props: RendererProps) => {
 
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
     composer.addPass(cutoutShaderPass);
+
+    const fxaaPass = new FXAAShaderPass(width, height);
+    composer.addPass(fxaaPass);
 
     cssRendererNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
