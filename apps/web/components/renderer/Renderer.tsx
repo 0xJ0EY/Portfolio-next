@@ -6,10 +6,10 @@ import { calculateAspectRatio } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
-import { UpdateActions } from '../asset-loader/loaders';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
+import { CameraController } from './camera/Camera';
+import { MouseInputHandler } from './camera/MouseInputHandler';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -98,10 +98,10 @@ export const Renderer = (props: RendererProps) => {
   let then: number | null = null;
 
   useEffect(() => {
-    const cssRendererNode = cssOutputRef.current;
+    const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
 
-    if (cssRendererNode == null || webglRenderNode == null) { return; }
+    if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
     const [width, height] = [window.innerWidth, window.innerHeight];
@@ -109,6 +109,9 @@ export const Renderer = (props: RendererProps) => {
     const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
+
+    const cameraController  = new CameraController(camera, scene);
+    const mouseInputHandler = new MouseInputHandler(cameraController, cssRenderNode, webglRenderNode);
 
     const controls = new OrbitControls(camera, webglRenderNode);
     const composer = createComposer(renderer, width, height);
@@ -119,7 +122,7 @@ export const Renderer = (props: RendererProps) => {
     const fxaaPass = new FXAAShaderPass(width, height);
     composer.addPass(fxaaPass);
 
-    cssRendererNode.appendChild(cssRenderer.domElement);
+    cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
 
     const animate = function(now: number) {
@@ -137,6 +140,8 @@ export const Renderer = (props: RendererProps) => {
       renderCssContext(cssScene, cssRenderer, camera);
 
       controls.update();
+      cameraController.update();
+      // mouseInputHandler.update();
     }
     
     const onWindowResize = function() {
@@ -152,7 +157,7 @@ export const Renderer = (props: RendererProps) => {
       renderer.dispose();
       renderer.forceContextLoss();
 
-      cssRendererNode.removeChild(cssRenderer.domElement);
+      cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
     }
 

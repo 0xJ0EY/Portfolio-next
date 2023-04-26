@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LoadingManager, Scene } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
-import { createRenderScenes, loadRenderScenes, UpdateActions } from "./loaders";
+import { createRenderScenes, loadRenderScenes, UpdateActions } from "./Loaders";
 
 export function AssetLoader() {
   const [loading, setLoading] = useState(true);

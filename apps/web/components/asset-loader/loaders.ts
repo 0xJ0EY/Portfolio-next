@@ -3,6 +3,7 @@ import { RendererScenes } from "../renderer/Renderer";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
+import { AssetKeys } from "./AssetKeys";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type UpdateActions = UpdateAction[];
@@ -38,6 +39,8 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   plane.rotateX(-Math.PI / 2);
 
   plane.position.y = -1.5;
+
+  plane.userData[AssetKeys.CameraCollidable] = true;
 
   scenes.sourceScene.add(plane.clone());
   
