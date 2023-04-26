@@ -4,7 +4,6 @@ import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
 enum CameraState {
   Idle,
-  Zoomed,
   FreeRoam
 }
 
@@ -35,9 +34,7 @@ export class CameraController {
   private maxZoomDistance = 15.0;
   private currentZoomDistance = 10;
 
-
-  constructor(private camera: PerspectiveCamera, private scene: Scene) {
-  }
+  constructor(private camera: PerspectiveCamera, private scene: Scene) {}
 
   state(): CameraState {
     return this.currentState;

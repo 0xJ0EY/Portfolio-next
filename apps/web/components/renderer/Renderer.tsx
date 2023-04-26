@@ -140,7 +140,7 @@ export const Renderer = (props: RendererProps) => {
       renderCssContext(cssScene, cssRenderer, camera);
 
       controls.update();
-      cameraController.update();
+      // cameraController.update();
       // mouseInputHandler.update();
     }
     

@@ -87,6 +87,7 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.backgroundColor = 'white';
   iframe.style.border = '32px solid black';
   iframe.style.boxSizing = 'border-box';
+  iframe.src = "http://localhost:3001";
   // iframe.src = "https://joeyderuiter.me";
 
   div.appendChild(iframe);
