@@ -10,6 +10,7 @@ import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
+import { CameraHandler, FreeRoamCameraState } from './camera/CameraHandlers';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -111,9 +112,9 @@ export const Renderer = (props: RendererProps) => {
     const [renderer, cssRenderer] = createRenderers(width, height);
 
     const cameraController  = new CameraController(camera, scene);
-    const mouseInputHandler = new MouseInputHandler(cameraController, cssRenderNode, webglRenderNode);
+    const cameraHandler     = new CameraHandler(cameraController);
+    const mouseInputHandler = new MouseInputHandler(cameraHandler, cssRenderNode, webglRenderNode);
 
-    const controls = new OrbitControls(camera, webglRenderNode);
     const composer = createComposer(renderer, width, height);
 
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
@@ -139,9 +140,10 @@ export const Renderer = (props: RendererProps) => {
       renderWebglContext(composer);
       renderCssContext(cssScene, cssRenderer, camera);
 
-      controls.update();
-      // cameraController.update();
-      // mouseInputHandler.update();
+
+      
+
+      cameraController.update();
     }
     
     const onWindowResize = function() {
@@ -156,6 +158,8 @@ export const Renderer = (props: RendererProps) => {
 
       renderer.dispose();
       renderer.forceContextLoss();
+
+      mouseInputHandler.destroy();
 
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
