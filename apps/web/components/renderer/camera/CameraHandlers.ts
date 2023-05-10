@@ -8,6 +8,22 @@ export class CameraHandlerContext {
   }
 }
 
+export class PointerData {
+  constructor(
+    public x: number,
+    public y: number,
+    public pointerDown: boolean
+  ) {}
+
+  static fromMouseEvent(x: MouseEvent): PointerData {
+    return new PointerData(
+      x.clientX,
+      x.clientY,
+      x.buttons > 0
+    )
+  }
+}
+
 export abstract class CameraHandlerState {
   protected manager: CameraHandler | null = null;
   protected ctx: CameraHandlerContext | null = null;
@@ -17,8 +33,10 @@ export abstract class CameraHandlerState {
     this.ctx = ctx;
   }
 
-  abstract onClick(evt: MouseEvent): void;
-  abstract onMove(evt: MouseEvent): void;
+  abstract onPointerUp(data: PointerData): void;
+  abstract onPointerDown(data: PointerData): void;
+  abstract onPointerMove(data: PointerData): void;
+  abstract onPointerDragMove(data: PointerData): void;
 }
 
 export class CameraHandler {
@@ -39,22 +57,54 @@ export class CameraHandler {
     this.state = state;
   }
 
-  onClick(evt: MouseEvent): void {
-    this.state.onClick(evt);
+  onPointerUp(data: PointerData): void {
+    this.state.onPointerUp(data);
   }
 
-  onMove(evt: MouseEvent): void {
-    this.state.onMove(evt);
+  onPointerDown(data: PointerData): void {
+    this.state.onPointerDown(data);
+  }
+
+  onPointerMove(data: PointerData): void {
+    this.state.onPointerMove(data);
+  }
+
+  onPointerDragMove(data: PointerData): void {
+    this.state.onPointerDragMove(data);
   }
 }
 
 export class FreeRoamCameraState extends CameraHandlerState {
-  onClick(evt: MouseEvent): void {
-    console.log(evt);
-    this.ctx?.camera;
+
+  private previousData: PointerData | null = null;
+
+  onPointerUp(data: PointerData): void {
+    this.previousData = null;
   }
 
-  onMove(evt: MouseEvent): void {
-    console.log(evt);
+  onPointerDown(data: PointerData): void {
+    this.previousData = data;
+  }
+
+  onPointerMove(data: PointerData): void {
+    if (!data.pointerDown) { return; }
+
+    const sensitivity = 0.01;
+
+    let phi = 0;
+    let theta = 0;
+
+    if (this.previousData !== null) {
+      phi   = (data.y - this.previousData.y) * sensitivity;
+      theta = (data.x - this.previousData.x) * sensitivity;
+    }
+
+    this.ctx?.camera.rotateCamera(phi, theta);
+
+    this.previousData = data;
+  }
+
+  onPointerDragMove(data: PointerData): void {
+    this.previousData = data;
   }
 }

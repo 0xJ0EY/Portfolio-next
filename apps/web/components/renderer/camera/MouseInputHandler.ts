@@ -1,4 +1,4 @@
-import { CameraHandler, CameraHandlerState } from "./CameraHandlers";
+import { CameraHandler, CameraHandlerState, PointerData } from "./CameraHandlers";
 
 enum MouseEventButtons {
   None          = 0x00,
@@ -13,7 +13,7 @@ export class MouseInputHandler {
   private pressedButtons = 0x00;
 
   constructor(
-    private cameraHandler: CameraHandler,
+    private handler: CameraHandler,
     private cssRenderNode: HTMLElement,
     private webglRenderNode: HTMLElement
   ) {
@@ -41,32 +41,23 @@ export class MouseInputHandler {
     window.removeEventListener('mouseleave', this.onMouseLeave.bind(this));
   }
 
-  private isPrimary(): boolean {
-    return (this.pressedButtons & MouseEventButtons.Primary) > 0;
-  }
-
-  private isSecondary(): boolean {
-    return (this.pressedButtons & MouseEventButtons.Secondary) > 0;
-  }
-
-  private handleMouseEvent(evt: MouseEvent) {
-    this.pressedButtons = evt.buttons;
-
-  }
-
   private onMouseDown(evt: MouseEvent) {
-    this.handleMouseEvent(evt);
+    const data = PointerData.fromMouseEvent(evt);
+    this.handler.onPointerDown(data);
   }
 
   private onMouseUp(evt: MouseEvent) {
-    this.handleMouseEvent(evt);
+    const data = PointerData.fromMouseEvent(evt);
+    this.handler.onPointerUp(data);
   }
 
   private onMouseMove(evt: MouseEvent) {
-    this.handleMouseEvent(evt);
+    const data = PointerData.fromMouseEvent(evt);
+    this.handler.onPointerMove(data);
 
-    this.cameraHandler.onMove(evt);
-
+    if (data.pointerDown) {
+      this.handler.onPointerDragMove(data);
+    }
   }
 
   private onContextMenu(evt: MouseEvent) {
