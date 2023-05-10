@@ -1,17 +1,6 @@
 import { CameraHandler, CameraHandlerState, PointerData } from "./CameraHandlers";
 
-enum MouseEventButtons {
-  None          = 0x00,
-  Primary       = 0x01,
-  Secondary     = 0x02,
-  Auxiliary     = 0x04,
-  BackButton    = 0x08,
-  ForwardButton = 0x10
-}
-
 export class MouseInputHandler {
-  private pressedButtons = 0x00;
-
   constructor(
     private handler: CameraHandler,
     private cssRenderNode: HTMLElement,
@@ -54,10 +43,6 @@ export class MouseInputHandler {
   private onMouseMove(evt: MouseEvent) {
     const data = PointerData.fromMouseEvent(evt);
     this.handler.onPointerMove(data);
-
-    if (data.pointerDown) {
-      this.handler.onPointerDragMove(data);
-    }
   }
 
   private onContextMenu(evt: MouseEvent) {

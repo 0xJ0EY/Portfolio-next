@@ -10,7 +10,7 @@ import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
-import FreeRoamCameraState, { CameraHandler } from './camera/CameraHandlers';
+import { CameraHandler } from './camera/CameraHandlers';
 
 export interface RendererScenes {
   sourceScene: Scene,
