@@ -1,5 +1,5 @@
 import { AssetKeys } from "@/components/asset-loader/AssetKeys";
-import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection } from "three";
+import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
 enum CameraState {
@@ -13,6 +13,8 @@ export class CameraController {
   static readonly State = CameraState;
 
   private currentState = CameraController.State.Idle;
+
+  private actions: ((deltaTime: number) => boolean)[] = [];
 
   private enabled: boolean = true;
   private target: Vector3 = new Vector3(0, 0, 0);
@@ -90,6 +92,45 @@ export class CameraController {
     this.sphericalDelta.theta -= radians;
   }
 
+  // TODO: Move this to a math util lib
+  private lerp(start: number, end: number, amt: number): number {
+    return (1 - amt) * start + amt * end;
+  }
+  
+  public transition(targetPosition: Vector3, targetRotation: Spherical, targetZoom: number, durationInMs: number) {
+    let timePassedInMs = 0;
+    
+    const originalPosition = this.target.clone();
+    const originalRotation = this.spherical.clone();
+    const originalZoom = this.currentZoomDistance;
+
+    const action = (deltaTime: number) => {
+      timePassedInMs += 1000 * deltaTime;
+      const progress = Math.min(timePassedInMs / durationInMs, 1);
+
+      const x = this.lerp(originalPosition.x, targetPosition.x, progress);
+      const y = this.lerp(originalPosition.y, targetPosition.y, progress);
+      const z = this.lerp(originalPosition.z, targetPosition.z, progress);
+
+      const phi   = this.lerp(originalRotation.phi, targetRotation.phi, progress);
+      const theta = this.lerp(originalRotation.theta, targetRotation.theta, progress);
+
+      // Calculate deltas for the position / rotation
+      this.panOffset.x = -(this.target.x - x);
+      this.panOffset.y = -(this.target.y - y);
+      this.panOffset.z = -(this.target.z - z);
+
+      this.sphericalDelta.phi   = -(this.spherical.phi - phi);
+      this.sphericalDelta.theta = -(this.spherical.theta - theta);
+
+      this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
+
+      return progress === 1;
+    }
+
+    this.actions.push(action);
+  }
+
   public zoom(amount: number): void {
     const zoom = this.calculateRadiusLimit(this.currentZoomDistance) + amount;
 
@@ -146,7 +187,37 @@ export class CameraController {
     }
   })();
 
-  public update(): void {
+  private hasActions(): boolean {
+    return this.actions.length > 0;
+  }
+
+  private getAction(): ((deltaTime: number) => boolean) {
+    return this.actions[0];
+  }
+
+  private popAction(): ((deltaTime: number) => boolean) {
+    return this.actions.shift()!;
+  }
+
+  private processActions(deltaTime: number) {
+    if (!this.hasActions()) { return; }
+
+    // Disable user interaction when executing actions
+    this.enabled = false;
+
+    const action = this.getAction();
+    const result = action(deltaTime);
+
+    if (result === true) { this.popAction(); }
+    
+    const done = result === true && !this.hasActions();
+
+    if (done) { this.enabled = true; }
+  }
+
+  public update(deltaTime: number): void {
+    this.processActions(deltaTime);
+
     const offset: Vector3 = new Vector3();
 
     offset.copy(this.camera.position).sub(this.target);

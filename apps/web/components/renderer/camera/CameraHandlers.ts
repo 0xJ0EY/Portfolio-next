@@ -1,4 +1,4 @@
-import { Camera, Raycaster, Vector2 } from "three";
+import { Camera, Raycaster, Spherical, Vector2, Vector3 } from "three";
 import { CameraController } from "./Camera";
 
 export class CameraHandlerContext {
@@ -49,36 +49,40 @@ export class PointerData {
   }
 }
 
-export abstract class CameraHandlerState {
-  protected manager: CameraHandler | null = null;
-  protected ctx: CameraHandlerContext | null = null;
+abstract class CameraState {
+  constructor(protected manager: CameraHandler, protected ctx: CameraHandlerContext) {}
 
-  setContext(manager: CameraHandler, ctx: CameraHandlerContext): void {
-    this.manager = manager;
-    this.ctx = ctx;
-  }
-
+  abstract transition(): void;
   abstract onPointerUp(data: PointerData): void;
   abstract onPointerDown(data: PointerData): void;
   abstract onPointerMove(data: PointerData): void;
 }
 
+export enum CameraHandlerState {
+  FreeRoam,
+  MonitorView,
+}
+
 export class CameraHandler {
   private ctx: CameraHandlerContext;
-  private state: CameraHandlerState;
+  private state: CameraState;
 
   constructor(cameraController: CameraController) {
     this.ctx = new CameraHandlerContext(cameraController);
+    this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
+  }
 
-    const state = new FreeRoamCameraState();
-    state.setContext(this, this.ctx);
-
-    this.state = state;
+  private stateToInstance(state: CameraHandlerState): CameraState {
+    switch (state) {
+      case CameraHandlerState.FreeRoam: return new FreeRoamCameraState(this, this.ctx);
+      case CameraHandlerState.MonitorView: return new MonitorViewCameraState(this, this.ctx);
+      default: throw new Error("unsupported state");
+    }
   }
 
   changeState(state: CameraHandlerState) {
-    state.setContext(this, this.ctx);
-    this.state = state;
+    this.state = this.stateToInstance(state);
+    this.state.transition();
   }
 
   onPointerUp(data: PointerData): void {
@@ -94,7 +98,23 @@ export class CameraHandler {
   }
 }
 
-export class MonitorViewCameraState extends CameraHandlerState {
+class MonitorViewCameraState extends CameraState {
+  transition(): void {
+    const ctx = this.ctx;
+    if (ctx === null) { return; }
+
+    const position = new Vector3();
+    position.y = 0.5;
+
+    const rotation = new Spherical();
+    rotation.phi = 1.2;
+    rotation.theta = 0.0;
+
+    const zoom = 5.0;
+
+    ctx.cameraController.transition(position, rotation, zoom, 1000); 
+  }
+  
   onPointerUp(data: PointerData): void {
     
   }
@@ -108,17 +128,21 @@ export class MonitorViewCameraState extends CameraHandlerState {
   }
 }
 
-export class FreeRoamCameraState extends CameraHandlerState {
-
+class FreeRoamCameraState extends CameraState {
+  
   private previousMovementData: PointerData | null = null;
   private previousRotationData: PointerData | null = null;
 
+  transition(): void {
+    
+  }
+
   private handleDisplayClick(data: PointerData): void {
     const ctx = this.ctx;
-    if (ctx === null) { return }
+    if (ctx === null) { return; }
 
     const manager = this.manager;
-    if (manager === null) { return }
+    if (manager === null) { return; }
 
     const raycaster = new Raycaster();
     const point     = new Vector2();
@@ -135,7 +159,7 @@ export class FreeRoamCameraState extends CameraHandlerState {
     if (first === null) { return; }
     if (first.object.name !== "Display") { return; }
 
-    manager.changeState(new MonitorViewCameraState());
+    manager.changeState(CameraHandlerState.MonitorView);
   }
 
   private moveCamera(data: PointerData): void {
