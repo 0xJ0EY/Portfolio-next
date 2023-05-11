@@ -36,6 +36,14 @@ export class CameraController {
 
   constructor(private camera: PerspectiveCamera, private scene: Scene) {}
 
+  public getCamera(): PerspectiveCamera {
+    return this.camera;
+  }
+
+  public getScene(): Scene {
+    return this.scene;
+  }
+
   state(): CameraState {
     return this.currentState;
   }

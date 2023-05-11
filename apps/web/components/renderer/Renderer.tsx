@@ -140,9 +140,6 @@ export const Renderer = (props: RendererProps) => {
       renderWebglContext(composer);
       renderCssContext(cssScene, cssRenderer, camera);
 
-
-      
-
       cameraController.update();
     }
     

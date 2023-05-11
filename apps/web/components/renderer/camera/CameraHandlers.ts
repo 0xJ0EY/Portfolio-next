@@ -1,14 +1,15 @@
+import { Camera, Raycaster, Vector2 } from "three";
 import { CameraController } from "./Camera";
 
 export class CameraHandlerContext {
-  constructor(private cameraController: CameraController) {}
+  constructor(private _cameraController: CameraController) { }
 
-  get camera(): CameraController {
-    return this.cameraController;
+  get cameraController(): CameraController {
+    return this._cameraController;
   }
 }
 
-enum MouseEventButtons {
+export enum MouseEventButton {
   None          = 0x00,
   Primary       = 0x01,
   Secondary     = 0x02,
@@ -17,20 +18,33 @@ enum MouseEventButtons {
   ForwardButton = 0x10
 }
 
+const buttonToMouseEventButton = (value: number): MouseEventButton => {
+  switch (value) {
+    case 0: return MouseEventButton.Primary;
+    case 1: return MouseEventButton.Secondary;
+    case 2: return MouseEventButton.Auxiliary;
+    case 3: return MouseEventButton.BackButton;
+    case 4: return MouseEventButton.ForwardButton;
+    default: return MouseEventButton.None;
+  }
+}
+
 export class PointerData {
   constructor(
     public x: number,
     public y: number,
     public primaryPointerDown: boolean,
     public secondaryPointerDown: boolean,
-  ) {}
+    public buttonDown: MouseEventButton
+  ) { }
 
   static fromMouseEvent(x: MouseEvent): PointerData {
     return new PointerData(
       x.clientX,
       x.clientY,
-      (x.buttons & MouseEventButtons.Primary) === MouseEventButtons.Primary,
-      (x.buttons & MouseEventButtons.Secondary) === MouseEventButtons.Secondary
+      (x.buttons & MouseEventButton.Primary) === MouseEventButton.Primary,
+      (x.buttons & MouseEventButton.Secondary) === MouseEventButton.Secondary,
+      buttonToMouseEventButton(x.button)
     )
   }
 }
@@ -55,7 +69,7 @@ export class CameraHandler {
 
   constructor(cameraController: CameraController) {
     this.ctx = new CameraHandlerContext(cameraController);
-    
+
     const state = new FreeRoamCameraState();
     state.setContext(this, this.ctx);
 
@@ -80,10 +94,49 @@ export class CameraHandler {
   }
 }
 
+export class MonitorViewCameraState extends CameraHandlerState {
+  onPointerUp(data: PointerData): void {
+    
+  }
+
+  onPointerDown(data: PointerData): void {
+    
+  }
+  
+  onPointerMove(data: PointerData): void {
+    
+  }
+}
+
 export class FreeRoamCameraState extends CameraHandlerState {
 
   private previousMovementData: PointerData | null = null;
   private previousRotationData: PointerData | null = null;
+
+  private handleDisplayClick(data: PointerData): void {
+    const ctx = this.ctx;
+    if (ctx === null) { return }
+
+    const manager = this.manager;
+    if (manager === null) { return }
+
+    const raycaster = new Raycaster();
+    const point     = new Vector2();
+
+    point.x = (data.x / window.innerWidth) * 2 - 1;
+    point.y = -(data.y / window.innerHeight) * 2 + 1;
+
+    const camera = ctx.cameraController.getCamera();
+    raycaster.setFromCamera(point, camera);
+
+    const intersects = raycaster.intersectObjects(ctx.cameraController.getScene().children);
+    const first = intersects[0] ?? null;
+
+    if (first === null) { return; }
+    if (first.object.name !== "Display") { return; }
+
+    manager.changeState(new MonitorViewCameraState());
+  }
 
   private moveCamera(data: PointerData): void {
     const sensitivity = 0.005;
@@ -98,8 +151,8 @@ export class FreeRoamCameraState extends CameraHandlerState {
       left = (data.x - previous.x) * sensitivity;
     }
 
-    this.ctx?.camera.moveCameraForward(forward);
-    this.ctx?.camera.moveCameraLeft(left);
+    this.ctx?.cameraController.moveCameraForward(forward);
+    this.ctx?.cameraController.moveCameraLeft(left);
 
     this.previousMovementData = data;
   }
@@ -117,11 +170,11 @@ export class FreeRoamCameraState extends CameraHandlerState {
     const previous = this.previousRotationData;
 
     if (previous !== null) {
-      phi   = (data.y - previous.y) * sensitivity;
-      theta = (data.x -  previous.x) * sensitivity;
+      phi = (data.y - previous.y) * sensitivity;
+      theta = (data.x - previous.x) * sensitivity;
     }
 
-    this.ctx?.camera.rotateCamera(phi, theta);
+    this.ctx?.cameraController.rotateCamera(phi, theta);
 
     this.previousRotationData = data;
   }
@@ -136,7 +189,7 @@ export class FreeRoamCameraState extends CameraHandlerState {
   }
 
   onPointerDown(data: PointerData): void {
-    
+    if (data.buttonDown === MouseEventButton.Primary) { this.handleDisplayClick(data); }
   }
 
   onPointerMove(data: PointerData): void {
