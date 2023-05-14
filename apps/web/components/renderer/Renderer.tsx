@@ -112,7 +112,7 @@ export const Renderer = (props: RendererProps) => {
     const [renderer, cssRenderer] = createRenderers(width, height);
 
     const cameraController  = new CameraController(camera, scene);
-    const cameraHandler     = new CameraHandler(cameraController);
+    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode);
     const mouseInputHandler = new MouseInputHandler(cameraHandler, cssRenderNode, webglRenderNode);
 
     const composer = createComposer(renderer, width, height);

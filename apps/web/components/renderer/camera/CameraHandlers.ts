@@ -2,10 +2,14 @@ import { Camera, Raycaster, Spherical, Vector2, Vector3 } from "three";
 import { CameraController } from "./Camera";
 
 export class CameraHandlerContext {
-  constructor(private _cameraController: CameraController) { }
+  constructor(private _cameraController: CameraController, private _webglNode: HTMLElement) { }
 
   get cameraController(): CameraController {
     return this._cameraController;
+  }
+
+  get webglNode(): HTMLElement {
+    return this._webglNode;
   }
 }
 
@@ -67,8 +71,8 @@ export class CameraHandler {
   private ctx: CameraHandlerContext;
   private state: CameraState;
 
-  constructor(cameraController: CameraController) {
-    this.ctx = new CameraHandlerContext(cameraController);
+  constructor(cameraController: CameraController, webglNode: HTMLElement) {
+    this.ctx = new CameraHandlerContext(cameraController, webglNode);
     this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
   }
 
@@ -113,10 +117,15 @@ class MonitorViewCameraState extends CameraState {
     const zoom = 5.0;
 
     ctx.cameraController.transition(position, rotation, zoom, 1000); 
+
+    ctx.webglNode.style.pointerEvents = 'none';
   }
   
   onPointerUp(data: PointerData): void {
-    
+    const manager = this.manager;
+    if (manager === null) { return; }
+
+    manager.changeState(CameraHandlerState.FreeRoam);
   }
 
   onPointerDown(data: PointerData): void {
@@ -134,7 +143,20 @@ class FreeRoamCameraState extends CameraState {
   private previousRotationData: PointerData | null = null;
 
   transition(): void {
+    const ctx = this.ctx;
+    if (ctx === null) { return; }
     
+    ctx.webglNode.style.pointerEvents = 'auto';
+
+    const position = new Vector3();
+
+    const rotation = new Spherical();
+    rotation.phi = 1.0;
+    rotation.theta = 0.0;
+
+    const zoom = 10.0;
+
+    ctx.cameraController.transition(position, rotation, zoom, 1000); 
   }
 
   private handleDisplayClick(data: PointerData): void {
