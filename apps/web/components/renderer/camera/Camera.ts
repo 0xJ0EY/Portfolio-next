@@ -187,6 +187,10 @@ export class CameraController {
     }
   })();
 
+  public isTransitioning(): boolean {
+    return this.hasActions();
+  }
+
   private hasActions(): boolean {
     return this.actions.length > 0;
   }
