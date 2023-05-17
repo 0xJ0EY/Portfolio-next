@@ -110,9 +110,6 @@ export class CameraHandler {
 
 class MonitorViewCameraState extends CameraState {
   transition(): void {
-    const ctx = this.ctx;
-    if (ctx === null) { return; }
-
     const position = new Vector3();
     position.y = 0.5;
 
@@ -122,9 +119,9 @@ class MonitorViewCameraState extends CameraState {
 
     const zoom = 5.0;
 
-    ctx.cameraController.transition(position, rotation, zoom, 1000); 
+    this.ctx.cameraController.transition(position, rotation, zoom, 1000); 
 
-    ctx.webglNode.style.pointerEvents = 'none';
+    this.ctx.webglNode.style.pointerEvents = 'none';
   }
   
   onPointerUp(data: PointerData): void {
@@ -149,10 +146,7 @@ class FreeRoamCameraState extends CameraState {
   private previousRotationData: PointerData | null = null;
 
   transition(): void {
-    const ctx = this.ctx;
-    if (ctx === null) { return; }
-    
-    ctx.webglNode.style.pointerEvents = 'auto';
+    this.ctx.webglNode.style.pointerEvents = 'auto';
 
     const position = new Vector3();
 
@@ -162,15 +156,11 @@ class FreeRoamCameraState extends CameraState {
 
     const zoom = 10.0;
 
-    ctx.cameraController.transition(position, rotation, zoom, 1000); 
+    this.ctx.cameraController.transition(position, rotation, zoom, 1000); 
   }
 
   private handleDisplayClick(data: PointerData): void {
-    const ctx = this.ctx;
-    if (ctx === null) { return; }
-
-    const manager = this.manager;
-    if (manager === null) { return; }
+    if (this.ctx.cameraController.isTransitioning()) return;
 
     const raycaster = new Raycaster();
     const point     = new Vector2();
@@ -178,16 +168,16 @@ class FreeRoamCameraState extends CameraState {
     point.x = (data.x / window.innerWidth) * 2 - 1;
     point.y = -(data.y / window.innerHeight) * 2 + 1;
 
-    const camera = ctx.cameraController.getCamera();
+    const camera = this.ctx.cameraController.getCamera();
     raycaster.setFromCamera(point, camera);
 
-    const intersects = raycaster.intersectObjects(ctx.cameraController.getScene().children);
+    const intersects = raycaster.intersectObjects(this.ctx.cameraController.getScene().children);
     const first = intersects[0] ?? null;
 
     if (first === null) { return; }
     if (first.object.name !== "Display") { return; }
 
-    manager.changeState(CameraHandlerState.MonitorView);
+    this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
   private moveCamera(data: PointerData): void {
@@ -203,8 +193,8 @@ class FreeRoamCameraState extends CameraState {
       left = (data.x - previous.x) * sensitivity;
     }
 
-    this.ctx?.cameraController.moveCameraForward(forward);
-    this.ctx?.cameraController.moveCameraLeft(left);
+    this.ctx.cameraController.moveCameraForward(forward);
+    this.ctx.cameraController.moveCameraLeft(left);
 
     this.previousMovementData = data;
   }
