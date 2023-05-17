@@ -1,15 +1,22 @@
 import styles from './Renderer.module.css'
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { RefObject, useEffect, useRef } from "react";
-import { BoxGeometry, Camera, DepthTexture, LinearFilter, Mesh, MeshBasicMaterial, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
+import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
-import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
+import { UpdateActions } from '../asset-loader/Loaders';
+import { FXAAShaderPass } from './shaders/FXAAShaderPass';
+import { CameraController } from './camera/Camera';
+import { MouseInputHandler } from './camera/MouseInputHandler';
+import { CameraHandler } from './camera/CameraHandlers';
 
-const createRenderScenes = (): [Scene, Scene, Scene] => {
-  return [new Scene(), new Scene(), new Scene()];
-}
+export interface RendererScenes {
+  sourceScene: Scene,
+  cutoutScene: Scene,
+  cssScene: Scene
+};
 
 const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
   const camera = new PerspectiveCamera(fov, aspectRatio, 0.1, 1000);
@@ -40,8 +47,8 @@ const resizeRenderers = (composer: EffectComposer, webGlRenderer: WebGLRenderer,
   cssRenderer.setSize(width, height);
 };
 
-const createComposer = (renderer: WebGLRenderer, width: number, height: number): EffectComposer => {
-  const composer = new EffectComposer(renderer, new WebGLRenderTarget(
+const createComposerTarget = (renderer: WebGLRenderer, width: number, height: number): WebGLRenderTarget => {
+  const target = new WebGLRenderTarget(
     width,
     height, 
     { 
@@ -49,7 +56,14 @@ const createComposer = (renderer: WebGLRenderer, width: number, height: number):
       magFilter: LinearFilter,
       format: RGBAFormat,
       depthTexture: new DepthTexture(width, height)
-    }));
+    }
+  );
+
+  return target;
+}
+
+const createComposer = (renderer: WebGLRenderer, width: number, height: number): EffectComposer => {
+  const composer = new EffectComposer(renderer, createComposerTarget(renderer, width, height));
 
   return composer;
 }
@@ -74,45 +88,59 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   camera.position.divideScalar(10);
 }
 
-export const Renderer = () => {
+interface RendererProps {
+  scenes: RendererScenes,
+  actions: UpdateActions
+}
+
+export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+  let then: number | null = null;
 
   useEffect(() => {
-    const cssRendererNode = cssOutputRef.current;
+    const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
 
-    if (cssRendererNode == null || webglRenderNode == null) { return; }
+    if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
-    const [width, height] = [window.innerWidth, window.innerHeight]
+    const [width, height] = [window.innerWidth, window.innerHeight];
 
-    const [scene, cutoutScene, cssScene] = createRenderScenes();
+    const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
+
+    const cameraController  = new CameraController(camera, scene);
+    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode);
+    const mouseInputHandler = new MouseInputHandler(cameraHandler, cssRenderNode, webglRenderNode);
 
     const composer = createComposer(renderer, width, height);
 
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
     composer.addPass(cutoutShaderPass);
 
-    cssRendererNode.appendChild(cssRenderer.domElement);
+    const fxaaPass = new FXAAShaderPass(width, height);
+    composer.addPass(fxaaPass);
+
+    cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
 
-    const geo = new BoxGeometry(1, 1, 1);
-    const mat = new MeshBasicMaterial({ color: 0x00FF00 });
-    const mesh = new Mesh(geo, mat);
+    const animate = function(now: number) {
+      if (then == null) { then = now; }
+      const deltaTime = (now - then) * 0.001; // Get delta time in seconds
+      then = now;
 
-    scene.add(mesh);
-
-    const animate = function() {
       animationFrameId = requestAnimationFrame(animate);
 
-      mesh.rotation.x += 0.01;
-      mesh.rotation.y += 0.01;
+      for (const action of props.actions) {
+        action(deltaTime);
+      }
       
       renderWebglContext(composer);
       renderCssContext(cssScene, cssRenderer, camera);
+
+      cameraController.update(deltaTime);
     }
     
     const onWindowResize = function() {
@@ -128,12 +156,14 @@ export const Renderer = () => {
       renderer.dispose();
       renderer.forceContextLoss();
 
-      cssRendererNode.removeChild(cssRenderer.domElement);
+      mouseInputHandler.destroy();
+
+      cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
     }
 
     window.addEventListener('resize', onWindowResize, false);
-    animate();
+    animate(performance.now());
 
     return () => onDestroy();
   }, []);
