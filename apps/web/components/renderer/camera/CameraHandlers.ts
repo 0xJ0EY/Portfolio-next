@@ -1,4 +1,4 @@
-import { Camera, Raycaster, Spherical, Vector2, Vector3 } from "three";
+import { Raycaster, Spherical, Vector2, Vector3 } from "three";
 import { CameraController } from "./Camera";
 
 export class CameraHandlerContext {
@@ -37,8 +37,8 @@ export class PointerData {
   constructor(
     public x: number,
     public y: number,
-    public primaryPointerDown: boolean,
-    public secondaryPointerDown: boolean,
+    public rotateCamera: boolean,
+    public moveCamera: boolean,
     public buttonDown: MouseEventButton
   ) { }
 
@@ -51,16 +51,50 @@ export class PointerData {
       buttonToMouseEventButton(x.button)
     )
   }
+
+  static fromTouchEvent(evt: TouchEvent): PointerData {
+    switch (evt.touches.length) {
+      case 1: {
+        // Rotate
+        const t1 = evt.touches[0];
+
+        const x = t1.clientX;
+        const y = t1.clientY;
+
+        return new PointerData(x, y, true, false, 0x00);
+      }
+
+      case 2: {
+        // Zoom
+        return new PointerData(0, 0, false, false, 0x00);
+      }
+
+      case 3: {
+        // Pan
+        const t1 = evt.touches[0];
+        const t2 = evt.touches[1];
+        const t3 = evt.touches[2];
+
+        const x = (t1.clientX + t2.clientX + t3.clientX) / 3;
+        const y = (t1.clientY + t2.clientY + t3.clientY) / 3;
+
+        return new PointerData(x, y, false, true, 0x00);
+      }
+      default: {
+        return new PointerData(0, 0, false, false, 0x00);
+      }
+    }
+  }
 }
 
 abstract class CameraState {
-  constructor(protected manager: CameraHandler, protected ctx: CameraHandlerContext) {}
+  constructor(protected manager: CameraHandler, protected ctx: CameraHandlerContext) { }
 
   abstract transition(): void;
   isTransitioning(): boolean {
     return this.ctx.cameraController.isTransitioning()
   }
-  
+
   abstract onPointerUp(data: PointerData): void;
   abstract onPointerDown(data: PointerData): void;
   abstract onPointerMove(data: PointerData): void;
@@ -119,11 +153,11 @@ class MonitorViewCameraState extends CameraState {
 
     const zoom = 5.0;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 1000); 
+    this.ctx.cameraController.transition(position, rotation, zoom, 1000);
 
     this.ctx.webglNode.style.pointerEvents = 'none';
   }
-  
+
   onPointerUp(data: PointerData): void {
     const manager = this.manager;
     if (manager === null) { return; }
@@ -132,16 +166,16 @@ class MonitorViewCameraState extends CameraState {
   }
 
   onPointerDown(data: PointerData): void {
-    
+
   }
-  
+
   onPointerMove(data: PointerData): void {
-    
+
   }
 }
 
 class FreeRoamCameraState extends CameraState {
-  
+
   private previousMovementData: PointerData | null = null;
   private previousRotationData: PointerData | null = null;
 
@@ -156,14 +190,14 @@ class FreeRoamCameraState extends CameraState {
 
     const zoom = 10.0;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 1000); 
+    this.ctx.cameraController.transition(position, rotation, zoom, 1000);
   }
 
   private handleDisplayClick(data: PointerData): void {
     if (this.ctx.cameraController.isTransitioning()) return;
 
     const raycaster = new Raycaster();
-    const point     = new Vector2();
+    const point = new Vector2();
 
     point.x = (data.x / window.innerWidth) * 2 - 1;
     point.y = -(data.y / window.innerHeight) * 2 + 1;
@@ -226,8 +260,8 @@ class FreeRoamCameraState extends CameraState {
   }
 
   onPointerUp(data: PointerData): void {
-    if (!data.primaryPointerDown) { this.clearRotateCamera(); }
-    if (!data.secondaryPointerDown) { this.clearMoveCamera(); }
+    if (!data.rotateCamera) { this.clearRotateCamera(); }
+    if (!data.moveCamera) { this.clearMoveCamera(); }
   }
 
   onPointerDown(data: PointerData): void {
@@ -235,7 +269,7 @@ class FreeRoamCameraState extends CameraState {
   }
 
   onPointerMove(data: PointerData): void {
-    if (data.primaryPointerDown) { this.rotateCamera(data); }
-    if (data.secondaryPointerDown) { this.moveCamera(data); }
+    if (data.rotateCamera) { this.rotateCamera(data); }
+    if (data.moveCamera) { this.moveCamera(data); }
   }
 }

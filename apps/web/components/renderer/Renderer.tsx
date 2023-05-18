@@ -11,6 +11,7 @@ import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandlers';
+import { TouchInputHandler } from './camera/TouchInputHandler';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -88,6 +89,10 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   camera.position.divideScalar(10);
 }
 
+const disableTouchInteraction = (node: HTMLElement): void => {
+  node.style.touchAction = 'none';
+}
+
 interface RendererProps {
   scenes: RendererScenes,
   actions: UpdateActions
@@ -111,9 +116,13 @@ export const Renderer = (props: RendererProps) => {
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
+    disableTouchInteraction(cssRenderNode);
+    disableTouchInteraction(webglRenderNode);
+
     const cameraController  = new CameraController(camera, scene);
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode);
-    const mouseInputHandler = new MouseInputHandler(cameraHandler, cssRenderNode, webglRenderNode);
+    const mouseInputHandler = new MouseInputHandler(cameraHandler);
+    const touchInputHandler = new TouchInputHandler(cameraHandler);
 
     const composer = createComposer(renderer, width, height);
 
@@ -144,7 +153,7 @@ export const Renderer = (props: RendererProps) => {
     }
     
     const onWindowResize = function() {
-      const [width, height] = [window.innerWidth, window.innerHeight]
+      const [width, height] = [window.innerWidth, window.innerHeight];
 
       resizeRenderers(composer, renderer, cssRenderer, width, height);
       resizeCamera(camera, calculateAspectRatio(width, height));
@@ -157,6 +166,7 @@ export const Renderer = (props: RendererProps) => {
       renderer.forceContextLoss();
 
       mouseInputHandler.destroy();
+      touchInputHandler.destroy();
 
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);

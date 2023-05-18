@@ -26,7 +26,7 @@ const createLights = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   directionalLight.position.x = .75;
   directionalLight.position.z = .9;
   scenes.sourceScene.add(directionalLight);
-  
+
   return null;
 };
 
@@ -43,14 +43,14 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   plane.userData[AssetKeys.CameraCollidable] = true;
 
   scenes.sourceScene.add(plane.clone());
-  
+
   return null;
 }
 
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
 
-  const display = gltf.scene.children.find((x) => x.name === "Display") as Mesh<BufferGeometry, Material>;        
+  const display = gltf.scene.children.find((x) => x.name === "Display") as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
   display.material.stencilWrite = true;
   display.material.transparent = true;
@@ -87,8 +87,8 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.backgroundColor = 'white';
   iframe.style.border = '32px solid black';
   iframe.style.boxSizing = 'border-box';
-  // iframe.src = "http://localhost:3001";
-  iframe.src = "https://joeyderuiter.me";
+  iframe.src = "http://192.168.178.49:3001";
+  // iframe.src = "https://joeyderuiter.me";
 
   div.appendChild(iframe);
 
@@ -132,7 +132,7 @@ export const loadRenderScenes = async (manager: LoadingManager | undefined): Pro
       } else {
         acc.push(cur);
       }
-      
+
       return acc;
     }, []);
 

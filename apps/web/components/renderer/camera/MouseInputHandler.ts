@@ -8,12 +8,7 @@ export class MouseInputHandler {
   private onWheelListener: (evt: WheelEvent) => void;
   private onMouseLeaveListener: (evt: MouseEvent) => void;
 
-  constructor(
-    private handler: CameraHandler,
-    private cssRenderNode: HTMLElement,
-    private webglRenderNode: HTMLElement
-  ) {
-
+  constructor(private handler: CameraHandler) {
     this.onMouseDownListener    = this.onMouseDown.bind(this);
     this.onMouseUpListener      = this.onMouseUp.bind(this);
     this.onMouseMoveListener    = this.onMouseMove.bind(this);
@@ -21,19 +16,16 @@ export class MouseInputHandler {
     this.onWheelListener        = this.onWheel.bind(this);
     this.onMouseLeaveListener   = this.onMouseLeave.bind(this);
 
+    this.create();
+  }
+
+  create(): void {
     window.addEventListener('mousedown', this.onMouseDownListener);
     window.addEventListener('mouseup', this.onMouseUpListener);
     window.addEventListener('mousemove', this.onMouseMoveListener);
     window.addEventListener('contextmenu', this.onContextMenuListener);
     window.addEventListener('wheel', this.onWheelListener);
     window.addEventListener('mouseleave', this.onMouseLeaveListener);
-    
-    this.create();
-  }
-
-  create(): void {
-    this.cssRenderNode.style.touchAction    = 'none';
-    this.webglRenderNode.style.touchAction  = 'none';
   }
 
   destroy(): void {
