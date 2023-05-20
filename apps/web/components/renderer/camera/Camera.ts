@@ -2,18 +2,9 @@ import { AssetKeys } from "@/components/asset-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
-enum CameraState {
-  Idle,
-  FreeRoam
-}
-
 // Should be responsible for managing the different states of camera
 // and that the camera will not collide with the nearest object
 export class CameraController {
-  static readonly State = CameraState;
-
-  private currentState = CameraController.State.Idle;
-
   private actions: ((deltaTime: number) => boolean)[] = [];
 
   private enabled: boolean = true;
@@ -44,10 +35,6 @@ export class CameraController {
 
   public getScene(): Scene {
     return this.scene;
-  }
-
-  state(): CameraState {
-    return this.currentState;
   }
 
   public moveCameraForward(distance: number): void {
