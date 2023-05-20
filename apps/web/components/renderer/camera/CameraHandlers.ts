@@ -122,6 +122,10 @@ export class CameraHandler {
     }
   }
 
+  getContext(): CameraHandlerContext {
+    return this.ctx;
+  }
+
   changeState(state: CameraHandlerState) {
     if (this.state.isTransitioning()) return;
 

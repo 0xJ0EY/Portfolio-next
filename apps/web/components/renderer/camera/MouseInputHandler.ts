@@ -43,7 +43,6 @@ export class MouseInputHandler {
   }
 
   private onMouseUp(evt: MouseEvent) {
-    
     const data = PointerData.fromMouseEvent(evt);
     this.handler.onPointerUp(data);
   }
@@ -58,7 +57,7 @@ export class MouseInputHandler {
   }
 
   private onWheel(evt: WheelEvent) {
-    
+    this.handler.getContext().cameraController.zoom(evt.deltaY * 0.01);
   }
 
   private onMouseLeave(evt: MouseEvent) {

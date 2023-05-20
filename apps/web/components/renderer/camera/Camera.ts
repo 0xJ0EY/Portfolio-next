@@ -96,10 +96,10 @@ export class CameraController {
   private lerp(start: number, end: number, amt: number): number {
     return (1 - amt) * start + amt * end;
   }
-  
+
   public transition(targetPosition: Vector3, targetRotation: Spherical, targetZoom: number, durationInMs: number) {
     let timePassedInMs = 0;
-    
+
     const originalPosition = this.target.clone();
     const originalRotation = this.spherical.clone();
     const originalZoom = this.currentZoomDistance;
@@ -129,6 +129,18 @@ export class CameraController {
     }
 
     this.actions.push(action);
+  }
+
+  public getZoom(): number {
+    return this.currentZoomDistance;
+  }
+
+  public setZoom(distance: number): void {
+    this.currentZoomDistance = clamp(
+      distance,
+      this.minZoomDistance,
+      this.maxZoomDistance
+    );
   }
 
   public zoom(amount: number): void {
@@ -213,7 +225,7 @@ export class CameraController {
     const result = action(deltaTime);
 
     if (result === true) { this.popAction(); }
-    
+
     const done = result === true && !this.hasActions();
 
     if (done) { this.enabled = true; }
