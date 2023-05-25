@@ -65,15 +65,18 @@ export class TouchData {
   constructor(private touches: {x: number, y: number}[]) {}
 
   isRotateEvent(): boolean {
-    return this.touches.length === 1;
+    const fingers = this.touches.length;
+    return fingers === 1;
   }
 
   isPanEvent(): boolean {
-    return this.touches.length === 2;
+    const fingers = this.touches.length;
+    return fingers === 3 || fingers === 2;
   }
 
   isMovementEvent(): boolean {
-    return this.touches.length === 3 || this.touches.length === 2;
+    const fingers = this.touches.length;
+    return fingers === 3 || fingers === 2;
   }
 
   boundingBox(): BoundingBox {
