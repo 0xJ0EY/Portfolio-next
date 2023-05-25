@@ -1,9 +1,19 @@
-import { CameraHandler, PointerData } from "./CameraHandlers";
+import { CameraHandler, PointerData, TouchData } from "./CameraHandlers";
+
+
+class PanData {
+  constructor(
+    public touch: TouchData,
+    public zoomDistance: number
+  ) {}
+}
 
 export class TouchInputHandler {
   private onTouchStartListener: (evt: TouchEvent) => void;
   private onTouchMoveListener: (evt: TouchEvent) => void;
   private onTouchEndListener: (evt: TouchEvent) => void;
+
+  private panData: PanData | null = null;
 
   constructor(private handler: CameraHandler) {
     this.onTouchStartListener = this.onTouchStart.bind(this);
@@ -25,19 +35,48 @@ export class TouchInputHandler {
     window.removeEventListener('touchend', this.onTouchEndListener);
   }
 
-  private onTouchStart(evt: TouchEvent): void {
+  private handlePanEvent(data: TouchData) {
+    if (data.isPanEvent()) {
+      const zoom =  this.handler.getContext().cameraController.getZoom();
+      this.panData = new PanData(data, zoom);
+    } else {
+      this.panData = null;
+    }
+  }
 
+  private onTouchStart(evt: TouchEvent): void {
+    const data = TouchData.fromTouchEvent(evt);
+
+    this.handlePanEvent(data);
+
+    this.handler.onPointerDown(data.toPointerData());
   }
 
   private onTouchMove(evt: TouchEvent): void {
-    const data = PointerData.fromTouchEvent(evt);
-    this.handler.onPointerMove(data);
+    const evtData = TouchData.fromTouchEvent(evt);
+
+    if (evtData.isPanEvent()) {
+      if (this.panData == null) { return; }
+      const panData = this.panData;
+      const touchData = panData.touch;
+
+      const bb1 = touchData.boundingBox();
+      const bb2 = evtData.boundingBox();
+
+      const zoomDistance = this.panData.zoomDistance;
+      const zoomOffset = (bb2.diagonal() - bb1.diagonal()) * 0.01;
+
+      this.handler.getContext().cameraController.setZoom(zoomDistance - zoomOffset);
+    }
+
+    this.handler.onPointerMove(evtData.toPointerData());
   }
 
   private onTouchEnd(evt: TouchEvent): void {
-    evt.preventDefault();
+    const data = TouchData.fromTouchEvent(evt);
 
-    const data = new PointerData(0, 0, false, false, 0);
-    this.handler.onPointerUp(data);
+    this.handlePanEvent(data);
+
+    this.handler.onPointerUp(data.toPointerData());
   }
 }
