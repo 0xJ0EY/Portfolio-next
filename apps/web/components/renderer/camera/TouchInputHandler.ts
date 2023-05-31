@@ -1,4 +1,4 @@
-import { CameraHandler, PointerData, TouchData } from "./CameraHandlers";
+import { CameraHandler, PointerData, TouchData } from "./CameraHandler";
 
 
 class PanData {
