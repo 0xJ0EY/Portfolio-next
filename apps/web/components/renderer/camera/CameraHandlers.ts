@@ -11,6 +11,40 @@ export class CameraHandlerContext {
   get webglNode(): HTMLElement {
     return this._webglNode;
   }
+
+  public setCursor(style: string): void {
+    this._webglNode.style.cursor = style;
+  }
+
+  public enableWebGLPointerEvents(): void {
+    this._webglNode.style.pointerEvents = 'auto';
+  }
+
+  public disableWebGLPointerEvents(): void {
+    this._webglNode.style.pointerEvents = 'none';
+  }
+}
+
+const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerData) => boolean) => {
+  // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)
+  const raycaster = new Raycaster();
+  const point = new Vector2();
+
+  return (data: PointerData) => {
+    point.x = (data.x / window.innerWidth) * 2 - 1;
+    point.y = -(data.y / window.innerHeight) * 2 + 1;
+
+    const camera = ctx.cameraController.getCamera();
+    raycaster.setFromCamera(point, camera);
+
+    const intersects = raycaster.intersectObjects(ctx.cameraController.getScene().children);
+    const first = intersects[0] ?? null;
+
+    if (first === null) { return false; }
+    if (first.object.name !== "Display") { return false; }
+
+    return true;
+  }
 }
 
 export enum MouseEventButton {
@@ -111,7 +145,7 @@ export class TouchData {
     return new TouchData(touches);
   }
 
-  public  toPointerData(): PointerData {
+  public toPointerData(): PointerData {
     const bb = this.boundingBox();
 
     const { x, y } = bb.center();
@@ -219,24 +253,41 @@ export class CameraHandler {
   changeState(state: CameraHandlerState) {
     if (this.state.isTransitioning()) return;
 
+    this.getContext().setCursor('default');
+
     this.state = this.stateToInstance(state);
     this.state.transition();
   }
 
   onPointerUp(data: PointerData): void {
+    if (this.state.isTransitioning()) return;
+
     this.state.onPointerUp(data);
   }
 
   onPointerDown(data: PointerData): void {
+    if (this.state.isTransitioning()) return;
+
     this.state.onPointerDown(data);
   }
 
-   onPointerMove(data: PointerData): void {
+  onPointerMove(data: PointerData): void {
+    if (this.state.isTransitioning()) return;
+
     this.state.onPointerMove(data);
   }
 }
 
 class MonitorViewCameraState extends CameraState {
+
+  private isOverDisplay: (data: PointerData) => boolean;
+
+  constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
+    super(manager, ctx);
+
+    this.isOverDisplay = constructIsOverDisplay(this.ctx);
+  }
+
   transition(): void {
     const position = new Vector3();
     position.y = 0.5;
@@ -247,9 +298,11 @@ class MonitorViewCameraState extends CameraState {
 
     const zoom = 5.0;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 1000);
+    const callback = () => {
+      this.ctx.disableWebGLPointerEvents();
+    }
 
-    this.ctx.webglNode.style.pointerEvents = 'none';
+    this.ctx.cameraController.transition(position, rotation, zoom, 1000, callback);
   }
 
   onPointerUp(data: PointerData): void {
@@ -263,8 +316,20 @@ class MonitorViewCameraState extends CameraState {
 
   }
 
-  onPointerMove(data: PointerData): void {
+  private updateCursor(data: PointerData): void {
+    const overDisplay = this.isOverDisplay(data);
 
+    if (overDisplay) {
+      this.ctx.disableWebGLPointerEvents();
+      this.ctx.setCursor('auto');
+    } else {
+      this.ctx.enableWebGLPointerEvents();
+      this.ctx.setCursor('pointer');
+    }
+  }
+
+  onPointerMove(data: PointerData): void {
+    this.updateCursor(data);
   }
 }
 
@@ -273,8 +338,16 @@ class FreeRoamCameraState extends CameraState {
   private previousMovementData: PointerData | null = null;
   private previousRotationData: PointerData | null = null;
 
+  private isOverDisplay: (data: PointerData) => boolean;
+
+  constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
+    super(manager, ctx);
+
+    this.isOverDisplay = constructIsOverDisplay(this.ctx);
+  }
+
   transition(): void {
-    this.ctx.webglNode.style.pointerEvents = 'auto';
+    this.ctx.enableWebGLPointerEvents();
 
     const position = new Vector3();
 
@@ -288,22 +361,7 @@ class FreeRoamCameraState extends CameraState {
   }
 
   private handleDisplayClick(data: PointerData): void {
-    if (this.ctx.cameraController.isTransitioning()) return;
-
-    const raycaster = new Raycaster();
-    const point = new Vector2();
-
-    point.x = (data.x / window.innerWidth) * 2 - 1;
-    point.y = -(data.y / window.innerHeight) * 2 + 1;
-
-    const camera = this.ctx.cameraController.getCamera();
-    raycaster.setFromCamera(point, camera);
-
-    const intersects = raycaster.intersectObjects(this.ctx.cameraController.getScene().children);
-    const first = intersects[0] ?? null;
-
-    if (first === null) { return; }
-    if (first.object.name !== "Display") { return; }
+    if (!this.isOverDisplay(data)) { return; }
 
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
@@ -344,7 +402,7 @@ class FreeRoamCameraState extends CameraState {
       theta = (data.x - previous.x) * sensitivity;
     }
 
-    this.ctx?.cameraController.rotateCamera(phi, theta);
+    this.ctx.cameraController.rotateCamera(phi, theta);
 
     this.previousRotationData = data;
   }
@@ -362,8 +420,16 @@ class FreeRoamCameraState extends CameraState {
     if (data.buttonDown === MouseEventButton.Primary) { this.handleDisplayClick(data); }
   }
 
+  private updateCursor(data: PointerData): void {
+    const ctx = this.ctx;
+
+    ctx.setCursor(this.isOverDisplay(data) ? 'pointer' : 'auto');
+  }
+
   onPointerMove(data: PointerData): void {
     if (data.rotateCamera) { this.rotateCamera(data); }
     if (data.moveCamera) { this.moveCamera(data); }
+
+    this.updateCursor(data);
   }
 }

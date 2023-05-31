@@ -84,7 +84,14 @@ export class CameraController {
     return (1 - amt) * start + amt * end;
   }
 
-  public transition(targetPosition: Vector3, targetRotation: Spherical, targetZoom: number, durationInMs: number) {
+  public transition(
+    targetPosition: Vector3,
+    targetRotation: Spherical,
+    targetZoom:
+    number,
+    durationInMs: number,
+    callback?: () => void
+    ) {
     let timePassedInMs = 0;
 
     const originalPosition = this.target.clone();
@@ -112,7 +119,13 @@ export class CameraController {
 
       this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
 
-      return progress === 1;
+      const isDone = progress === 1;
+
+      if (isDone && callback !== undefined) {
+        callback();
+      }
+
+      return isDone;
     }
 
     this.actions.push(action);
