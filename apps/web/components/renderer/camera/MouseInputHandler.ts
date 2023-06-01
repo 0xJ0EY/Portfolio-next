@@ -1,17 +1,17 @@
 import { CameraHandler, PointerData } from "./CameraHandler";
 
 export class MouseInputHandler {
-  private onMouseDownListener: (evt: MouseEvent) => void;
-  private onMouseUpListener: (evt: MouseEvent) => void;
-  private onMouseMoveListener: (evt: MouseEvent) => void;
+  private onPointerDownListener: (evt: PointerEvent) => void;
+  private onPointerUpListener: (evt: PointerEvent) => void;
+  private onPointerMoveListener: (evt: PointerEvent) => void;
   private onContextMenuListener: (evt: MouseEvent) => void;
   private onWheelListener: (evt: WheelEvent) => void;
   private onMouseLeaveListener: (evt: MouseEvent) => void;
 
   constructor(private handler: CameraHandler) {
-    this.onMouseDownListener    = this.onMouseDown.bind(this);
-    this.onMouseUpListener      = this.onMouseUp.bind(this);
-    this.onMouseMoveListener    = this.onMouseMove.bind(this);
+    this.onPointerDownListener  = this.onPointerDown.bind(this);
+    this.onPointerUpListener    = this.onPointerUp.bind(this);
+    this.onPointerMoveListener  = this.onPointerMove.bind(this);
     this.onContextMenuListener  = this.onContextMenu.bind(this);
     this.onWheelListener        = this.onWheel.bind(this);
     this.onMouseLeaveListener   = this.onMouseLeave.bind(this);
@@ -20,34 +20,44 @@ export class MouseInputHandler {
   }
 
   create(): void {
-    window.addEventListener('mousedown', this.onMouseDownListener);
-    window.addEventListener('mouseup', this.onMouseUpListener);
-    window.addEventListener('mousemove', this.onMouseMoveListener);
+    window.addEventListener('pointerdown', this.onPointerDownListener);
+    window.addEventListener('pointerup', this.onPointerUpListener);
+    window.addEventListener('pointermove', this.onPointerMoveListener);
     window.addEventListener('contextmenu', this.onContextMenuListener);
     window.addEventListener('wheel', this.onWheelListener);
     window.addEventListener('mouseleave', this.onMouseLeaveListener);
   }
 
   destroy(): void {
-    window.removeEventListener('mousedown', this.onMouseDownListener);
-    window.removeEventListener('mouseup', this.onMouseUpListener);
-    window.removeEventListener('mousemove', this.onMouseMoveListener);
+    window.removeEventListener('pointerdown', this.onPointerDownListener);
+    window.removeEventListener('pointerup', this.onPointerUpListener);
+    window.removeEventListener('pointermove', this.onPointerMoveListener);
     window.removeEventListener('contextmenu', this.onContextMenuListener);
     window.removeEventListener('wheel', this.onWheelListener);
     window.removeEventListener('mouseleave', this.onMouseLeaveListener);
   }
 
-  private onMouseDown(evt: MouseEvent) {
+  private isMouse(evt: PointerEvent): boolean {
+    return evt.pointerType === 'mouse';
+  }
+
+  private onPointerDown(evt: PointerEvent) {
+    if (!this.isMouse(evt)) { return; }
+
     const data = PointerData.fromMouseEvent(evt);
     this.handler.onPointerDown(data);
   }
 
-  private onMouseUp(evt: MouseEvent) {
+  private onPointerUp(evt: PointerEvent) {
+    if (!this.isMouse(evt)) { return; }
+
     const data = PointerData.fromMouseEvent(evt);
     this.handler.onPointerUp(data);
   }
 
-  private onMouseMove(evt: MouseEvent) {
+  private onPointerMove(evt: PointerEvent) {
+    if (!this.isMouse(evt)) { return; }
+
     const data = PointerData.fromMouseEvent(evt);
     this.handler.onPointerMove(data);
   }
