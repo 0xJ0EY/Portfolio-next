@@ -65,10 +65,11 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const pageHeight = 998;
 
   const margin = 0.5;
+  const scale = 10;
 
-  const width   = (box.max.x - box.min.x) * 10 + margin;
-  const height  = (box.max.y - box.min.y) * 10 + margin;
-  const depth   = (box.max.z - box.min.z) * 10;
+  const width   = (box.max.x - box.min.x) * scale + margin;
+  const height  = (box.max.y - box.min.y) * scale + margin;
+  const depth   = (box.max.z - box.min.z) * scale;
 
   const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));
 
@@ -94,10 +95,16 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   const cssPage = new CSS3DObject(div);
 
+  const [localX, localY, localZ] = [
+    ((box.min.x * scale) - margin / 2) + width / 2,
+    ((box.min.y * scale) - margin / 2) + height / 2,
+    (box.min.z * scale) + depth / 2
+  ];
+
   const [x, y, z] = [
-    ((box.min.x * 10) - margin / 2) + width / 2,
-    ((box.min.y * 10) - margin / 2) + height / 2,
-    (box.min.z * 10) + depth / 2
+    display.position.x * scale + localX,
+    display.position.y * scale + localY,
+    display.position.z * scale + localZ
   ];
 
   cssPage.position.set(x, y, z);

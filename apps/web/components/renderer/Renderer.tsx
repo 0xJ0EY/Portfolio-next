@@ -1,5 +1,4 @@
 import styles from './Renderer.module.css'
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
