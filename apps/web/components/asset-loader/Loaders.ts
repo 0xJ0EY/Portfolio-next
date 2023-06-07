@@ -1,5 +1,5 @@
 import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CurveUtils, DirectionalLight, Loader, LoadingManager, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, Scene, Vector3 } from "three";
-import { RendererScenes } from "../renderer/Renderer";
+import { CssWorldScale, RendererScenes } from "../renderer/Renderer";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
@@ -65,7 +65,7 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const pageHeight = 998;
 
   const margin = 0.5;
-  const scale = 10;
+  const scale = CssWorldScale;
 
   const width   = (box.max.x - box.min.x) * scale + margin;
   const height  = (box.max.y - box.min.y) * scale + margin;

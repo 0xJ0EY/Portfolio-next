@@ -87,6 +87,12 @@ export class FreeRoamCameraState extends CameraState {
   }
 
   onPointerDown(data: PointerData): void {
+    if (data.source === 'touch' && this.isOverDisplay(data)) {
+      const result = confirm('do you want to zoom in?');
+
+      if (result) this.handleDisplayClick(data);
+    }
+
     if (data.buttonDown === MouseEventButton.Primary) { this.handleDisplayClick(data); }
   }
 

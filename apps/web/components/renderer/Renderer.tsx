@@ -12,6 +12,8 @@ import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 
+export const CssWorldScale = 10;
+
 export interface RendererScenes {
   sourceScene: Scene,
   cutoutScene: Scene,
@@ -77,7 +79,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   // 1. We scale up the scene, this is so that the dom element of the css scene will be rendered at a higher quality
   // 2. We manually update the world matrix and inverse the transformations of the css elements.
   //    This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
-  camera.position.multiplyScalar(10);
+  camera.position.multiplyScalar(CssWorldScale);
   camera.matrixWorldAutoUpdate = false;
   camera.updateMatrixWorld();
   camera.matrixWorldInverse.elements[15] = -1;
@@ -85,7 +87,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   renderer.render(scene, camera);
 
   camera.matrixWorldAutoUpdate = true;
-  camera.position.divideScalar(10);
+  camera.position.divideScalar(CssWorldScale);
 }
 
 const disableTouchInteraction = (node: HTMLElement): void => {

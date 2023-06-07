@@ -133,9 +133,18 @@ export class TouchData {
     const isRotation = this.isRotateEvent();
     const isMovement = this.isMovementEvent();
 
-    return new PointerData(x, y, isRotation, isMovement, 0x00);
+    return new PointerData(
+      x,
+      y,
+      isRotation,
+      isMovement,
+      0x00,
+      'touch'
+    );
   }
 }
+
+type PointerDataSource = 'touch' | 'mouse';
 
 export class PointerData {
   constructor(
@@ -143,7 +152,8 @@ export class PointerData {
     public y: number,
     public rotateCamera: boolean,
     public moveCamera: boolean,
-    public buttonDown: MouseEventButton
+    public buttonDown: MouseEventButton,
+    public source: PointerDataSource
   ) { }
 
   static fromMouseEvent(x: MouseEvent): PointerData {
@@ -152,11 +162,14 @@ export class PointerData {
       x.clientY,
       (x.buttons & MouseEventButton.Primary) === MouseEventButton.Primary,
       (x.buttons & MouseEventButton.Secondary) === MouseEventButton.Secondary,
-      buttonToMouseEventButton(x.button)
+      buttonToMouseEventButton(x.button),
+      'mouse'
     )
   }
 
   static fromTouchEvent(evt: TouchEvent): PointerData {
+    const source = 'touch';
+
     switch (evt.touches.length) {
       case 1: {
         // Rotate
@@ -165,12 +178,12 @@ export class PointerData {
         const x = t1.clientX;
         const y = t1.clientY;
 
-        return new PointerData(x, y, true, false, 0x00);
+        return new PointerData(x, y, true, false, 0x00, source);
       }
 
       case 2: {
         // Zoom
-        return new PointerData(0, 0, false, false, 0x00);
+        return new PointerData(0, 0, false, false, 0x00, source);
       }
 
       case 3: {
@@ -182,10 +195,10 @@ export class PointerData {
         const x = (t1.clientX + t2.clientX + t3.clientX) / 3;
         const y = (t1.clientY + t2.clientY + t3.clientY) / 3;
 
-        return new PointerData(x, y, false, true, 0x00);
+        return new PointerData(x, y, false, true, 0x00, source);
       }
       default: {
-        return new PointerData(0, 0, false, false, 0x00);
+        return new PointerData(0, 0, false, false, 0x00, source);
       }
     }
   }
