@@ -2,9 +2,14 @@ import { CameraController } from "./Camera";
 import { FreeRoamCameraState } from "./states/FreeRoamCameraState";
 import { CameraState } from "./CameraState";
 import { MonitorViewCameraState } from "./states/MonitorViewCameraState";
+import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
+import { UnsubscribeHandler } from "@/events/EventBus";
 
 export class CameraHandlerContext {
-  constructor(private _cameraController: CameraController, private _webglNode: HTMLElement) { }
+  constructor(
+    private _cameraController: CameraController,
+    private _webglNode: HTMLElement,
+  ) { }
 
   get cameraController(): CameraController {
     return this._cameraController;
@@ -213,9 +218,21 @@ export class CameraHandler {
   private ctx: CameraHandlerContext;
   private state: CameraState;
 
-  constructor(cameraController: CameraController, webglNode: HTMLElement) {
+  private eventBusUnsubscribeHandler: UnsubscribeHandler;
+
+  constructor(
+    cameraController: CameraController,
+    webglNode: HTMLElement,
+    private eventBus: UserInteractionEventBus
+  ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
     this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
+
+    this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
+  }
+
+  public destroy() {
+    this.eventBusUnsubscribeHandler();
   }
 
   private stateToInstance(state: CameraHandlerState): CameraState {
@@ -239,21 +256,11 @@ export class CameraHandler {
     this.state.transition();
   }
 
-  onPointerUp(data: PointerData): void {
-    if (this.state.isTransitioning()) return;
-
-    this.state.onPointerUp(data);
+  emitUserInteractionEvent(event: UserInteractionEvent) {
+    this.eventBus.emit(event);
   }
 
-  onPointerDown(data: PointerData): void {
-    if (this.state.isTransitioning()) return;
-
-    this.state.onPointerDown(data);
-  }
-
-  onPointerMove(data: PointerData): void {
-    if (this.state.isTransitioning()) return;
-
-    this.state.onPointerMove(data);
+  onUserInteractionEvent(event: UserInteractionEvent) {
+    this.state.onUserEvent(event);
   }
 }

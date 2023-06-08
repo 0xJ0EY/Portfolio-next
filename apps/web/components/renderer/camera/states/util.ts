@@ -1,12 +1,13 @@
 import { Raycaster, Vector2 } from "three";
 import { CameraHandlerContext, PointerData } from "../CameraHandler";
+import { PointerCoordinates } from "@/events/UserInteractionEvents";
 
-export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerData) => boolean) => {
+export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
   // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)
   const raycaster = new Raycaster();
   const point = new Vector2();
 
-  return (data: PointerData) => {
+  return (data: PointerCoordinates) => {
     point.x = (data.x / window.innerWidth) * 2 - 1;
     point.y = -(data.y / window.innerHeight) * 2 + 1;
 

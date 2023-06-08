@@ -1,3 +1,4 @@
+import { UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { CameraHandler, CameraHandlerContext, PointerData } from "./CameraHandler";
 
 export abstract class CameraState {
@@ -8,7 +9,5 @@ export abstract class CameraState {
     return this.ctx.cameraController.isTransitioning()
   }
 
-  abstract onPointerUp(data: PointerData): void;
-  abstract onPointerDown(data: PointerData): void;
-  abstract onPointerMove(data: PointerData): void;
+  abstract onUserEvent(data: UserInteractionEvent): void;
 }

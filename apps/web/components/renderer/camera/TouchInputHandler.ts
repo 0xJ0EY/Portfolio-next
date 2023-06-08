@@ -1,6 +1,5 @@
 import { CameraHandler, PointerData, TouchData } from "./CameraHandler";
 
-
 class PanData {
   constructor(
     public touch: TouchData,
@@ -49,7 +48,7 @@ export class TouchInputHandler {
 
     this.handlePanEvent(data);
 
-    this.handler.onPointerDown(data.toPointerData());
+    // this.handler.emitUserInteractionEvent(toTouchEvent(data));
   }
 
   private onTouchMove(evt: TouchEvent): void {
@@ -69,7 +68,7 @@ export class TouchInputHandler {
       this.handler.getContext().cameraController.setZoom(zoomDistance - zoomOffset);
     }
 
-    this.handler.onPointerMove(evtData.toPointerData());
+    // this.handler.emitUserInteractionEvent(toMouseEvent(evtData.toPointerData()))
   }
 
   private onTouchEnd(evt: TouchEvent): void {
@@ -77,6 +76,7 @@ export class TouchInputHandler {
 
     this.handlePanEvent(data);
 
-    this.handler.onPointerUp(data.toPointerData());
+
+    // this.handler.emitUserInteractionEvent(toMouseEvent(data.toPointerData()));
   }
 }

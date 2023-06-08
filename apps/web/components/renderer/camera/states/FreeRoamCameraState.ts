@@ -2,13 +2,22 @@ import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState, MouseEventButton, PointerData } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
+import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
+
+function isRotateCamera(data: MouseData): boolean {
+  return data.isPrimaryDown();
+}
+
+function isMoveCamera(data: MouseData): boolean {
+  return data.isSecondaryDown();
+}
 
 export class FreeRoamCameraState extends CameraState {
 
-  private previousMovementData: PointerData | null = null;
-  private previousRotationData: PointerData | null = null;
+  private previousMovementData: PointerCoordinates | null = null;
+  private previousRotationData: PointerCoordinates | null = null;
 
-  private isOverDisplay: (data: PointerData) => boolean;
+  private isOverDisplay: (data: PointerCoordinates) => boolean;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -30,13 +39,13 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.transition(position, rotation, zoom, 1000);
   }
 
-  private handleDisplayClick(data: PointerData): void {
+  private handleDisplayClick(data: PointerCoordinates): void {
     if (!this.isOverDisplay(data)) { return; }
 
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
-  private moveCamera(data: PointerData): void {
+  private moveCamera(coords: PointerCoordinates): void {
     const sensitivity = 0.005;
 
     let forward = 0;
@@ -45,21 +54,21 @@ export class FreeRoamCameraState extends CameraState {
     const previous = this.previousMovementData;
 
     if (previous !== null) {
-      forward = (data.y - previous.y) * sensitivity;
-      left = (data.x - previous.x) * sensitivity;
+      forward = (coords.y - previous.y) * sensitivity;
+      left = (coords.x - previous.x) * sensitivity;
     }
 
     this.ctx.cameraController.moveCameraForward(forward);
     this.ctx.cameraController.moveCameraLeft(left);
 
-    this.previousMovementData = data;
+    this.previousMovementData = coords;
   }
 
   private clearMoveCamera(): void {
     this.previousMovementData = null;
   }
 
-  private rotateCamera(data: PointerData): void {
+  private rotateCamera(coords: PointerCoordinates): void {
     const sensitivity = 0.01;
 
     let phi = 0;
@@ -68,44 +77,64 @@ export class FreeRoamCameraState extends CameraState {
     const previous = this.previousRotationData;
 
     if (previous !== null) {
-      phi = (data.y - previous.y) * sensitivity;
-      theta = (data.x - previous.x) * sensitivity;
+      phi = (coords.y - previous.y) * sensitivity;
+      theta = (coords.x - previous.x) * sensitivity;
     }
 
     this.ctx.cameraController.rotateCamera(phi, theta);
 
-    this.previousRotationData = data;
+    this.previousRotationData = coords;
+  }
+
+  private updateCursor(data: PointerCoordinates): void {
+    const ctx = this.ctx;
+
+    ctx.setCursor(this.isOverDisplay(data) ? 'pointer' : 'auto');
   }
 
   private clearRotateCamera(): void {
     this.previousRotationData = null;
   }
 
-  onPointerUp(data: PointerData): void {
+  onUserEvent(data: UserInteractionEvent): void {
+    switch (data.event) {
+      case 'mouse_event': return this.handleMouseEvent(data.data);
+      case 'touch_event': return this.handleTouchEvent(data.data);
+    }
+  }
+
+  handleMouseUp(data: MouseData): void {
     this.clearMoveCamera();
     this.clearRotateCamera();
   }
 
-  onPointerDown(data: PointerData): void {
-    if (data.source === 'touch' && this.isOverDisplay(data)) {
-      const result = confirm('do you want to zoom in?');
-
-      if (result) this.handleDisplayClick(data);
+  handleMouseDown(data: MouseData): void {
+    if (data.isPrimaryDown()) {
+      this.handleDisplayClick(data);
     }
-
-    if (data.buttonDown === MouseEventButton.Primary) { this.handleDisplayClick(data); }
   }
 
-  private updateCursor(data: PointerData): void {
-    const ctx = this.ctx;
-
-    ctx.setCursor(this.isOverDisplay(data) ? 'pointer' : 'auto');
-  }
-
-  onPointerMove(data: PointerData): void {
-    if (data.rotateCamera) { this.rotateCamera(data); }
-    if (data.moveCamera) { this.moveCamera(data); }
+  handleMouseMove(data: MouseData): void {
+    if (isRotateCamera(data)) { this.rotateCamera(data.pointerCoordinates()); }
+    if (isMoveCamera(data)) { this.moveCamera(data.pointerCoordinates()); }
 
     this.updateCursor(data);
+  }
+
+  handleMouseScroll(data: MouseData): void {
+    this.ctx.cameraController.zoom(data.zoomDelta());
+  }
+
+  handleMouseEvent(data: MouseData) {
+    switch (data.source) {
+      case 'up': return this.handleMouseUp(data);
+      case 'down': return this.handleMouseDown(data);
+      case 'move': return this.handleMouseMove(data);
+      case 'wheel': return this.handleMouseScroll(data);
+    }
+  }
+
+  handleTouchEvent(data: TouchData) {
+
   }
 }
