@@ -1,14 +1,49 @@
 import { Spherical, Vector3 } from "three";
-import { CameraHandler, CameraHandlerContext, CameraHandlerState, MouseEventButton, PointerData } from "../CameraHandler";
+import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
+import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
+import { CameraController } from "../Camera";
+
+function isMouseRotateCamera(data: MouseData): boolean {
+  return data.isPrimaryDown();
+}
+
+function isTouchRotateCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
+
+function isMouseMoveCamera(data: MouseData): boolean {
+  return data.isSecondaryDown();
+}
+
+function isTouchMoveCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(2) || data.hasTouchesDown(3);
+}
+
+function isTouchZoom(data: TouchData): boolean {
+  return data.hasTouchesDown(2);
+}
+
+class PanOriginData {
+  constructor(
+    public touchData: TouchData,
+    public zoomDistance: number
+  ) {}
+
+  static create(cameraController: CameraController, touchData: TouchData): PanOriginData {
+    return new PanOriginData(touchData, cameraController.getZoom());
+  }
+}
 
 export class FreeRoamCameraState extends CameraState {
 
-  private previousMovementData: PointerData | null = null;
-  private previousRotationData: PointerData | null = null;
+  private previousMovementData: PointerCoordinates | null = null;
+  private previousRotationData: PointerCoordinates | null = null;
 
-  private isOverDisplay: (data: PointerData) => boolean;
+  private panOrigin: PanOriginData | null = null;
+
+  private isOverDisplay: (data: PointerCoordinates) => boolean;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -30,13 +65,13 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.transition(position, rotation, zoom, 1000);
   }
 
-  private handleDisplayClick(data: PointerData): void {
+  private handleDisplayClick(data: PointerCoordinates): void {
     if (!this.isOverDisplay(data)) { return; }
 
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
-  private moveCamera(data: PointerData): void {
+  private moveCamera(coords: PointerCoordinates): void {
     const sensitivity = 0.005;
 
     let forward = 0;
@@ -45,21 +80,21 @@ export class FreeRoamCameraState extends CameraState {
     const previous = this.previousMovementData;
 
     if (previous !== null) {
-      forward = (data.y - previous.y) * sensitivity;
-      left = (data.x - previous.x) * sensitivity;
+      forward = (coords.y - previous.y) * sensitivity;
+      left = (coords.x - previous.x) * sensitivity;
     }
 
     this.ctx.cameraController.moveCameraForward(forward);
     this.ctx.cameraController.moveCameraLeft(left);
 
-    this.previousMovementData = data;
+    this.previousMovementData = coords;
   }
 
   private clearMoveCamera(): void {
     this.previousMovementData = null;
   }
 
-  private rotateCamera(data: PointerData): void {
+  private rotateCamera(coords: PointerCoordinates): void {
     const sensitivity = 0.01;
 
     let phi = 0;
@@ -68,44 +103,106 @@ export class FreeRoamCameraState extends CameraState {
     const previous = this.previousRotationData;
 
     if (previous !== null) {
-      phi = (data.y - previous.y) * sensitivity;
-      theta = (data.x - previous.x) * sensitivity;
+      phi = (coords.y - previous.y) * sensitivity;
+      theta = (coords.x - previous.x) * sensitivity;
     }
 
     this.ctx.cameraController.rotateCamera(phi, theta);
 
-    this.previousRotationData = data;
+    this.previousRotationData = coords;
+  }
+
+  private updateCursor(data: PointerCoordinates): void {
+    const ctx = this.ctx;
+
+    ctx.setCursor(this.isOverDisplay(data) ? 'pointer' : 'auto');
   }
 
   private clearRotateCamera(): void {
     this.previousRotationData = null;
   }
 
-  onPointerUp(data: PointerData): void {
+  onUserEvent(data: UserInteractionEvent): void {
+    switch (data.event) {
+      case 'mouse_event': return this.handleMouseEvent(data.data);
+      case 'touch_event': return this.handleTouchEvent(data.data);
+    }
+  }
+
+  private handleMouseUp(data: MouseData): void {
     this.clearMoveCamera();
     this.clearRotateCamera();
   }
 
-  onPointerDown(data: PointerData): void {
-    if (data.source === 'touch' && this.isOverDisplay(data)) {
-      const result = confirm('do you want to zoom in?');
-
-      if (result) this.handleDisplayClick(data);
+  private handleMouseDown(data: MouseData): void {
+    if (data.isPrimaryDown()) {
+      this.handleDisplayClick(data);
     }
-
-    if (data.buttonDown === MouseEventButton.Primary) { this.handleDisplayClick(data); }
   }
 
-  private updateCursor(data: PointerData): void {
-    const ctx = this.ctx;
-
-    ctx.setCursor(this.isOverDisplay(data) ? 'pointer' : 'auto');
-  }
-
-  onPointerMove(data: PointerData): void {
-    if (data.rotateCamera) { this.rotateCamera(data); }
-    if (data.moveCamera) { this.moveCamera(data); }
+  private handleMouseMove(data: MouseData): void {
+    if (isMouseRotateCamera(data)) { this.rotateCamera(data.pointerCoordinates()); }
+    if (isMouseMoveCamera(data)) { this.moveCamera(data.pointerCoordinates()); }
 
     this.updateCursor(data);
+  }
+
+  private handleMouseScroll(data: MouseData): void {
+    this.ctx.cameraController.zoom(data.zoomDelta());
+  }
+
+  private handleMouseEvent(data: MouseData) {
+    switch (data.source) {
+      case 'up': return this.handleMouseUp(data);
+      case 'down': return this.handleMouseDown(data);
+      case 'move': return this.handleMouseMove(data);
+      case 'wheel': return this.handleMouseScroll(data);
+    }
+  }
+
+  private setupZoomEvent(data: TouchData) {
+    if (isTouchZoom(data)) {
+      this.panOrigin = PanOriginData.create(this.ctx.cameraController, data);
+    } else {
+      this.panOrigin = null;
+    }
+  }
+
+  private handleZoomEvent(data: TouchData) {
+    if (this.panOrigin === null) { return; }
+
+    const origin = this.panOrigin.touchData;
+    const bb1 = origin.boundingBox();
+    const bb2 = data.boundingBox();
+
+    const zoomDistance = this.panOrigin.zoomDistance;
+    const zoomOffset = (bb2.diagonal() - bb1.diagonal()) * 0.01;
+
+    this.ctx.cameraController.setZoom(zoomDistance - zoomOffset);
+  }
+
+  private handleTouchStart(data: TouchData) {
+    this.setupZoomEvent(data);
+    this.clearMoveCamera();
+    this.clearRotateCamera();
+  }
+
+  private handleTouchMove(data: TouchData) {
+    if (isTouchMoveCamera(data)) { this.moveCamera(data.pointerCoordinates()); }
+    if (isTouchRotateCamera(data)) { this.rotateCamera(data.pointerCoordinates()); }
+    if (isTouchZoom(data)) { this.handleZoomEvent(data); }
+  }
+
+  private handleTouchEnd(data: TouchData) {
+    this.clearMoveCamera();
+    this.clearRotateCamera();
+  }
+
+  private handleTouchEvent(data: TouchData) {
+    switch (data.source) {
+      case "start": return this.handleTouchStart(data);
+      case "move": return this.handleTouchMove(data);
+      case "end": return this.handleTouchEnd(data);
+    }
   }
 }

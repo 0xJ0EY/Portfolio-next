@@ -1,5 +1,5 @@
 import styles from './Renderer.module.css'
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, createContext, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
@@ -11,6 +11,8 @@ import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
+import { EventBus } from '@/events/EventBus';
+import { UserInteractionEventBus, createUIEventBus } from '@/events/UserInteractionEvents';
 
 export const CssWorldScale = 10;
 
@@ -99,9 +101,23 @@ interface RendererProps {
   actions: UpdateActions
 }
 
+const TouchInteractions = (touchEvents: UserInteractionEventBus) => {
+  const [status, setStatus] = useState('foobar');
+
+  useEffect(() => {
+    touchEvents.subscribe((x) => { setStatus('foo'); });
+  });
+
+  return <>{status}</>
+}
+
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+  const touchEvents = createUIEventBus();
+
+  const touch = TouchInteractions(touchEvents);
+
   let then: number | null = null;
 
   useEffect(() => {
@@ -121,7 +137,7 @@ export const Renderer = (props: RendererProps) => {
     disableTouchInteraction(webglRenderNode);
 
     const cameraController  = new CameraController(camera, scene);
-    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode);
+    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents);
     const mouseInputHandler = new MouseInputHandler(cameraHandler);
     const touchInputHandler = new TouchInputHandler(cameraHandler);
 
@@ -169,6 +185,8 @@ export const Renderer = (props: RendererProps) => {
       mouseInputHandler.destroy();
       touchInputHandler.destroy();
 
+      cameraHandler.destroy();
+
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
     }
@@ -182,6 +200,7 @@ export const Renderer = (props: RendererProps) => {
     <div className={styles.renderer}>
       <div className={styles.cssOutput} ref={cssOutputRef}></div>
       <div className={styles.webglOutput} ref={webglOutputRef}></div>
+      {touch}
     </div>
   );
 };

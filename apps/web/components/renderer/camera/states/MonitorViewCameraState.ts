@@ -1,11 +1,12 @@
 import { Spherical, Vector3 } from "three";
-import { CameraHandler, CameraHandlerContext, CameraHandlerState, PointerData } from "../CameraHandler";
+import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
+import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
 
-  private isOverDisplay: (data: PointerData) => boolean;
+  private isOverDisplay: (data: PointerCoordinates) => boolean;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -30,18 +31,7 @@ export class MonitorViewCameraState extends CameraState {
     this.ctx.cameraController.transition(position, rotation, zoom, 1000, callback);
   }
 
-  onPointerUp(data: PointerData): void {
-    const manager = this.manager;
-    if (manager === null) { return; }
-
-    manager.changeState(CameraHandlerState.FreeRoam);
-  }
-
-  onPointerDown(data: PointerData): void {
-
-  }
-
-  private updateCursor(data: PointerData): void {
+  private updateCursor(data: PointerCoordinates): void {
     const overDisplay = this.isOverDisplay(data);
 
     if (overDisplay) {
@@ -53,8 +43,34 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  onPointerMove(data: PointerData): void {
-    this.updateCursor(data);
+  onUserEvent(data: UserInteractionEvent): void {
+    switch (data.event) {
+      case 'mouse_event': return this.handleMouseEvent(data.data);
+      case 'touch_event': return this.handleTouchEvent(data.data);
+    }
+  }
+
+  handleMouseUp(data: MouseData): void {
+    this.manager.changeState(CameraHandlerState.FreeRoam);
+  }
+
+  handleMouseMove(data: MouseData): void {
+    this.updateCursor(data.pointerCoordinates());
+  }
+
+  handleMouseScroll(data: MouseData): void {
+    this.ctx.cameraController.zoom(data.zoomDelta());
+  }
+
+  handleMouseEvent(data: MouseData) {
+    switch (data.source) {
+      case 'up': return this.handleMouseUp(data);
+      case 'move': return this.handleMouseMove(data);
+    }
+  }
+
+  handleTouchEvent(data: TouchData) {
+
   }
 }
 

@@ -6,9 +6,15 @@
 }
 
 .cssOutput,
-.webglOutput {
+.webglOutput,
+.hoverEffects {
   position: absolute;
   user-select: none;
   top: 0;
   left: 0;
+}
+
+.hoverEffects {
+  width: 100%;
+  height: 100%;
 }
