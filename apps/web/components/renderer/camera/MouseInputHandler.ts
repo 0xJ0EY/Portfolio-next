@@ -1,5 +1,5 @@
 import { MouseData, toUserInteractionMouseEvent } from "@/events/UserInteractionEvents";
-import { CameraHandler, PointerData } from "./CameraHandler";
+import { CameraHandler } from "./CameraHandler";
 
 export class MouseInputHandler {
   private onMouseDownListener: (evt: MouseEvent) => void;

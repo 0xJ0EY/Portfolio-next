@@ -1,10 +1,14 @@
 import { UserInteractionEvent } from "@/events/UserInteractionEvents";
-import { CameraHandler, CameraHandlerContext, PointerData } from "./CameraHandler";
+import { CameraHandler, CameraHandlerContext } from "./CameraHandler";
 
 export abstract class CameraState {
-  constructor(protected manager: CameraHandler, protected ctx: CameraHandlerContext) { }
+  constructor(
+    protected manager: CameraHandler,
+    protected ctx: CameraHandlerContext
+  ) { }
 
   abstract transition(): void;
+
   isTransitioning(): boolean {
     return this.ctx.cameraController.isTransitioning()
   }

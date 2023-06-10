@@ -1,5 +1,5 @@
 import { Spherical, Vector3 } from "three";
-import { CameraHandler, CameraHandlerContext, CameraHandlerState, PointerData } from "../CameraHandler";
+import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
