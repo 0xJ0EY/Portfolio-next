@@ -1,5 +1,5 @@
 import { Raycaster, Vector2 } from "three";
-import { CameraHandlerContext, PointerData } from "../CameraHandler";
+import { CameraHandlerContext } from "../CameraHandler";
 import { PointerCoordinates } from "@/events/UserInteractionEvents";
 
 export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
