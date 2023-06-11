@@ -192,13 +192,11 @@ export class FreeRoamCameraState extends CameraState {
       this.manager.changeState(CameraHandlerState.MonitorView);
     };
 
-    const onCancel = () => {};
-
     const confirm = TouchConfirmationData.fromTouchData(
       data,
       1000,
       onSuccess,
-      onCancel,
+      null,
     );
 
     const confirmEvent = toUserInteractionTouchConfirmationEvent(confirm);

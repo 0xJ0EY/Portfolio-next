@@ -8,14 +8,14 @@ export class TouchConfirmationData {
     public creationTime: number,
     public durationInMS: number,
     public callbackSuccess: () => void,
-    public callbackCancelation: () => void,
+    public callbackCancelation: (() => void) | null,
   ) {}
 
   static fromTouchData(
     data: TouchData,
     durationInMS: number,
     callbackSuccess: () => void,
-    callbackCancelation: () => void
+    callbackCancelation: (() => void) | null
   ) {
     const coords = data.pointerCoordinates();
 

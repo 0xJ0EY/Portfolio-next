@@ -43,7 +43,10 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
     };
   
     const handleCancelation = (): void => {
-      localStatus?.callbackCancelation();
+      if (localStatus?.callbackCancelation !== null) {
+        localStatus?.callbackCancelation();
+      }
+      
       updateStatus(null);
     };
   
