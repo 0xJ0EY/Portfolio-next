@@ -2,11 +2,15 @@ import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
-import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 import { CameraController } from "../Camera";
 
 function isMouseRotateCamera(data: MouseData): boolean {
   return data.isPrimaryDown();
+}
+
+function isTouchTap(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
 }
 
 function isTouchRotateCamera(data: TouchData): boolean {
@@ -181,7 +185,32 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.setZoom(zoomDistance - zoomOffset);
   }
 
+  private handleTouchDisplayClick(data: TouchData) {
+    if (!this.isOverDisplay(data.pointerCoordinates())) { return; }
+
+    const onSuccess = () => {
+      this.manager.changeState(CameraHandlerState.MonitorView);
+    };
+
+    const onCancel = () => {};
+
+    const confirm = TouchConfirmationData.fromTouchData(
+      data,
+      1000,
+      onSuccess,
+      onCancel,
+    );
+
+    const confirmEvent = toUserInteractionTouchConfirmationEvent(confirm);
+
+    this.manager.emitUserInteractionEvent(confirmEvent);
+  }
+
   private handleTouchStart(data: TouchData) {
+    if (isTouchTap(data)) {
+      this.handleTouchDisplayClick(data);
+    }
+
     this.setupZoomEvent(data);
     this.clearMoveCamera();
     this.clearRotateCamera();

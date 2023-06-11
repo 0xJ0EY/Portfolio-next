@@ -1,6 +1,40 @@
 import { BoundingBox } from "@/data/BoundingBox";
 import { EventBus } from "./EventBus";
 
+export class TouchConfirmationData {
+  constructor(
+    public x: number,
+    public y: number,
+    public creationTime: number,
+    public durationInMS: number,
+    public callbackSuccess: () => void,
+    public callbackCancelation: () => void,
+  ) {}
+
+  static fromTouchData(
+    data: TouchData,
+    durationInMS: number,
+    callbackSuccess: () => void,
+    callbackCancelation: () => void
+  ) {
+    const coords = data.pointerCoordinates();
+
+    return new TouchConfirmationData(
+      coords.x,
+      coords.y,
+      Date.now(),
+      durationInMS,
+      callbackSuccess,
+      callbackCancelation
+    )
+  }
+}
+
+export type TouchConfirmationEvent = {
+  event: 'touch_confirmation_event';
+  data: TouchConfirmationData;
+}
+
 export type UserTouchEvent = {
   event: 'touch_event';
   data: TouchData;
@@ -97,6 +131,10 @@ export class TouchData {
     return this.touches.length === amount;
   }
 
+  hasMoreTouchesDownThan(amount: number): boolean {
+    return this.touches.length > amount;
+  }
+
   boundingBox(): BoundingBox {
     return BoundingBox.fromTouchData(this);
   }
@@ -115,6 +153,10 @@ export class TouchData {
   }
 }
 
+export const toUserInteractionTouchConfirmationEvent = (data: TouchConfirmationData): TouchConfirmationEvent => {
+  return { event: 'touch_confirmation_event', data };
+}
+
 export const toUserInteractionTouchEvent = (data: TouchData): UserTouchEvent => {
   return { event: 'touch_event', data };
 }
@@ -123,7 +165,7 @@ export const toUserInteractionMouseEvent = (data: MouseData): UserMouseEvent => 
   return { event: 'mouse_event', data };
 }
 
-export type UserInteractionEvent = UserTouchEvent | UserMouseEvent;
+export type UserInteractionEvent = UserTouchEvent | UserMouseEvent | TouchConfirmationEvent;
 export type UserInteractionEventBus = EventBus<UserInteractionEvent>;
 
 export const createUIEventBus = (): UserInteractionEventBus => {
