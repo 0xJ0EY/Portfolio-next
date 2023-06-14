@@ -1,13 +1,65 @@
 import { TouchConfirmationData, TouchData, UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { useEffect, useState } from "react";
+import { clamp } from "./util";
+
+class ConfirmationData {
+  constructor(public x: number, public y: number, public progress: number) {}
+
+  static fromTouchConfirmationData(data: TouchConfirmationData, progress: number): ConfirmationData {
+    return new ConfirmationData(data.x, data.y, progress);
+  }
+};
+
+const ProgressCircle = (data: ConfirmationData) => {
+  const radius = 50;
+  const strokeWidth = 20;
+
+  const width = (radius + strokeWidth) * 2;
+  const height = (radius + strokeWidth) * 2;
+
+  const [x, y] = [data.x, data.y];
+
+  const localStyle = {
+    top: y - height / 2,
+    left: x - width / 2,
+    height,
+    width,
+    position: 'absolute',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    touchAction: 'none'
+  } as React.CSSProperties;
+
+  const svgStyle = {
+    transform: 'rotate(-90deg)',
+  };
+
+  const progress = clamp(data.progress, 0, 1);
+
+  const circumference = (2 * Math.PI) * radius;
+  const offset = circumference * (1.0 - progress);
+
+  return <>
+    <div style={localStyle}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={svgStyle}>
+        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#e0e0e0" strokeWidth={`${strokeWidth}px`}></circle>
+        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#60e6a8" strokeWidth={`${strokeWidth}px`} strokeDasharray={`${circumference}px`} strokeDashoffset={`${offset}px`}></circle>
+      </svg>
+    </div>
+  </>
+}
 
 export const RendererTouchUserInterface = (userInteractionEventBus: UserInteractionEventBus) => {
-    const [viewStatus, setStatus] = useState<TouchConfirmationData | null>(null);
+    const [viewStatus, setStatus] = useState<ConfirmationData | null>(null);
     let localStatus: TouchConfirmationData | null = null;
   
-    const updateStatus = (data: TouchConfirmationData | null): void => {
+    const updateLocalStatus = (data: TouchConfirmationData | null): void => {
       localStatus = data;
-      setStatus(data);
+    }
+
+    const clearStatus = (): void => {
+      updateLocalStatus(null);
+      setStatus(null);
     }
     
     const handleTouchEvent = (data: TouchData): void => {
@@ -16,7 +68,8 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
     }
   
     const handleTouchConfirmationEvent = (data: TouchConfirmationData): void => {
-      updateStatus(data); 
+      updateLocalStatus(data);
+      setStatus(ConfirmationData.fromTouchConfirmationData(data, 0));
     }
   
     const checkIfOnlyOneFinger = (evt: TouchData): boolean => {
@@ -39,7 +92,7 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
     
     const handleSuccess = (): void => {
       localStatus?.callbackSuccess();
-      updateStatus(null);
+      clearStatus();
     };
   
     const handleCancelation = (): void => {
@@ -47,7 +100,7 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
         localStatus?.callbackCancelation();
       }
       
-      updateStatus(null);
+      clearStatus();
     };
   
     const handleUserInteractionEvent = (evt: UserInteractionEvent) => {
@@ -64,6 +117,8 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
       const delta = now - localStatus.creationTime;
   
       const progress = Math.min(delta / localStatus.durationInMS, 1.0);
+
+      setStatus(ConfirmationData.fromTouchConfirmationData(localStatus, progress));
   
       if (progress === 1.0) { handleSuccess(); }
     };
@@ -78,9 +133,9 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
         clearInterval(interval);
       }
     }, []);
-  
-    if (viewStatus === null) { return <>no status</>}
-  
-    return <>{viewStatus.x} {viewStatus.y}</>
+ 
+    if (viewStatus === null) { return <></>}
+
+    return  ProgressCircle(viewStatus);
   }
   

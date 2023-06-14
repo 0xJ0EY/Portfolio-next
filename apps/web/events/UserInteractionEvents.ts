@@ -26,7 +26,7 @@ export class TouchConfirmationData {
       durationInMS,
       callbackSuccess,
       callbackCancelation
-    )
+    );
   }
 }
 
