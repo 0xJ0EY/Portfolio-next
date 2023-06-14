@@ -136,6 +136,6 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
  
     if (viewStatus === null) { return <></>}
 
-    return  ProgressCircle(viewStatus);
+    return ProgressCircle(viewStatus);
   }
   

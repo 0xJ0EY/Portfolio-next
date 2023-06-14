@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
@@ -92,10 +92,6 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   camera.position.divideScalar(CssWorldScale);
 }
 
-const disableTouchInteraction = (node: HTMLElement): void => {
-  node.style.touchAction = 'none';
-}
-
 interface RendererProps {
   scenes: RendererScenes,
   actions: UpdateActions
@@ -168,6 +164,9 @@ export const Renderer = (props: RendererProps) => {
 
     const onDestroy = function() {
       if (animationFrameId) { cancelAnimationFrame(animationFrameId); }
+
+      enableTouchInteraction(cssRenderNode);
+      enableTouchInteraction(webglRenderNode);
 
       renderer.dispose();
       renderer.forceContextLoss();

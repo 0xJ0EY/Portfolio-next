@@ -2,7 +2,11 @@ import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
-import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+
+function isTouchTap(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
 
 export class MonitorViewCameraState extends CameraState {
 
@@ -69,8 +73,32 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  handleTouchEvent(data: TouchData) {
+  private handleTouchOutsideDisplay(data: TouchData) {
+    const onSuccess = () => {
+      this.manager.changeState(CameraHandlerState.FreeRoam);
+    };
 
+    const confirm = TouchConfirmationData.fromTouchData(
+      data,
+      600,
+      onSuccess,
+      null
+    );
+
+    const event = toUserInteractionTouchConfirmationEvent(confirm);
+    this.manager.emitUserInteractionEvent(event);
+  }
+
+  private handleTouchStart(data: TouchData) {
+    if (isTouchTap(data)) {
+      this.handleTouchOutsideDisplay(data);
+    }
+  }
+
+  private handleTouchEvent(data: TouchData) {
+    if (data.source === 'start') {
+      this.handleTouchStart(data);
+    }
   }
 }
 
