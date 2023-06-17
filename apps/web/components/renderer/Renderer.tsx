@@ -1,5 +1,5 @@
 import styles from './Renderer.module.css'
-import { RefObject, useEffect, useRef } from "react";
+import { MutableRefObject, RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
@@ -104,7 +104,7 @@ export const Renderer = (props: RendererProps) => {
 
   const touchUserInterface = RendererTouchUserInterface(touchEvents);
 
-  let then: number | null = null;
+  let then: MutableRefObject<number | null> = useRef(null);
 
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
@@ -139,9 +139,9 @@ export const Renderer = (props: RendererProps) => {
     webglRenderNode.appendChild(renderer.domElement);
 
     const animate = function(now: number) {
-      if (then == null) { then = now; }
-      const deltaTime = (now - then) * 0.001; // Get delta time in seconds
-      then = now;
+      if (then.current == null) { then.current = now; }
+      const deltaTime = (now - then.current) * 0.001; // Get delta time in seconds
+      then.current = now;
 
       animationFrameId = requestAnimationFrame(animate);
 

@@ -7,9 +7,9 @@ export function AssetLoader() {
   const [loading, setLoading] = useState(true);
   const [scenes, setScenes] = useState<RendererScenes>(createRenderScenes());
   const [actions, setActions] = useState<UpdateActions>([]);
-  const manager = new LoadingManager();
-
+  
   useEffect(() => {
+    const manager = new LoadingManager();
     const fetchData = async () => {
       const [rendererScenes, updateActions] = await loadRenderScenes(manager);
 
@@ -20,7 +20,7 @@ export function AssetLoader() {
     }
 
     fetchData();
-  }, []);
+  });
   
   if (loading) {
     return <>Loading!</>
