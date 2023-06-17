@@ -1,11 +1,53 @@
-import { Spherical, Vector3 } from "three";
+import { ArrowHelper, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Scene, Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { constructIsOverDisplay } from "./util";
 import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
+import { degToRad } from "three/src/math/MathUtils";
 
 function isTouchTap(data: TouchData): boolean {
   return data.hasTouchesDown(1);
+}
+
+const getDisplay = (scene: Scene): Mesh | undefined => {
+  // NOTE(Joey): This makes it that there may only be *one* display on the scene.
+  const parent = scene.children.find(x => x.name === DisplayParentName);
+  const display = parent?.children.find(x => x.name === DisplayName) as Mesh | undefined;
+
+  return display;
+}
+
+const calculateCameraPosition = (display: Mesh, fov: number) => {
+  const bb = display.geometry.boundingBox!;
+
+  const width   = bb.max.x - bb.min.x;
+  const height  = bb.max.y - bb.min.y;
+  const depth   = bb.max.z - bb.min.z;
+
+  const position = new Vector3(
+    bb.min.x + width / 2,
+    bb.min.y + height / 2,
+    bb.min.z + depth / 2
+  );
+
+  const spherical = new Spherical();
+  spherical.phi = Math.atan2(height, depth);
+
+  const rotation = new Vector3();
+  rotation.setFromSpherical(spherical);
+  // TODO: Calculate in rotation, prob from mesh self, as bounding box does not contain the information needed
+
+  const fovAngle      = fov / 2;
+  const oppositeAngle = Math.tan(degToRad(fovAngle));
+
+  const distance = oppositeAngle * ((width / 2) + 3);
+
+  return {
+    spherical,
+    position,
+    distance
+  }
 }
 
 export class MonitorViewCameraState extends CameraState {
@@ -19,20 +61,17 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   transition(): void {
-    const position = new Vector3();
-    position.y = 0.5;
+    const display = getDisplay(this.ctx.scene);
+    if (!display) { return; }
 
-    const rotation = new Spherical();
-    rotation.phi = 1.2;
-    rotation.theta = 0.0;
-
-    const zoom = 5.0;
+    const cameraFov = this.ctx.cameraController.getCamera().fov;
+    const { spherical, position, distance } = calculateCameraPosition(display, cameraFov);
 
     const callback = () => {
       this.ctx.disableWebGLPointerEvents();
     }
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 1000, callback);
+    this.ctx.cameraController.transition(position, spherical, distance, 1000, callback);
   }
 
   private updateCursor(data: PointerCoordinates): void {
@@ -101,4 +140,3 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 }
-

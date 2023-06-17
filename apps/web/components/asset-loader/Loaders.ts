@@ -5,6 +5,9 @@ import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { AssetKeys } from "./AssetKeys";
 
+export const DisplayParentName = "DisplayParent";
+export const DisplayName = "Display";
+
 export type UpdateAction = ((deltaTime: number) => void);
 export type UpdateActions = UpdateAction[];
 export type OptionalUpdateActions = UpdateAction | UpdateActions | null;
@@ -49,8 +52,9 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
 
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
+  gltf.scene.name = DisplayParentName;
 
-  const display = gltf.scene.children.find((x) => x.name === "Display") as Mesh<BufferGeometry, Material>;
+  const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
   display.material.stencilWrite = true;
   display.material.transparent = true;

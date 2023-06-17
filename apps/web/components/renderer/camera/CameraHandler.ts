@@ -4,6 +4,7 @@ import { CameraState } from "./CameraState";
 import { MonitorViewCameraState } from "./states/MonitorViewCameraState";
 import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { UnsubscribeHandler } from "@/events/EventBus";
+import { Scene } from "three";
 
 export class CameraHandlerContext {
   constructor(
@@ -17,6 +18,10 @@ export class CameraHandlerContext {
 
   get webglNode(): HTMLElement {
     return this._webglNode;
+  }
+
+  get scene(): Scene {
+    return this._cameraController.getScene();
   }
 
   public setCursor(style: string): void {
