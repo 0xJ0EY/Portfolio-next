@@ -65,8 +65,8 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   const box = display.geometry.boundingBox ?? new Box3();
 
-  const pageWidth = 1000;
-  const pageHeight = 998;
+  const pageWidth = 1280;
+  const pageHeight = 1024;
 
   const margin = 0.5;
   const scale = CssWorldScale;
@@ -89,9 +89,11 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.classList.add("iframe-container");
   iframe.style.width = `${pageWidth}px`;
   iframe.style.height = `${pageHeight + 0}px`;
-  iframe.style.backgroundColor = 'white';
-  iframe.style.border = '32px solid black';
+  iframe.style.backgroundColor = 'black';
+  iframe.style.border = '0 solid black';
   iframe.style.boxSizing = 'border-box';
+  iframe.style.padding = '32px';
+
   // iframe.src = "http://192.168.178.49:3001";
   iframe.src = "https://example.com/";
   // iframe.src = "https://joeyderuiter.me";

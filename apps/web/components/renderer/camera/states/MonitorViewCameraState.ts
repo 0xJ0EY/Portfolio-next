@@ -5,6 +5,7 @@ import { constructIsOverDisplay } from "./util";
 import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
 import { degToRad } from "three/src/math/MathUtils";
+import { calculateAspectRatio } from "../../util";
 
 function isTouchTap(data: TouchData): boolean {
   return data.hasTouchesDown(1);
@@ -19,6 +20,7 @@ const getDisplay = (scene: Scene): Mesh | undefined => {
 }
 
 const calculateCameraPosition = (display: Mesh, fov: number) => {
+  const zoomDistance = 3; // User defined number for setting up the zoom
   const bb = display.geometry.boundingBox!;
 
   const width   = bb.max.x - bb.min.x;
@@ -41,7 +43,11 @@ const calculateCameraPosition = (display: Mesh, fov: number) => {
   const fovAngle      = fov / 2;
   const oppositeAngle = Math.tan(degToRad(fovAngle));
 
-  const distance = oppositeAngle * ((width / 2) + 3);
+  const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
+  const aspectRatio = calculateAspectRatio(windowWidth, windowHeight);
+  const zoom = zoomDistance / aspectRatio;
+
+  const distance = oppositeAngle * ((width / 2) + zoom);
 
   return {
     spherical,
