@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LoadingManager, Scene } from "three";
+import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { createRenderScenes, loadRenderScenes, UpdateActions } from "./Loaders";
 
@@ -20,7 +20,7 @@ export function AssetLoader() {
     }
 
     fetchData();
-  });
+  }, []);
   
   if (loading) {
     return <>Loading!</>
