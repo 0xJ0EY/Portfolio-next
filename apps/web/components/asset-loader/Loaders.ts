@@ -54,6 +54,11 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
   gltf.scene.name = DisplayParentName;
 
+  // Correct for desk hight
+  for (const x of gltf.scene.children) {
+    x.position.y += 5.59;
+  }
+
   const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
   display.material.stencilWrite = true;
@@ -118,9 +123,24 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   cssPage.scale.set(viewWidthScale, viewHeightScale, 1);
   cssPage.rotateX(Math.atan(height / depth) - degToRad(90));
+
   scenes.cssScene.add(cssPage);
   scenes.sourceScene.add(gltf.scene);
   scenes.cutoutScene.add(cutoutDisplay);
+
+  return null;
+}
+
+const createDesk = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  const gltf = await loader.loadAsync("/assets/Desk.gltf");
+
+  gltf.scene.position.y = -1.3;
+
+  for (const obj of gltf.scene.children) {
+    obj.userData[AssetKeys.CameraCollidable] = true;
+  }
+
+  scenes.sourceScene.add(gltf.scene);
 
   return null;
 }
@@ -132,7 +152,8 @@ export const loadRenderScenes = async (manager: LoadingManager | undefined): Pro
   const actions = [
     createLights(rendererScenes),
     createFloors(rendererScenes),
-    createMonitor(gltfLoader, rendererScenes)
+    createMonitor(gltfLoader, rendererScenes),
+    createDesk(gltfLoader, rendererScenes),
   ];
 
   const result = await Promise.all(actions);

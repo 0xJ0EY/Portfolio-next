@@ -27,11 +27,15 @@ const calculateCameraPosition = (display: Mesh, fov: number) => {
   const height  = bb.max.y - bb.min.y;
   const depth   = bb.max.z - bb.min.z;
 
-  const position = new Vector3(
+  const centerPoint = new Vector3(
     bb.min.x + width / 2,
     bb.min.y + height / 2,
     bb.min.z + depth / 2
   );
+
+  const position = new Vector3();
+  position.add(display.position);
+  position.add(centerPoint);
 
   const spherical = new Spherical();
   spherical.phi = Math.atan2(height, depth);

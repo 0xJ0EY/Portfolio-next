@@ -54,7 +54,9 @@ export class CameraHandler {
     private eventBus: UserInteractionEventBus
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
+
     this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
+    cameraController.moveCameraUp(5.5); // TODO: Move this to an actual camera init state
 
     this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
   }

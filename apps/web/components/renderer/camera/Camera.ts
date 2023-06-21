@@ -46,7 +46,7 @@ export class CameraController {
   }
 
   public moveCameraUp(distance: number): void {
-    this.panOffset.y -= distance;
+    this.panOffset.y += distance;
   }
 
   public moveCameraLeft(distance: number): void {

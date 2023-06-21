@@ -59,6 +59,7 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.enableWebGLPointerEvents();
 
     const position = new Vector3();
+    position.y = 5.5;
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
