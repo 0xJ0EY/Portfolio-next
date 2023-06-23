@@ -1,0 +1,36 @@
+.operatingSystem {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;  
+  display: flex;
+  flex-flow: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.menuBar {
+  background-color: red;
+  display: block;
+  padding: 5px; 
+  flex: 0 1 auto;
+}
+
+.desktop {
+  background-color: green;
+  display: block;
+
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.dock {
+  position: absolute;
+  display: block;
+  background-color: blue;
+
+  height: 40px;
+  width: 100%;
+
+  bottom: 0;
+}
