@@ -4,8 +4,7 @@ export default function LazyComponent() {
   const [number, setNumber] = useState(0);
 
   useEffect(() => { 
-    console.log('bound');
-    return () => { console.log('unbound'); }
+    return () => { }
   }, []);
 
   return (

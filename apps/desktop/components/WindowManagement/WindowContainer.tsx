@@ -1,4 +1,5 @@
-import { Window, WindowApplication, WindowCompositor } from "./WindowMagement/WindowCompositor";
+import { useEffect } from 'react';
+import { Window, WindowApplication, WindowCompositor } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 
 const calculateStyle = (window: Window): React.CSSProperties => {
@@ -34,7 +35,9 @@ export const WindowHeader = (window: Window, windowCompositor: WindowCompositor)
   ) 
 }
 
-export const WindowContainer = (window: Window, Application: WindowApplication, windowCompositor: WindowCompositor) => {
+export default function(props: { window: Window, Application: WindowApplication, windowCompositor: WindowCompositor }) {
+  const { window, Application, windowCompositor } = props;
+
   function focus() { windowCompositor.focus(window.id); }
   function onMouseOver() {
     if (window.resizingCursor !== "wait") {
@@ -50,10 +53,10 @@ export const WindowContainer = (window: Window, Application: WindowApplication, 
   const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
 
   const resizableStyle = buildResizableStyle(window);
-
-  return (
-    <div key={window.id} style={style}>
-      <div className={styles.container}>
+  
+  return <div style={style} key={window.id}>
+    
+    <div className={styles.container}>
         {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
         {window.focused && <div className={styles.resizable} style={resizableStyle} onMouseOver={onMouseOver}></div>}
 
@@ -64,8 +67,6 @@ export const WindowContainer = (window: Window, Application: WindowApplication, 
             <Application/>
           </div>
         </div>
-
       </div>
     </div>
-  )
 }

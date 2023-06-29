@@ -1,8 +1,7 @@
 import styles from '@/styles/Desktop.module.css';
 import React, { useEffect, useReducer } from "react";
-import { WindowContainer } from './WindowContainer';
-import { Window, WindowApplication, WindowCompositor } from './WindowMagement/WindowCompositor';
-import { WindowEvent } from './WindowMagement/WindowEvents';
+import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
+import { WindowEvent } from './WindowManagement/WindowEvents';
 
 const MenuBar = () => {
   return <>
@@ -16,6 +15,7 @@ const Dock = () => {
   </>
 }
 
+const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
 const LazyComponent = React.lazy(() => import('./LazyComponent'));
 
 const createLazy = () => {
@@ -93,7 +93,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   }, [])
 
   return <>
-    {applicationWindows.map(x => WindowContainer(x.window, x.application, windowCompositor))}
+    {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor}/></div>)}
     <Dock/>
   </>
 }
