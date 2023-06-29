@@ -1,4 +1,5 @@
 import { WindowContainer } from "./WindowContainer";
+import { LazyExoticComponent } from "react";
 
 export interface WindowConfig {
   x: number,
@@ -6,7 +7,7 @@ export interface WindowConfig {
   height?: number,
   width?: number,
   title: string,
-  content: JSX.Element
+  content: () => LazyExoticComponent<() => JSX.Element>
 }
 
 class Node<T> {
@@ -110,8 +111,46 @@ export class OrderedWindow {
   }
 }
 
-export class Window {
 
+export type WindowCreateEvent = {
+  event: 'create_window',
+  windowId: number
+}
+
+export const ConstructWindowCreateEvent = (windowId: number): WindowCreateEvent => {
+  return {
+    event: 'create_window',
+    windowId
+  };
+};
+
+export type WindowsUpdateEvent = {
+  event: 'update_windows',
+}
+
+export const ConstructUpdateWindowsEvent = (): WindowsUpdateEvent => {
+  return {
+    event: 'update_windows'
+  }
+}
+
+export type WindowDestroyEvent = {
+  event: 'destroy_window',
+  windowId: number
+}
+
+export const ConstructDestroyWindowEvent = (windowId: number): WindowDestroyEvent => {
+  return {
+    event: 'destroy_window',
+    windowId
+  }
+}
+
+export type WindowEvent = WindowCreateEvent | WindowsUpdateEvent | WindowDestroyEvent;
+
+type WindowEventHandler = (evt: WindowEvent) => void
+
+export class Window {
   constructor(
     public readonly id: number,
     public x: number,
@@ -119,7 +158,7 @@ export class Window {
     public width: number,
     public height: number,
     public title: string,
-    public readonly content: JSX.Element
+    public readonly content: () => LazyExoticComponent<() => JSX.Element>
   ) { }
 }
 
@@ -128,22 +167,30 @@ export class WindowManager {
   private windows: Chain<Window> = new Chain();
 
   private windowNodeLookup: Record<number, Node<Window>> = {};
+  private observers: (WindowEventHandler)[] = [];
 
-  private observers: (() => void)[] = [];
-
-  public subscribe(changeCallback: () => void) {
-    this.observers.push(changeCallback);
-
-    return () => {
-
-
-    };
+  public subscribe(handler: WindowEventHandler) {
+    this.observers.push(handler);
+    return () => { this.unsubscribe(handler); };
   }
 
-  private updateObservers(): void {
-    for (const observer of this.observers) {
-      observer();
+  public unsubscribe(handler: WindowEventHandler) {
+    for (const [index, observerCallback] of this.observers.entries()) {
+      if (handler === observerCallback) {
+        this.observers.splice(index);
+        return;
+      }
     }
+  }
+
+  private publish(evt: WindowEvent): void {
+    for (const eventHandler of this.observers) {
+      eventHandler(evt);
+    }
+  }
+
+  public getById(windowId: number): Window | null {
+    return this.windowNodeLookup[windowId].value;
   }
 
   public open(config: WindowConfig): Window {
@@ -161,29 +208,39 @@ export class WindowManager {
     const node = this.windows.append(window);
     this.windowNodeLookup[id] = node;
 
-    this.updateObservers();
+    this.publish(ConstructWindowCreateEvent(window.id))
 
     return window;
   }
 
-  public focus(window: Window) {
-    const node = this.windowNodeLookup[window.id];
+  public focus(windowId: number) {
+    console.log(windowId);
+    const node = this.windowNodeLookup[windowId];
 
-    if (node === null) { return; }
+    if (node === null) {
+      console.error('Node not found');
+      return;
+    }
+
     // The window is already on top, so don't update the stack
-    if (node === this.windows.getHead()) { return; }
+    if (node === this.windows.getHead()) {
+      console.error('Is already the head node');
+      return;
+    }
 
     this.windows.moveToHead(node);
-    this.updateObservers();
+
+    this.publish(ConstructUpdateWindowsEvent());
   }
 
   public update(window: Window) {
-    this.updateObservers();
+    // this.updateObservers();
   }
 
   public close(windowId: number): void {
     // TODO: Remove window from lookup table
-    this.updateObservers();
+    // this.updateObservers();
+    this.publish(ConstructDestroyWindowEvent(windowId))
   }
 
   public getOrderedWindows(): OrderedWindow[] {
@@ -198,5 +255,13 @@ export class WindowManager {
     }
 
     return results;
+  }
+
+  public clear(): void {
+    this.windowId = 0;
+    this.windows = new Chain();
+
+    this.windowNodeLookup = {};
+    this.observers = [];
   }
 }

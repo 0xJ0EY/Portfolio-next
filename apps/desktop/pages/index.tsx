@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
-import { Desktop, DesktopComposition } from '@/components/Desktop'
+import { Desktop, OperatingSystem } from '@/components/Desktop'
 
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <DesktopComposition/>
+        <OperatingSystem/>
       </main>
     </>
   )
