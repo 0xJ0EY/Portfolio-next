@@ -1,10 +1,7 @@
-import { Window, WindowManager } from "./WindowManager";
-import { LazyExoticComponent, useEffect, useState, useContext } from 'react';
+import { Window, WindowApplication, WindowCompositor } from "./WindowMagement/WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 
-export type LazyComponent = LazyExoticComponent<() => JSX.Element>;
-
-export const calculateStyle = (window: Window): React.CSSProperties => {
+const calculateStyle = (window: Window): React.CSSProperties => {
   return {
     position: 'absolute',
     display: 'block',
@@ -13,47 +10,62 @@ export const calculateStyle = (window: Window): React.CSSProperties => {
     width: `${window.width}px`,
     height: `${window.height}px`,
     backgroundColor: 'red',
+    zIndex: window.order
   };
 }
 
-export const WindowContainer = (window: Window, Component: LazyComponent, windowCompositor: WindowManager) => {
+const buildResizableStyle = (window: Window): React.CSSProperties => {
+  return {
+    cursor: window.resizingCursor,
+  };
+}
+
+export const WindowHeader = (window: Window, windowCompositor: WindowCompositor) => {
+
+  const classes = [styles.header];
+
+  if (window.focused) { classes.push(styles.focused); }
+
+  return (
+    <div className={classes.join(' ')}>
+      <span>{ window.title }</span>
+      <button onClick={() => { windowCompositor.close(window.id) }}>Close</button>
+    </div>
+  ) 
+}
+
+export const WindowContainer = (window: Window, Application: WindowApplication, windowCompositor: WindowCompositor) => {
+  function focus() { windowCompositor.focus(window.id); }
+  function onMouseOver() {
+    if (window.resizingCursor !== "wait") {
+      window.resizingCursor = "wait";
+      windowCompositor.update(window);
+    }
+  };
+
   const style = calculateStyle(window);
+  const header = WindowHeader(window, windowCompositor);
+
+  const focusedClass = window.focused ? styles.focused : ''; 
+  const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
+
+  const resizableStyle = buildResizableStyle(window);
 
   return (
     <div key={window.id} style={style}>
-      <div className={styles.resizable}>
-      <button onClick={() => { windowCompositor.focus(window.id) }}>Focus</button>
-        <button onClick={() => { windowCompositor.close(window.id) }}>Close</button>
-        <Component/>
+      <div className={styles.container}>
+        {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
+        {window.focused && <div className={styles.resizable} style={resizableStyle} onMouseOver={onMouseOver}></div>}
+
+        <div className={contentContainerClasses}>
+          {header}
+
+          <div className={styles.content}>
+            <Application/>
+          </div>
+        </div>
+
       </div>
     </div>
   )
 }
-
-// export const WindowContainer = (orderedWindow: OrderedWindow, wm: WindowManager) => {
-//   const window  = orderedWindow.getWindow();
-//   const order   = orderedWindow.getOrder(); // Order equals the Z-index
-
-//   const style = {
-//     position: 'absolute',
-//     display: 'block',
-//     top: `${window.y}px`,
-//     left: `${window.x}px`,
-//     width: `${window.width}px`,
-//     height: `${window.height}px`,
-//     backgroundColor: 'red',
-//   } as React.CSSProperties;
-  
-//   return (
-//     <div onClick={() => wm.focus(window)} key={window.id} style={style}>
-//       <div className={styles.resizable} onMouseMove={resize}>
-//         <div className={styles.header}>
-//           {window.title}
-//         </div>
-//         {/* <div className={styles.content}>
-//           {window.content}
-//         </div> */}
-//       </div>
-//     </div>
-//   )
-// }
