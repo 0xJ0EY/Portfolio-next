@@ -22,6 +22,27 @@ const buildResizableStyle = (cursor: string): React.CSSProperties => {
 type ResizeAxis = 'none' | 'e' | 'w' | 'n' | 's' | 'ne' | 'se' | 'sw' | 'nw';
 type ResizeCursor = 'none' | 'ew' | 'ns' | 'nesw' | 'nwse';
 
+class Origin {
+  public cursor: {
+    x: number,
+    y: number
+  } = { x: 0, y: 0 }
+
+  public boundingBox: {
+    top: number,
+    left: number,
+    width: number,
+    height: number
+  } = { top: 0, left: 0, width: 0, height: 0 };
+
+  public window: {
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  } = { x: 0, y: 0, width: 0, height: 0 };
+}
+
 // TODO: Maybe performance gain? It should be possible to bind the window events to a singular component before these get rendered.
 // So we don't have to process all these window events
 const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor}) => {
@@ -32,14 +53,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 
   const isDown = useRef(false);
   const axis = useRef<ResizeAxis>('none');
-  const origin = useRef<{
-    x: number,
-    y: number,
-    windowX: number,
-    windowY: number,
-    windowWidth: number,
-    windowHeight: number
-  }>({ x: 0, y: 0, windowX: 0, windowY: 0, windowWidth: 0, windowHeight: 0 });
+  const origin = useRef<Origin>(new Origin());
   
   const output: RefObject<HTMLDivElement> = useRef(null);
 
@@ -88,18 +102,31 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     }
   }
 
-  function onPointerDown(evt: PointerEvent) {
+  const onPointerDown = (evt: PointerEvent) => {
+    const node = output.current;
+    if (node === null) { return; }
+
     isDown.current = true;
     axis.current = getResizeAxis(evt);
 
+    const bb = node.getBoundingClientRect();
+
     setResizing(true);
-    origin.current = {
-      x: evt.clientX,
-      y: evt.clientY,
-      windowX: windowData.x,
-      windowY: windowData.y,
-      windowWidth: windowData.width,
-      windowHeight: windowData.height
+  
+    origin.current.cursor = { x: evt.clientX, y: evt.clientY };
+    
+    origin.current.window = {
+      x: windowData.x,
+      y: windowData.y,
+      width: windowData.width,
+      height: windowData.height
+    };
+
+    origin.current.boundingBox = {
+      top: bb.top,
+      left: bb.left,
+      width: bb.width,
+      height: bb.height
     };
   }
 
@@ -111,39 +138,55 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
 
+    // TODO: Should be configurable per window
+    const windowMinHeight = 100;
+    const windowMinWidth  = 200; 
+
     const [deltaX, deltaY] = [
-      origin.current.x - evt.clientX,
-      origin.current.y - evt.clientY
+      origin.current.cursor.x - evt.clientX,
+      origin.current.cursor.y - evt.clientY
     ];
 
     const [windowX, windowY] = [
-      origin.current.windowX,
-      origin.current.windowY
+      origin.current.window.x,
+      origin.current.window.y
     ];
 
     const [windowWidth, windowHeight] = [
-      origin.current.windowWidth,
-      origin.current.windowHeight
+      origin.current.window.width,
+      origin.current.window.height
     ];
 
     const axes = axis.current.split('');
 
     for (const axis of axes) {
       switch (axis) {
-        case 'n':
-          windowData.y = windowY - deltaY;
-          windowData.height = windowHeight + deltaY;
-          break;
-        case 'e':
-          windowData.width = windowWidth - deltaX;
-          break;
-        case 's':
-          windowData.height = windowHeight - deltaY;
-          break;
-        case 'w':
-          windowData.x = windowX - deltaX;
-          windowData.width = windowWidth + deltaX;
-          break;
+        case 'n': {
+          const maxDelta = windowY + (windowHeight - windowMinHeight);
+
+          const clampedY = Math.min(windowY - deltaY, maxDelta);
+          const clampedHeight = Math.max(windowHeight + deltaY, windowMinHeight);
+
+          windowData.y = clampedY;
+          windowData.height = clampedHeight;
+        } break;
+        case 'e': {
+          const clampedWidth = Math.max(windowWidth - deltaX, windowMinWidth);
+          windowData.width = clampedWidth;
+        } break;
+        case 's': {
+          const clampedHeight = Math.max(windowHeight - deltaY, windowMinHeight);
+          windowData.height = clampedHeight;
+        } break;
+        case 'w': {
+          const maxDelta = windowX + (windowWidth - windowMinWidth);
+          
+          const clampedX = Math.min(windowX - deltaX, maxDelta);
+          const clampedWidth = Math.max(windowWidth + deltaX, windowMinWidth);
+
+          windowData.x = clampedX;
+          windowData.width = clampedWidth;
+        } break;
       }
     }
 
