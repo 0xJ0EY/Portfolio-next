@@ -231,7 +231,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 
 
 const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) => {
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const output: RefObject<HTMLDivElement> = useRef(null);
   const isDown = useRef(false);
   const origin = useRef<Origin>(new Origin());
@@ -242,8 +242,10 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
 
-    setIsDragging(true);
+    setDragging(true);
     isDown.current = true;
+
+    if (!windowData.focused) { windowCompositor.focus(windowData.id); }
 
     origin.current.cursor = { x: evt.clientX, y: evt.clientY };
 
@@ -272,7 +274,7 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
     windowCompositor.update(windowData);
   }
   function onPointerUp(evt: PointerEvent) {
-    setIsDragging(false);
+    setDragging(false);
     isDown.current = false;
   }
 
@@ -292,12 +294,13 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
 
   }, []);
 
-  return (
+  return <>
     <div ref={output} className={classes.join(' ')}>
       <span>{ windowData.title }</span>
       <button onClick={() => { windowCompositor.close(windowData.id) }}>Close</button>
     </div>
-  ) 
+    { dragging && <div className={styles.draggingMask}></div>}
+    </>
 }
 
 export default function WindowContainer(props: { window: Window, Application: WindowApplication, windowCompositor: WindowCompositor }) {

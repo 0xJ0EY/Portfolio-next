@@ -52,6 +52,13 @@
   flex: 0 1 auto;
 
   height: 30px;
+  user-select: none;
+
+  z-index: 9999;
+}
+
+.header > span {
+  pointer-events: none;
 }
 
 .content {
@@ -63,7 +70,7 @@
   margin: 3px;
 }
 
-.resizingMask {
+.resizingMask, .draggingMask {
   position: fixed;
   top: 0;
   left: 0;
