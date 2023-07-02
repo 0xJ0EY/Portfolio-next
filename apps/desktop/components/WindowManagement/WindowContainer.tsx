@@ -229,15 +229,73 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   </>;
 }
 
-const WindowHeader = (window: Window, windowCompositor: WindowCompositor) => {
-  const classes = [styles.header];
 
-  if (window.focused) { classes.push(styles.focused); }
+const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const output: RefObject<HTMLDivElement> = useRef(null);
+  const isDown = useRef(false);
+  const origin = useRef<Origin>(new Origin());
+
+  const classes = [styles.header];
+  if (windowData.focused) { classes.push(styles.focused); }
+
+  function onPointerDown(evt: PointerEvent) {
+    if (evt.target !== output.current) { return; }
+
+    setIsDragging(true);
+    isDown.current = true;
+
+    origin.current.cursor = { x: evt.clientX, y: evt.clientY };
+
+    origin.current.window = {
+      x: windowData.x,
+      y: windowData.y,
+      width: windowData.width,
+      height: windowData.height
+    };
+  }
+  function onPointerMove(evt: PointerEvent) {
+    if (!isDown.current) { return; }
+
+    const cursor = origin.current.cursor;
+    const window = origin.current.window;
+
+    const deltaX = cursor.x - evt.clientX;
+    const deltaY = cursor.y - evt.clientY;
+
+    const windowX = window.x - deltaX;
+    const windowY = window.y - deltaY;
+
+    windowData.x = windowX;
+    windowData.y = windowY;
+
+    windowCompositor.update(windowData);
+  }
+  function onPointerUp(evt: PointerEvent) {
+    setIsDragging(false);
+    isDown.current = false;
+  }
+
+  useEffect(() => {
+    const node = output.current;
+    if (node === null) { return; }
+
+    node.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      node.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    }
+
+  }, []);
 
   return (
-    <div className={classes.join(' ')}>
-      <span>{ window.title }</span>
-      <button onClick={() => { windowCompositor.close(window.id) }}>Close</button>
+    <div ref={output} className={classes.join(' ')}>
+      <span>{ windowData.title }</span>
+      <button onClick={() => { windowCompositor.close(windowData.id) }}>Close</button>
     </div>
   ) 
 }
