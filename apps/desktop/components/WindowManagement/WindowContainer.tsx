@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, RefObject } from 'react';
 import { Window, WindowApplication, WindowCompositor } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
+import { clamp } from '../util';
 
 const calculateStyle = (window: Window): React.CSSProperties => {
   return {
@@ -259,14 +260,17 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
 
-    const cursor = origin.current.cursor;
-    const window = origin.current.window;
+    const cursorRef = origin.current.cursor;
+    const windowRef = origin.current.window;
 
-    const deltaX = cursor.x - evt.clientX;
-    const deltaY = cursor.y - evt.clientY;
+    const clientX = clamp(evt.clientX, 0, window.innerWidth);
+    const clientY = clamp(evt.clientY, 0, window.innerHeight);
 
-    const windowX = window.x - deltaX;
-    const windowY = window.y - deltaY;
+    const deltaX = cursorRef.x - clientX;
+    const deltaY = cursorRef.y - clientY;
+
+    const windowX = windowRef.x - deltaX;
+    const windowY = windowRef.y - deltaY;
 
     windowData.x = windowX;
     windowData.y = windowY;
