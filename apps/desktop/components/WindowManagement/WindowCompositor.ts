@@ -99,7 +99,6 @@ export class WindowCompositor {
   }
 
   public focus(windowId: number) {
-    console.log(windowId);
     const node = this.windowNodeLookup[windowId];
 
     if (!node) {
