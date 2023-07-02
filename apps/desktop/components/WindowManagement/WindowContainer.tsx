@@ -143,9 +143,12 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     const windowMinHeight = 100;
     const windowMinWidth  = 200; 
 
+    const windowMaxHeight = window.innerHeight;
+    const windowMaxWidth  = window.innerWidth;
+
     const [deltaX, deltaY] = [
-      origin.current.cursor.x - evt.clientX,
-      origin.current.cursor.y - evt.clientY
+      origin.current.cursor.x - clamp(evt.clientX, 0, windowMaxWidth),
+      origin.current.cursor.y - clamp(evt.clientY, 0, windowMaxHeight)
     ];
 
     const [windowX, windowY] = [
@@ -166,24 +169,24 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
           const maxDelta = windowY + (windowHeight - windowMinHeight);
 
           const clampedY = Math.min(windowY - deltaY, maxDelta);
-          const clampedHeight = Math.max(windowHeight + deltaY, windowMinHeight);
+          const clampedHeight = clamp(windowHeight + deltaY, windowMinHeight, windowMaxHeight);
 
           windowData.y = clampedY;
           windowData.height = clampedHeight;
         } break;
         case 'e': {
-          const clampedWidth = Math.max(windowWidth - deltaX, windowMinWidth);
+          const clampedWidth = clamp(windowWidth - deltaX, windowMinWidth, windowMaxWidth);
           windowData.width = clampedWidth;
         } break;
         case 's': {
-          const clampedHeight = Math.max(windowHeight - deltaY, windowMinHeight);
+          const clampedHeight = clamp(windowHeight - deltaY, windowMinHeight, windowMaxHeight);
           windowData.height = clampedHeight;
         } break;
         case 'w': {
           const maxDelta = windowX + (windowWidth - windowMinWidth);
           
           const clampedX = Math.min(windowX - deltaX, maxDelta);
-          const clampedWidth = Math.max(windowWidth + deltaX, windowMinWidth);
+          const clampedWidth = clamp(windowWidth + deltaX, windowMinWidth, windowMaxWidth);
 
           windowData.x = clampedX;
           windowData.width = clampedWidth;

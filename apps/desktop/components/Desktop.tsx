@@ -93,7 +93,9 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   }, [])
 
   return <>
-    {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor}/></div>)}
+    <div className={styles.desktop}>
+      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor}/></div>)}
+    </div>
     <Dock/>
   </>
 }
@@ -121,7 +123,9 @@ export const OperatingSystem = () => {
   }, []);
 
   return <>
+    <div className={styles.operatingSystem}>
     <MenuBar/>
     <Desktop windowCompositor={windowCompositor} />
+    </div>
   </>
 }
