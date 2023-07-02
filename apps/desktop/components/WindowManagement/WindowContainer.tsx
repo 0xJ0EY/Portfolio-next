@@ -225,7 +225,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   
   return <>
    <div ref={output} className={styles.resizable} style={resizableStyle}></div>
-   { resizing && <>Resizing</>}  
+   { resizing && <div className={styles.resizingMask} style={resizableStyle}></div>}
   </>;
 }
 

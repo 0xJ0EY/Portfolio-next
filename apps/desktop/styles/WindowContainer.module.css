@@ -1,3 +1,4 @@
+/* TODO: Fix Z-index issues, set it to variables, or ranges w.e. */
 .container {
   position: relative;
   display: block;
@@ -29,6 +30,7 @@
   width: 102%;
   height: 102%;
   z-index: 100;
+  user-select: none;
 }
 
 .focusLayer {
@@ -59,4 +61,16 @@
 
   flex: 1 1 auto;
   margin: 3px;
+}
+
+.resizingMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  z-index: 9999;
+  user-select: none;
+
+  width: 100vw;
+  height: 100vh;
 }
