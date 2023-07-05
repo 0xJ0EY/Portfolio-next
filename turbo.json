@@ -11,6 +11,10 @@
     },
     "dev": {
       "cache": false
+    },
+    "start": {
+      "cache": true,
+      "persistent": true
     }
   }
 }
