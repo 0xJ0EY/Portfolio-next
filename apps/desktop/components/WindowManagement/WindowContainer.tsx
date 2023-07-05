@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, RefObject } from 'react';
+import { useRef, useEffect, useState, RefObject, MutableRefObject } from 'react';
 import { Window, WindowApplication, WindowCompositor } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
@@ -46,8 +46,8 @@ class Origin {
 
 // TODO: Maybe performance gain? It should be possible to bind the window events to a singular component before these get rendered.
 // So we don't have to process all these window events
-const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor}) => {
-  const { windowData, windowCompositor } = props;
+const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor, isMaximized: MutableRefObject<boolean>}) => {
+  const { windowData, windowCompositor, isMaximized } = props;
 
   const [resizing, setResizing] = useState(false);
   const [cursor, setCursor] = useState('auto');
@@ -113,6 +113,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     const bb = node.getBoundingClientRect();
 
     setResizing(true);
+    isMaximized.current = false;
   
     origin.current.cursor = { x: evt.clientX, y: evt.clientY };
     
@@ -234,20 +235,69 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 }
 
 
-const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) => {
+type OriginWindow = {
+  x: number,
+  y: number,
+  width: number,
+  height: number
+}
+
+const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor, parent: HTMLDivElement, maximized: MutableRefObject<boolean>) => {
   const [dragging, setDragging] = useState(false);
+  
   const output: RefObject<HTMLDivElement> = useRef(null);
+  const isMaximized = maximized;
+
+  const headerTopOffset = useRef(0);
+
   const isDown = useRef(false);
   const origin = useRef<Origin>(new Origin());
 
+  const originalWindow = useRef<OriginWindow>({ x: 0, y: 0, width: 0, height: 0 });
+
   const classes = [styles.header];
   if (windowData.focused) { classes.push(styles.focused); }
+
+  function onClickMaximize() {
+    if (isMaximized.current === false) {
+      originalWindow.current = {
+        x: windowData.x,
+        y: windowData.y,
+        width: windowData.width,
+        height: windowData.height
+      };
+
+      windowData.x = 0;
+      windowData.y = 0;
+
+      windowData.width = parent.offsetWidth;
+      windowData.height = parent.offsetHeight;
+
+      windowCompositor.update(windowData);
+      windowCompositor.focus(windowData.id);
+    } else {
+      windowData.x = originalWindow.current.x;
+      windowData.y = originalWindow.current.y;
+      windowData.width = originalWindow.current.width;
+      windowData.height = originalWindow.current.height;
+
+      windowCompositor.update(windowData);
+    }
+
+    isMaximized.current = !isMaximized.current;
+  }
 
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
 
     setDragging(true);
     isDown.current = true;
+    isMaximized.current = false;
+
+    const headerBoundingClient = output.current!.getBoundingClientRect();
+    const offset = evt.clientY - headerBoundingClient.y;
+
+    headerTopOffset.current = offset;
 
     if (!windowData.focused) { windowCompositor.focus(windowData.id); }
 
@@ -260,14 +310,18 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
       height: windowData.height
     };
   }
+
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
 
     const cursorRef = origin.current.cursor;
     const windowRef = origin.current.window;
 
-    const clientX = clamp(evt.clientX, 0, window.innerWidth);
-    const clientY = clamp(evt.clientY, 0, window.innerHeight);
+    const clientX = clamp(evt.clientX, parent.offsetLeft, parent.offsetWidth);
+    const clientY = clamp(evt.clientY,
+      parent.offsetTop + headerTopOffset.current,
+      parent.offsetHeight + headerTopOffset.current
+    );
 
     const deltaX = cursorRef.x - clientX;
     const deltaY = cursorRef.y - clientY;
@@ -280,6 +334,7 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
 
     windowCompositor.update(windowData);
   }
+
   function onPointerUp(evt: PointerEvent) {
     setDragging(false);
     isDown.current = false;
@@ -304,19 +359,25 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor) =>
   return <>
     <div ref={output} className={classes.join(' ')}>
       <span>{ windowData.title }</span>
+      { <button onClick={onClickMaximize}>Maximize</button> }
       <button onClick={() => { windowCompositor.close(windowData.id) }}>Close</button>
     </div>
-    { dragging && <div className={styles.draggingMask}></div>}
+    { dragging && <div className={styles.draggingMask}></div> }
     </>
 }
 
-export default function WindowContainer(props: { window: Window, Application: WindowApplication, windowCompositor: WindowCompositor }) {
+export default function WindowContainer(props: { window: Window, Application: WindowApplication, windowCompositor: WindowCompositor, parent: HTMLDivElement | null}) {
   const { window, Application, windowCompositor } = props;
+
+  const maximized = useRef(false);
+
+  if (props.parent === null) { return <></>; }
+  const parent = props.parent;
 
   function focus() { windowCompositor.focus(window.id); }
 
   const style = calculateStyle(window);
-  const header = WindowHeader(window, windowCompositor);
+  const header = WindowHeader(window, windowCompositor, parent, maximized);
 
   const focusedClass = window.focused ? styles.focused : ''; 
   const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
@@ -325,7 +386,10 @@ export default function WindowContainer(props: { window: Window, Application: Wi
     <div style={style}>
       <div className={styles.container}>
         {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
-        {window.focused && <Resizable windowData={window} windowCompositor={windowCompositor} />}
+        {window.focused && <Resizable
+          windowData={window}
+          windowCompositor={windowCompositor}
+          isMaximized={maximized} />}
 
         <div className={contentContainerClasses}>
           {header}

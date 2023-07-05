@@ -1,5 +1,5 @@
 import styles from '@/styles/Desktop.module.css';
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useRef, useReducer } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
 
@@ -81,6 +81,8 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
 export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   const { windowCompositor } = props;
 
+  const parentNode = useRef(null);
+
   const reducer = applicationReducer(windowCompositor);
   const [applicationWindows, dispatch] = useReducer(reducer, []);
 
@@ -90,13 +92,12 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
     });
 
     return () => { unsubscribe(); }
-  }, [])
+  }, []);
 
   return <>
-    <div className={styles.desktop}>
-      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor}/></div>)}
+    <div ref={parentNode} className={styles.windowContainer}>
+      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor} parent={parentNode.current}/></div>)}
     </div>
-    <Dock/>
   </>
 }
 
@@ -126,6 +127,7 @@ export const OperatingSystem = () => {
     <div className={styles.operatingSystem}>
     <MenuBar/>
     <Desktop windowCompositor={windowCompositor} />
+    <Dock/>
     </div>
   </>
 }
