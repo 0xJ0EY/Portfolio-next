@@ -2,6 +2,7 @@ import styles from '@/styles/Desktop.module.css';
 import React, { useEffect, useRef, useReducer } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
+import { ApplicationManager } from '@/applications/ApplicationManager';
 
 const MenuBar = () => {
   return <>
@@ -114,6 +115,7 @@ const addWindow = (wm: WindowCompositor, x: number) => {
 
 export const OperatingSystem = () => {
   const windowCompositor = new WindowCompositor();
+  const applicationManager = new ApplicationManager();
 
   useEffect(() => {
     addWindow(windowCompositor, 100);
