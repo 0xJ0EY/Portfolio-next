@@ -143,7 +143,7 @@ export class WindowCompositor {
      }
   }
 
-  public updateWindowOrder(): void {
+  private updateWindowOrder(): void {
     let node = this.windows.getTail();
     let order = 0;
 

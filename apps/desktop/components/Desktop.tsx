@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useReducer } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import { ApplicationManager } from '@/applications/ApplicationManager';
+import { FileSystem } from './FileSystem/FileSystem';
 
 const MenuBar = () => {
   return <>
@@ -114,15 +115,19 @@ const addWindow = (wm: WindowCompositor, x: number) => {
 }
 
 export const OperatingSystem = () => {
+  const fileSystem = new FileSystem();
   const windowCompositor = new WindowCompositor();
-  const applicationManager = new ApplicationManager();
+  const applicationManager = new ApplicationManager(windowCompositor, fileSystem);
 
   useEffect(() => {
-    addWindow(windowCompositor, 100);
-    addWindow(windowCompositor, 250);
-    addWindow(windowCompositor, 400);
+    fileSystem.init();
+    applicationManager.open('/Applications/Info.app');
+    applicationManager.open('/Applications/Info.app');
 
-    return () => { windowCompositor.reset(); }
+    return () => { 
+      applicationManager.reset();  
+      windowCompositor.reset();
+    }
   }, []);
 
   return <>
