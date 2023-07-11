@@ -1,9 +1,9 @@
 import { WindowContext } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState } from 'react';
-import { Application, ApplicationContext } from './ApplicationManager';
+import { Application } from './ApplicationManager';
 
-export default function AboutApplicationView(props: { application: Application, context: ApplicationContext, windowContext: WindowContext }) {
-  const { application, context, windowContext } = props;
+export default function AboutApplicationView(props: { application: Application, windowContext: WindowContext }) {
+  const { application, windowContext } = props;
   const [number, setNumber] = useState(0);
 
   useEffect(() => { 
@@ -15,7 +15,7 @@ export default function AboutApplicationView(props: { application: Application, 
       <button onClick={() => {setNumber(number - 1)}}>-</button>
       {number}
       <button onClick={() => {setNumber(number + 1)}}>+</button>
-      <button onClick={() => application.on({ kind: 'close' }, context, windowContext)}>Send event</button>
+      <button onClick={() => application.on({ kind: 'close' }, windowContext)}>Send event</button>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { Application } from "@/applications/ApplicationManager";
 import { Err, Ok, Result } from "../util";
 import { InfoApplication } from "@/applications/InfoApplication";
 import { AboutApplication } from "@/applications/AboutApplication";
+import { LocalWindowCompositor } from "../WindowManagement/LocalWindowCompositor";
 
 export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
@@ -20,12 +21,12 @@ export type FileSystemApplication = {
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
-  entrypoint: () => Application
+  entrypoint: (compositor: LocalWindowCompositor) => Application
 }
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
-function createApplication(parent: FileSystemDirectory, name: string, entrypoint: () => Application): FileSystemApplication {
+function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor) => Application): FileSystemApplication {
   return {
     parent,
     kind: 'application',
@@ -126,13 +127,11 @@ export class FileSystem {
 
   private addApplication(parent: FileSystemDirectory, name: string): Result<FileSystemApplication, Error> {
 
-    let entrypoint: () => Application;
-
-    console.log(name);
+    let entrypoint: (compositor: LocalWindowCompositor) => Application;
 
     switch (name) {
-      case 'Info.app': entrypoint = () => { return new InfoApplication() }; break;
-      case 'About.app': entrypoint = () => { return new AboutApplication() }; break;
+      case 'Info.app': entrypoint = (compositor: LocalWindowCompositor) => { return new InfoApplication(compositor) }; break;
+      case 'About.app': entrypoint = (compositor: LocalWindowCompositor) => { return new AboutApplication(compositor) }; break;
       default: return Err(Error(`Application "${name}" not in the application list.`))
     }
 

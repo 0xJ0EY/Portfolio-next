@@ -437,7 +437,7 @@ export default function WindowContainer(props: { window: Window, WindowApp: Wind
           {header}
 
           <div className={styles.content}>
-            <WindowApp application={window.application} context={window.context} windowContext={windowContext} />
+            <WindowApp application={window.application} windowContext={windowContext} />
           </div>
         </div>
       </div>
