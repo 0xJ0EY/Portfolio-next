@@ -1,6 +1,7 @@
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import React from "react";
-import { Application, ApplicationEvent } from "./ApplicationManager";
+import { ApplicationEvent } from "./ApplicationEvents";
+import { Application } from "./ApplicationManager";
 
 const View = React.lazy(() => import('./AboutApplicationView'));
 
@@ -9,7 +10,7 @@ export class AboutApplication extends Application {
   displayName() { return "About" }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
-    if (event.kind === 'open') {
+    if (event.kind === 'application-open') {
       this.compositor.open({
         x: 200,
         y: 200,
@@ -21,10 +22,10 @@ export class AboutApplication extends Application {
       });
     };
 
-    if (event.kind === 'close') {
+    if (event.kind === 'application-quit') {
       if (!windowContext) { return; }
 
-      this.compositor.close(windowContext!.id);
+      // this.manager.exit();
     }
   }
 }

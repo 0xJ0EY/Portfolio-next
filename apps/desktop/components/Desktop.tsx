@@ -4,18 +4,8 @@ import { Window, WindowApplication, WindowCompositor } from './WindowManagement/
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import { ApplicationManager } from '@/applications/ApplicationManager';
 import { FileSystem } from './FileSystem/FileSystem';
-
-const MenuBar = () => {
-  return <>
-    <div className={styles.menuBar}>menu</div>
-  </>
-}
-
-const Dock = () => {
-  return <>
-    <div className={styles.dock}>dock</div>
-  </>
-}
+import { Dock } from './Dock';
+import { MenuBar } from './MenuBar';
 
 const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
 
@@ -93,7 +83,14 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
-      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} WindowApp={x.application} windowCompositor={windowCompositor} parent={parentNode.current}/></div>)}
+      {applicationWindows.map(x => 
+        <div key={x.window.id}>
+          <WindowContainer
+            window={x.window}
+            WindowApp={x.application}
+            windowCompositor={windowCompositor}
+            parent={parentNode.current}/>
+        </div>)}
     </div>
   </>
 }
@@ -114,11 +111,13 @@ export const OperatingSystem = () => {
     }
   }, []);
 
+  const dock = Dock(applicationManager);
+
   return <>
     <div className={styles.operatingSystem}>
     <MenuBar/>
     <Desktop windowCompositor={windowCompositor} />
-    <Dock/>
+    {dock}
     </div>
   </>
 }

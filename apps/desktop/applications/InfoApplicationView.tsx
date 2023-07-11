@@ -17,7 +17,7 @@ export default function InfoApplicationView(props: { application: Application, w
       {number}
       <button onClick={() => {setNumber(number + 1)}}>+</button>
 
-      <button onClick={() => application.on({ kind: 'close' }, windowContext)}>Send event</button>
+      <button onClick={() => application.on({ kind: 'application-quit' }, windowContext)}>Send event</button>
     </div>
   )
 } 

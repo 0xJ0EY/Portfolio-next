@@ -1,8 +1,10 @@
-import { Application } from "@/applications/ApplicationManager";
+import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { Err, Ok, Result } from "../util";
 import { InfoApplication } from "@/applications/InfoApplication";
 import { AboutApplication } from "@/applications/AboutApplication";
 import { LocalWindowCompositor } from "../WindowManagement/LocalWindowCompositor";
+import { FinderApplication } from "@/applications/Finder/FinderApplication";
+import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 
 export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
@@ -21,12 +23,12 @@ export type FileSystemApplication = {
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
-  entrypoint: (compositor: LocalWindowCompositor) => Application
+  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application
 }
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
-function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor) => Application): FileSystemApplication {
+function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application): FileSystemApplication {
   return {
     parent,
     kind: 'application',
@@ -81,8 +83,9 @@ export class FileSystem {
 
     // create file tree
     const applicationsDir = this.addDirectory(this.root, 'Applications');
-    this.addApplication(applicationsDir, 'About.app');
-    this.addApplication(applicationsDir, 'Info.app');
+    this.addApplication(applicationsDir, 'Finder.app', (compositor, manager) => new FinderApplication(compositor, manager));
+    this.addApplication(applicationsDir, 'About.app', (compositor, manager) => new AboutApplication(compositor, manager));
+    this.addApplication(applicationsDir, 'Info.app', (compositor, manager) => new InfoApplication(compositor, manager));
 
     const home = this.addDirectory(this.root, 'Home');
     const joey = this.addDirectory(home, 'Joey');
@@ -125,16 +128,7 @@ export class FileSystem {
     return Ok(node.value);
   }
 
-  private addApplication(parent: FileSystemDirectory, name: string): Result<FileSystemApplication, Error> {
-
-    let entrypoint: (compositor: LocalWindowCompositor) => Application;
-
-    switch (name) {
-      case 'Info.app': entrypoint = (compositor: LocalWindowCompositor) => { return new InfoApplication(compositor) }; break;
-      case 'About.app': entrypoint = (compositor: LocalWindowCompositor) => { return new AboutApplication(compositor) }; break;
-      default: return Err(Error(`Application "${name}" not in the application list.`))
-    }
-
+  private addApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application): Result<FileSystemApplication, Error> {
     const application = createApplication(parent, name, entrypoint);
 
     parent.children.push(application);

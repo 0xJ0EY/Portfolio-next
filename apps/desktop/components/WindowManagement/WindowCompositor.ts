@@ -2,6 +2,7 @@ import { Chain, Node } from "./Chain";
 import { LazyExoticComponent } from "react"
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
+import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
 export type WindowApplication = LazyExoticComponent<(props: { application: Application, windowContext: WindowContext }) => JSX.Element>;
 export type WindowApplicationGenerator = () => WindowApplication;
@@ -113,6 +114,8 @@ export class WindowCompositor {
 
     this.updateWindowOrder();
 
+    window.application.on(createWindowOpenEvent(id), { id });
+
     this.publish(CreateWindowEvent(window.id))
 
     return window;
@@ -149,7 +152,10 @@ export class WindowCompositor {
     const node = this.windowNodeLookup[windowId];
     if (node === null) { return; }
 
+    const window = node.value;
+
     this.publish(DestroyWindowEvent(windowId));
+    window.application.on(createWindowCloseEvent(windowId), { id: windowId });
 
     const prev = node.prev;
 
@@ -178,6 +184,9 @@ export class WindowCompositor {
     }
 
     // If no nodes match the application, just select the one on top of the stack
+    // Also send a message that all windows have been closed
+    app.on(createAllWindowsClosedEvent());
+
     this.updateWindowOrder();
   }
 

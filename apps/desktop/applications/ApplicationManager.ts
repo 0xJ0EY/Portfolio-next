@@ -2,25 +2,8 @@ import { FileSystem, FileSystemApplication } from "@/components/FileSystem/FileS
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
-
-export type ApplicationOpenEvent = {
-  kind: 'open',
-  isFirst: boolean,
-}
-
-export type ApplicationCloseEvent = {
-  kind: 'close',
-}
-
-function createOpenEvent(isFirst: boolean): ApplicationOpenEvent {
-  return { kind: 'open', isFirst };
-}
-
-function createCloseEvent(): ApplicationCloseEvent {
-  return { kind: 'close' };
-}
-
-export type ApplicationEvent = ApplicationOpenEvent | ApplicationCloseEvent;
+import { LocalApplicationManager } from "./LocalApplicationManager";
+import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -33,6 +16,7 @@ class ApplicationContext {
 export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
+    protected readonly manager: LocalApplicationManager
   ) {}
 
   abstract displayName(): string;
@@ -44,7 +28,12 @@ type ApplicationInstance = {
   context: ApplicationContext
 }
 
-export class ApplicationManager {
+export interface BaseApplicationManager {
+  open(argument: string): Result<number, Error>;
+  quit(processId: number): void;
+}
+
+export class ApplicationManager implements BaseApplicationManager {
 
   private processId: number = 0;
   private processes: (ApplicationInstance | null)[] = [];
@@ -62,16 +51,18 @@ export class ApplicationManager {
 
   private openApplication(application: FileSystemApplication, path: string): Result<number, Error> {
     const compositor = new LocalWindowCompositor(this.windowCompositor);
+    const manager = new LocalApplicationManager(this.processId, this);
+
     const isFirstProcess = !this.processes.find(x => x?.context.path === path);
 
     const instance = {
-      application: application.entrypoint(compositor),
+      application: application.entrypoint(compositor, manager),
       context: new ApplicationContext(path, compositor),
     };
 
     this.processes.push(instance);
 
-    instance.application.on(createOpenEvent(isFirstProcess));
+    instance.application.on(createApplicationOpenEvent(isFirstProcess));
 
     return Ok(this.processId++);
   }
@@ -99,7 +90,7 @@ export class ApplicationManager {
 
     if (instance === null) { return; }
 
-    instance.application.on(createCloseEvent());
+    instance.application.on(createApplicationQuitEvent());
     instance.context.compositor.closeAll();
 
     this.processes[processId] = null;

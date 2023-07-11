@@ -15,7 +15,7 @@ export default function AboutApplicationView(props: { application: Application, 
       <button onClick={() => {setNumber(number - 1)}}>-</button>
       {number}
       <button onClick={() => {setNumber(number + 1)}}>+</button>
-      <button onClick={() => application.on({ kind: 'close' }, windowContext)}>Send event</button>
+      <button onClick={() => application.on({ kind: 'application-quit' }, windowContext)}>Send event</button>
     </div>
   )
 }
