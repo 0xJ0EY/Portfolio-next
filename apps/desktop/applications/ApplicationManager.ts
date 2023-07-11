@@ -14,7 +14,10 @@ class ApplicationContext {
 }
 
 export interface ApplicationConfig {
-  displayName: string,
+  readonly displayName: string,
+  readonly path: string,
+  readonly appName: string,
+  readonly entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application
 }
 
 export abstract class Application {

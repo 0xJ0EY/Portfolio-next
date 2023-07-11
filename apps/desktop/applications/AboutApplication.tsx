@@ -1,16 +1,25 @@
+import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import React from "react";
 import { ApplicationEvent } from "./ApplicationEvents";
 import { Application, ApplicationConfig } from "./ApplicationManager";
+import { LocalApplicationManager } from "./LocalApplicationManager";
 
 const View = React.lazy(() => import('./AboutApplicationView'));
+
+export class AboutConfig implements ApplicationConfig {
+  public readonly displayName = 'About';
+  public readonly path = '/Applications/';
+  public readonly appName = 'About.app'
+  public readonly entrypoint = (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => new AboutApplication(compositor, manager);
+}
+
+export const aboutConfig = new AboutConfig();
 
 export class AboutApplication extends Application {
   
   config(): ApplicationConfig {
-    return {
-      displayName: 'About'
-    }
+    return aboutConfig;
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {

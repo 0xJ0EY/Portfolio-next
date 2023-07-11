@@ -1,9 +1,9 @@
-import { Application, ApplicationManager } from "@/applications/ApplicationManager";
+import { Application, ApplicationConfig, ApplicationManager } from "@/applications/ApplicationManager";
 import { Err, Ok, Result } from "../util";
-import { InfoApplication } from "@/applications/InfoApplication";
-import { AboutApplication } from "@/applications/AboutApplication";
+import { infoConfig } from "@/applications/InfoApplication";
+import { aboutConfig } from "@/applications/AboutApplication";
 import { LocalWindowCompositor } from "../WindowManagement/LocalWindowCompositor";
-import { FinderApplication } from "@/applications/Finder/FinderApplication";
+import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 
 export type FileSystemDirectory = {
@@ -82,10 +82,11 @@ export class FileSystem {
     this.lookupTable['/'] = this.root;
 
     // create file tree
-    const applicationsDir = this.addDirectory(this.root, 'Applications');
-    this.addApplication(applicationsDir, 'Finder.app', (compositor, manager) => new FinderApplication(compositor, manager));
-    this.addApplication(applicationsDir, 'About.app', (compositor, manager) => new AboutApplication(compositor, manager));
-    this.addApplication(applicationsDir, 'Info.app', (compositor, manager) => new InfoApplication(compositor, manager));
+    this.addDirectory(this.root, 'Applications');
+
+    this.addApplication(finderConfig);
+    this.addApplication(aboutConfig);
+    this.addApplication(infoConfig);
 
     const home = this.addDirectory(this.root, 'Home');
     const joey = this.addDirectory(home, 'Joey');
@@ -128,8 +129,11 @@ export class FileSystem {
     return Ok(node.value);
   }
 
-  private addApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application): Result<FileSystemApplication, Error> {
-    const application = createApplication(parent, name, entrypoint);
+  private addApplication(config: ApplicationConfig): Result<FileSystemApplication, Error> {
+    const parent = this.lookupTable[config.path];
+    if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
+
+    const application = createApplication(parent, config.appName, config.entrypoint);
 
     parent.children.push(application);
 
