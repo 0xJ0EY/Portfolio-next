@@ -23,6 +23,8 @@ export class InfoApplication extends Application {
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
+    this.baseHandler(event, windowContext);
+
     if (event.kind === 'application-open') {
       for (let i = 1; i <= 5; i++) {
         this.compositor.open({

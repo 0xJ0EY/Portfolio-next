@@ -1,18 +1,13 @@
+import { useEffect } from 'react';
 import { ApplicationManager } from '@/applications/ApplicationManager';
 import styles from '@/styles/Desktop.module.css';
 
-interface DockItem {
-  displayName: string,
-  onClick: () => void
-}
-
 export const Dock = (manager: ApplicationManager) => {
+  useEffect(() => {
+    const unsubscribe = manager.subscribe(() => { console.log('update'); });
 
-  
-
-  const dockItems: DockItem[] = [
-    { displayName: 'Finder', onClick: () => { manager.open('/Applications/Finder.app') }}
-  ]
+    return () => { unsubscribe(); }
+  }, []);
 
   return <>
     <div className={styles.dock}>

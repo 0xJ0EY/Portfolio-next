@@ -23,6 +23,8 @@ export class AboutApplication extends Application {
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
+    this.baseHandler(event, windowContext);
+
     if (event.kind === 'application-open') {
       this.compositor.open({
         x: 200,

@@ -3,7 +3,7 @@ import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindow
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
-import { ApplicationEvent, createApplicationKillEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -29,6 +29,11 @@ export abstract class Application {
   abstract config(): ApplicationConfig;
 
   protected baseHandler(event: ApplicationEvent, windowContext?: WindowContext): void {
+    if (event.kind === 'all-windows-closed') {
+      this.manager.quit();
+      return;
+    }
+
     if (event.kind === 'application-kill') {
       this.manager.quit();
       return;
@@ -40,7 +45,8 @@ export abstract class Application {
 
 type ApplicationInstance = {
   application: Application,
-  context: ApplicationContext
+  context: ApplicationContext,
+  processId: number,
 }
 
 export interface BaseApplicationManager {
@@ -48,10 +54,14 @@ export interface BaseApplicationManager {
   kill(processId: number): void;
 }
 
+export type ApplicationManagerListener = () => void;
+
 export class ApplicationManager implements BaseApplicationManager {
 
   private processId: number = 0;
   private processes: (ApplicationInstance | null)[] = [];
+
+  private observers: (ApplicationManagerListener)[] = [];
 
   constructor(
     private windowCompositor: WindowCompositor,
@@ -60,32 +70,61 @@ export class ApplicationManager implements BaseApplicationManager {
     windowCompositor.registerApplicationManager(this);
   }
 
+  public subscribe(listener: ApplicationManagerListener) {
+    this.observers.push(listener);
+    return () => { this.unsubscribe(listener); }
+  }
+
+  public unsubscribe(listener: ApplicationManagerListener) {
+    for (const [index, observer] of this.observers.entries()) {
+      if (observer === listener) {
+        this.observers.splice(index);
+        return;
+      }
+    }
+  }
+
+  private publishChanges(): void {
+    for (const observer of this.observers) {
+      observer();
+    }
+  }
+
   public focus(application: Application) {
     console.log(application.config().displayName);
   }
 
-  private openApplication(application: FileSystemApplication, path: string): Result<number, Error> {
+  private openApplication(application: FileSystemApplication, path: string, args: string): Result<number, Error> {
     const compositor = new LocalWindowCompositor(this.windowCompositor);
     const manager = new LocalApplicationManager(this.processId, this);
 
-    const isFirstProcess = !this.processes.find(x => x?.context.path === path);
+    const parent = this.processes.find(x => x?.context.path === path);
 
-    const instance = {
-      application: application.entrypoint(compositor, manager),
-      context: new ApplicationContext(path, compositor),
-    };
+    if (parent) {
+      parent.application.on(createApplicationOpenEvent(false, args));
 
-    this.processes.push(instance);
+      return Ok(parent.processId);
+    } else {
+      const instance = {
+        application: application.entrypoint(compositor, manager),
+        context: new ApplicationContext(path, compositor),
+        processId: this.processId
+      };
 
-    instance.application.on(createApplicationOpenEvent(isFirstProcess));
+      this.processes.push(instance);
 
-    return Ok(this.processId++);
+      instance.application.on(createApplicationOpenEvent(true, args));
+
+      return Ok(this.processId++);
+    }
   }
 
   open(argument: string): Result<number, Error> {
-    const args = argument.split(' ');
+    const parts = argument.split(' ');
 
-    const path = args[0] ?? '';
+    const path = parts.splice(0, 1)[0] ?? '';
+    const args = parts.join(' ') ?? '';
+
     const node = this.fileSystem.getNode(path);
 
     if (!node.ok) { return Err(Error("File not found")); }
@@ -95,7 +134,7 @@ export class ApplicationManager implements BaseApplicationManager {
     // TODO: Open folder in folder exporer
     // TODO: Open text file in text file viewer
     switch (value.kind) {
-      case 'application': return this.openApplication(value, path);
+      case 'application': return this.openApplication(value, path, args);
       default: return Err(Error("Not yet implemented"))
     }
   }
@@ -109,6 +148,8 @@ export class ApplicationManager implements BaseApplicationManager {
     instance.context.compositor.closeAll();
 
     this.processes[processId] = null;
+
+    this.publishChanges();
   }
 
   reset(): void {
@@ -118,5 +159,7 @@ export class ApplicationManager implements BaseApplicationManager {
 
     this.processId = 0;
     this.processes = [];
+
+    this.observers = [];
   }
 }

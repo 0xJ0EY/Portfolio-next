@@ -1,6 +1,7 @@
 export type ApplicationOpenEvent = {
   kind: 'application-open',
   isFirst: boolean,
+  args: string
 }
 
 export type ApplicationQuitEvent = {
@@ -25,8 +26,8 @@ export type AllWindowsClosedEvent = {
   kind: 'all-windows-closed',
 }
 
-export function createApplicationOpenEvent(isFirst: boolean): ApplicationOpenEvent {
-  return { kind: 'application-open', isFirst };
+export function createApplicationOpenEvent(isFirst: boolean, args: string): ApplicationOpenEvent {
+  return { kind: 'application-open', isFirst, args };
 }
 
 export function createApplicationQuitEvent(): ApplicationQuitEvent {

@@ -150,44 +150,42 @@ export class WindowCompositor {
 
   public close(windowId: number): void {
     const node = this.windowNodeLookup[windowId];
-    if (node === null) { return; }
+    if (!node) { return; }
 
     const window = node.value;
 
     this.publish(DestroyWindowEvent(windowId));
     window.application.on(createWindowCloseEvent(windowId), { id: windowId });
 
-    const prev = node.prev;
-
     this.windows.unlink(node);
     delete this.windowNodeLookup[windowId];
 
-    if (prev !== null) {
-      this.updateWindowOrderToMostRecentApplicationWindow(node);
-      this.publish(UpdateWindowsEvent());
-     }
+    const prev = this.findPreviousNodeOfSameApplication(window.application);
+
+    if (prev) {
+      // Force update the windows, if no force is used it might be the case that the DOM isn't updated
+      // Due to the node already being the top level node.
+      this.focus(prev.value.id, true);
+
+    } else {
+      // All the previous windows got closed of this app
+      window.application.on(createAllWindowsClosedEvent());
+      this.updateWindowOrder();
+    }
   }
 
-  private updateWindowOrderToMostRecentApplicationWindow(deletedNode: Node<Window>) {
-    // Find any other windows of the same application
-    const app = deletedNode.value.application;
-
+  private findPreviousNodeOfSameApplication(application: Application): Node<Window> | null {
     let node = this.windows.getHead();
 
     while (node !== null) {
-      if (node.value.application === app) {
-        this.focus(node.value.id, true);
-        return;
+      if (node.value.application === application) {
+        return node;
       }
 
       node = node.prev;
     }
 
-    // If no nodes match the application, just select the one on top of the stack
-    // Also send a message that all windows have been closed
-    app.on(createAllWindowsClosedEvent());
-
-    this.updateWindowOrder();
+    return null;
   }
 
   private updateWindowOrder(): void {
