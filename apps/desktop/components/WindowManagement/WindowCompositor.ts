@@ -1,7 +1,7 @@
 import { Chain, Node } from "./Chain";
 import { LazyExoticComponent } from "react"
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
-import { Application } from "@/applications/ApplicationManager";
+import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 
 export type WindowApplication = LazyExoticComponent<(props: { application: Application, windowContext: WindowContext }) => JSX.Element>;
 export type WindowApplicationGenerator = () => WindowApplication;
@@ -58,6 +58,17 @@ export class WindowCompositor {
   private windowNodeLookup: Record<number, Node<Window>> = {};
   private observers: (WindowEventHandler)[] = [];
 
+  private applicationManager: ApplicationManager | null = null;
+
+  public registerApplicationManager(applicationManager: ApplicationManager) {
+    this.applicationManager = applicationManager;
+  }
+
+  private updateApplicationManager(node: Node<Window>) {
+    const app = node.value.application;
+    this.applicationManager?.focus(app);
+  }
+
   public subscribe(handler: WindowEventHandler) {
     this.observers.push(handler);
     return () => { this.unsubscribe(handler); };
@@ -96,6 +107,8 @@ export class WindowCompositor {
     );
 
     const node = this.windows.append(window);
+    this.updateApplicationManager(node);
+
     this.windowNodeLookup[id] = node;
 
     this.updateWindowOrder();
@@ -105,7 +118,7 @@ export class WindowCompositor {
     return window;
   }
 
-  public focus(windowId: number) {
+  public focus(windowId: number, force: boolean = false) {
     const node = this.windowNodeLookup[windowId];
 
     if (!node) {
@@ -114,7 +127,8 @@ export class WindowCompositor {
     }
 
     // The window is already on top, so don't update the stack
-    if (node === this.windows.getHead()) { return; }
+    if (!force && node === this.windows.getHead()) { return; }
+    this.updateApplicationManager(node);
 
     this.windows.moveToHead(node);
     this.updateWindowOrder();
@@ -145,9 +159,28 @@ export class WindowCompositor {
     if (prev !== null) {
       // TODO: Make this work on application level, like macOS
       // Currently we just unwrap the chain, no matter what "application" is selected
-      this.updateWindowOrder();
+      this.updateWindowOrderToMostRecentApplicationWindow(node);
       this.publish(UpdateWindowsEvent());
      }
+  }
+
+  private updateWindowOrderToMostRecentApplicationWindow(deletedNode: Node<Window>) {
+    // Find any other windows of the same application
+    const app = deletedNode.value.application;
+
+    let node = this.windows.getHead();
+
+    while (node !== null) {
+      if (node.value.application === app) {
+        this.focus(node.value.id, true);
+        return;
+      }
+
+      node = node.prev;
+    }
+
+    // If no nodes match the application, just select the one on top of the stack
+    this.updateWindowOrder();
   }
 
   private updateWindowOrder(): void {
@@ -155,7 +188,7 @@ export class WindowCompositor {
     let order = 0;
 
     while (node !== null) {
-      node.value.order    = order++;
+      node.value.order = order++;
       node.value.focused = node.next === null;
 
       node = node.next;

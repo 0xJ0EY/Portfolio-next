@@ -10,15 +10,17 @@ export class InfoApplication extends Application {
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'open') {
-      this.compositor.open({
-        x: 200,
-        y: 200,
-        height: 400,
-        width: 400,
-        title: "Info application",
-        application: this,
-        generator: () => { return View; }
-      });
+      for (let i = 1; i <= 5; i++) {
+        this.compositor.open({
+          x: 200 + (20 * i),
+          y: 200 + (20 * i),
+          height: 400,
+          width: 400,
+          title: `Info application (${i})`,
+          application: this,
+          generator: () => { return View; }
+        });  
+      }
     };
 
     if (event.kind === 'close') {

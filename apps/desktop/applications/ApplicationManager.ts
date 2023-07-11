@@ -52,7 +52,13 @@ export class ApplicationManager {
   constructor(
     private windowCompositor: WindowCompositor,
     private fileSystem: FileSystem
-  ) {}
+  ) {
+    windowCompositor.registerApplicationManager(this);
+  }
+
+  public focus(application: Application) {
+    console.log(application.displayName());
+  }
 
   private openApplication(application: FileSystemApplication, path: string): Result<number, Error> {
     const compositor = new LocalWindowCompositor(this.windowCompositor);
