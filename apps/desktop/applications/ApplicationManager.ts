@@ -3,7 +3,24 @@ import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindow
 import { WindowCompositor } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 
-export type ApplicationEvent = 'open' | 'close';
+
+export type ApplicationOpenEvent = {
+  kind: 'open'
+}
+
+export type ApplicationCloseEvent = {
+  kind: 'close'
+}
+
+function createOpenEvent(): ApplicationOpenEvent {
+  return { kind: 'open' };
+}
+
+function createCloseEvent(): ApplicationCloseEvent {
+  return { kind: 'close' };
+}
+
+export type ApplicationEvent = ApplicationOpenEvent | ApplicationCloseEvent;
 
 export class ApplicationContext {
   constructor(
@@ -43,7 +60,7 @@ export class ApplicationManager {
 
     this.processes.push(instance);
 
-    instance.application.on('open', instance.context);
+    instance.application.on(createOpenEvent(), instance.context);
 
     return Ok(this.processId++);
   }
@@ -71,7 +88,7 @@ export class ApplicationManager {
 
     if (instance === null) { return; }
 
-    instance.application.on('close', instance.context);
+    instance.application.on(createCloseEvent(), instance.context);
     instance.context.compositor.closeAll();
 
     this.processes[processId] = null;

@@ -5,7 +5,7 @@ const View = React.lazy(() => import('./InfoApplicationView'));
 
 export class InfoApplication implements Application {
   on(event: ApplicationEvent, context: ApplicationContext): void {
-    if (event === 'open') {
+    if (event.kind === 'open') {
       context.compositor.open({
         x: 200,
         y: 200,
