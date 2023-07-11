@@ -36,6 +36,11 @@ class Origin {
     height: number
   } = { top: 0, left: 0, width: 0, height: 0 };
 
+  public offset: {
+    x: number,
+    y: number
+  } = { x: 0, y: 0 };
+
   public window: {
     x: number,
     y: number,
@@ -46,8 +51,8 @@ class Origin {
 
 // TODO: Maybe performance gain? It should be possible to bind the window events to a singular component before these get rendered.
 // So we don't have to process all these window events
-const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor, isMaximized: MutableRefObject<boolean>}) => {
-  const { windowData, windowCompositor, isMaximized } = props;
+const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor, parent: HTMLDivElement, isMaximized: MutableRefObject<boolean>}) => {
+  const { windowData, windowCompositor, parent, isMaximized } = props;
 
   const [resizing, setResizing] = useState(false);
   const [cursor, setCursor] = useState('auto');
@@ -108,7 +113,9 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     if (node === null) { return; }
 
     isDown.current = true;
-    axis.current = getResizeAxis(evt);
+    const resizeAxis = getResizeAxis(evt);
+    
+    axis.current = resizeAxis;
 
     const bb = node.getBoundingClientRect();
 
@@ -123,6 +130,26 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
       width: windowData.width,
       height: windowData.height
     };
+
+    const correctedWindowY = windowData.y + parent.offsetTop;
+    const correctedWindowX = windowData.x + parent.offsetLeft;
+
+    resizeAxis.split('').forEach(x => {
+      switch (x) {
+        case 'n':
+          origin.current.offset.y = origin.current.cursor.y - correctedWindowY;
+          break;
+        case 's':
+          origin.current.offset.y = origin.current.cursor.y - (correctedWindowY + windowData.height);
+          break;
+        case 'w':
+          origin.current.offset.x = origin.current.cursor.x - correctedWindowX;
+          break;
+        case 'e':
+          origin.current.offset.x = origin.current.cursor.x - (correctedWindowX + windowData.width);
+          break;
+      }
+    });
 
     origin.current.boundingBox = {
       top: bb.top,
@@ -147,9 +174,12 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     const windowMaxHeight = window.innerHeight;
     const windowMaxWidth  = window.innerWidth;
 
+    const offsetX = origin.current.offset.x;
+    const offsetY = origin.current.offset.y;
+
     const [deltaX, deltaY] = [
-      origin.current.cursor.x - clamp(evt.clientX, 0, windowMaxWidth),
-      origin.current.cursor.y - clamp(evt.clientY, 0, windowMaxHeight)
+      origin.current.cursor.x - clamp(evt.clientX, parent.offsetLeft + offsetX, parent.offsetWidth + offsetX),
+      origin.current.cursor.y - clamp(evt.clientY, parent.offsetTop + offsetY, parent.offsetTop + parent.offsetHeight + offsetY)
     ];
 
     const [windowX, windowY] = [
@@ -389,6 +419,7 @@ export default function WindowContainer(props: { window: Window, Application: Wi
         {window.focused && <Resizable
           windowData={window}
           windowCompositor={windowCompositor}
+          parent={parent}
           isMaximized={maximized} />}
 
         <div className={contentContainerClasses}>
