@@ -157,8 +157,6 @@ export class WindowCompositor {
     delete this.windowNodeLookup[windowId];
 
     if (prev !== null) {
-      // TODO: Make this work on application level, like macOS
-      // Currently we just unwrap the chain, no matter what "application" is selected
       this.updateWindowOrderToMostRecentApplicationWindow(node);
       this.publish(UpdateWindowsEvent());
      }
@@ -189,7 +187,12 @@ export class WindowCompositor {
 
     while (node !== null) {
       node.value.order = order++;
-      node.value.focused = node.next === null;
+      node.value.focused = false;
+
+      if (node.next === null) {
+        node.value.focused = true;
+        this.updateApplicationManager(node);
+      }
 
       node = node.next;
     }
