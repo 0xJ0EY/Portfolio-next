@@ -1,4 +1,4 @@
-import { FileSystem } from "@/components/FileSystem/FileSystem";
+import { FileSystem, FileSystemApplication } from "@/components/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
@@ -32,18 +32,9 @@ export class ApplicationManager {
     private fileSystem: FileSystem
   ) {}
 
-  open(argument: string): Result<number, Error> {
-    const args = argument.split(' ');
-
-    const path = args[0] ?? '';
-    const node = this.fileSystem.getApplication(path);
-
-    if (!node.ok) { return Err(Error("File not found")); }
-
-    const application = node.value;
-    const isFirstProcess = !this.processes.find(x => x?.context.path === path);
-
+  private openApplication(application: FileSystemApplication, path: string): Result<number, Error> {
     const compositor = new LocalWindowCompositor(this.windowCompositor);
+    const isFirstProcess = !this.processes.find(x => x?.context.path === path);
 
     const instance = {
       application: application.entrypoint(),
@@ -55,6 +46,24 @@ export class ApplicationManager {
     instance.application.on('open', instance.context);
 
     return Ok(this.processId++);
+  }
+
+  open(argument: string): Result<number, Error> {
+    const args = argument.split(' ');
+
+    const path = args[0] ?? '';
+    const node = this.fileSystem.getNode(path);
+
+    if (!node.ok) { return Err(Error("File not found")); }
+
+    const value = node.value;
+
+    // TODO: Open folder in folder exporer
+    // TODO: Open text file in text file viewer
+    switch (value.kind) {
+      case 'application': return this.openApplication(value, path);
+      default: return Err(Error("Not yet implemented"))
+    }
   }
 
   quit(processId: number): void {

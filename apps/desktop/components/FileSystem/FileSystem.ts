@@ -2,27 +2,27 @@ import { Application } from "@/applications/ApplicationManager";
 import { Err, Ok, Result } from "../util";
 import { InfoApplication } from "@/applications/InfoApplication";
 
-type FileSystemDirectory = {
+export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
   kind: 'directory',
   name: string,
   children: FileSystemNode[]
 };
 
-type FileSystemFile = {
+export type FileSystemFile = {
   parent: FileSystemDirectory
   kind: 'file',
   name: string
 };
 
-type FileSystemApplication = {
+export type FileSystemApplication = {
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
   entrypoint: () => Application
 }
 
-type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
+export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
 function createApplication(parent: FileSystemDirectory, name: string, entrypoint: () => Application): FileSystemApplication {
   return {

@@ -33,11 +33,9 @@ export class LocalWindowCompositor {
   }
 
   public closeAll(): void {
-
-    console.log(this.instances);
-
-    // for (const windows of this.instances) {
-      // this.close()
-    // }
+    for (const windowId in this.instances) {
+      // id's are cast to strings due to them being used as keys, so we need to cast them back to numbers here
+      this.close(+windowId);
+    }
   }
 }
