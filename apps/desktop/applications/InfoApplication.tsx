@@ -1,13 +1,17 @@
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import React from "react";
 import { ApplicationEvent } from "./ApplicationEvents";
-import { Application } from "./ApplicationManager";
+import { Application, ApplicationConfig } from "./ApplicationManager";
 
 const View = React.lazy(() => import('./InfoApplicationView'));
 
 export class InfoApplication extends Application {
 
-  displayName() { return "Info" }
+  config(): ApplicationConfig {
+    return {
+      displayName: 'Info'
+    }
+  }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'application-open') {

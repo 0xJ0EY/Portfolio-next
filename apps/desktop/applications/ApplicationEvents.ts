@@ -7,6 +7,10 @@ export type ApplicationQuitEvent = {
   kind: 'application-quit',
 }
 
+export type ApplicationKillEvent = {
+  kind: 'application-kill'
+}
+
 export type WindowOpenEvent = {
   kind: 'window-open',
   windowId: number
@@ -29,6 +33,10 @@ export function createApplicationQuitEvent(): ApplicationQuitEvent {
   return { kind: 'application-quit' };
 }
 
+export function createApplicationKillEvent(): ApplicationKillEvent {
+  return { kind: 'application-kill' };
+}
+
 export function createWindowOpenEvent(windowId: number): WindowOpenEvent {
   return { kind: 'window-open', windowId };
 }
@@ -42,5 +50,5 @@ export function createAllWindowsClosedEvent(): AllWindowsClosedEvent {
 }
 
 export type ApplicationEvent =
-  ApplicationOpenEvent | ApplicationQuitEvent |
+  ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent |
   WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent;

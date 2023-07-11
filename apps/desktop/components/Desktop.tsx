@@ -102,6 +102,7 @@ export const OperatingSystem = () => {
 
   useEffect(() => {
     fileSystem.init();
+    applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/Info.app');
     applicationManager.open('/Applications/About.app');
 

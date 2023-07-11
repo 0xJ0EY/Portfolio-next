@@ -3,7 +3,7 @@ import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindow
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
-import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { ApplicationEvent, createApplicationKillEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -13,13 +13,25 @@ class ApplicationContext {
   ) {}
 }
 
+export interface ApplicationConfig {
+  displayName: string,
+}
+
 export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
     protected readonly manager: LocalApplicationManager
   ) {}
 
-  abstract displayName(): string;
+  abstract config(): ApplicationConfig;
+
+  protected baseHandler(event: ApplicationEvent, windowContext?: WindowContext): void {
+    if (event.kind === 'application-kill') {
+      this.manager.quit();
+      return;
+    }
+  }
+
   abstract on(event: ApplicationEvent, windowContext?: WindowContext): void;
 }
 
@@ -30,7 +42,7 @@ type ApplicationInstance = {
 
 export interface BaseApplicationManager {
   open(argument: string): Result<number, Error>;
-  quit(processId: number): void;
+  kill(processId: number): void;
 }
 
 export class ApplicationManager implements BaseApplicationManager {
@@ -46,7 +58,7 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   public focus(application: Application) {
-    console.log(application.displayName());
+    console.log(application.config().displayName);
   }
 
   private openApplication(application: FileSystemApplication, path: string): Result<number, Error> {
@@ -85,7 +97,7 @@ export class ApplicationManager implements BaseApplicationManager {
     }
   }
 
-  quit(processId: number): void {
+  kill(processId: number): void {
     const instance = this.processes[processId];
 
     if (instance === null) { return; }
@@ -98,7 +110,7 @@ export class ApplicationManager implements BaseApplicationManager {
 
   reset(): void {
     for (let i = 0; i < this.processId; i++) {
-      this.quit(i);
+      this.kill(i);
     }
 
     this.processId = 0;

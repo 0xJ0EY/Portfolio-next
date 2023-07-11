@@ -9,11 +9,11 @@ export class LocalApplicationManager implements BaseApplicationManager {
   }
 
   // There is no concept of ring level security in this operating system :^)
-  quit(processId: number): void {
-    return this.manager.quit(processId);
+  kill(processId: number): void {
+    return this.manager.kill(processId);
   }
 
-  exit(): void {
-    return this.quit(this.processId);
+  quit(): void {
+    return this.kill(this.processId);
   }
 }
