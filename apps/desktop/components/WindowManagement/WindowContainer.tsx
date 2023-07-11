@@ -114,7 +114,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 
     isDown.current = true;
     const resizeAxis = getResizeAxis(evt);
-    
+
     axis.current = resizeAxis;
 
     const bb = node.getBoundingClientRect();
@@ -272,13 +272,17 @@ type OriginWindow = {
   height: number
 }
 
-const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor, parent: HTMLDivElement, maximized: MutableRefObject<boolean>) => {
+const WindowHeader = (
+  windowData: Window,
+  windowCompositor: WindowCompositor,
+  parent: HTMLDivElement,
+  windowRoot: RefObject<HTMLDivElement>,
+  maximized: MutableRefObject<boolean>
+) => {
   const [dragging, setDragging] = useState(false);
   
   const output: RefObject<HTMLDivElement> = useRef(null);
   const isMaximized = maximized;
-
-  const headerTopOffset = useRef(0);
 
   const isDown = useRef(false);
   const origin = useRef<Origin>(new Origin());
@@ -318,16 +322,17 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor, pa
   }
 
   function onPointerDown(evt: PointerEvent) {
-    if (evt.target !== output.current) { return; }
-
+    if (windowRoot.current === null) { return; }
+    
     setDragging(true);
     isDown.current = true;
     isMaximized.current = false;
 
-    const headerBoundingClient = output.current!.getBoundingClientRect();
+    const headerBoundingClient = windowRoot.current.getBoundingClientRect();
     const offset = evt.clientY - headerBoundingClient.y;
 
-    headerTopOffset.current = offset;
+    origin.current.offset.y = offset;
+    origin.current.offset.x = 0;
 
     if (!windowData.focused) { windowCompositor.focus(windowData.id); }
 
@@ -349,8 +354,8 @@ const WindowHeader = (windowData: Window, windowCompositor: WindowCompositor, pa
 
     const clientX = clamp(evt.clientX, parent.offsetLeft, parent.offsetWidth);
     const clientY = clamp(evt.clientY,
-      parent.offsetTop + headerTopOffset.current,
-      parent.offsetHeight + headerTopOffset.current
+      parent.offsetTop + origin.current.offset.y,
+      parent.offsetHeight + origin.current.offset.y
     );
 
     const deltaX = cursorRef.x - clientX;
@@ -400,6 +405,7 @@ export default function WindowContainer(props: { window: Window, Application: Wi
   const { window, Application, windowCompositor } = props;
 
   const maximized = useRef(false);
+  const windowRoot = useRef<HTMLDivElement>(null);
 
   if (props.parent === null) { return <></>; }
   const parent = props.parent;
@@ -407,13 +413,13 @@ export default function WindowContainer(props: { window: Window, Application: Wi
   function focus() { windowCompositor.focus(window.id); }
 
   const style = calculateStyle(window);
-  const header = WindowHeader(window, windowCompositor, parent, maximized);
+  const header = WindowHeader(window, windowCompositor, parent, windowRoot, maximized);
 
   const focusedClass = window.focused ? styles.focused : ''; 
   const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
 
   return (
-    <div style={style}>
+    <div style={style} ref={windowRoot}>
       <div className={styles.container}>
         {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
         {window.focused && <Resizable
