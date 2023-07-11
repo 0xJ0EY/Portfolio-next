@@ -276,7 +276,6 @@ const WindowHeader = (
   windowData: Window,
   windowCompositor: WindowCompositor,
   parent: HTMLDivElement,
-  windowRoot: RefObject<HTMLDivElement>,
   maximized: MutableRefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
@@ -322,13 +321,16 @@ const WindowHeader = (
   }
 
   function onPointerDown(evt: PointerEvent) {
-    if (windowRoot.current === null) { return; }
+    if (evt.target !== output.current) { return; }
+    
+    // I cannot put a ref on the root, due to rerenders to this is the solution :^)
+    const windowRoot = output.current!.parentNode!.parentNode!.parentNode as HTMLDivElement;
     
     setDragging(true);
     isDown.current = true;
     isMaximized.current = false;
 
-    const headerBoundingClient = windowRoot.current.getBoundingClientRect();
+    const headerBoundingClient = windowRoot.getBoundingClientRect();
     const offset = evt.clientY - headerBoundingClient.y;
 
     origin.current.offset.y = offset;
@@ -394,7 +396,7 @@ const WindowHeader = (
   return <>
     <div ref={output} className={classes.join(' ')}>
       <span>{ windowData.title }</span>
-      { <button onClick={onClickMaximize}>Maximize</button> }
+      <button onClick={onClickMaximize}>Maximize</button>
       <button onClick={() => { windowCompositor.close(windowData.id) }}>Close</button>
     </div>
     { dragging && <div className={styles.draggingMask}></div> }
@@ -405,7 +407,6 @@ export default function WindowContainer(props: { window: Window, Application: Wi
   const { window, Application, windowCompositor } = props;
 
   const maximized = useRef(false);
-  const windowRoot = useRef<HTMLDivElement>(null);
 
   if (props.parent === null) { return <></>; }
   const parent = props.parent;
@@ -413,13 +414,13 @@ export default function WindowContainer(props: { window: Window, Application: Wi
   function focus() { windowCompositor.focus(window.id); }
 
   const style = calculateStyle(window);
-  const header = WindowHeader(window, windowCompositor, parent, windowRoot, maximized);
+  const header = WindowHeader(window, windowCompositor, parent, maximized);
 
   const focusedClass = window.focused ? styles.focused : ''; 
   const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
 
   return (
-    <div style={style} ref={windowRoot}>
+    <div style={style}>
       <div className={styles.container}>
         {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
         {window.focused && <Resizable
