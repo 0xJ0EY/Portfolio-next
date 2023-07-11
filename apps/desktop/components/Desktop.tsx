@@ -18,11 +18,6 @@ const Dock = () => {
 }
 
 const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
-const LazyComponent = React.lazy(() => import('./LazyComponent'));
-
-const createLazy = () => {
-  return LazyComponent;
-}
 
 interface ApplicationData {
   window: Window,
@@ -98,7 +93,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
-      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} Application={x.application} windowCompositor={windowCompositor} parent={parentNode.current}/></div>)}
+      {applicationWindows.map(x => <div key={x.window.id}><WindowContainer window={x.window} WindowApp={x.application} windowCompositor={windowCompositor} parent={parentNode.current}/></div>)}
     </div>
   </>
 }

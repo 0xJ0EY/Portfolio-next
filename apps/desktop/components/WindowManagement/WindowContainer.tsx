@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, RefObject, MutableRefObject } from 'react';
-import { Window, WindowApplication, WindowCompositor } from "./WindowCompositor";
+import { Window, WindowApplication, WindowCompositor, WindowContext } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
@@ -403,8 +403,8 @@ const WindowHeader = (
     </>
 }
 
-export default function WindowContainer(props: { window: Window, Application: WindowApplication, windowCompositor: WindowCompositor, parent: HTMLDivElement | null}) {
-  const { window, Application, windowCompositor } = props;
+export default function WindowContainer(props: { window: Window, WindowApp: WindowApplication, windowCompositor: WindowCompositor, parent: HTMLDivElement | null}) {
+  const { window, WindowApp, windowCompositor } = props;
 
   const maximized = useRef(false);
 
@@ -418,6 +418,10 @@ export default function WindowContainer(props: { window: Window, Application: Wi
 
   const focusedClass = window.focused ? styles.focused : ''; 
   const contentContainerClasses = `${styles.contentContainer} ${focusedClass}`;
+
+  const windowContext: WindowContext = {
+    id: window.id
+  };
 
   return (
     <div style={style}>
@@ -433,7 +437,7 @@ export default function WindowContainer(props: { window: Window, Application: Wi
           {header}
 
           <div className={styles.content}>
-            <Application/>
+            <WindowApp application={window.application} context={window.context} windowContext={windowContext} />
           </div>
         </div>
       </div>

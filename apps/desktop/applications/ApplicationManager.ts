@@ -1,6 +1,6 @@
 import { FileSystem, FileSystemApplication } from "@/components/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
-import { WindowCompositor } from "@/components/WindowManagement/WindowCompositor";
+import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 
 
@@ -31,7 +31,7 @@ export class ApplicationContext {
 }
 
 export interface Application {
-  on(event: ApplicationEvent, context: ApplicationContext): void;
+  on(event: ApplicationEvent, context: ApplicationContext, windowContext?: WindowContext): void;
 }
 
 type ApplicationInstance = {

@@ -1,9 +1,14 @@
 import { Chain, Node } from "./Chain";
 import { LazyExoticComponent } from "react"
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
+import { Application, ApplicationContext } from "@/applications/ApplicationManager";
 
-export type WindowApplication = LazyExoticComponent<() => JSX.Element>;
+export type WindowApplication = LazyExoticComponent<(props: { application: Application, context: ApplicationContext, windowContext: WindowContext }) => JSX.Element>;
 export type WindowApplicationGenerator = () => WindowApplication;
+
+export interface WindowContext {
+  readonly id: number
+}
 
 export interface WindowConfig {
   x: number,
@@ -11,13 +16,14 @@ export interface WindowConfig {
   height?: number,
   width?: number,
   title: string,
-  generator: WindowApplicationGenerator
+  readonly application: Application,
+  readonly context: ApplicationContext,
+  readonly generator: WindowApplicationGenerator
 }
 
 export class Window {
   public order: number = 0;
   public focused: boolean = true;
-  public resizingCursor: string = 'auto'
 
   constructor(
     public readonly id: number,
@@ -26,6 +32,8 @@ export class Window {
     public width: number,
     public height: number,
     public title: string,
+    public readonly application: Application,
+    public readonly context: ApplicationContext,
     public readonly generator: WindowApplicationGenerator
   ) { }
 }
@@ -85,6 +93,8 @@ export class WindowCompositor {
       config.width ?? 400,
       config.height ?? 80,
       config.title,
+      config.application,
+      config.context,
       config.generator
     );
 
