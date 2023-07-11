@@ -103,17 +103,6 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   </>
 }
 
-const addWindow = (wm: WindowCompositor, x: number) => {
-  wm.open({
-    x,
-    y: 200,
-    height: 400,
-    width: 400,
-    title: "Random window",
-    generator: () => createLazy()
-  });
-}
-
 export const OperatingSystem = () => {
   const fileSystem = new FileSystem();
   const windowCompositor = new WindowCompositor();
@@ -122,7 +111,7 @@ export const OperatingSystem = () => {
   useEffect(() => {
     fileSystem.init();
     applicationManager.open('/Applications/Info.app');
-    applicationManager.open('/Applications/Info.app');
+    applicationManager.open('/Applications/About.app');
 
     return () => { 
       applicationManager.reset();  

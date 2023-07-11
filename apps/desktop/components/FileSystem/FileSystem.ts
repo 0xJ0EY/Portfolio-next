@@ -1,6 +1,7 @@
 import { Application } from "@/applications/ApplicationManager";
 import { Err, Ok, Result } from "../util";
 import { InfoApplication } from "@/applications/InfoApplication";
+import { AboutApplication } from "@/applications/AboutApplication";
 
 export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
@@ -123,16 +124,25 @@ export class FileSystem {
     return Ok(node.value);
   }
 
-  private addApplication(parent: FileSystemDirectory, name: string): FileSystemApplication {
-    const application = createApplication(parent, name, () => {
-      return new InfoApplication()
-    });
+  private addApplication(parent: FileSystemDirectory, name: string): Result<FileSystemApplication, Error> {
+
+    let entrypoint: () => Application;
+
+    console.log(name);
+
+    switch (name) {
+      case 'Info.app': entrypoint = () => { return new InfoApplication() }; break;
+      case 'About.app': entrypoint = () => { return new AboutApplication() }; break;
+      default: return Err(Error(`Application "${name}" not in the application list.`))
+    }
+
+    const application = createApplication(parent, name, entrypoint);
 
     parent.children.push(application);
 
     this.lookupTable[constructPath(application)] = application;
 
-    return application;
+    return Ok(application);
   }
 
   public addDirectory(parent: FileSystemDirectory, name: string): FileSystemDirectory {
