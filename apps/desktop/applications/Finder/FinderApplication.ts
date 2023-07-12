@@ -7,7 +7,7 @@ import { LocalApplicationManager } from "../LocalApplicationManager";
 export class FinderConfig implements ApplicationConfig {
   public readonly displayName = 'Finder';
   public readonly path = '/Applications/';
-  public readonly appName = 'Finder.app'
+  public readonly appName = 'Finder.app';
   public readonly entrypoint = (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => new FinderApplication(compositor, manager);
 }
 

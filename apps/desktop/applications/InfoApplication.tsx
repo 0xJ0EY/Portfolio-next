@@ -10,7 +10,7 @@ const View = React.lazy(() => import('./InfoApplicationView'));
 export class InfoConfig implements ApplicationConfig {
   public readonly displayName = 'Info';
   public readonly path = '/Applications/';
-  public readonly appName = 'Info.app'
+  public readonly appName = 'Info.app';
   public readonly entrypoint = (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => new InfoApplication(compositor, manager);
 }
 

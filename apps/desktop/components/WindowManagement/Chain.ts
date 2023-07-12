@@ -93,4 +93,17 @@ export class Chain<T> {
   public count(): number {
     return this.items;
   }
+
+  public toArray(): T[] {
+    let items: T[] = [];
+    let node = this.getTail();
+
+    while (node !== null) {
+      items.push(node.value);
+
+      node = node.next;
+    }
+
+    return items;
+  }
 }

@@ -94,6 +94,12 @@ export class ApplicationManager implements BaseApplicationManager {
     console.log(application.config().displayName);
   }
 
+  public listApplications(): Application[] {
+    return this.processes
+      .filter(x => x !== null)
+      .map(x => x!.application);
+  }
+
   private openApplication(application: FileSystemApplication, path: string, args: string): Result<number, Error> {
     const compositor = new LocalWindowCompositor(this.windowCompositor);
     const manager = new LocalApplicationManager(this.processId, this);
@@ -114,6 +120,8 @@ export class ApplicationManager implements BaseApplicationManager {
       this.processes.push(instance);
 
       instance.application.on(createApplicationOpenEvent(true, args));
+
+      this.publishChanges();
 
       return Ok(this.processId++);
     }

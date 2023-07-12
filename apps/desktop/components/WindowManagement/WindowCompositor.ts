@@ -91,7 +91,7 @@ export class WindowCompositor {
   }
 
   public getById(windowId: number): Window | null {
-    return this.windowNodeLookup[windowId].value;
+    return this.windowNodeLookup[windowId]?.value;
   }
 
   public open(config: WindowConfig): Window {

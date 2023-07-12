@@ -1,5 +1,5 @@
 import styles from '@/styles/Desktop.module.css';
-import React, { useEffect, useRef, useReducer } from "react";
+import React, { useEffect, useRef, useReducer, useState } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import { ApplicationManager } from '@/applications/ApplicationManager';
@@ -20,7 +20,7 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
     switch (action.event) {
       case 'create_window': { 
         const window = windowCompositor.getById(action.windowId);
-        if (window === null) { return state; }
+        if (!window) { return state; }
 
         if (state.find(x => x.window.id === window.id)) { break; }
 
@@ -33,7 +33,7 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
 
       case 'update_window': {
         const window = windowCompositor.getById(action.windowId);
-        if (window === null) { return state; }
+        if (!window) { return state; }
 
         state = state.map(x => {
           if (x.window.id !== window.id) { return x; }
@@ -95,18 +95,20 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   </>
 }
 
-export const OperatingSystem = () => {
-  const fileSystem = new FileSystem();
-  const windowCompositor = new WindowCompositor();
-  const applicationManager = new ApplicationManager(windowCompositor, fileSystem);
+const fileSystem = new FileSystem();
+fileSystem.init();
 
+const windowCompositor = new WindowCompositor();
+const applicationManager = new ApplicationManager(windowCompositor, fileSystem);
+
+export const OperatingSystem = () => {
   useEffect(() => {
-    fileSystem.init();
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/Info.app');
     applicationManager.open('/Applications/About.app');
 
-    return () => { 
+    return () => {
+      // Needs to be done, due to this class also opening files in the application manager
       applicationManager.reset();  
       windowCompositor.reset();
     }
