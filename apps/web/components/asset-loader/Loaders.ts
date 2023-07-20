@@ -50,16 +50,29 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   return null;
 }
 
+const transformWebUrlToDesktop = (desktopUrl: string): string => {
+  const parts = desktopUrl.split('-');
+
+  return 'https://' + parts.join('-');
+}
+
 const getTargetDomain = (): string => {
   // const env = process.env.VERCEL_ENV ?? 'local';
 
-  const env = 'preview';
+  // const env = 'preview';
 
-  if (env === 'local') {
-    return process.env.DESKTOP_URL ?? 'http://localhost:3001';
-  }
+  // // if (env === 'local') {
+  // //   return 'http://localhost:3001';
+  // // }
 
-  return '';
+  // if (env === 'preview') {
+  //   // const vercelUrl = "portfolio-next-desktop-git-feature-file-dragging-0xj0ey.vercel.app";
+
+  //   // return transformWebUrlToDesktop(vercelUrl);
+  //   // https://portfolio-next-web-git-feature-file-dragging-0xj0ey.vercel.app/
+  // }
+
+  return 'http://localhost:3001';
 }
 
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
