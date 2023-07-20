@@ -60,14 +60,14 @@ const transformWebUrlToDesktop = (webUrl: string): string => {
 }
 
 const getTargetDomain = (): string => {
-  const env = process.env.VERCEL_ENV ?? 'local';
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
 
   if (env === 'production') {
     return 'https://portfolio-next-web.vercel.app/';
   }
 
   if (env === 'preview' || env === 'development') {
-    const vercelUrl = process.env.VERCEL_BRANCH_URL ?? ''
+    const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? ''
 
     return transformWebUrlToDesktop(vercelUrl);
   } else {
