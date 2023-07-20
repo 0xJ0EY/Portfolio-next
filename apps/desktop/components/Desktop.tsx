@@ -6,7 +6,9 @@ import { ApplicationManager } from '@/applications/ApplicationManager';
 import { FileSystem } from './FileSystem/FileSystem';
 import { Dock } from './Dock';
 import { MenuBar } from './MenuBar';
+import dynamic from 'next/dynamic';
 
+const DesktopIcon = dynamic(() => import('./Icons/DesktopIcon'));
 const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
 
 interface ApplicationData {
@@ -83,6 +85,10 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
+      <div>
+        <DesktopIcon/>
+      </div>
+
       {applicationWindows.map(x => 
         <div key={x.window.id}>
           <WindowContainer
