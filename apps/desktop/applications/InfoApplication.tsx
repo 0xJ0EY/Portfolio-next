@@ -4,6 +4,7 @@ import { ApplicationEvent } from "./ApplicationEvents";
 import { Application, ApplicationConfig } from "./ApplicationManager";
 import { LocalApplicationManager } from "./LocalApplicationManager";
 import dynamic from 'next/dynamic';
+import { SystemAPIs } from "@/components/Desktop";
 
 const View = dynamic(() => import('./InfoApplicationView'));
 
@@ -11,7 +12,11 @@ export class InfoConfig implements ApplicationConfig {
   public readonly displayName = 'Info';
   public readonly path = '/Applications/';
   public readonly appName = 'Info.app';
-  public readonly entrypoint = (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => new InfoApplication(compositor, manager);
+  public readonly entrypoint = (
+    compositor: LocalWindowCompositor,
+    manager: LocalApplicationManager,
+    apis: SystemAPIs
+  ) => new InfoApplication(compositor, manager, apis);
 }
 
 export const infoConfig = new InfoConfig();

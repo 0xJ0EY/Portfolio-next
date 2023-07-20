@@ -3,10 +3,11 @@ import React, { useEffect, useRef, useReducer, useState } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import { ApplicationManager } from '@/applications/ApplicationManager';
-import { FileSystem } from './FileSystem/FileSystem';
+import { FileSystem, createBaseFileSystem } from './FileSystem/FileSystem';
 import { Dock } from './Dock';
 import { MenuBar } from './MenuBar';
 import dynamic from 'next/dynamic';
+import { DragAndDropService } from '@/events/Dragging';
 
 const DesktopIcon = dynamic(() => import('./Icons/DesktopIcon'));
 const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
@@ -101,11 +102,14 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   </>
 }
 
-const fileSystem = new FileSystem();
-fileSystem.init();
+const fileSystem = createBaseFileSystem();
+const dragAndDrop = new DragAndDropService();
+
+export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem };
+const apis: SystemAPIs = { dragAndDrop, fileSystem };
 
 const windowCompositor = new WindowCompositor();
-const applicationManager = new ApplicationManager(windowCompositor, fileSystem);
+const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
 
 export const OperatingSystem = () => {
   useEffect(() => {
@@ -115,7 +119,7 @@ export const OperatingSystem = () => {
 
     return () => {
       // Needs to be done, due to this class also opening files in the application manager
-      applicationManager.reset();  
+      applicationManager.reset();
       windowCompositor.reset();
     }
   }, []);

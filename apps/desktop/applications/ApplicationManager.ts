@@ -4,6 +4,7 @@ import { WindowCompositor, WindowContext } from "@/components/WindowManagement/W
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
 import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { SystemAPIs } from "@/components/Desktop";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -17,13 +18,18 @@ export interface ApplicationConfig {
   readonly displayName: string,
   readonly path: string,
   readonly appName: string,
-  readonly entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application
+  readonly entrypoint: (
+    compositor: LocalWindowCompositor,
+    manager: LocalApplicationManager,
+    apis: SystemAPIs
+  ) => Application
 }
 
 export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
-    protected readonly manager: LocalApplicationManager
+    protected readonly manager: LocalApplicationManager,
+    protected readonly apis: SystemAPIs
   ) {}
 
   abstract config(): ApplicationConfig;
@@ -65,7 +71,8 @@ export class ApplicationManager implements BaseApplicationManager {
 
   constructor(
     private windowCompositor: WindowCompositor,
-    private fileSystem: FileSystem
+    private fileSystem: FileSystem,
+    private apis: SystemAPIs
   ) {
     windowCompositor.registerApplicationManager(this);
   }
@@ -112,7 +119,7 @@ export class ApplicationManager implements BaseApplicationManager {
       return Ok(parent.processId);
     } else {
       const instance = {
-        application: application.entrypoint(compositor, manager),
+        application: application.entrypoint(compositor, manager, this.apis),
         context: new ApplicationContext(path, compositor),
         processId: this.processId
       };

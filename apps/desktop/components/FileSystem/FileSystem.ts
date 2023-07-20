@@ -5,6 +5,7 @@ import { aboutConfig } from "@/applications/AboutApplication";
 import { LocalWindowCompositor } from "../WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
+import { SystemAPIs } from "../Desktop";
 
 export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
@@ -23,12 +24,12 @@ export type FileSystemApplication = {
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
-  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application
+  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application
 }
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
-function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application): FileSystemApplication {
+function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application): FileSystemApplication {
   return {
     parent,
     kind: 'application',
@@ -74,23 +75,34 @@ function constructPath(node: FileSystemNode): string {
   return path;
 }
 
+export function createBaseFileSystem(): FileSystem {
+  const fileSystem = new FileSystem();
+  const rootEntry = fileSystem.getDirectory('/');
+
+  if (!rootEntry.ok) { return fileSystem; }
+  const root = rootEntry.value;
+
+  // Create base file tree
+  fileSystem.addDirectory(root, 'Applications');
+
+  fileSystem.addApplication(finderConfig);
+  fileSystem.addApplication(aboutConfig);
+  fileSystem.addApplication(infoConfig);
+
+  const home = fileSystem.addDirectory(root, 'Home');
+  const joey = fileSystem.addDirectory(home, 'Joey');
+  fileSystem.addDirectory(joey, 'Desktop');
+
+  return fileSystem;
+}
+
 export class FileSystem {
-  private root: FileSystemDirectory = createRootNode();
+  private root: FileSystemDirectory;
   private lookupTable: Record<string, FileSystemNode> = {};
 
-  public init() {
+  constructor() {
+    this.root = createRootNode();
     this.lookupTable['/'] = this.root;
-
-    // create file tree
-    this.addDirectory(this.root, 'Applications');
-
-    this.addApplication(finderConfig);
-    this.addApplication(aboutConfig);
-    this.addApplication(infoConfig);
-
-    const home = this.addDirectory(this.root, 'Home');
-    const joey = this.addDirectory(home, 'Joey');
-    this.addDirectory(joey, 'Desktop');
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
@@ -129,7 +141,7 @@ export class FileSystem {
     return Ok(node.value);
   }
 
-  private addApplication(config: ApplicationConfig): Result<FileSystemApplication, Error> {
+  public addApplication(config: ApplicationConfig): Result<FileSystemApplication, Error> {
     const parent = this.lookupTable[config.path];
     if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
 
