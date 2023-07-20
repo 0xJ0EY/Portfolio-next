@@ -9,7 +9,7 @@ import { MenuBar } from './MenuBar';
 import dynamic from 'next/dynamic';
 
 const DesktopIcon = dynamic(() => import('./Icons/DesktopIcon'));
-const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
+const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
 
 interface ApplicationData {
   window: Window,

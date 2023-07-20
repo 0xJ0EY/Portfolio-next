@@ -1,11 +1,11 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
-import React from "react";
 import { ApplicationEvent } from "./ApplicationEvents";
 import { Application, ApplicationConfig } from "./ApplicationManager";
 import { LocalApplicationManager } from "./LocalApplicationManager";
+import dynamic from 'next/dynamic';
 
-const View = React.lazy(() => import('./InfoApplicationView'));
+const View = dynamic(() => import('./InfoApplicationView'));
 
 export class InfoConfig implements ApplicationConfig {
   public readonly displayName = 'Info';

@@ -1,11 +1,10 @@
 import { Chain, Node } from "./Chain";
-import { LazyExoticComponent } from "react"
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
-export type WindowApplication = LazyExoticComponent<(props: { application: Application, windowContext: WindowContext }) => JSX.Element>;
-export type WindowApplicationGenerator = () => WindowApplication;
+export type WindowApplication = React.ComponentType<{ application: Application, windowContext: WindowContext }>
+export type WindowApplicationGenerator = () => WindowApplication
 
 export interface WindowContext {
   readonly id: number
