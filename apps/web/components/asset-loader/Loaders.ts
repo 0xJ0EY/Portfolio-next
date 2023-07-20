@@ -67,7 +67,9 @@ const getTargetDomain = (): string => {
   }
 
   if (env === 'preview' || env === 'development') {
-    const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? ''
+    console.log(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL);
+
+    const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? window.location.host;
 
     return transformWebUrlToDesktop(vercelUrl);
   } else {
