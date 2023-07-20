@@ -112,6 +112,10 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
     const node = output.current;
     if (node === null) { return; }
 
+    // Register the event listeners here, so we don't pollute the window with all event listeners
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointermove', onPointerMove);
+
     isDown.current = true;
     const resizeAxis = getResizeAxis(evt);
 
@@ -160,6 +164,9 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   }
 
   function onPointerUp(evt: PointerEvent) {
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointermove', onPointerMove);
+    
     isDown.current = false;
     setResizing(false);
   }
@@ -245,14 +252,10 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 
     node.addEventListener('pointerdown', onPointerDown);
     node.addEventListener('pointermove', onPointerMoveOnElement);
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointermove', onPointerMove);
     
     return () => {
       node.removeEventListener('pointerdown', onPointerDown);
       node.removeEventListener('pointermove', onPointerMoveOnElement);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointermove', onPointerMove);
     };
   }, []);
 
@@ -322,6 +325,9 @@ const WindowHeader = (
 
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
     
     // I cannot put a ref on the root, due to rerenders to this is the solution :^)
     const windowRoot = output.current!.parentNode!.parentNode!.parentNode as HTMLDivElement;
@@ -373,6 +379,9 @@ const WindowHeader = (
   }
 
   function onPointerUp(evt: PointerEvent) {
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+
     setDragging(false);
     isDown.current = false;
   }
@@ -382,13 +391,9 @@ const WindowHeader = (
     if (node === null) { return; }
 
     node.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
 
     return () => {
       node.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
     }
 
   }, []);
