@@ -51,8 +51,6 @@ export const Dock = (manager: ApplicationManager) => {
       })
     });
 
-    console.log(result.toArray());
-
     return result.toArray();
   }
 

@@ -50,6 +50,18 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   return null;
 }
 
+const getTargetDomain = (): string => {
+  // const env = process.env.VERCEL_ENV ?? 'local';
+
+  const env = 'preview';
+
+  if (env === 'local') {
+    return process.env.DESKTOP_URL ?? 'http://localhost:3001';
+  }
+
+  return '';
+}
+
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
   gltf.scene.name = DisplayParentName;
@@ -99,10 +111,9 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
 
-  // iframe.src = "http://192.168.178.49:3001";
-  iframe.src = "http://localhost:3001";
-  // iframe.src = "https://example.com/";
-  // iframe.src = "https://joeyderuiter.me";
+  console.log(getTargetDomain());
+
+  iframe.src = getTargetDomain();
 
   div.appendChild(iframe);
 

@@ -1,3 +1,4 @@
+import { FileDragWrapper } from '@/events/DragWrapper';
 import { useEffect, useRef, RefObject } from 'react';
 
 export default function DesktopIcon(props: any) {
@@ -21,8 +22,10 @@ export default function DesktopIcon(props: any) {
   }, []);
   
   return <>
-    <div ref={ref}>
-      <h1>foobar</h1>
-    </div>
+    <FileDragWrapper>
+      <div ref={ref}>
+        <h1>foobar</h1>
+      </div>
+    </FileDragWrapper>
   </>
 }

@@ -91,7 +91,7 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   public focus(application: Application) {
-    console.log(application.config().displayName);
+    console.log(`Application focussed: ${application.config().displayName}`);
   }
 
   public listApplications(): Application[] {
