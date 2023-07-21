@@ -1,4 +1,4 @@
-import { FileDragWrapper } from '@/events/DragWrapper';
+import { FileDragWrapper } from '@/apis/DragAndDrop/DragWrapper';
 import { SystemAPIs } from '../Desktop';
 
 export default function DesktopIcon(props: { apis: SystemAPIs }) {

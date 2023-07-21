@@ -1,6 +1,6 @@
 import { useEffect, useRef, RefObject, ReactNode, MutableRefObject } from 'react';
-import { DragAndDropService, DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragLeave } from './Dragging';
-import { FileSystemNode } from '@/components/FileSystem/FileSystem';
+import { DragAndDropService, DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragLeave } from './DragAndDrop';
+import { FileSystemNode } from '@/apis/FileSystem/FileSystem';
 
 type Props = {
   children: ReactNode,

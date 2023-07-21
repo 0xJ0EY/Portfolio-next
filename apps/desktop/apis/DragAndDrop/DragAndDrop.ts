@@ -1,4 +1,4 @@
-import { FileSystemNode } from "@/components/FileSystem/FileSystem";
+import { FileSystemNode } from "@/apis/FileSystem/FileSystem";
 
 export const FileSystemItemDragEnter = "fs_item_drag_enter";
 export const FileSystemItemDragLeave = "fs_item_drag_leave";

@@ -3,11 +3,11 @@ import React, { useEffect, useRef, useReducer, useState } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import { ApplicationManager } from '@/applications/ApplicationManager';
-import { FileSystem, createBaseFileSystem } from './FileSystem/FileSystem';
+import { FileSystem, createBaseFileSystem } from '../apis/FileSystem/FileSystem';
 import { Dock } from './Dock';
 import { MenuBar } from './MenuBar';
 import dynamic from 'next/dynamic';
-import { DragAndDropService } from '@/events/Dragging';
+import { DragAndDropService } from '@/apis/DragAndDrop/DragAndDrop';
 
 const DesktopIcon = dynamic(() => import('./Icons/DesktopIcon'));
 const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));

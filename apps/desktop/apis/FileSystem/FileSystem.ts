@@ -1,11 +1,11 @@
 import { Application, ApplicationConfig, ApplicationManager } from "@/applications/ApplicationManager";
-import { Err, Ok, Result } from "../util";
+import { Err, Ok, Result } from "../../components/util";
 import { infoConfig } from "@/applications/InfoApplication";
 import { aboutConfig } from "@/applications/AboutApplication";
-import { LocalWindowCompositor } from "../WindowManagement/LocalWindowCompositor";
+import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
-import { SystemAPIs } from "../Desktop";
+import { SystemAPIs } from "../../components/Desktop";
 
 export type FileSystemDirectory = {
   parent: FileSystemDirectory | null

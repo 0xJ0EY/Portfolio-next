@@ -1,7 +1,7 @@
 import { WindowContext } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState, useRef, RefObject } from 'react';
 import { Application } from './ApplicationManager';
-import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/events/Dragging';
+import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
 
 export default function AboutApplicationView(props: { application: Application, windowContext: WindowContext }) {
   const { application, windowContext } = props;

@@ -1,4 +1,4 @@
-import { FileSystem, FileSystemApplication } from "@/components/FileSystem/FileSystem";
+import { FileSystem, FileSystemApplication } from "@/apis/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
