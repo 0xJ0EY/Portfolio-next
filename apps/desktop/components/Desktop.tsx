@@ -68,8 +68,8 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
   }
 };
 
-export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
-  const { windowCompositor } = props;
+export const Desktop = (props: { windowCompositor: WindowCompositor, apis: SystemAPIs }) => {
+  const { windowCompositor, apis } = props;
 
   const parentNode = useRef(null);
 
@@ -87,7 +87,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
       <div>
-        <DesktopIcon/>
+        <DesktopIcon apis={apis}/>
       </div>
 
       {applicationWindows.map(x => 
@@ -129,7 +129,7 @@ export const OperatingSystem = () => {
   return <>
     <div className={styles.operatingSystem}>
     <MenuBar/>
-    <Desktop windowCompositor={windowCompositor} />
+    <Desktop apis={apis} windowCompositor={windowCompositor} />
     {dock}
     </div>
   </>

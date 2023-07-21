@@ -89,8 +89,8 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(infoConfig);
 
-  const home = fileSystem.addDirectory(root, 'Home');
-  const joey = fileSystem.addDirectory(home, 'Joey');
+  const home = fileSystem.addDirectory(root, 'home');
+  const joey = fileSystem.addDirectory(home, 'joey');
   fileSystem.addDirectory(joey, 'Desktop');
 
   return fileSystem;

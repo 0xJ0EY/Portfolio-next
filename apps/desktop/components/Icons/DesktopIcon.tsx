@@ -1,29 +1,17 @@
 import { FileDragWrapper } from '@/events/DragWrapper';
-import { useEffect, useRef, RefObject } from 'react';
+import { SystemAPIs } from '../Desktop';
 
-export default function DesktopIcon(props: any) {
-  const ref: RefObject<HTMLDivElement> = useRef(null);
+export default function DesktopIcon(props: { apis: SystemAPIs }) {
+  const { apis } = props; 
 
-  function onDrag() {
-    console.log('drag');
-  };
+  const dir = apis.fileSystem.getDirectory('/home/joey/Desktop');
+  if (!dir.ok) { return <></> };
 
-
-  useEffect(() => {
-    if (!ref.current) { return; }
-    const node = ref.current;
-
-    node.addEventListener('drag', onDrag);
-
-    return () => {
-      node.removeEventListener('drag', onDrag);
-    }
-
-  }, []);
+  const node = dir.value;
   
   return <>
-    <FileDragWrapper>
-      <div ref={ref}>
+    <FileDragWrapper file={node} dragAndDrop={apis.dragAndDrop}>
+      <div>
         <h1>foobar</h1>
       </div>
     </FileDragWrapper>
