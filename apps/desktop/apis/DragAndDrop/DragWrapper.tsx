@@ -69,6 +69,7 @@ export function FileDragWrapper({ children, file, dragAndDrop }: Props) {
 
     dragSession.current?.drop(evt.clientX, evt.clientY);
     dragSession.current = null;
+    currentNode.current = undefined;
 
     isDragging.current = false;
   }
@@ -85,7 +86,7 @@ export function FileDragWrapper({ children, file, dragAndDrop }: Props) {
   }, []);
 
   return <>
-  <div ref={ref} className='wrapper'>
+  <div ref={ref} className='drag-and-drop-wrapper'>
     {children}
   </div>
   </>

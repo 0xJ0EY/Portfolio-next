@@ -12,19 +12,22 @@ export type FileSystemDirectory = {
   kind: 'directory',
   name: string,
   children: FileSystemNode[]
+  editable: boolean
 };
 
 export type FileSystemFile = {
   parent: FileSystemDirectory
   kind: 'file',
-  name: string
+  name: string,
+  editable: boolean
 };
 
 export type FileSystemApplication = {
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
-  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application
+  editable: boolean,
+  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application,
 }
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
@@ -34,6 +37,7 @@ function createApplication(parent: FileSystemDirectory, name: string, entrypoint
     parent,
     kind: 'application',
     name,
+    editable: false,
     entrypoint
   }
 }
@@ -43,15 +47,17 @@ function createRootNode(): FileSystemDirectory {
     parent: null,
     kind: 'directory',
     name: '/',
+    editable: false,
     children: []
   }
 }
 
-function createDirectory(parent: FileSystemDirectory, name: string): FileSystemDirectory {
+function createDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
   return {
     parent,
     kind: 'directory',
     name,
+    editable,
     children: []
   }
 }
@@ -83,15 +89,20 @@ export function createBaseFileSystem(): FileSystem {
   const root = rootEntry.value;
 
   // Create base file tree
-  fileSystem.addDirectory(root, 'Applications');
+  fileSystem.addDirectory(root, 'Applications', false);
 
   fileSystem.addApplication(finderConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(infoConfig);
 
-  const home = fileSystem.addDirectory(root, 'home');
-  const joey = fileSystem.addDirectory(home, 'joey');
-  fileSystem.addDirectory(joey, 'Desktop');
+  // Create macOS like Users folder
+  const users = fileSystem.addDirectory(root, 'Users', false);
+  const joey = fileSystem.addDirectory(users, 'joey', false);
+  const desktop = fileSystem.addDirectory(joey, 'Desktop', false);
+  fileSystem.addDirectory(desktop, 'foo', true);
+
+  // Create unix like /home folder (macOS also has one)
+  fileSystem.addDirectory(root, 'home', false);
 
   return fileSystem;
 }
@@ -154,8 +165,8 @@ export class FileSystem {
     return Ok(application);
   }
 
-  public addDirectory(parent: FileSystemDirectory, name: string): FileSystemDirectory {
-    const directory = createDirectory(parent, name);
+  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
+    const directory = createDirectory(parent, name, editable);
     parent.children.push(directory);
     this.lookupTable[constructPath(directory)] = directory;
 
