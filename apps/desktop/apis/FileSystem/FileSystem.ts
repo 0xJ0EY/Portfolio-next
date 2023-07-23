@@ -8,6 +8,7 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/Desktop";
 
 export type FileSystemDirectory = {
+  id: number,
   parent: FileSystemDirectory | null
   kind: 'directory',
   name: string,
@@ -16,6 +17,7 @@ export type FileSystemDirectory = {
 };
 
 export type FileSystemFile = {
+  id: number,
   parent: FileSystemDirectory
   kind: 'file',
   name: string,
@@ -23,6 +25,7 @@ export type FileSystemFile = {
 };
 
 export type FileSystemApplication = {
+  id: number,
   parent: FileSystemDirectory
   kind: 'application'
   name: string,
@@ -32,8 +35,9 @@ export type FileSystemApplication = {
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
-function createApplication(parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application): FileSystemApplication {
+function createApplication(id: number, parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application): FileSystemApplication {
   return {
+    id,
     parent,
     kind: 'application',
     name,
@@ -44,6 +48,7 @@ function createApplication(parent: FileSystemDirectory, name: string, entrypoint
 
 function createRootNode(): FileSystemDirectory {
   return {
+    id: 0,
     parent: null,
     kind: 'directory',
     name: '/',
@@ -52,8 +57,9 @@ function createRootNode(): FileSystemDirectory {
   }
 }
 
-function createDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
   return {
+    id,
     parent,
     kind: 'directory',
     name,
@@ -100,6 +106,7 @@ export function createBaseFileSystem(): FileSystem {
   const joey = fileSystem.addDirectory(users, 'joey', false);
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false);
   fileSystem.addDirectory(desktop, 'foo', true);
+  fileSystem.addDirectory(desktop, 'bar', true);
 
   // Create unix like /home folder (macOS also has one)
   fileSystem.addDirectory(root, 'home', false);
@@ -108,12 +115,14 @@ export function createBaseFileSystem(): FileSystem {
 }
 
 export class FileSystem {
+  private id: number;
   private root: FileSystemDirectory;
   private lookupTable: Record<string, FileSystemNode> = {};
 
   constructor() {
     this.root = createRootNode();
     this.lookupTable['/'] = this.root;
+    this.id = 1; // Root is already 0
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
@@ -156,7 +165,7 @@ export class FileSystem {
     const parent = this.lookupTable[config.path];
     if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
 
-    const application = createApplication(parent, config.appName, config.entrypoint);
+    const application = createApplication(++this.id, parent, config.appName, config.entrypoint);
 
     parent.children.push(application);
 
@@ -166,7 +175,7 @@ export class FileSystem {
   }
 
   public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
-    const directory = createDirectory(parent, name, editable);
+    const directory = createDirectory(++this.id, parent, name, editable);
     parent.children.push(directory);
     this.lookupTable[constructPath(directory)] = directory;
 

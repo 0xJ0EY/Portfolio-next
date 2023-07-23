@@ -9,7 +9,7 @@ import { MenuBar } from './MenuBar';
 import dynamic from 'next/dynamic';
 import { DragAndDropService } from '@/apis/DragAndDrop/DragAndDrop';
 
-const DesktopIcon = dynamic(() => import('./Icons/DesktopIcon'));
+const FolderView = dynamic(() => import('./Folder/FolderView'));
 const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
 
 interface ApplicationData {
@@ -87,7 +87,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, apis: Syste
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
       <div>
-        <DesktopIcon apis={apis}/>
+        <FolderView directory='/Users/joey/Desktop' apis={apis}/>
       </div>
 
       {applicationWindows.map(x => 

@@ -2,6 +2,7 @@ import { FileDragWrapper } from '@/apis/DragAndDrop/DragWrapper';
 import { SystemAPIs } from '../Desktop';
 import Image from 'next/image';
 import styles from '@/components/Icons/DesktopIcon.module.css';
+import { FileSystemNode } from '@/apis/FileSystem/FileSystem';
 
 function RenderTitle(props: { title: string }) {
   const { title } = props;
@@ -25,13 +26,11 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
-export default function DesktopIcon(props: { apis: SystemAPIs }) {
-  const { apis } = props; 
+export default function DesktopIcon(props: { file: FileSystemNode, apis: SystemAPIs }) {
+  const { file, apis } = props; 
 
-  const dir = apis.fileSystem.getDirectory('/Users/joey/Desktop/foo');
-  if (!dir.ok) { return <></> };
+  function onClick() {}
 
-  const file = dir.value;
   return <>
     <div className={file.kind + " " + styles.container}>
       <div className={styles.imageContainer}>

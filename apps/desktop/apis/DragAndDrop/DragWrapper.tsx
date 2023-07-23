@@ -5,12 +5,13 @@ import { FileSystemNode } from '@/apis/FileSystem/FileSystem';
 type Props = {
   children: ReactNode,
   file: FileSystemNode,
-  dragAndDrop: DragAndDropService
+  dragAndDrop: DragAndDropService,
+  onClick?: (FileSystemItemDragDrop: number) => void,
 }
 
 const DraggingThreshold = 5;
 
-export function FileDragWrapper({ children, file, dragAndDrop }: Props) {
+export function FileDragWrapper({ children, file, dragAndDrop, onClick}: Props) {
   const ref: RefObject<HTMLDivElement> = useRef(null);
 
   const origin = useRef({ x: 0, y: 0 });
@@ -22,6 +23,8 @@ export function FileDragWrapper({ children, file, dragAndDrop }: Props) {
   function onPointerDown(evt: PointerEvent) {
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
+
+    if (onClick) { onClick(file.id); }
 
     origin.current = { x: evt.clientX, y: evt.clientY };
   }
