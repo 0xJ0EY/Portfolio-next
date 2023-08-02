@@ -7,14 +7,35 @@ import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/Desktop";
 
+type FileSystemDirectorySettings = {
+  alwaysOpenAsIconView: boolean,
+  sortBy: null, // TODO: Implement this
+  sortDirection: 'horizontal' | 'vertical',
+  sortOrigin: 'top-left' | 'top-right',
+}
+
+type FileSystemDirectoryContent = {
+  view: 'icons' | 'list',
+  width: number,
+  height: number
+}
+
 export type FileSystemDirectory = {
   id: number,
   parent: FileSystemDirectory | null
   kind: 'directory',
   name: string,
-  children: FileSystemNode[]
+  settings: FileSystemDirectorySettings,
+  content: FileSystemDirectoryContent,
+  children: FileSystemDirectoryEntry[]
   editable: boolean
 };
+
+export type FileSystemDirectoryEntry = {
+  node: FileSystemNode,
+  x: number,
+  y: number
+}
 
 export type FileSystemFile = {
   id: number,
@@ -51,6 +72,17 @@ function createRootNode(): FileSystemDirectory {
     id: 0,
     parent: null,
     kind: 'directory',
+    settings: {
+      alwaysOpenAsIconView: false,
+      sortBy: null, // TODO: Implement this
+      sortDirection: 'horizontal',
+      sortOrigin: 'top-left',
+    },
+    content: {
+      view: 'icons',
+      width: 200,
+      height: 80
+    },
     name: '/',
     editable: false,
     children: []
@@ -62,6 +94,17 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     id,
     parent,
     kind: 'directory',
+    settings: {
+      alwaysOpenAsIconView: false,
+      sortBy: null, // TODO: Implement this
+      sortDirection: 'horizontal',
+      sortOrigin: 'top-left',
+    },
+    content: {
+      view: 'icons',
+      width: 200,
+      height: 80
+    },
     name,
     editable,
     children: []
@@ -112,6 +155,15 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addDirectory(root, 'home', false);
 
   return fileSystem;
+}
+
+
+function calculateNodePosition(others: FileSystemDirectoryEntry[] , node: FileSystemNode): { x: number, y: number } {
+  return { x: 0, y: 0 };
+}
+
+export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode) {
+
 }
 
 export class FileSystem {
@@ -167,7 +219,7 @@ export class FileSystem {
 
     const application = createApplication(++this.id, parent, config.appName, config.entrypoint);
 
-    parent.children.push(application);
+    addNodeToDirectory(parent, application);
 
     this.lookupTable[constructPath(application)] = application;
 
@@ -176,7 +228,9 @@ export class FileSystem {
 
   public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
     const directory = createDirectory(++this.id, parent, name, editable);
-    parent.children.push(directory);
+
+    addNodeToDirectory(parent, directory);
+
     this.lookupTable[constructPath(directory)] = directory;
 
     return directory;

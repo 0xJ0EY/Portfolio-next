@@ -24,7 +24,7 @@ export default function FolderView({ directory, apis }: Props) {
 
     console.log(dir.value.children);
 
-    setFiles(dir.value.children);
+    // setFiles(dir.value.children);
   }
 
   useEffect(() => {
