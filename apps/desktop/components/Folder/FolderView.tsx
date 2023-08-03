@@ -1,4 +1,4 @@
-import { FileSystem, FileSystemNode } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, FileSystem, FileSystemNode } from '@/apis/FileSystem/FileSystem';
 import { useState, useEffect } from 'react';
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
@@ -15,23 +15,21 @@ type Props = {
 export default function FolderView({ directory, apis }: Props) {
   const fs = apis.fileSystem;
 
-  const [files, setFiles] = useState<FileSystemNode[]>([]);
+  const [files, setFiles] = useState<DirectoryEntry[]>([]);
 
   function loadFiles(directory: string) {
     // TODO: Add something like a subscription for directory changes
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return; }
-
-    console.log(dir.value.children);
-
-    // setFiles(dir.value.children);
+    
+    setFiles(dir.value.children);
   }
 
   useEffect(() => {
     loadFiles(directory);
   }, []);
 
-  const icons = files.map((x, index) => <DesktopIcon key={index} file={x} apis={apis} />);
+  const icons = files.map((x, index) => <DesktopIcon key={index} entry={x} apis={apis} />);
   
   return <>{icons}</>
 }

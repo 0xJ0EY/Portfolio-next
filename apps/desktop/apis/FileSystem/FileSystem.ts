@@ -7,17 +7,23 @@ import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/Desktop";
 
-type FileSystemDirectorySettings = {
+type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
   sortBy: null, // TODO: Implement this
   sortDirection: 'horizontal' | 'vertical',
   sortOrigin: 'top-left' | 'top-right',
 }
 
-type FileSystemDirectoryContent = {
+type DirectoryContent = {
   view: 'icons' | 'list',
   width: number,
   height: number
+}
+
+export type DirectoryEntry = {
+  node: FileSystemNode,
+  x: number,
+  y: number
 }
 
 export type FileSystemDirectory = {
@@ -25,17 +31,11 @@ export type FileSystemDirectory = {
   parent: FileSystemDirectory | null
   kind: 'directory',
   name: string,
-  settings: FileSystemDirectorySettings,
-  content: FileSystemDirectoryContent,
-  children: FileSystemDirectoryEntry[]
+  settings: DirectorySettings,
+  content: DirectoryContent,
+  children: DirectoryEntry[]
   editable: boolean
 };
-
-export type FileSystemDirectoryEntry = {
-  node: FileSystemNode,
-  x: number,
-  y: number
-}
 
 export type FileSystemFile = {
   id: number,
@@ -56,7 +56,12 @@ export type FileSystemApplication = {
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
-function createApplication(id: number, parent: FileSystemDirectory, name: string, entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application): FileSystemApplication {
+function createApplication(
+  id: number,
+  parent: FileSystemDirectory,
+  name: string,
+  entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application
+): FileSystemApplication {
   return {
     id,
     parent,
@@ -80,8 +85,8 @@ function createRootNode(): FileSystemDirectory {
     },
     content: {
       view: 'icons',
-      width: 200,
-      height: 80
+      width: 800,
+      height: 400
     },
     name: '/',
     editable: false,
@@ -102,8 +107,8 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     },
     content: {
       view: 'icons',
-      width: 200,
-      height: 80
+      width: 800,
+      height: 400
     },
     name,
     editable,
@@ -144,6 +149,9 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(infoConfig);
 
+  // Create unix like /home folder (macOS also has one)
+  fileSystem.addDirectory(root, 'home', false);
+
   // Create macOS like Users folder
   const users = fileSystem.addDirectory(root, 'Users', false);
   const joey = fileSystem.addDirectory(users, 'joey', false);
@@ -151,19 +159,119 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addDirectory(desktop, 'foo', true);
   fileSystem.addDirectory(desktop, 'bar', true);
 
-  // Create unix like /home folder (macOS also has one)
-  fileSystem.addDirectory(root, 'home', false);
-
   return fileSystem;
 }
 
+function entriesWithinSelection(entries: DirectoryEntry[], x: number, y: number, dimensions: { width: number, height: number }): boolean {
+  const { width, height } = dimensions;
+  // NOTE(Joey): The width & height are used for both the new incoming entry as the already existing entries.
+  // It might be a good idea to make this static to the file system/configuration, instead of just randomly defined
 
-function calculateNodePosition(others: FileSystemDirectoryEntry[] , node: FileSystemNode): { x: number, y: number } {
-  return { x: 0, y: 0 };
+  for (const entry of entries) {
+    const a = {
+      x1: x,
+      x2: x + width,
+      y1: y,
+      y2: y + height
+    };
+
+    const b = {
+      x1: entry.x,
+      x2: entry.x + width,
+      y1: entry.y,
+      y2: entry.y + height
+    };
+
+    const horizontal  = a.x1 < b.x2 && a.x2 > b.x1;
+    const vertical    = a.y1 < b.y2 && a.y2 > b.y1;
+
+    const overlap = horizontal && vertical;
+
+    if (overlap) { return true; }
+  }
+
+  return false;
+}
+
+function generatePositionRange(settings: DirectorySettings, content: DirectoryContent, boundingBox: { width: number, height: number}): { x: number, y: number }[] {
+  const direction = settings.sortDirection;
+  const origin  = settings.sortOrigin;
+
+  const horizontalSteps = Math.floor(content.width / boundingBox.width);
+  const verticalSteps = Math.floor(content.height / boundingBox.height);
+
+  let steps = [];
+
+  function positionX(iteration: number, direction: 'horizontal' | 'vertical'): number {
+
+    switch (direction) {
+      case "horizontal":
+        if (origin === 'top-right') {
+          return horizontalSteps - iteration % horizontalSteps;
+        } else {
+          return iteration % horizontalSteps;
+        }
+
+      case "vertical":
+        return Math.floor(iteration / verticalSteps);
+    }
+  }
+
+  function positionY(iteration: number, direction: 'horizontal' | 'vertical'): number {
+    switch (direction) {
+      case "horizontal":
+        return Math.floor(iteration / horizontalSteps);
+
+      case "vertical":
+        return iteration % verticalSteps;
+    }
+  }
+
+  const iterations = horizontalSteps * verticalSteps;
+
+  for (let iteration = 0; iteration < iterations; iteration++) {
+    const x = positionX(iteration, direction) * boundingBox.width;
+    const y = positionY(iteration, direction) * boundingBox.height;
+
+    steps.push({ x, y });
+  }
+
+  return steps;
+}
+
+function calculateNodePosition(
+  settings: DirectorySettings,
+  content: DirectoryContent,
+  others: DirectoryEntry[]
+): { x: number, y: number } {
+  const nodeBoundingBox = { width: 120, height: 80 };
+
+  const positionRange = generatePositionRange(settings, content, nodeBoundingBox);
+  const possiblePosition = positionRange.find(pos => !entriesWithinSelection(others, pos.x, pos.y, nodeBoundingBox));
+
+  // TODO: handle not having a possible position
+  if (!possiblePosition) { return { x: 0, y: 0 }; }
+
+  return possiblePosition;
 }
 
 export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode) {
 
+  console.log('Adding node: ' + node.name + ' to ' + directory.name);
+
+  const { x, y } = calculateNodePosition(
+    directory.settings,
+    directory.content,
+    directory.children
+  );
+
+  const entry: DirectoryEntry = {
+    node,
+    x,
+    y
+  };
+
+  directory.children.push(entry);
 }
 
 export class FileSystem {
