@@ -33,7 +33,7 @@ export default function DesktopIcon(props: { entry: DirectoryEntry, apis: System
   function onClick() {}
 
   return <>
-    <div className={file.kind + " " + styles.container}>
+    <div className={file.kind + " " + styles.container} style={{top: `${entry.y}px`, left: `${entry.x}px`}}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
           <FileDragWrapper file={file} dragAndDrop={apis.dragAndDrop}>

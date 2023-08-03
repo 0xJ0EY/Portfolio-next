@@ -86,9 +86,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, apis: Syste
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
-      <div>
-        <FolderView directory='/Users/joey/Desktop' apis={apis}/>
-      </div>
+      <FolderView directory='/Users/joey/Desktop' apis={apis}/>
 
       {applicationWindows.map(x => 
         <div key={x.window.id}>

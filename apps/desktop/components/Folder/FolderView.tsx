@@ -2,6 +2,7 @@ import { DirectoryEntry, FileSystem, FileSystemNode } from '@/apis/FileSystem/Fi
 import { useState, useEffect } from 'react';
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
+import styles from '@/components/Folder/FolderView.module.css';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -31,5 +32,5 @@ export default function FolderView({ directory, apis }: Props) {
 
   const icons = files.map((x, index) => <DesktopIcon key={index} entry={x} apis={apis} />);
   
-  return <>{icons}</>
+  return <div className={styles.folder}>{icons}</div>
 }
