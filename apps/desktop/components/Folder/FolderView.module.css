@@ -5,3 +5,10 @@
 
   position: relative;
 }
+
+.selectionBox {
+  display: block;
+  position: absolute;
+  background-color: hotpink;
+  opacity: 0.7;
+}
