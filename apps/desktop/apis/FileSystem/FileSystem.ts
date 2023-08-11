@@ -6,6 +6,7 @@ import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWi
 import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/Desktop";
+import { rectangleIntersection } from "@/applications/math";
 
 type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -23,7 +24,8 @@ type DirectoryContent = {
 export type DirectoryEntry = {
   node: FileSystemNode,
   x: number,
-  y: number
+  y: number,
+  selected: boolean,
 }
 
 export type FileSystemDirectory = {
@@ -182,10 +184,7 @@ function entriesWithinSelection(entries: DirectoryEntry[], x: number, y: number,
       y2: entry.y + height
     };
 
-    const horizontal  = a.x1 < b.x2 && a.x2 > b.x1;
-    const vertical    = a.y1 < b.y2 && a.y2 > b.y1;
-
-    const overlap = horizontal && vertical;
+    const overlap = rectangleIntersection(a, b);
 
     if (overlap) { return true; }
   }
@@ -268,7 +267,8 @@ export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSys
   const entry: DirectoryEntry = {
     node,
     x,
-    y
+    y,
+    selected: false
   };
 
   directory.children.push(entry);

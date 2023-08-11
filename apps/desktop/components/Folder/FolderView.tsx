@@ -3,6 +3,8 @@ import { useState, useRef, useEffect, RefObject } from 'react';
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
+import { DesktopIconHitBox } from '../Icons/DesktopIcon';
+import { Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -31,8 +33,16 @@ export default function FolderView({ directory, apis }: Props) {
   const fs = apis.fileSystem;
 
   const [files, setFiles] = useState<DirectoryEntry[]>([]);
+  const localFiles = useRef<DirectoryEntry[]>([]);
+
+  function updateFiles(files: DirectoryEntry[]) {
+    localFiles.current = files;
+    setFiles(files);
+  } 
+
   const ref: RefObject<HTMLDivElement> = useRef(null);
-  const start = useRef({x: 0, y: 0});
+
+  const selectionBoxStart = useRef({x: 0, y: 0});
   const [box, setBox] = useState<SelectionBox>({ open: false, x: 0, y: 0, width: 0, height: 0 });
 
   function getLocalCoordinates(evt: PointerEvent) {
@@ -44,15 +54,64 @@ export default function FolderView({ directory, apis }: Props) {
     return { x: localX, y: localY};
   }
 
+  function selectFile(evt: PointerEvent) {
+    const files = localFiles.current;
+    const point = getLocalCoordinates(evt);
+  }
+
+  function selectFiles(evt: PointerEvent) {
+    const files = localFiles.current;
+    const origin = selectionBoxStart.current;
+    const current = getLocalCoordinates(evt);
+    
+    const topLeftPoint = { x: Math.min(origin.x, current.x), y: Math.min(origin.y, current.y) };
+    const bottomRightPoint = { x: Math.max(origin.x, current.x), y: Math.max(origin.y, current.y) };
+
+    const selectionRect: Rectangle = {
+      x1: topLeftPoint.x,
+      x2: bottomRightPoint.x,
+      y1: topLeftPoint.y,
+      y2: bottomRightPoint.y
+    };
+
+    const updatedFiles = files.map(file => {
+      const hitBox = DesktopIconHitBox(file);
+      file.selected = rectangleAnyIntersection(selectionRect, hitBox);
+      return file;
+    });
+
+    updateFiles(updatedFiles);
+  }
+
+  function hasClickedFile(evt: PointerEvent): boolean {
+    const point = getLocalCoordinates(evt);
+    const files = localFiles.current;
+
+    return files.some(file => {
+      const hitBox = DesktopIconHitBox(file);
+      return pointInsideAnyRectangles(point, hitBox);
+    });
+  }
+
+  function onPointerDown(evt: PointerEvent) {
+    const clickedFile = hasClickedFile(evt);
+
+    if (clickedFile) {
+      selectFile(evt);
+    } else {
+      openSelectionBox(evt);
+    }
+  }
+
   function openSelectionBox(evt: PointerEvent) {
-    start.current = getLocalCoordinates(evt);
+    selectionBoxStart.current = getLocalCoordinates(evt);
 
     window.addEventListener('pointermove', moveSelectionBox);
     window.addEventListener('pointerup', closeSelectionBox);
   }
 
   function moveSelectionBox(evt: PointerEvent) {
-    const origin = start.current;
+    const origin = selectionBoxStart.current;
     const current = getLocalCoordinates(evt);
 
     const topLeftPoint = { x: Math.min(origin.x, current.x), y: Math.min(origin.y, current.y) };
@@ -65,41 +124,46 @@ export default function FolderView({ directory, apis }: Props) {
     const height = bottomRightPoint.y - topLeftPoint.y;
 
     setBox({ open: true, x, y, width, height });
+
+    selectFiles(evt);
   }
 
   function closeSelectionBox(evt: PointerEvent) {
-    const localBox = box;
-    localBox.open = false;
-    setBox(localBox);
+    function closeBox() {
+      const localBox = box;
+      localBox.open = false;
+      setBox(localBox);
+  
+      window.removeEventListener('pointermove', moveSelectionBox);
+      window.removeEventListener('pointerup', closeSelectionBox);
+    }
 
-    window.removeEventListener('pointermove', moveSelectionBox);
-    window.removeEventListener('pointerup', closeSelectionBox);
+    selectFiles(evt);
+    closeBox();
   }
 
   function loadFiles(directory: string) {
     // TODO: Add something like a subscription for directory changes
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return; }
-    
-    setFiles(dir.value.children);
+
+    updateFiles(dir.value.children);
   }
 
   useEffect(() => {
     if (!ref.current) { return; }
     const folder = ref.current;
 
-    console.log(folder);
-
-    folder.addEventListener('pointerdown', openSelectionBox);
-
-    loadFiles(directory)
+    folder.addEventListener('pointerdown', onPointerDown);
     
     return () => {
-      folder.removeEventListener('pointerdown', openSelectionBox);
+      folder.removeEventListener('pointerdown', onPointerDown);
     };
   }, []);
 
-  const icons = files.map((x, index) => <DesktopIcon key={index} entry={x} apis={apis} />);
+  useEffect(() => { loadFiles(directory); }, [directory]);
+
+  const icons = files.map((entry, index) => <DesktopIcon key={index} entry={entry} apis={apis} />);
 
   const selectionBox = SelectionBox(box);
   

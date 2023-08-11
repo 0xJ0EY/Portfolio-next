@@ -3,6 +3,38 @@ import { SystemAPIs } from '../Desktop';
 import Image from 'next/image';
 import styles from '@/components/Icons/DesktopIcon.module.css';
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
+import { Rectangle } from '@/applications/math';
+
+export const IconWidth    = 120;
+export const IconHeight   = 80;
+
+export const ImageHeight  = 60;
+export const ImageWidth   = 60;
+
+export const TextWidth    = 120;
+export const TextHeight   = 20;
+
+export function DesktopIconHitBox(entry: DirectoryEntry): Rectangle[] {
+  // TODO: Resize text hitbox based on the content
+
+  const imageHorizontalCenter = IconWidth / 2;
+
+  const image: Rectangle = {
+    x1: entry.x + (imageHorizontalCenter - (ImageWidth / 2)),
+    x2: entry.x + (imageHorizontalCenter + (ImageWidth / 2)),
+    y1: entry.y,
+    y2: entry.y + ImageHeight
+  };
+
+  const text: Rectangle = {
+    x1: entry.x,
+    x2: entry.x + IconWidth,
+    y1: entry.y + (IconHeight - TextHeight),
+    y2: entry.y + IconHeight
+  };
+
+  return [image, text];
+}
 
 function RenderTitle(props: { title: string }) {
   const { title } = props;
@@ -33,26 +65,23 @@ export default function DesktopIcon(props: { entry: DirectoryEntry, apis: System
   function onClick() {}
 
   return <>
+  {entry.selected ? "selected" : "not selected"}
     <div className={file.kind + " " + styles.container} style={{top: `${entry.y}px`, left: `${entry.x}px`}}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
-          <FileDragWrapper file={file} dragAndDrop={apis.dragAndDrop}>
-            <Image
-              draggable="false"
-              className={styles.image}
-              src="/icons/folder-icon.png"
-              alt='folder icon'
-              width={60}
-              height={60}
-              />
-          </FileDragWrapper>
+          <Image
+            draggable="false"
+            className={styles.image}
+            src="/icons/folder-icon.png"
+            alt='folder icon'
+            width={ImageWidth}
+            height={ImageHeight}
+            />
         </div>
       </div>
 
       <div className={styles.textContainer}>
-        <FileDragWrapper file={file} dragAndDrop={apis.dragAndDrop}>
-          <RenderTitle title={file.name}/>
-        </FileDragWrapper>
+        <RenderTitle title={file.name}/>
       </div>
     </div>
   </>
