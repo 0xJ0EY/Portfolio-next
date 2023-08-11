@@ -7,6 +7,7 @@ import { finderConfig } from "@/applications/Finder/FinderApplication";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/Desktop";
 import { rectangleIntersection } from "@/applications/math";
+import { Chain } from "@/data/Chain";
 
 type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -35,7 +36,7 @@ export type FileSystemDirectory = {
   name: string,
   settings: DirectorySettings,
   content: DirectoryContent,
-  children: DirectoryEntry[]
+  children: Chain<DirectoryEntry>
   editable: boolean
 };
 
@@ -92,7 +93,7 @@ function createRootNode(): FileSystemDirectory {
     },
     name: '/',
     editable: false,
-    children: []
+    children: new Chain()
   }
 }
 
@@ -114,7 +115,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     },
     name,
     editable,
-    children: []
+    children: new Chain()
   }
 }
 
@@ -261,7 +262,7 @@ export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSys
   const { x, y } = calculateNodePosition(
     directory.settings,
     directory.content,
-    directory.children
+    directory.children.toArray()
   );
 
   const entry: DirectoryEntry = {
@@ -271,7 +272,7 @@ export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSys
     selected: false
   };
 
-  directory.children.push(entry);
+  directory.children.append(entry);
 }
 
 export class FileSystem {

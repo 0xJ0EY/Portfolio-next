@@ -1,10 +1,11 @@
-import { DirectoryEntry, FileSystem, FileSystemNode } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject } from 'react';
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { DesktopIconHitBox } from '../Icons/DesktopIcon';
 import { Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
+import { Chain } from '../../data/Chain';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -33,11 +34,11 @@ export default function FolderView({ directory, apis }: Props) {
   const fs = apis.fileSystem;
 
   const [files, setFiles] = useState<DirectoryEntry[]>([]);
-  const localFiles = useRef<DirectoryEntry[]>([]);
+  const localFiles = useRef<Chain<DirectoryEntry>>(new Chain());
 
-  function updateFiles(files: DirectoryEntry[]) {
+  function updateFiles(files: Chain<DirectoryEntry>) {
     localFiles.current = files;
-    setFiles(files);
+    setFiles(files.toArray());
   } 
 
   const ref: RefObject<HTMLDivElement> = useRef(null);
@@ -57,6 +58,20 @@ export default function FolderView({ directory, apis }: Props) {
   function selectFile(evt: PointerEvent) {
     const files = localFiles.current;
     const point = getLocalCoordinates(evt);
+
+    let hasSelected = false;
+
+    for (let file of files.iterFromHead()) {
+      const hitBox = DesktopIconHitBox(file);
+
+      const selected = pointInsideAnyRectangles(point, hitBox);
+      const toggleSelected = selected && !hasSelected;
+
+      file.selected = toggleSelected
+      if (toggleSelected) { hasSelected = true; }
+    }
+
+    updateFiles(files);
   }
 
   function selectFiles(evt: PointerEvent) {
@@ -74,30 +89,39 @@ export default function FolderView({ directory, apis }: Props) {
       y2: bottomRightPoint.y
     };
 
-    const updatedFiles = files.map(file => {
+    for (let file of files.iterFromHead()) {
       const hitBox = DesktopIconHitBox(file);
       file.selected = rectangleAnyIntersection(selectionRect, hitBox);
-      return file;
-    });
+    }
 
-    updateFiles(updatedFiles);
+    updateFiles(files);
   }
 
-  function hasClickedFile(evt: PointerEvent): boolean {
+  function hasClickedFile(evt: PointerEvent): DirectoryEntry | null {
     const point = getLocalCoordinates(evt);
     const files = localFiles.current;
 
-    return files.some(file => {
+    for (const file of files.iterFromTail()) {
       const hitBox = DesktopIconHitBox(file);
-      return pointInsideAnyRectangles(point, hitBox);
-    });
+
+      if (pointInsideAnyRectangles(point, hitBox)) {
+        return file;
+      }
+    }
+
+    return null;
   }
 
   function onPointerDown(evt: PointerEvent) {
     const clickedFile = hasClickedFile(evt);
 
     if (clickedFile) {
-      selectFile(evt);
+      if (!clickedFile.selected) {
+        selectFile(evt);
+      }
+
+      // TODO: Implement open logic & drag logic
+
     } else {
       openSelectionBox(evt);
     }

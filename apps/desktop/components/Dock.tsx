@@ -4,7 +4,7 @@ import styles from '@/styles/Desktop.module.css';
 import { aboutConfig } from '@/applications/AboutApplication';
 import { finderConfig } from '@/applications/Finder/FinderApplication';
 import { infoConfig } from '@/applications/InfoApplication';
-import { Chain } from './WindowManagement/Chain';
+import { Chain } from '../data/Chain';
 
 const DockApplications = [
   finderConfig,
