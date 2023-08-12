@@ -1,11 +1,12 @@
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
-import { useState, useRef, useEffect, RefObject } from 'react';
+import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { DesktopIconHitBox } from '../Icons/DesktopIcon';
 import { Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
+import { DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -25,6 +26,8 @@ function SelectionBox(box: SelectionBox) {
   return <div className={styles.selectionBox} style={{width: box.width, height: box.height, top: box.y, left: box.x}}></div>
 }
 
+const DraggingThreshold = 5;
+
 type Props = {
   directory: string,
   apis: SystemAPIs
@@ -43,7 +46,16 @@ export default function FolderView({ directory, apis }: Props) {
 
   const ref: RefObject<HTMLDivElement> = useRef(null);
 
-  const selectionBoxStart = useRef({x: 0, y: 0});
+  const dragAndDrop = apis.dragAndDrop;
+
+  const selectionBoxStart = useRef({ x: 0, y: 0 });
+  const fileDraggingOrigin = useRef({ x: 0, y: 0 });
+  const activeFile = useRef<DirectoryEntry>();
+
+  const isDragging = useRef(false);
+  const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
+  const fileDraggingSession: MutableRefObject<DragAndDropSession | null> = useRef(null);
+
   const [box, setBox] = useState<SelectionBox>({ open: false, x: 0, y: 0, width: 0, height: 0 });
 
   function getLocalCoordinates(evt: PointerEvent) {
@@ -97,7 +109,7 @@ export default function FolderView({ directory, apis }: Props) {
     updateFiles(files);
   }
 
-  function hasClickedFile(evt: PointerEvent): DirectoryEntry | null {
+  function clickedFile(evt: PointerEvent): DirectoryEntry | undefined {
     const point = getLocalCoordinates(evt);
     const files = localFiles.current;
 
@@ -109,18 +121,80 @@ export default function FolderView({ directory, apis }: Props) {
       }
     }
 
-    return null;
+    return undefined;
+  }
+
+  function onFileDraggingStart(evt: PointerEvent) {
+    window.addEventListener('pointermove', onFileDraggingMove);
+    window.addEventListener('pointerup', onFileDraggingUp);
+    
+    fileDraggingOrigin.current = { x: evt.clientX, y: evt.clientY };
+  }
+
+  function onFileDraggingMove(evt: PointerEvent) {
+    const file = activeFile.current?.node;
+    if (!file) { return; }
+
+    const deltaX = Math.abs(fileDraggingOrigin.current.x - evt.clientX);
+    const deltaY = Math.abs(fileDraggingOrigin.current.y - evt.clientY);
+
+    if (deltaX > DraggingThreshold || deltaY > DraggingThreshold) {
+      isDragging.current = true;
+
+      // Propagate drag start event
+      fileDraggingSession.current = dragAndDrop.start(file, evt.clientX, evt.clientY);
+    }
+
+    if (isDragging.current && fileDraggingSession.current) {
+      // Propagate drag move event
+      fileDraggingSession.current.move(evt.clientX, evt.clientY);
+
+      // Get the current target element
+      const elements = document.elementsFromPoint(evt.clientX, evt.clientY);
+      const dropPoint = elements.find(x => x.hasAttribute("data-drop-point"));
+
+      if (dropPoint !== fileDraggingCurrentNode.current) {
+        const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail: { node: file }, bubbles: false }); 
+        const leaveEvent = new CustomEvent(FileSystemItemDragLeave, { detail: { node: file }, bubbles: false }); 
+
+        fileDraggingCurrentNode.current?.dispatchEvent(leaveEvent);
+        dropPoint?.dispatchEvent(enterEvent);
+
+        fileDraggingCurrentNode.current = dropPoint;
+      }
+    }
+  }
+
+  function onFileDraggingUp(evt: PointerEvent) {
+    window.removeEventListener('pointermove', onFileDraggingMove);
+    window.removeEventListener('pointerup', onFileDraggingUp);
+
+    const file = activeFile.current?.node;
+    if (!file) { return; }
+
+    if (fileDraggingCurrentNode.current) {
+      const dropEvent = new CustomEvent(FileSystemItemDragDrop, { detail: { node: file }, bubbles: false });
+
+      fileDraggingCurrentNode.current.dispatchEvent(dropEvent)
+    }
+
+    fileDraggingSession.current?.drop(evt.clientX, evt.clientY);
+    fileDraggingSession.current = null;
+    fileDraggingCurrentNode.current = undefined;
+
+    isDragging.current = false;
   }
 
   function onPointerDown(evt: PointerEvent) {
-    const clickedFile = hasClickedFile(evt);
+    const file = clickedFile(evt);
 
-    if (clickedFile) {
-      if (!clickedFile.selected) {
-        selectFile(evt);
-      }
+    activeFile.current = file;
 
-      // TODO: Implement open logic & drag logic
+    if (file) {
+      if (!file.selected) { selectFile(evt); }
+
+      onFileDraggingStart(evt);
+      // TODO: Implement open logic
 
     } else {
       openSelectionBox(evt);
