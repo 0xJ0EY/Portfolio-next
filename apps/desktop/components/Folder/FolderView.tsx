@@ -6,7 +6,7 @@ import styles from '@/components/Folder/FolderView.module.css';
 import { DesktopIconHitBox } from '../Icons/DesktopIcon';
 import { Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
-import { DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
+import { DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -18,9 +18,15 @@ interface SelectionBox {
   height: number,
 }
 
+interface ActiveFile {
+  file: DirectoryEntry,
+  deltaX: number,
+  deltaY: number
+}
+
 function SelectionBox(box: SelectionBox) {
   if (!box.open) {
-    return <>closed</>
+    return <></>
   }
 
   return <div className={styles.selectionBox} style={{width: box.width, height: box.height, top: box.y, left: box.x}}></div>
@@ -50,7 +56,7 @@ export default function FolderView({ directory, apis }: Props) {
 
   const selectionBoxStart = useRef({ x: 0, y: 0 });
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
-  const activeFile = useRef<DirectoryEntry>();
+  const activeFile = useRef<ActiveFile>();
 
   const isDragging = useRef(false);
   const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
@@ -132,8 +138,13 @@ export default function FolderView({ directory, apis }: Props) {
   }
 
   function onFileDraggingMove(evt: PointerEvent) {
-    const file = activeFile.current?.node;
-    if (!file) { return; }
+    const file = activeFile.current?.file.node;
+    const coords = ref.current?.getBoundingClientRect();
+
+    if (!file || !coords) { return; }
+
+    const x = evt.clientX - coords.left;
+    const y = evt.clientY - coords.top;
 
     const deltaX = Math.abs(fileDraggingOrigin.current.x - evt.clientX);
     const deltaY = Math.abs(fileDraggingOrigin.current.y - evt.clientY);
@@ -153,9 +164,19 @@ export default function FolderView({ directory, apis }: Props) {
       const elements = document.elementsFromPoint(evt.clientX, evt.clientY);
       const dropPoint = elements.find(x => x.hasAttribute("data-drop-point"));
 
+      const detail = {
+        node: file,
+        x, y
+      };
+
+      if (dropPoint) {
+        const moveEvent = new CustomEvent(FileSystemItemDragMove, { detail, bubbles: false }); 
+        dropPoint?.dispatchEvent(moveEvent);
+      }
+
       if (dropPoint !== fileDraggingCurrentNode.current) {
-        const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail: { node: file }, bubbles: false }); 
-        const leaveEvent = new CustomEvent(FileSystemItemDragLeave, { detail: { node: file }, bubbles: false }); 
+        const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail, bubbles: false }); 
+        const leaveEvent = new CustomEvent(FileSystemItemDragLeave, { detail, bubbles: false }); 
 
         fileDraggingCurrentNode.current?.dispatchEvent(leaveEvent);
         dropPoint?.dispatchEvent(enterEvent);
@@ -169,11 +190,21 @@ export default function FolderView({ directory, apis }: Props) {
     window.removeEventListener('pointermove', onFileDraggingMove);
     window.removeEventListener('pointerup', onFileDraggingUp);
 
-    const file = activeFile.current?.node;
-    if (!file) { return; }
+    const active = activeFile.current;
+    const coords = ref.current?.getBoundingClientRect();
+
+    if (!active || !coords) { return; }
+
+    const x = evt.clientX - coords.left - active.deltaX;
+    const y = evt.clientY - coords.top - active.deltaY;
 
     if (fileDraggingCurrentNode.current) {
-      const dropEvent = new CustomEvent(FileSystemItemDragDrop, { detail: { node: file }, bubbles: false });
+      const detail = {
+        node: active.file.node,
+        x, y
+      };
+
+      const dropEvent = new CustomEvent(FileSystemItemDragDrop, { detail, bubbles: false });
 
       fileDraggingCurrentNode.current.dispatchEvent(dropEvent)
     }
@@ -186,17 +217,27 @@ export default function FolderView({ directory, apis }: Props) {
   }
 
   function onPointerDown(evt: PointerEvent) {
+    if (!ref.current) { return; }
+
+
     const file = clickedFile(evt);
 
-    activeFile.current = file;
-
     if (file) {
+      const coords = ref.current.getBoundingClientRect();
+
+      const deltaX = evt.clientX - file.x - coords.left;
+      const deltaY = evt.clientY - file.y - coords.top;
+
+      activeFile.current = { file, deltaX, deltaY };
+
       if (!file.selected) { selectFile(evt); }
 
       onFileDraggingStart(evt);
       // TODO: Implement open logic
 
     } else {
+      activeFile.current = undefined;
+
       openSelectionBox(evt);
     }
   }
@@ -248,14 +289,37 @@ export default function FolderView({ directory, apis }: Props) {
     updateFiles(dir.value.children);
   }
 
+  function onFileMove(evt: FileSystemItemDragEvent) {
+    console.log('move');
+  }
+
+  function onFileDrop(evt: FileSystemItemDragEvent) {
+    const files = localFiles.current;
+  
+    for (let file of files.iterFromTail()) {
+      if (file.node.id === evt.detail.node.id) {
+        file.x = evt.detail.x;
+        file.y = evt.detail.y;
+      }
+    }
+
+    updateFiles(files);
+  }
+
   useEffect(() => {
     if (!ref.current) { return; }
     const folder = ref.current;
 
     folder.addEventListener('pointerdown', onPointerDown);
+
+    folder.addEventListener(FileSystemItemDragMove, onFileMove as EventListener);
+    folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
     return () => {
       folder.removeEventListener('pointerdown', onPointerDown);
+
+      folder.removeEventListener(FileSystemItemDragMove, onFileMove as EventListener);
+      folder.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     };
   }, []);
 
@@ -266,7 +330,11 @@ export default function FolderView({ directory, apis }: Props) {
   const selectionBox = SelectionBox(box);
   
   return <>
-    <div ref={ref} className={styles.folder}>{icons}</div>
+    <div 
+      ref={ref}
+      className={styles.folder}
+      data-drop-point="true"
+    >{icons}</div>
     { selectionBox }
   </>
 }

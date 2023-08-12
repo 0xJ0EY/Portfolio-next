@@ -1,11 +1,14 @@
 import { FileSystemNode } from "@/apis/FileSystem/FileSystem";
 
 export const FileSystemItemDragEnter = "fs_item_drag_enter";
+export const FileSystemItemDragMove  = "fs_item_drag_move";
 export const FileSystemItemDragLeave = "fs_item_drag_leave";
 export const FileSystemItemDragDrop  = "fs_item_drag_drop";
 
 export interface FileSystemItemDragData {
-  node: FileSystemNode
+  node: FileSystemNode,
+  x: number,
+  y: number
 };
 
 export type FileSystemItemDragEvent = CustomEvent<FileSystemItemDragData>;
