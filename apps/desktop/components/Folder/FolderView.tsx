@@ -3,10 +3,11 @@ import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react'
 import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
-import { DesktopIconHitBox } from '../Icons/DesktopIcon';
-import { Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
+import { DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
+import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
-import { DragAndDropSession, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
+import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
+import { clamp } from '../util';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -55,10 +56,12 @@ export default function FolderView({ directory, apis }: Props) {
   const dragAndDrop = apis.dragAndDrop;
 
   const selectionBoxStart = useRef({ x: 0, y: 0 });
-  const fileDraggingOrigin = useRef({ x: 0, y: 0 });
-  const activeFile = useRef<ActiveFile>();
 
   const isDragging = useRef(false);
+  const fileDraggingOrigin = useRef({ x: 0, y: 0 });
+  const fileDraggingFolderOrigin = useRef<Point>();
+
+  const fileDraggingSelection  = useRef<DirectoryEntry[]>([]);
   const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
   const fileDraggingSession: MutableRefObject<DragAndDropSession | null> = useRef(null);
 
@@ -131,29 +134,44 @@ export default function FolderView({ directory, apis }: Props) {
   }
 
   function onFileDraggingStart(evt: PointerEvent) {
+    const files = localFiles.current;
     window.addEventListener('pointermove', onFileDraggingMove);
     window.addEventListener('pointerup', onFileDraggingUp);
-    
+
+    const selectedFiles: DirectoryEntry[] = [];
+
+    for (const file of files.iterFromTail()) {
+      if (file.selected) { selectedFiles.push(file); }
+    }
+
+    fileDraggingSelection.current = selectedFiles;
     fileDraggingOrigin.current = { x: evt.clientX, y: evt.clientY };
   }
 
   function onFileDraggingMove(evt: PointerEvent) {
-    const file = activeFile.current?.file.node;
-    const coords = ref.current?.getBoundingClientRect();
-
-    if (!file || !coords) { return; }
-
-    const x = evt.clientX - coords.left;
-    const y = evt.clientY - coords.top;
-
     const deltaX = Math.abs(fileDraggingOrigin.current.x - evt.clientX);
     const deltaY = Math.abs(fileDraggingOrigin.current.y - evt.clientY);
+
+    const origin = fileDraggingFolderOrigin.current;
+
+    if (!origin) { return; }
+
+    const data: FileSystemItemDragData = {
+      nodes: fileDraggingSelection.current.map(entry => {
+        const offset = {
+          x: origin.x - entry.x,
+          y: origin.y - entry.y,
+        };
+
+        return { item: entry.node, position: { x: 0, y: 0}, offset };
+      })
+    };
 
     if (deltaX > DraggingThreshold || deltaY > DraggingThreshold) {
       isDragging.current = true;
 
       // Propagate drag start event
-      fileDraggingSession.current = dragAndDrop.start(file, evt.clientX, evt.clientY);
+      fileDraggingSession.current = dragAndDrop.start(data, evt.clientX, evt.clientY);
     }
 
     if (isDragging.current && fileDraggingSession.current) {
@@ -164,19 +182,15 @@ export default function FolderView({ directory, apis }: Props) {
       const elements = document.elementsFromPoint(evt.clientX, evt.clientY);
       const dropPoint = elements.find(x => x.hasAttribute("data-drop-point"));
 
-      const detail = {
-        node: file,
-        x, y
-      };
+      if (!dropPoint) { return; }
 
-      if (dropPoint) {
-        const moveEvent = new CustomEvent(FileSystemItemDragMove, { detail, bubbles: false }); 
-        dropPoint?.dispatchEvent(moveEvent);
-      }
+      const moveEvent = new CustomEvent(FileSystemItemDragMove, { detail: data, bubbles: false }); 
+      dropPoint?.dispatchEvent(moveEvent);
+
 
       if (dropPoint !== fileDraggingCurrentNode.current) {
-        const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail, bubbles: false }); 
-        const leaveEvent = new CustomEvent(FileSystemItemDragLeave, { detail, bubbles: false }); 
+        const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail: data, bubbles: false }); 
+        const leaveEvent = new CustomEvent(FileSystemItemDragLeave, { detail: data, bubbles: false }); 
 
         fileDraggingCurrentNode.current?.dispatchEvent(leaveEvent);
         dropPoint?.dispatchEvent(enterEvent);
@@ -190,23 +204,33 @@ export default function FolderView({ directory, apis }: Props) {
     window.removeEventListener('pointermove', onFileDraggingMove);
     window.removeEventListener('pointerup', onFileDraggingUp);
 
-    const active = activeFile.current;
-    const coords = ref.current?.getBoundingClientRect();
+    const coords = fileDraggingCurrentNode.current?.getBoundingClientRect();
+    const origin = fileDraggingFolderOrigin.current;
 
-    if (!active || !coords) { return; }
+    if (!origin || !coords) { return; }
 
-    const x = evt.clientX - coords.left - active.deltaX;
-    const y = evt.clientY - coords.top - active.deltaY;
-
+    // 1. get the offset for each file from the original position
+    // 2. get the local position within the other folder view
+    // 3. apply the offset to the local position
     if (fileDraggingCurrentNode.current) {
-      const detail = {
-        node: active.file.node,
-        x, y
-      };
+      const data: FileSystemItemDragData = {
+        nodes: fileDraggingSelection.current.map(entry => {
+          const offset = {
+            x: origin.x - entry.x,
+            y: origin.y - entry.y,
+          };
 
-      const dropEvent = new CustomEvent(FileSystemItemDragDrop, { detail, bubbles: false });
+          const position = {
+            x: evt.clientX - coords.left - offset.x,
+            y: evt.clientY - coords.top - offset.y,
+          };
 
-      fileDraggingCurrentNode.current.dispatchEvent(dropEvent)
+          return { item: entry.node, position, offset };
+        })
+      }
+
+      const dropEventLeave = new CustomEvent(FileSystemItemDragDrop, { detail: data, bubbles: false });
+      fileDraggingCurrentNode.current.dispatchEvent(dropEventLeave);
     }
 
     fileDraggingSession.current?.drop(evt.clientX, evt.clientY);
@@ -225,18 +249,17 @@ export default function FolderView({ directory, apis }: Props) {
     if (file) {
       const coords = ref.current.getBoundingClientRect();
 
-      const deltaX = evt.clientX - file.x - coords.left;
-      const deltaY = evt.clientY - file.y - coords.top;
+      const deltaX = evt.clientX - coords.left;
+      const deltaY = evt.clientY - coords.top;
 
-      activeFile.current = { file, deltaX, deltaY };
+      fileDraggingFolderOrigin.current = { x: deltaX, y: deltaY };
 
       if (!file.selected) { selectFile(evt); }
 
       onFileDraggingStart(evt);
-      // TODO: Implement open logic
 
     } else {
-      activeFile.current = undefined;
+      fileDraggingFolderOrigin.current = undefined;
 
       openSelectionBox(evt);
     }
@@ -295,11 +318,28 @@ export default function FolderView({ directory, apis }: Props) {
 
   function onFileDrop(evt: FileSystemItemDragEvent) {
     const files = localFiles.current;
+    
+    if (!ref.current) { return; }
+    const folder = ref.current;
+
+    const folderRect = folder.getBoundingClientRect();
+    
+    const horizontal = {
+      min: -IconWidth / 2,
+      max: folderRect.width + (IconWidth / 2)
+    };
+
+    const vertical = {
+      min: -IconHeight / 2,
+      max: folderRect.height + (IconHeight / 2)
+    }
   
     for (let file of files.iterFromTail()) {
-      if (file.node.id === evt.detail.node.id) {
-        file.x = evt.detail.x;
-        file.y = evt.detail.y;
+      for (const node of evt.detail.nodes) {
+        if (node.item.id === file.node.id) {
+          file.x = clamp(node.position.x, horizontal.min, horizontal.max);
+          file.y = clamp(node.position.y, vertical.min, vertical.max);
+        }
       }
     }
 

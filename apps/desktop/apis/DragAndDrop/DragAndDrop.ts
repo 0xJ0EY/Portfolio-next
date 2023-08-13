@@ -1,14 +1,20 @@
 import { FileSystemNode } from "@/apis/FileSystem/FileSystem";
+import { Point } from "@/applications/math";
 
 export const FileSystemItemDragEnter = "fs_item_drag_enter";
 export const FileSystemItemDragMove  = "fs_item_drag_move";
 export const FileSystemItemDragLeave = "fs_item_drag_leave";
-export const FileSystemItemDragDrop  = "fs_item_drag_drop";
+export const FileSystemItemDragDrop = "fs_item_drag_drop";
+
+
+export interface ItemDragNode {
+  item: FileSystemNode,
+  position: Point,
+  offset: Point
+}
 
 export interface FileSystemItemDragData {
-  node: FileSystemNode,
-  x: number,
-  y: number
+  nodes: ItemDragNode[],
 };
 
 export type FileSystemItemDragEvent = CustomEvent<FileSystemItemDragData>;
@@ -18,7 +24,7 @@ export type Action<T> = () => T
 
 export interface DragAndDropData {
   action: 'start' | 'move' | 'drop',
-  file: FileSystemNode,
+  files: FileSystemItemDragData,
   x: number,
   y: number,
 }
@@ -49,12 +55,12 @@ class DragAndDropContext {
 }
 
 export class DragAndDropSession {
-  constructor(private context: DragAndDropContext, private file: FileSystemNode) {}
+  constructor(private context: DragAndDropContext, private files: FileSystemItemDragData) {}
 
   public start(x: number, y: number) {
     this.context.propagate({
       action: 'start',
-      file: this.file,
+      files: this.files,
       x,
       y
     });
@@ -63,7 +69,7 @@ export class DragAndDropSession {
   public move(x: number, y: number) {
     this.context.propagate({
       action: 'move',
-      file: this.file,
+      files: this.files,
       x,
       y
     });
@@ -72,7 +78,7 @@ export class DragAndDropSession {
   public drop(x: number, y: number) {
     this.context.propagate({
       action: 'drop',
-      file: this.file,
+      files: this.files,
       x,
       y
     });
@@ -82,8 +88,8 @@ export class DragAndDropSession {
 export class DragAndDropService {
   private context = new DragAndDropContext();
 
-  public start(file: FileSystemNode, x: number, y: number) {
-    const session = new DragAndDropSession(this.context, file);
+  public start(files: FileSystemItemDragData, x: number, y: number) {
+    const session = new DragAndDropSession(this.context, files);
 
     session.start(x, y);
 
