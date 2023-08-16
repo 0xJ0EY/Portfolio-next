@@ -1,4 +1,3 @@
-import { SystemAPIs } from '../Desktop';
 import Image from 'next/image';
 import styles from '@/components/Icons/DesktopIcon.module.css';
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';

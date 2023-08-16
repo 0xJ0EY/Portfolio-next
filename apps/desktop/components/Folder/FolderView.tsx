@@ -1,6 +1,5 @@
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
-import { SystemAPIs } from '../Desktop';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
@@ -8,6 +7,7 @@ import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } 
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
 import { clamp } from '../util';
+import { SystemAPIs } from '../OperatingSystem';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 

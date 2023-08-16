@@ -2,12 +2,8 @@ import styles from '@/styles/Desktop.module.css';
 import React, { useEffect, useRef, useReducer, useState } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
-import { ApplicationManager } from '@/applications/ApplicationManager';
-import { FileSystem, createBaseFileSystem } from '../apis/FileSystem/FileSystem';
-import { Dock } from './Dock';
-import { MenuBar } from './MenuBar';
 import dynamic from 'next/dynamic';
-import { DragAndDropService } from '@/apis/DragAndDrop/DragAndDrop';
+import { SystemAPIs } from './OperatingSystem';
 
 const FolderView = dynamic(() => import('./Folder/FolderView'));
 const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
@@ -96,39 +92,6 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, apis: Syste
             windowCompositor={windowCompositor}
             parent={parentNode.current}/>
         </div>)}
-    </div>
-  </>
-}
-
-const fileSystem = createBaseFileSystem();
-const dragAndDrop = new DragAndDropService();
-
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem };
-const apis: SystemAPIs = { dragAndDrop, fileSystem };
-
-const windowCompositor = new WindowCompositor();
-const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
-
-export const OperatingSystem = () => {
-  useEffect(() => {
-    applicationManager.open('/Applications/Finder.app');
-    // applicationManager.open('/Applications/Info.app');
-    // applicationManager.open('/Applications/About.app');
-
-    return () => {
-      // Needs to be done, due to this class also opening files in the application manager
-      applicationManager.reset();
-      windowCompositor.reset();
-    }
-  }, []);
-
-  const dock = Dock(applicationManager);
-
-  return <>
-    <div className={styles.operatingSystem}>
-    <MenuBar/>
-    <Desktop apis={apis} windowCompositor={windowCompositor} />
-    {dock}
     </div>
   </>
 }

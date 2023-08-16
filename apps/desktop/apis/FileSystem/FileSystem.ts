@@ -5,7 +5,7 @@ import { aboutConfig } from "@/applications/AboutApplication";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
-import { SystemAPIs } from "../../components/Desktop";
+import { SystemAPIs } from "../../components/OperatingSystem";
 import { rectangleIntersection } from "@/applications/math";
 import { Chain } from "@/data/Chain";
 

@@ -4,7 +4,7 @@ import { WindowCompositor, WindowContext } from "@/components/WindowManagement/W
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
 import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
-import { SystemAPIs } from "@/components/Desktop";
+import { SystemAPIs } from "@/components/OperatingSystem";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
