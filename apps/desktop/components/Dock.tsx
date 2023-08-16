@@ -20,7 +20,8 @@ interface DockItem {
 
 // Extend the notification system of the dock events (by adding closed/open application)
 // And implement a reducer like in Desktop.tsx
-export const Dock = (manager: ApplicationManager) => {
+export const Dock = (props: { manager: ApplicationManager }) => {
+  const { manager } = props;
   const [dockItems, setDockItems] = useState<DockItem[]>([]);
 
   function constructDock(manager: ApplicationManager): DockItem[] {

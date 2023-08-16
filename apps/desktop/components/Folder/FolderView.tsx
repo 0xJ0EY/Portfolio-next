@@ -170,7 +170,9 @@ export default function FolderView({ directory, apis }: Props) {
       })
     };
 
-    if (deltaX > DraggingThreshold || deltaY > DraggingThreshold) {
+    const passesDraggingThreshold = deltaX > DraggingThreshold || deltaY > DraggingThreshold;
+
+    if (passesDraggingThreshold && !isDragging.current) {
       isDragging.current = true;
 
       // Propagate drag start event
@@ -316,7 +318,7 @@ export default function FolderView({ directory, apis }: Props) {
   }
 
   function onFileMove(evt: FileSystemItemDragEvent) {
-    console.log('move');
+    // console.log('move');
   }
 
   function onFileDrop(evt: FileSystemItemDragEvent) {

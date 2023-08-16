@@ -27,6 +27,7 @@ export type DirectoryEntry = {
   x: number,
   y: number,
   selected: boolean,
+  dragging: boolean,
 }
 
 export type FileSystemDirectory = {
@@ -269,7 +270,8 @@ export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSys
     node,
     x,
     y,
-    selected: false
+    selected: false,
+    dragging: false
   };
 
   directory.children.append(entry);

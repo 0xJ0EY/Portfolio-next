@@ -8,6 +8,7 @@ import { Desktop } from "./Desktop";
 import { Dock } from "./Dock";
 import { FileSystem } from '@/apis/FileSystem/FileSystem';
 import styles from '@/styles/Desktop.module.css';
+import { DragAndDropView } from "./DragAndDropView";
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
@@ -31,13 +32,12 @@ export const OperatingSystem = () => {
     }
   }, []);
 
-  const dock = Dock(applicationManager);
-
   return <>
     <div className={styles.operatingSystem}>
-    <MenuBar/>
-    <Desktop apis={apis} windowCompositor={windowCompositor} />
-    {dock}
+      <MenuBar/>
+      <Desktop apis={apis} windowCompositor={windowCompositor} />
+      <Dock manager={applicationManager}></Dock>
+      <DragAndDropView apis={apis}/>
     </div>
   </>
 }
