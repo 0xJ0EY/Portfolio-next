@@ -185,9 +185,24 @@ export default function FolderView({ directory, apis }: Props) {
 
       // Get the current target element
       const elements = document.elementsFromPoint(evt.clientX, evt.clientY);
-      const dropPoint = elements.find(x => x.hasAttribute("data-drop-point"));
 
-      if (!dropPoint) { return; }
+      let dropPoint = null;
+
+      for (const element of elements) {
+        if (element.hasAttribute("data-drop-point")) {
+          dropPoint = element;
+          break;
+        }
+
+        if (element.hasAttribute("data-window-root")) {
+          break;
+        } 
+      }
+
+      if (!dropPoint) { 
+        fileDraggingCurrentNode.current = undefined;
+        return;
+      }
 
       const moveEvent = new CustomEvent(FileSystemItemDragMove, { detail: data, bubbles: false }); 
       dropPoint?.dispatchEvent(moveEvent);
@@ -212,7 +227,10 @@ export default function FolderView({ directory, apis }: Props) {
     const coords = fileDraggingCurrentNode.current?.getBoundingClientRect();
     const origin = fileDraggingFolderOrigin.current;
 
-    if (!origin || !coords) { return; }
+    if (!origin || !coords) {   
+      fileDraggingSession.current?.drop(evt.clientX, evt.clientY);
+      return;
+    }
 
     // 1. get the offset for each file from the original position
     // 2. get the local position within the other folder view
@@ -309,12 +327,22 @@ export default function FolderView({ directory, apis }: Props) {
     closeBox();
   }
 
-  function loadFiles(directory: string) {
-    // TODO: Add something like a subscription for directory changes
+  function reloadFiles(directory: string) {
     const dir = fs.getDirectory(directory);
-    if (!dir.ok) { return; }
+    if (!dir.ok) { return dir; }
 
     updateFiles(dir.value.children);
+
+    return dir;
+  }
+
+  function loadFiles(directory: string) {
+    const action = () => reloadFiles(directory);
+    const result = action();
+    
+    if (result.ok) {
+      return fs.subscribe(result.value, action);
+    }
   }
 
   function onFileMove(evt: FileSystemItemDragEvent) {
@@ -326,6 +354,13 @@ export default function FolderView({ directory, apis }: Props) {
     
     if (!ref.current) { return; }
     const folder = ref.current;
+
+    const dir = fs.getDirectory(directory);
+    if (!dir.ok) { return };
+
+    for (const file of evt.detail.nodes) {
+      fs.moveNode(file.item, dir.value);
+    }
 
     const folderRect = folder.getBoundingClientRect();
     
@@ -369,7 +404,13 @@ export default function FolderView({ directory, apis }: Props) {
     };
   }, []);
 
-  useEffect(() => { loadFiles(directory); }, [directory]);
+  useEffect(() => { 
+    const unsubscribe = loadFiles(directory);
+
+    return () => {
+      if (unsubscribe) { unsubscribe() };
+    }
+  }, [directory]);
 
   const icons = files.map((entry, index) => <DesktopIcon key={index} entry={entry} index={index} />);
 

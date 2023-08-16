@@ -429,7 +429,7 @@ export default function WindowContainer(props: { window: Window, WindowApp: Wind
   };
 
   return (
-    <div style={style}>
+    <div style={style} data-window-root="true">
       <div className={styles.container}>
         {!window.focused && <div onClick={focus} className={styles.focusLayer}></div>}
         {window.focused && <Resizable

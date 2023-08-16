@@ -7,7 +7,8 @@ import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { rectangleIntersection } from "@/applications/math";
-import { Chain } from "@/data/Chain";
+import { Chain, Node } from "@/data/Chain";
+import { Action } from "../DragAndDrop/DragAndDrop";
 
 type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -21,6 +22,8 @@ type DirectoryContent = {
   width: number,
   height: number
 }
+
+export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication;
 
 export type DirectoryEntry = {
   node: FileSystemNode,
@@ -58,7 +61,6 @@ export type FileSystemApplication = {
   entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application,
 }
 
-export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication
 
 function createApplication(
   id: number,
@@ -256,36 +258,56 @@ function calculateNodePosition(
   return possiblePosition;
 }
 
-export function addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode) {
+export function findNodeInDirectoryChain(directory: FileSystemDirectory, node: FileSystemNode): Result<Node<DirectoryEntry>, Error> {
+  for (const entry of directory.children.iterFromTail()) {
+    if (entry.value.node.id === node.id) {
+      return Ok(entry);
+    }
+  }
 
-  console.log('Adding node: ' + node.name + ' to ' + directory.name);
-
-  const { x, y } = calculateNodePosition(
-    directory.settings,
-    directory.content,
-    directory.children.toArray()
-  );
-
-  const entry: DirectoryEntry = {
-    node,
-    x,
-    y,
-    selected: false,
-    dragging: false
-  };
-
-  directory.children.append(entry);
+  return Err(Error("Unable to find node within the directory chain"));
 }
+
+export type DirectoryListener = () => void;
 
 export class FileSystem {
   private id: number;
   private root: FileSystemDirectory;
   private lookupTable: Record<string, FileSystemNode> = {};
 
+  // The number used here, is equal to the id of the directory
+  private directoryListeners: Record<number, (DirectoryListener)[]> = {};
+
   constructor() {
     this.root = createRootNode();
     this.lookupTable['/'] = this.root;
     this.id = 1; // Root is already 0
+  }
+
+  public subscribe(directory: FileSystemDirectory, listener: DirectoryListener): Action<void> {
+    if (!this.directoryListeners[directory.id]) {
+      this.directoryListeners[directory.id] = [];
+    }
+
+    this.directoryListeners[directory.id].push(listener);
+
+    return () => { this.unsubscribe(directory, listener); }
+  }
+
+  public unsubscribe(directory: FileSystemDirectory, listener: DirectoryListener) {
+    for (const [index, entry] of this.directoryListeners[directory.id].entries()) {
+      if (entry === listener) {
+        this.directoryListeners[directory.id].splice(index);
+        return;
+      }
+    }
+  }
+
+  private propagateDirectoryEvent(directory: FileSystemDirectory) {
+    const listeners = this.directoryListeners[directory.id];
+    if (!listeners) { return; }
+
+    for (const listener of listeners) { listener(); }
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
@@ -296,6 +318,11 @@ export class FileSystem {
     }
 
     return Ok(node);
+  }
+
+  public moveNode(node: FileSystemNode, directory: FileSystemDirectory) {
+    this.removeNodeFromDirectory(node);
+    this.addNodeToDirectory(directory, node);
   }
 
   public getApplication(path: string): Result<FileSystemApplication, Error> {
@@ -330,7 +357,7 @@ export class FileSystem {
 
     const application = createApplication(++this.id, parent, config.appName, config.entrypoint);
 
-    addNodeToDirectory(parent, application);
+    this.addNodeToDirectory(parent, application);
 
     this.lookupTable[constructPath(application)] = application;
 
@@ -340,10 +367,45 @@ export class FileSystem {
   public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
     const directory = createDirectory(++this.id, parent, name, editable);
 
-    addNodeToDirectory(parent, directory);
+    this.addNodeToDirectory(parent, directory);
 
     this.lookupTable[constructPath(directory)] = directory;
 
     return directory;
+  }
+
+  public addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode) {
+    const { x, y } = calculateNodePosition(
+      directory.settings,
+      directory.content,
+      directory.children.toArray()
+    );
+
+    node.parent = directory;
+
+    const entry: DirectoryEntry = {
+      node,
+      x,
+      y,
+      selected: false,
+      dragging: false
+    };
+
+    directory.children.append(entry);
+
+    this.propagateDirectoryEvent(directory);
+  }
+
+  public removeNodeFromDirectory(node: FileSystemNode) {
+    const parentDirectory = node.parent;
+    if (!parentDirectory) { return; }
+
+    const chainNode = findNodeInDirectoryChain(parentDirectory, node);
+    if (!chainNode.ok) { return; }
+
+    const result = chainNode.value;
+    parentDirectory.children.unlink(result);
+
+    this.propagateDirectoryEvent(parentDirectory);
   }
 }
