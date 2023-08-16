@@ -4,7 +4,7 @@ import { ApplicationEvent } from "./ApplicationEvents";
 import { Application, ApplicationConfig } from "./ApplicationManager";
 import { LocalApplicationManager } from "./LocalApplicationManager";
 import dynamic from 'next/dynamic';
-import { SystemAPIs } from "@/components/Desktop";
+import { SystemAPIs } from "@/components/OperatingSystem";
 
 const View = dynamic(() => import('./AboutApplicationView'));
 

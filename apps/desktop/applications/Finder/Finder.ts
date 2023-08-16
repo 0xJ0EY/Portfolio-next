@@ -3,7 +3,7 @@ import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { ApplicationEvent } from "../ApplicationEvents";
 import { Application, ApplicationConfig } from "../ApplicationManager";
 import { LocalApplicationManager } from "../LocalApplicationManager";
-import { SystemAPIs } from "@/components/Desktop";
+import { SystemAPIs } from "@/components/OperatingSystem";
 import dynamic from 'next/dynamic';
 
 const View = dynamic(() => import('./FinderView'));
