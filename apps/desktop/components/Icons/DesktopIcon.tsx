@@ -1,4 +1,3 @@
-import { FileDragWrapper } from '@/apis/DragAndDrop/DragWrapper';
 import { SystemAPIs } from '../Desktop';
 import Image from 'next/image';
 import styles from '@/components/Icons/DesktopIcon.module.css';
