@@ -14,8 +14,7 @@ export function DragAndDropView(props: { apis: SystemAPIs }) {
     switch (data.action) {
       case 'start':
       case 'move':
-        
-        const foobar: DirectoryEntry[] = data.files.nodes.map(x => {
+        const selectedFiles: DirectoryEntry[] = data.files.nodes.map(x => {
           return {
             node: x.item,
             x: data.x - x.offset.x,
@@ -25,7 +24,7 @@ export function DragAndDropView(props: { apis: SystemAPIs }) {
           }
         });
 
-        setFiles(foobar);
+        setFiles(selectedFiles);
         break;
       case 'drop':
         setFiles([]);
