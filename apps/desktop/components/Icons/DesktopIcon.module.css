@@ -7,6 +7,10 @@
   justify-content: center;
 }
 
+.selected img {
+  background-color: hotpink;
+}
+
 .imageContainer {
   display: flex;
   justify-content: center;
@@ -20,6 +24,7 @@
 
 .image {
   display: block;
+  user-select: none;
 }
 
 .title {
