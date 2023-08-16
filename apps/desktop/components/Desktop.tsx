@@ -112,8 +112,8 @@ const applicationManager = new ApplicationManager(windowCompositor, fileSystem, 
 export const OperatingSystem = () => {
   useEffect(() => {
     applicationManager.open('/Applications/Finder.app');
-    applicationManager.open('/Applications/Info.app');
-    applicationManager.open('/Applications/About.app');
+    // applicationManager.open('/Applications/Info.app');
+    // applicationManager.open('/Applications/About.app');
 
     return () => {
       // Needs to be done, due to this class also opening files in the application manager

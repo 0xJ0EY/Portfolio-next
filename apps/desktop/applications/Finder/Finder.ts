@@ -4,6 +4,9 @@ import { ApplicationEvent } from "../ApplicationEvents";
 import { Application, ApplicationConfig } from "../ApplicationManager";
 import { LocalApplicationManager } from "../LocalApplicationManager";
 import { SystemAPIs } from "@/components/Desktop";
+import dynamic from 'next/dynamic';
+
+const View = dynamic(() => import('./FinderView'));
 
 export class FinderConfig implements ApplicationConfig {
   public readonly displayName = 'Finder';
@@ -13,17 +16,28 @@ export class FinderConfig implements ApplicationConfig {
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
     apis: SystemAPIs
-  ) => new FinderApplication(compositor, manager, apis);
+  ) => new Finder(compositor, manager, apis);
 }
 
 export const finderConfig = new FinderConfig();
 
-export class FinderApplication extends Application {
+export class Finder extends Application {
 
   config(): ApplicationConfig {
     return finderConfig;
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
+    if (event.kind === 'application-open') {
+      this.compositor.open({
+        x: 200,
+        y: 200,
+        height: 400,
+        width: 400,
+        title: `Finder`,
+        application: this,
+        generator: () => { return View; }
+      });
+    };
   }
 }

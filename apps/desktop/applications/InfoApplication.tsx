@@ -41,9 +41,5 @@ export class InfoApplication extends Application {
         generator: () => { return View; }
       });
     };
-
-    if (event.kind === 'application-quit') {
-      // this.manager.exit();
-    }
   }
 }

@@ -378,7 +378,9 @@ export default function FolderView({ directory, apis }: Props) {
       ref={ref}
       className={styles.folder}
       data-drop-point="true"
-    >{icons}</div>
-    { selectionBox }
+    >
+      {icons}
+      {selectionBox}
+    </div>
   </>
 }

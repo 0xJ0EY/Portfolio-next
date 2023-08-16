@@ -29,7 +29,7 @@ export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
     protected readonly manager: LocalApplicationManager,
-    protected readonly apis: SystemAPIs
+    public readonly apis: SystemAPIs
   ) {}
 
   abstract config(): ApplicationConfig;

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Application, ApplicationConfig, ApplicationManager } from '@/applications/ApplicationManager';
 import styles from '@/styles/Desktop.module.css';
 import { aboutConfig } from '@/applications/AboutApplication';
-import { finderConfig } from '@/applications/Finder/FinderApplication';
+import { finderConfig } from '@/applications/Finder/Finder';
 import { infoConfig } from '@/applications/InfoApplication';
 import { Chain } from '../data/Chain';
 
