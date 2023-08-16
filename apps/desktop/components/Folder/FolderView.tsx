@@ -19,12 +19,6 @@ interface SelectionBox {
   height: number,
 }
 
-interface ActiveFile {
-  file: DirectoryEntry,
-  deltaX: number,
-  deltaY: number
-}
-
 function SelectionBox(box: SelectionBox) {
   if (!box.open) {
     return <></>
@@ -82,14 +76,19 @@ export default function FolderView({ directory, apis }: Props) {
 
     let hasSelected = false;
 
-    for (let file of files.iterFromHead()) {
+    for (let node of files.iterFromHead()) {
+      const file = node.value;
       const hitBox = DesktopIconHitBox(file);
 
       const selected = pointInsideAnyRectangles(point, hitBox);
       const toggleSelected = selected && !hasSelected;
 
-      file.selected = toggleSelected
-      if (toggleSelected) { hasSelected = true; }
+      file.selected = toggleSelected;
+      
+      if (toggleSelected) {
+        files.moveToHead(node);
+        hasSelected = true;
+      }
     }
 
     updateFiles(files);
@@ -110,7 +109,8 @@ export default function FolderView({ directory, apis }: Props) {
       y2: bottomRightPoint.y
     };
 
-    for (let file of files.iterFromHead()) {
+    for (let node of files.iterFromHead()) {
+      const file = node.value; 
       const hitBox = DesktopIconHitBox(file);
       file.selected = rectangleAnyIntersection(selectionRect, hitBox);
     }
@@ -122,11 +122,12 @@ export default function FolderView({ directory, apis }: Props) {
     const point = getLocalCoordinates(evt);
     const files = localFiles.current;
 
-    for (const file of files.iterFromTail()) {
+    for (const node of files.iterFromTail()) {
+      const file = node.value;
       const hitBox = DesktopIconHitBox(file);
 
       if (pointInsideAnyRectangles(point, hitBox)) {
-        return file;
+        return node.value;
       }
     }
 
@@ -140,7 +141,9 @@ export default function FolderView({ directory, apis }: Props) {
 
     const selectedFiles: DirectoryEntry[] = [];
 
-    for (const file of files.iterFromTail()) {
+    for (const node of files.iterFromTail()) {
+      const file = node.value;
+
       if (file.selected) { selectedFiles.push(file); }
     }
 
@@ -334,8 +337,9 @@ export default function FolderView({ directory, apis }: Props) {
       max: folderRect.height + (IconHeight / 2)
     }
   
-    for (let file of files.iterFromTail()) {
-      for (const node of evt.detail.nodes) {
+    for (let fileNode of files.iterFromTail()) {
+      const file = fileNode.value;
+      for (const node of evt.detail.nodes) {        
         if (node.item.id === file.node.id) {
           file.x = clamp(node.position.x, horizontal.min, horizontal.max);
           file.y = clamp(node.position.y, vertical.min, vertical.max);
@@ -365,7 +369,7 @@ export default function FolderView({ directory, apis }: Props) {
 
   useEffect(() => { loadFiles(directory); }, [directory]);
 
-  const icons = files.map((entry, index) => <DesktopIcon key={index} entry={entry} apis={apis} />);
+  const icons = files.map((entry, index) => <DesktopIcon key={index} entry={entry} index={index} />);
 
   const selectionBox = SelectionBox(box);
   

@@ -5,7 +5,7 @@ export class Node<T> {
   constructor(public value: T) {}
 }
 
-export class ChainIterator<T> implements Iterable<T> {
+export class ChainIterator<T> implements Iterable<Node<T>> {
   private node: Node<T> | null;
 
   constructor(chain: Chain<T>, private direction: 'fromTail' | 'fromHead') {
@@ -19,15 +19,15 @@ export class ChainIterator<T> implements Iterable<T> {
     }
   }
 
-  [Symbol.iterator](): Iterator<T, any, undefined> {
-    let value: T;
+  [Symbol.iterator](): Iterator<Node<T>, any, undefined> {
+    let value: Node<T>;
 
     return {
       next: () => {
         // NOTE(Joey): Not sure, why value is required here, as it is not used in the for ... of loop
         if (!this.node) { return {done: true, value: value!}}
 
-        value = this.node.value;
+        value = this.node;
 
         switch (this.direction) {
           case "fromTail":

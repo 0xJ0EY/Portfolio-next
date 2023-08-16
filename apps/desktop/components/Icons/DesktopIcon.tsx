@@ -58,15 +58,12 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
-export default function DesktopIcon(props: { entry: DirectoryEntry, apis: SystemAPIs }) {
-  const { entry, apis } = props;
+export default function DesktopIcon(props: { entry: DirectoryEntry,  index: number }) {
+  const { entry, index } = props;
   const file = entry.node;
 
-  function onClick() {}
-
   return <>
-  {entry.selected ? "selected" : "not selected"}
-    <div className={file.kind + " " + styles.container} style={{top: `${entry.y}px`, left: `${entry.x}px`}}>
+    <div className={file.kind + " " + styles.container} style={{top: `${entry.y}px`, left: `${entry.x}px`, zIndex: index}}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
           <Image
