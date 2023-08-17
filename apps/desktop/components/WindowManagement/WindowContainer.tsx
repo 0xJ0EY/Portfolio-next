@@ -3,6 +3,10 @@ import { Window, WindowApplication, WindowCompositor, WindowContext } from "./Wi
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
+const calculateWindowZIndex = (order: number): number => {
+  return 1000 + order * 1000;
+}
+
 const calculateStyle = (window: Window): React.CSSProperties => {
   return {
     position: 'absolute',
@@ -12,7 +16,7 @@ const calculateStyle = (window: Window): React.CSSProperties => {
     width: `${window.width}px`,
     height: `${window.height}px`,
     backgroundColor: 'red',
-    zIndex: window.order
+    zIndex: calculateWindowZIndex(window.order),
   };
 }
 

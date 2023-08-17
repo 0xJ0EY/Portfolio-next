@@ -6,7 +6,6 @@ export const FileSystemItemDragMove  = "fs_item_drag_move";
 export const FileSystemItemDragLeave = "fs_item_drag_leave";
 export const FileSystemItemDragDrop = "fs_item_drag_drop";
 
-
 export interface ItemDragNode {
   item: FileSystemNode,
   position: Point,
@@ -103,5 +102,4 @@ export class DragAndDropService {
   public unsubscribe(listener: DragAndDropListener) {
     this.context.unsubscribe(listener);
   }
-
 }

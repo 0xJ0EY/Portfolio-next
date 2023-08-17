@@ -56,6 +56,14 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
+function calculateZIndex(entry: DirectoryEntry, index: number): number {
+  let result = entry.dragging ? 100_000 : 0;
+  
+  result += index;
+
+  return result;
+}
+
 export default function DesktopIcon(props: { entry: DirectoryEntry, index: number }) {
   const { entry, index } = props;
   const file = entry.node;
@@ -63,7 +71,7 @@ export default function DesktopIcon(props: { entry: DirectoryEntry, index: numbe
   const selected = entry.selected ? styles.selected : '';
 
   return <>
-    <div className={file.kind + " " + styles.container + ' ' + selected} style={{top: `${entry.y}px`, left: `${entry.x}px`, zIndex: index}}>
+    <div className={file.kind + " " + styles.container + ' ' + selected} style={{top: `${entry.y}px`, left: `${entry.x}px`, zIndex: calculateZIndex(entry, index)}}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
           <Image
