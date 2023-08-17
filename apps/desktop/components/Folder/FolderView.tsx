@@ -50,6 +50,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
   const dragAndDrop = apis.dragAndDrop;
 
+  const currentDirectory = useRef(directory);
   const selectionBoxStart = useRef({ x: 0, y: 0 });
 
   const isDragging = useRef(false);
@@ -345,6 +346,8 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return dir; }
 
+    currentDirectory.current = directory;
+
     updateFiles(dir.value.children);
 
     return dir;
@@ -369,7 +372,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     if (!ref.current) { return; }
     const folder = ref.current;
 
-    const dir = fs.getDirectory(directory);
+    const dir = fs.getDirectory(currentDirectory.current);
     if (!dir.ok) { return };
 
     for (const file of evt.detail.nodes) {
