@@ -362,10 +362,6 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     }
   }
 
-  function onFileMove(evt: FileSystemItemDragEvent) {
-    // console.log('move');
-  }
-
   function onFileDrop(evt: FileSystemItemDragEvent) {
     const files = localFiles.current;
     
@@ -409,14 +405,10 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     const folder = ref.current;
 
     folder.addEventListener('pointerdown', onPointerDown);
-
-    folder.addEventListener(FileSystemItemDragMove, onFileMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
     return () => {
       folder.removeEventListener('pointerdown', onPointerDown);
-
-      folder.removeEventListener(FileSystemItemDragMove, onFileMove as EventListener);
       folder.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     };
   }, []);

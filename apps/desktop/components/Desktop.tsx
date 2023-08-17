@@ -75,7 +75,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
   const [applicationWindows, dispatch] = useReducer(reducer, []);
 
   function onFileOpen(file: DirectoryEntry) {
-    const path = constructPath(file.node)
+    const path = constructPath(file.node);
     manager.open(path);
   }
 

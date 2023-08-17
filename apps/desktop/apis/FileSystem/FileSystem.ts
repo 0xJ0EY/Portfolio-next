@@ -319,9 +319,29 @@ export class FileSystem {
     return Ok(node);
   }
 
-  public moveNode(node: FileSystemNode, directory: FileSystemDirectory) {
+  public moveNode(node: FileSystemNode, directory: FileSystemDirectory): Result<null, Error> {
+    // Check if the node was a parent of the target directory
+    let currentDir: FileSystemDirectory | null = directory;
+
+    while (currentDir) {
+      if (currentDir.id === node.id) {
+        return Err(Error("Node is a parent of the target directory"));
+      }
+
+      currentDir = currentDir.parent;
+    }
+
+    // Remove old path from lookup table
+    const path = constructPath(node);
+    if (this.lookupTable[path]) { delete this.lookupTable[path]; }
+
     this.removeNodeFromDirectory(node);
     this.addNodeToDirectory(directory, node);
+
+    // Add new path to lookup table
+    this.lookupTable[constructPath(node)] = node;
+
+    return Ok(null);
   }
 
   public getApplication(path: string): Result<FileSystemApplication, Error> {
@@ -391,7 +411,6 @@ export class FileSystem {
     };
 
     directory.children.append(entry);
-
     this.propagateDirectoryEvent(directory);
   }
 
