@@ -172,9 +172,6 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   private openDirectory(path: string): Result<number, Error> {
-    // const path = constructPath(directory);
-    console.log(path);
-
     this.open(`/Applications/Finder.app ${path}`)
 
     return Err(Error("not yet impl"));
@@ -182,8 +179,6 @@ export class ApplicationManager implements BaseApplicationManager {
 
   open(argument: string): Result<number, Error> {
     const parts = argument.split(' ');
-
-    console.log(argument);
 
     const path = parts.splice(0, 1)[0] ?? '';
     const args = parts.join(' ') ?? '';
@@ -194,9 +189,6 @@ export class ApplicationManager implements BaseApplicationManager {
 
     const value = node.value;
 
-    console.log(value);
-
-    // TODO: Open folder in folder exporer
     // TODO: Open text file in text file viewer
     switch (value.kind) {
       case 'application': return this.openApplication(value, path, args);

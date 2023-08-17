@@ -26,6 +26,11 @@ export type AllWindowsClosedEvent = {
   kind: 'all-windows-closed',
 }
 
+export type FinderOpenFileEvent = {
+  kind: 'finder-open-file-event',
+  path: string
+}
+
 export function createApplicationOpenEvent(isFirst: boolean, args: string): ApplicationOpenEvent {
   return { kind: 'application-open', isFirst, args };
 }
@@ -52,12 +57,17 @@ export function createAllWindowsClosedEvent(): AllWindowsClosedEvent {
 
 export type ApplicationEvent =
   ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent |
-  WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent;
-
+  WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent |
+  FinderOpenFileEvent;
 
 export type ApplicationWindowMessage = {
   kind: 'message',
   message: string
 }
 
-export type ApplicationWindowEvent = ApplicationWindowMessage;
+export type FinderChangePath = {
+  kind: 'finder-change-path',
+  path: string
+}
+
+export type ApplicationWindowEvent = ApplicationWindowMessage | FinderChangePath;

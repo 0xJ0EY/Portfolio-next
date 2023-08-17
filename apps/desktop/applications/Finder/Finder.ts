@@ -28,6 +28,8 @@ export class Finder extends Application {
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
+    console.log(event);
+
     if (event.kind === 'application-open') {
       this.compositor.open({
         x: 200,
@@ -40,5 +42,11 @@ export class Finder extends Application {
         generator: () => { return View; }
       });
     };
+
+    if (event.kind === 'finder-open-file-event') {
+      if (!windowContext) { return }
+
+      this.manager.open(event.path);
+    }
   }
 }

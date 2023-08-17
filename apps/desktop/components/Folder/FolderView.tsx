@@ -287,9 +287,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       const delta = now - previousClickedFile.current.timestamp;
       const sameFile = previousClickedFile.current.file === file;
 
-      if (delta < 2000 && sameFile) {
-        console.log('open file');
-        
+      if (delta < 400 && sameFile) {        
         onFileOpen(file);
         
         previousClickedFile.current = { file: null, timestamp: 0 };

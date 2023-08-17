@@ -13,7 +13,13 @@ export default function FinderView(props: WindowProps) {
   }
 
   function onFileOpen(file: DirectoryEntry) {
-    // TODO: Send message back to application
+    const path = constructPath(file.node);
+
+    if (file.node.kind === 'directory') {
+      setPath(path);
+    } else {
+      application.on({ kind: 'finder-open-file-event', path}, windowContext)
+    }
   }
 
   useEffect(() => {
