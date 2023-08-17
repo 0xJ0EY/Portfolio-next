@@ -35,7 +35,7 @@ export const OperatingSystem = () => {
   return <>
     <div className={styles.operatingSystem}>
       <MenuBar/>
-      <Desktop apis={apis} windowCompositor={windowCompositor} />
+      <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
       <Dock manager={applicationManager}></Dock>
       <DragAndDropView apis={apis}/>
     </div>

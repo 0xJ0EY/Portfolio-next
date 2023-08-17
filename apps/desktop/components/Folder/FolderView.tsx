@@ -31,10 +31,11 @@ const DraggingThreshold = 5;
 
 type Props = {
   directory: string,
-  apis: SystemAPIs
+  apis: SystemAPIs,
+  onFileOpen: (file: DirectoryEntry) => void
 }
 
-export default function FolderView({ directory, apis }: Props) {
+export default function FolderView({ directory, apis, onFileOpen }: Props) {
   const fs = apis.fileSystem;
 
   const [files, setFiles] = useState<DirectoryEntry[]>([]);
@@ -52,6 +53,8 @@ export default function FolderView({ directory, apis }: Props) {
   const selectionBoxStart = useRef({ x: 0, y: 0 });
 
   const isDragging = useRef(false);
+  const previousClickedFile = useRef<{ file: DirectoryEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
+
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
   const fileDraggingFolderOrigin = useRef<Point>();
 
@@ -265,8 +268,7 @@ export default function FolderView({ directory, apis }: Props) {
 
   function onPointerDown(evt: PointerEvent) {
     if (!ref.current) { return; }
-
-
+    
     const file = clickedFile(evt);
 
     if (file) {
@@ -281,6 +283,20 @@ export default function FolderView({ directory, apis }: Props) {
 
       onFileDraggingStart(evt);
 
+      const now = Date.now();
+      const delta = now - previousClickedFile.current.timestamp;
+      const sameFile = previousClickedFile.current.file === file;
+
+      if (delta < 2000 && sameFile) {
+        console.log('open file');
+        
+        onFileOpen(file);
+        
+        previousClickedFile.current = { file: null, timestamp: 0 };
+      } else {
+        previousClickedFile.current = { file, timestamp: Date.now() };
+      }
+      
     } else {
       fileDraggingFolderOrigin.current = undefined;
 

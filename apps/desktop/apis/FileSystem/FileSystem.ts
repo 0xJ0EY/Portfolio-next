@@ -1,4 +1,4 @@
-import { Application, ApplicationConfig, ApplicationManager } from "@/applications/ApplicationManager";
+import { Application, ApplicationConfig } from "@/applications/ApplicationManager";
 import { Action, Err, Ok, Result } from "../../components/util";
 import { infoConfig } from "@/applications/InfoApplication";
 import { aboutConfig } from "@/applications/AboutApplication";
@@ -121,7 +121,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
   }
 }
 
-function constructPath(node: FileSystemNode): string {
+export function constructPath(node: FileSystemNode): string {
   let currentNode: FileSystemNode = node;
   let directories = [];
 

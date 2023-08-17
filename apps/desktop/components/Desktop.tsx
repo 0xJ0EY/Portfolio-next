@@ -4,6 +4,8 @@ import { Window, WindowApplication, WindowCompositor } from './WindowManagement/
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import dynamic from 'next/dynamic';
 import { SystemAPIs } from './OperatingSystem';
+import { DirectoryEntry, constructPath } from '@/apis/FileSystem/FileSystem';
+import { ApplicationManager } from '@/applications/ApplicationManager';
 
 const FolderView = dynamic(() => import('./Folder/FolderView'));
 const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
@@ -64,13 +66,18 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
   }
 };
 
-export const Desktop = (props: { windowCompositor: WindowCompositor, apis: SystemAPIs }) => {
-  const { windowCompositor, apis } = props;
+export const Desktop = (props: { windowCompositor: WindowCompositor, manager: ApplicationManager, apis: SystemAPIs }) => {
+  const { windowCompositor, manager, apis } = props;
 
   const parentNode = useRef(null);
 
   const reducer = applicationReducer(windowCompositor);
   const [applicationWindows, dispatch] = useReducer(reducer, []);
+
+  function onFileOpen(file: DirectoryEntry) {
+    const path = constructPath(file.node)
+    manager.open(path);
+  }
 
   useEffect(() => {
     const unsubscribe = windowCompositor.subscribe((evt: WindowEvent) => {
@@ -82,7 +89,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, apis: Syste
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
-      <FolderView directory='/Users/joey/Desktop' apis={apis}/>
+      <FolderView directory='/Users/joey/Desktop' apis={apis} onFileOpen={onFileOpen}/>
 
       {applicationWindows.map(x => 
         <div key={x.window.id}>
