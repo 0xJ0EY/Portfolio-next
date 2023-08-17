@@ -1,5 +1,6 @@
 import { FileSystemNode } from "@/apis/FileSystem/FileSystem";
 import { Point } from "@/applications/math";
+import { Action } from "@/components/util";
 
 export const FileSystemItemDragEnter = "fs_item_drag_enter";
 export const FileSystemItemDragMove  = "fs_item_drag_move";
@@ -19,7 +20,6 @@ export interface FileSystemItemDragData {
 export type FileSystemItemDragEvent = CustomEvent<FileSystemItemDragData>;
 
 export type DragAndDropListener = (data: DragAndDropData) => void;
-export type Action<T> = () => T
 
 export interface DragAndDropData {
   action: 'start' | 'move' | 'drop',

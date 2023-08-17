@@ -1,5 +1,5 @@
 import { Application, ApplicationConfig, ApplicationManager } from "@/applications/ApplicationManager";
-import { Err, Ok, Result } from "../../components/util";
+import { Action, Err, Ok, Result } from "../../components/util";
 import { infoConfig } from "@/applications/InfoApplication";
 import { aboutConfig } from "@/applications/AboutApplication";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
@@ -8,7 +8,6 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
-import { Action } from "../DragAndDrop/DragAndDrop";
 
 type DirectorySettings = {
   alwaysOpenAsIconView: boolean,

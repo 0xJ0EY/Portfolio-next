@@ -53,3 +53,11 @@ export function createAllWindowsClosedEvent(): AllWindowsClosedEvent {
 export type ApplicationEvent =
   ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent |
   WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent;
+
+
+export type ApplicationWindowMessage = {
+  kind: 'message',
+  message: string
+}
+
+export type ApplicationWindowEvent = ApplicationWindowMessage;

@@ -21,7 +21,7 @@ const applicationManager = new ApplicationManager(windowCompositor, fileSystem, 
 
 export const OperatingSystem = () => {
   useEffect(() => {
-    applicationManager.open('/Applications/Finder.app');
+    applicationManager.open('/Applications/Finder.app /');
     // applicationManager.open('/Applications/Info.app');
     // applicationManager.open('/Applications/About.app');
 

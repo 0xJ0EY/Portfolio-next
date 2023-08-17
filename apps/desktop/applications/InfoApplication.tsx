@@ -38,6 +38,7 @@ export class InfoApplication extends Application {
         width: 400,
         title: `Info application`,
         application: this,
+        args: event.args,
         generator: () => { return View; }
       });
     };

@@ -3,8 +3,9 @@ import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindow
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
-import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { ApplicationEvent, ApplicationWindowEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
 import { SystemAPIs } from "@/components/OperatingSystem";
+import { Action } from "@/components/util";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -25,12 +26,16 @@ export interface ApplicationConfig {
   ) => Application
 }
 
+type ApplicationWindowListener = (event: ApplicationWindowEvent) => void;
+
 export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
     protected readonly manager: LocalApplicationManager,
     public readonly apis: SystemAPIs
   ) {}
+
+  private windowListeners: Record<number, ApplicationWindowListener[]> = {};
 
   abstract config(): ApplicationConfig;
 
@@ -43,6 +48,38 @@ export abstract class Application {
     if (event.kind === 'application-kill') {
       this.manager.quit();
       return;
+    }
+  }
+
+  subscribeToWindowEvents(windowId: number, listener: ApplicationWindowListener): Action<void> {
+    if (!this.windowListeners[windowId]) {
+      this.windowListeners[windowId] = [];
+    }
+
+    this.windowListeners[windowId].push(listener);
+
+    return () => { this.unsubscribeFromWindowEvents(windowId, listener); };
+  }
+
+  unsubscribeFromWindowEvents(windowId: number, listener: ApplicationWindowListener) {
+    for (const [index, entry] of this.windowListeners[windowId].entries()) {
+      if (entry === listener) {
+        this.windowListeners[windowId].splice(index);
+        return;
+      }
+    }
+  }
+
+  sendEventToView(windowId: number, event: ApplicationWindowEvent) {
+    const listeners = this.windowListeners[windowId];
+    if (!listeners) { return; }
+
+    for (const listener of listeners) { listener(event); }
+  }
+
+  sendEventToAllViews(event: ApplicationWindowEvent) {
+    for (const listeners of Object.values(this.windowListeners)) {
+      for (const listener of listeners) { listener(event); }
     }
   }
 

@@ -36,6 +36,7 @@ export class Finder extends Application {
         width: 400,
         title: `Finder`,
         application: this,
+        args: event.args.length !== 0 ? event.args : '/',
         generator: () => { return View; }
       });
     };

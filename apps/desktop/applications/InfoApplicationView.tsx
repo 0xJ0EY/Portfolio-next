@@ -1,8 +1,7 @@
-import { WindowContext } from '@/components/WindowManagement/WindowCompositor';
+import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState } from 'react';
-import { Application } from './ApplicationManager';
 
-export default function InfoApplicationView(props: { application: Application, windowContext: WindowContext }) {
+export default function InfoApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
   const [number, setNumber] = useState(0);
