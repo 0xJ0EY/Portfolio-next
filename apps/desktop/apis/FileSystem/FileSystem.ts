@@ -317,7 +317,7 @@ export class FileSystem {
     return Ok(node);
   }
 
-  public moveNode(node: FileSystemNode, directory: FileSystemDirectory): Result<null, Error> {
+  public moveNode(node: FileSystemNode, directory: FileSystemDirectory): Result<DirectoryEntry, Error> {
     // Check if the node was a parent of the target directory
     let currentDir: FileSystemDirectory | null = directory;
 
@@ -334,12 +334,12 @@ export class FileSystem {
     if (this.lookupTable[path]) { delete this.lookupTable[path]; }
 
     this.removeNodeFromDirectory(node);
-    this.addNodeToDirectory(directory, node);
+    const entry = this.addNodeToDirectory(directory, node);
 
     // Add new path to lookup table
     this.lookupTable[constructPath(node)] = node;
 
-    return Ok(null);
+    return Ok(entry);
   }
 
   public getApplication(path: string): Result<FileSystemApplication, Error> {
@@ -391,7 +391,7 @@ export class FileSystem {
     return directory;
   }
 
-  public addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode) {
+  public addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode): DirectoryEntry {
     const { x, y } = calculateNodePosition(
       directory.settings,
       directory.content,
@@ -408,6 +408,8 @@ export class FileSystem {
 
     directory.children.append(entry);
     this.propagateDirectoryEvent(directory);
+
+    return entry;
   }
 
   public removeNodeFromDirectory(node: FileSystemNode) {

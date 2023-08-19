@@ -386,7 +386,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     }
 
     updateFiles(chain);
-    
+
     return dir;
   }
 
@@ -408,10 +408,6 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     const dir = fs.getDirectory(currentDirectory.current);
     if (!dir.ok) { return };
 
-    for (const file of evt.detail.nodes) {
-      fs.moveNode(file.item, dir.value);
-    }
-
     const folderRect = folder.getBoundingClientRect();
     
     const horizontal = {
@@ -423,15 +419,31 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       min: -IconHeight / 2,
       max: folderRect.height + (IconHeight / 2)
     }
-  
-    for (let fileNode of files.iterFromTail()) {
-      const file = fileNode.value;
-      for (const node of evt.detail.nodes) {        
-        if (node.item.id === file.entry.node.id) {
-          file.entry.x = clamp(node.position.x, horizontal.min, horizontal.max);
-          file.entry.y = clamp(node.position.y, vertical.min, vertical.max);
+
+    outer: for (const node of evt.detail.nodes) {
+      const result = fs.moveNode(node.item, dir.value);
+
+      if (!result.ok) { continue; }
+      const directoryEntry = result.value;
+      directoryEntry.x = clamp(node.position.x, horizontal.min, horizontal.max);
+      directoryEntry.y = clamp(node.position.y, vertical.min, vertical.max);
+      
+      const desktopIconEntry: DesktopIconEntry = {
+        entry: directoryEntry,
+        selected: false,
+        dragging: false
+      }
+
+
+      for (let fileNode of files.iterFromTail()) {
+        if (fileNode.value.entry.node.id === directoryEntry.node.id) {
+          fileNode.value.entry = directoryEntry;
+
+          continue outer;
         }
       }
+
+      files.append(desktopIconEntry);
     }
 
     updateFiles(files);
