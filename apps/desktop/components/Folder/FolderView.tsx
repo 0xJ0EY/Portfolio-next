@@ -47,6 +47,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
   } 
 
   const ref: RefObject<HTMLDivElement> = useRef(null);
+  const iconContainer: RefObject<HTMLDivElement> = useRef(null);
 
   const dragAndDrop = apis.dragAndDrop;
 
@@ -65,7 +66,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
   const [box, setBox] = useState<SelectionBox>({ open: false, x: 0, y: 0, width: 0, height: 0 });
 
-  function getLocalCoordinates(evt: PointerEvent) {
+  function getLocalCoordinates(evt: PointerEvent): Point {
     const dimensions = ref.current!.getBoundingClientRect();
 
     const localX = evt.clientX - dimensions.left;
@@ -74,9 +75,27 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     return { x: localX, y: localY};
   }
 
+  function getXCoordInIconContainer(x: number, container: HTMLDivElement): number {
+    return container.scrollLeft + x;
+  }
+
+  function getYCoordInIconContainer(y: number, container: HTMLDivElement): number {
+    return container.scrollTop + y;
+  }
+
+  function getCoordinatesInIconContainer(point: Point, container: HTMLDivElement): Point {
+    return {
+      x: getXCoordInIconContainer(point.x, container),
+      y: getYCoordInIconContainer(point.y, container)
+    };
+  }
+
   function selectFile(evt: PointerEvent) {
     const files = localFiles.current;
-    const point = getLocalCoordinates(evt);
+    
+    if (!iconContainer.current) { return; }
+    const container = iconContainer.current;
+    const point = getCoordinatesInIconContainer(getLocalCoordinates(evt), container);
 
     let hasSelected = false;
 
@@ -101,16 +120,20 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
   function selectFiles(evt: PointerEvent) {
     const files = localFiles.current;
     const origin = selectionBoxStart.current;
+
+    if (!iconContainer.current) { return; }
+    const container = iconContainer.current;
+
     const current = getLocalCoordinates(evt);
     
     const topLeftPoint = { x: Math.min(origin.x, current.x), y: Math.min(origin.y, current.y) };
     const bottomRightPoint = { x: Math.max(origin.x, current.x), y: Math.max(origin.y, current.y) };
 
     const selectionRect: Rectangle = {
-      x1: topLeftPoint.x,
-      x2: bottomRightPoint.x,
-      y1: topLeftPoint.y,
-      y2: bottomRightPoint.y
+      x1: getXCoordInIconContainer(topLeftPoint.x, container),
+      x2: getXCoordInIconContainer(bottomRightPoint.x, container),
+      y1: getYCoordInIconContainer(topLeftPoint.y, container),
+      y2: getYCoordInIconContainer(bottomRightPoint.y, container)
     };
 
     for (let node of files.iterFromHead()) {
@@ -123,8 +146,11 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
   }
 
   function clickedFile(evt: PointerEvent): DirectoryEntry | undefined {
-    const point = getLocalCoordinates(evt);
     const files = localFiles.current;
+
+    if (!iconContainer.current) { return; }
+    const container = iconContainer.current;
+    const point = getCoordinatesInIconContainer(getLocalCoordinates(evt), container);
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
@@ -431,8 +457,12 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       className={styles.folder}
       data-drop-point="true"
     >
-      {icons}
-      {selectionBox}
+      <div className={styles.selectionBoxContainer}>
+        {selectionBox}
+      </div>
+      <div ref={iconContainer} className={styles.iconsContainer}>
+        {icons}
+      </div>
     </div>
   </>
 }
