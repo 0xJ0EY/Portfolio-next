@@ -56,7 +56,7 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
-function calculateZIndex(entry: DirectoryEntry, index: number): number {
+function calculateZIndex(entry: DesktopIconEntry, index: number): number {
   let result = entry.dragging ? 100_000 : 0;
   
   result += index;
@@ -64,14 +64,25 @@ function calculateZIndex(entry: DirectoryEntry, index: number): number {
   return result;
 }
 
-export default function DesktopIcon(props: { entry: DirectoryEntry, index: number }) {
-  const { entry, index } = props;
+export type DesktopIconEntry = {
+  entry: DirectoryEntry,
+  selected: boolean,
+  dragging: boolean,
+}
+
+export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {
+  const { desktopIconEntry, index } = props;
+  const entry = desktopIconEntry.entry;
   const file = entry.node;
 
-  const selected = entry.selected ? styles.selected : '';
+  const selected = desktopIconEntry.selected ? styles.selected : '';
 
   return <>
-    <div className={file.kind + " " + styles.container + ' ' + selected} style={{top: `${entry.y}px`, left: `${entry.x}px`, zIndex: calculateZIndex(entry, index)}}>
+    <div className={file.kind + " " + styles.container + ' ' + selected} style={{
+      top: `${entry.y}px`,
+      left: `${entry.x}px`,
+      zIndex: calculateZIndex(desktopIconEntry, index)
+    }}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
           <Image

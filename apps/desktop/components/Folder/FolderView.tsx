@@ -2,7 +2,7 @@ import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
-import { DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
+import { DesktopIconEntry, DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
 import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
@@ -38,10 +38,10 @@ type Props = {
 export default function FolderView({ directory, apis, onFileOpen }: Props) {
   const fs = apis.fileSystem;
 
-  const [files, setFiles] = useState<DirectoryEntry[]>([]);
-  const localFiles = useRef<Chain<DirectoryEntry>>(new Chain());
+  const [files, setFiles] = useState<DesktopIconEntry[]>([]);
+  const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
 
-  function updateFiles(files: Chain<DirectoryEntry>) {
+  function updateFiles(files: Chain<DesktopIconEntry>) {
     localFiles.current = files;
     setFiles(files.toArray());
   } 
@@ -55,12 +55,12 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
   const selectionBoxStart = useRef({ x: 0, y: 0 });
 
   const isDragging = useRef(false);
-  const previousClickedFile = useRef<{ file: DirectoryEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
+  const previousClickedFile = useRef<{ file: DesktopIconEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
 
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
   const fileDraggingFolderOrigin = useRef<Point>();
 
-  const fileDraggingSelection  = useRef<DirectoryEntry[]>([]);
+  const fileDraggingSelection  = useRef<DesktopIconEntry[]>([]);
   const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
   const fileDraggingSession: MutableRefObject<DragAndDropSession | null> = useRef(null);
 
@@ -101,7 +101,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (let node of files.iterFromHead()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = DesktopIconHitBox(file.entry);
 
       const selected = pointInsideAnyRectangles(point, hitBox);
       const toggleSelected = selected && !hasSelected;
@@ -138,14 +138,14 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (let node of files.iterFromHead()) {
       const file = node.value; 
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = DesktopIconHitBox(file.entry);
       file.selected = rectangleAnyIntersection(selectionRect, hitBox);
     }
 
     updateFiles(files);
   }
 
-  function clickedFile(evt: PointerEvent): DirectoryEntry | undefined {
+  function clickedFile(evt: PointerEvent): DesktopIconEntry | undefined {
     const files = localFiles.current;
 
     if (!iconContainer.current) { return; }
@@ -154,7 +154,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = DesktopIconHitBox(file.entry);
 
       if (pointInsideAnyRectangles(point, hitBox)) {
         return node.value;
@@ -169,7 +169,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     window.addEventListener('pointermove', onFileDraggingMove);
     window.addEventListener('pointerup', onFileDraggingUp);
 
-    const selectedFiles: DirectoryEntry[] = [];
+    const selectedFiles: DesktopIconEntry[] = [];
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
@@ -190,13 +190,14 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     if (!origin) { return; }
 
     const data: FileSystemItemDragData = {
-      nodes: fileDraggingSelection.current.map(entry => {
+      nodes: fileDraggingSelection.current.map(desktopIconEntry => {
+      
         const offset = {
-          x: origin.x - entry.x,
-          y: origin.y - entry.y,
+          x: origin.x - desktopIconEntry.entry.x,
+          y: origin.y - desktopIconEntry.entry.y,
         };
 
-        return { item: entry.node, position: { x: 0, y: 0}, offset };
+        return { item: desktopIconEntry.entry.node, position: { x: 0, y: 0}, offset };
       })
     };
 
@@ -267,10 +268,10 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     // 3. apply the offset to the local position
     if (fileDraggingCurrentNode.current) {
       const data: FileSystemItemDragData = {
-        nodes: fileDraggingSelection.current.map(entry => {
+        nodes: fileDraggingSelection.current.map(desktopIconEntry => {
           const offset = {
-            x: origin.x - entry.x,
-            y: origin.y - entry.y,
+            x: origin.x - desktopIconEntry.entry.x,
+            y: origin.y - desktopIconEntry.entry.y,
           };
 
           const position = {
@@ -278,7 +279,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
             y: evt.clientY - coords.top - offset.y,
           };
 
-          return { item: entry.node, position, offset };
+          return { item: desktopIconEntry.entry.node, position, offset };
         })
       }
 
@@ -315,7 +316,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       const sameFile = previousClickedFile.current.file === file;
 
       if (delta < 400 && sameFile) {        
-        onFileOpen(file);
+        onFileOpen(file.entry);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else {
@@ -374,8 +375,18 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     currentDirectory.current = directory;
 
-    updateFiles(dir.value.children);
+    let chain = new Chain<DesktopIconEntry>();
 
+    for (const node of dir.value.children.iterFromTail()) {
+      chain.append({
+        entry: node.value,
+        selected: false,
+        dragging: false
+      });
+    }
+
+    updateFiles(chain);
+    
     return dir;
   }
 
@@ -416,9 +427,9 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     for (let fileNode of files.iterFromTail()) {
       const file = fileNode.value;
       for (const node of evt.detail.nodes) {        
-        if (node.item.id === file.node.id) {
-          file.x = clamp(node.position.x, horizontal.min, horizontal.max);
-          file.y = clamp(node.position.y, vertical.min, vertical.max);
+        if (node.item.id === file.entry.node.id) {
+          file.entry.x = clamp(node.position.x, horizontal.min, horizontal.max);
+          file.entry.y = clamp(node.position.y, vertical.min, vertical.max);
         }
       }
     }
@@ -447,7 +458,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     }
   }, [directory]);
 
-  const icons = files.map((entry, index) => <DesktopIcon key={index} entry={entry} index={index} />);
+  const icons = files.map((entry, index) => <DesktopIcon key={index} desktopIconEntry={entry} index={index} />);
 
   const selectionBox = SelectionBox(box);
   

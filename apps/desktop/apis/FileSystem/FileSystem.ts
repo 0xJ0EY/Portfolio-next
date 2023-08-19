@@ -27,9 +27,7 @@ export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemAp
 export type DirectoryEntry = {
   node: FileSystemNode,
   x: number,
-  y: number,
-  selected: boolean,
-  dragging: boolean,
+  y: number
 }
 
 export type FileSystemDirectory = {
@@ -406,8 +404,6 @@ export class FileSystem {
       node,
       x,
       y,
-      selected: false,
-      dragging: false
     };
 
     directory.children.append(entry);
