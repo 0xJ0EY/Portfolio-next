@@ -38,7 +38,8 @@ export type FileSystemDirectory = {
   settings: DirectorySettings,
   content: DirectoryContent,
   children: Chain<DirectoryEntry>
-  editable: boolean
+  editable: boolean,
+  stickyBit: boolean,
 };
 
 export type FileSystemFile = {
@@ -57,7 +58,6 @@ export type FileSystemApplication = {
   editable: boolean,
   entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application,
 }
-
 
 function createApplication(
   id: number,
@@ -93,11 +93,12 @@ function createRootNode(): FileSystemDirectory {
     },
     name: '/',
     editable: false,
+    stickyBit: false,
     children: new Chain()
   }
 }
 
-function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean): FileSystemDirectory {
   return {
     id,
     parent,
@@ -115,6 +116,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     },
     name,
     editable,
+    stickyBit,
     children: new Chain()
   }
 }
@@ -146,21 +148,21 @@ export function createBaseFileSystem(): FileSystem {
   const root = rootEntry.value;
 
   // Create base file tree
-  fileSystem.addDirectory(root, 'Applications', false);
+  fileSystem.addDirectory(root, 'Applications', false, false);
 
   fileSystem.addApplication(finderConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(infoConfig);
 
   // Create unix like /home folder (macOS also has one)
-  fileSystem.addDirectory(root, 'home', false);
+  fileSystem.addDirectory(root, 'home', false, false);
 
   // Create macOS like Users folder
-  const users = fileSystem.addDirectory(root, 'Users', false);
-  const joey = fileSystem.addDirectory(users, 'joey', false);
-  const desktop = fileSystem.addDirectory(joey, 'Desktop', false);
-  fileSystem.addDirectory(desktop, 'foo', true);
-  fileSystem.addDirectory(desktop, 'bar', true);
+  const users = fileSystem.addDirectory(root, 'Users', false, false);
+  const joey = fileSystem.addDirectory(users, 'joey', false, false);
+  const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
+  fileSystem.addDirectory(desktop, 'foo', true, true);
+  fileSystem.addDirectory(desktop, 'bar', true, true);
 
   return fileSystem;
 }
@@ -265,6 +267,31 @@ export function findNodeInDirectoryChain(directory: FileSystemDirectory, node: F
   return Err(Error("Unable to find node within the directory chain"));
 }
 
+function isParentOfTargetDirectory(directory: FileSystemDirectory, node: FileSystemNode): boolean {
+  let currentDir: FileSystemDirectory | null = directory;
+
+  while (currentDir) {
+    if (currentDir.id === node.id) {
+      return true;
+    }
+
+    currentDir = currentDir.parent;
+  }
+
+  return false;
+}
+
+function isEditable(node: FileSystemNode | null): boolean {
+  // If no node is given (parent not existing) the node should not be editable, as this case should never happen
+  if (!node) { return false; }
+
+  return node.editable;
+}
+
+function targetDirectoryAllowsModification(directory: FileSystemDirectory): boolean {
+  return directory.editable || directory.stickyBit;
+}
+
 export type DirectoryListener = () => void;
 
 export class FileSystem {
@@ -319,14 +346,16 @@ export class FileSystem {
 
   public moveNode(node: FileSystemNode, directory: FileSystemDirectory): Result<DirectoryEntry, Error> {
     // Check if the node was a parent of the target directory
-    let currentDir: FileSystemDirectory | null = directory;
+    if (isParentOfTargetDirectory(directory, node)) {
+      return Err(Error("Node is a parent of the target directory"));
+    }
 
-    while (currentDir) {
-      if (currentDir.id === node.id) {
-        return Err(Error("Node is a parent of the target directory"));
-      }
+    if (!isEditable(node)) {
+      return Err(Error("Node or target directory is not editable"));
+    }
 
-      currentDir = currentDir.parent;
+    if (!targetDirectoryAllowsModification(directory)) {
+      return Err(Error("Target directory does not allow modification"));
     }
 
     // Remove old path from lookup table
@@ -381,8 +410,8 @@ export class FileSystem {
     return Ok(application);
   }
 
-  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean): FileSystemDirectory {
-    const directory = createDirectory(++this.id, parent, name, editable);
+  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean): FileSystemDirectory {
+    const directory = createDirectory(++this.id, parent, name, editable, editableContent);
 
     this.addNodeToDirectory(parent, directory);
 

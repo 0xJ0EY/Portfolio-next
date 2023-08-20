@@ -434,7 +434,6 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
         dragging: false
       }
 
-
       for (let fileNode of files.iterFromTail()) {
         if (fileNode.value.entry.node.id === directoryEntry.node.id) {
           fileNode.value.entry = directoryEntry;
