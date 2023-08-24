@@ -2,12 +2,13 @@ import styles from '@/styles/Desktop.module.css';
 import React, { useEffect, useRef, useReducer, useState } from "react";
 import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
+import dynamic from 'next/dynamic';
+import { SystemAPIs } from './OperatingSystem';
+import { DirectoryEntry, constructPath } from '@/apis/FileSystem/FileSystem';
 import { ApplicationManager } from '@/applications/ApplicationManager';
-import { FileSystem } from './FileSystem/FileSystem';
-import { Dock } from './Dock';
-import { MenuBar } from './MenuBar';
 
-const WindowContainer = React.lazy(() => import('./WindowManagement/WindowContainer'));
+const FolderView = dynamic(() => import('./Folder/FolderView'));
+const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
 
 interface ApplicationData {
   window: Window,
@@ -65,13 +66,18 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
   }
 };
 
-export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
-  const { windowCompositor } = props;
+export const Desktop = (props: { windowCompositor: WindowCompositor, manager: ApplicationManager, apis: SystemAPIs }) => {
+  const { windowCompositor, manager, apis } = props;
 
   const parentNode = useRef(null);
 
   const reducer = applicationReducer(windowCompositor);
   const [applicationWindows, dispatch] = useReducer(reducer, []);
+
+  function onFileOpen(file: DirectoryEntry) {
+    const path = constructPath(file.node);
+    manager.open(path);
+  }
 
   useEffect(() => {
     const unsubscribe = windowCompositor.subscribe((evt: WindowEvent) => {
@@ -83,6 +89,8 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
+      <FolderView directory='/Users/joey/Desktop' apis={apis} onFileOpen={onFileOpen} localIconPosition={true}/>
+
       {applicationWindows.map(x => 
         <div key={x.window.id}>
           <WindowContainer
@@ -91,36 +99,6 @@ export const Desktop = (props: { windowCompositor: WindowCompositor}) => {
             windowCompositor={windowCompositor}
             parent={parentNode.current}/>
         </div>)}
-    </div>
-  </>
-}
-
-const fileSystem = new FileSystem();
-fileSystem.init();
-
-const windowCompositor = new WindowCompositor();
-const applicationManager = new ApplicationManager(windowCompositor, fileSystem);
-
-export const OperatingSystem = () => {
-  useEffect(() => {
-    applicationManager.open('/Applications/Finder.app');
-    applicationManager.open('/Applications/Info.app');
-    applicationManager.open('/Applications/About.app');
-
-    return () => {
-      // Needs to be done, due to this class also opening files in the application manager
-      applicationManager.reset();  
-      windowCompositor.reset();
-    }
-  }, []);
-
-  const dock = Dock(applicationManager);
-
-  return <>
-    <div className={styles.operatingSystem}>
-    <MenuBar/>
-    <Desktop windowCompositor={windowCompositor} />
-    {dock}
     </div>
   </>
 }

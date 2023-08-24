@@ -1,9 +1,11 @@
-import { FileSystem, FileSystemApplication } from "@/components/FileSystem/FileSystem";
+import { FileSystem, FileSystemApplication, FileSystemDirectory, constructPath } from "@/apis/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "@/components/util";
 import { LocalApplicationManager } from "./LocalApplicationManager";
-import { ApplicationEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { ApplicationEvent, ApplicationWindowEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
+import { SystemAPIs } from "@/components/OperatingSystem";
+import { Action } from "@/components/util";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -17,14 +19,23 @@ export interface ApplicationConfig {
   readonly displayName: string,
   readonly path: string,
   readonly appName: string,
-  readonly entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager) => Application
+  readonly entrypoint: (
+    compositor: LocalWindowCompositor,
+    manager: LocalApplicationManager,
+    apis: SystemAPIs
+  ) => Application
 }
+
+type ApplicationWindowListener = (event: ApplicationWindowEvent) => void;
 
 export abstract class Application {
   constructor(
     protected readonly compositor: LocalWindowCompositor,
-    protected readonly manager: LocalApplicationManager
+    protected readonly manager: LocalApplicationManager,
+    public readonly apis: SystemAPIs
   ) {}
+
+  private windowListeners: Record<number, ApplicationWindowListener[]> = {};
 
   abstract config(): ApplicationConfig;
 
@@ -37,6 +48,38 @@ export abstract class Application {
     if (event.kind === 'application-kill') {
       this.manager.quit();
       return;
+    }
+  }
+
+  subscribeToWindowEvents(windowId: number, listener: ApplicationWindowListener): Action<void> {
+    if (!this.windowListeners[windowId]) {
+      this.windowListeners[windowId] = [];
+    }
+
+    this.windowListeners[windowId].push(listener);
+
+    return () => { this.unsubscribeFromWindowEvents(windowId, listener); };
+  }
+
+  unsubscribeFromWindowEvents(windowId: number, listener: ApplicationWindowListener) {
+    for (const [index, entry] of this.windowListeners[windowId].entries()) {
+      if (entry === listener) {
+        this.windowListeners[windowId].splice(index);
+        return;
+      }
+    }
+  }
+
+  sendEventToView(windowId: number, event: ApplicationWindowEvent) {
+    const listeners = this.windowListeners[windowId];
+    if (!listeners) { return; }
+
+    for (const listener of listeners) { listener(event); }
+  }
+
+  sendEventToAllViews(event: ApplicationWindowEvent) {
+    for (const listeners of Object.values(this.windowListeners)) {
+      for (const listener of listeners) { listener(event); }
     }
   }
 
@@ -65,7 +108,8 @@ export class ApplicationManager implements BaseApplicationManager {
 
   constructor(
     private windowCompositor: WindowCompositor,
-    private fileSystem: FileSystem
+    private fileSystem: FileSystem,
+    private apis: SystemAPIs
   ) {
     windowCompositor.registerApplicationManager(this);
   }
@@ -91,7 +135,7 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   public focus(application: Application) {
-    console.log(application.config().displayName);
+    console.log(`Application focussed: ${application.config().displayName}`);
   }
 
   public listApplications(): Application[] {
@@ -112,7 +156,7 @@ export class ApplicationManager implements BaseApplicationManager {
       return Ok(parent.processId);
     } else {
       const instance = {
-        application: application.entrypoint(compositor, manager),
+        application: application.entrypoint(compositor, manager, this.apis),
         context: new ApplicationContext(path, compositor),
         processId: this.processId
       };
@@ -127,6 +171,10 @@ export class ApplicationManager implements BaseApplicationManager {
     }
   }
 
+  private openDirectory(path: string): Result<number, Error> {
+    return this.open(`/Applications/Finder.app ${path}`);
+  }
+
   open(argument: string): Result<number, Error> {
     const parts = argument.split(' ');
 
@@ -139,10 +187,10 @@ export class ApplicationManager implements BaseApplicationManager {
 
     const value = node.value;
 
-    // TODO: Open folder in folder exporer
     // TODO: Open text file in text file viewer
     switch (value.kind) {
       case 'application': return this.openApplication(value, path, args);
+      case 'directory': return this.openDirectory(path);
       default: return Err(Error("Not yet implemented"))
     }
   }

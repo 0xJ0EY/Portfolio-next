@@ -11,3 +11,5 @@ export function Ok<T, E = Error>(value: T): Result<T, E> {
 export function Err<T, E = Error>(error: E): Result<T, E> {
   return { ok: false, value: error };
 }
+
+export type Action<T> = () => T

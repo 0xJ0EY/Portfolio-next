@@ -50,6 +50,33 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   return null;
 }
 
+const transformWebUrlToDesktop = (webUrl: string): string => {
+  const parts = webUrl.split('-');
+
+  const index = parts.findIndex(x => x === 'web');
+  parts[index] = 'desktop';
+
+  return 'https://' + parts.join('-');
+}
+
+const getTargetDomain = (): string => {
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
+
+  if (env === 'production') {
+    return 'https://portfolio-next-web.vercel.app/';
+  }
+
+  if (env === 'preview' || env === 'development') {
+    console.log(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL);
+
+    const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? window.location.host;
+
+    return transformWebUrlToDesktop(vercelUrl);
+  } else {
+    return 'http://localhost:3001'
+  }
+}
+
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
   gltf.scene.name = DisplayParentName;
@@ -99,10 +126,9 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
 
-  // iframe.src = "http://192.168.178.49:3001";
-  iframe.src = "http://localhost:3001";
-  // iframe.src = "https://example.com/";
-  // iframe.src = "https://joeyderuiter.me";
+  console.log(getTargetDomain());
+
+  iframe.src = getTargetDomain();
 
   div.appendChild(iframe);
 

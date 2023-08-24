@@ -1,23 +1,24 @@
-import { WindowContext } from '@/components/WindowManagement/WindowCompositor';
+import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState } from 'react';
-import { Application } from './ApplicationManager';
 
-export default function InfoApplicationView(props: { application: Application, windowContext: WindowContext }) {
+export default function InfoApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
-  const [number, setNumber] = useState(0);
+  const [time, _] = useState(Date.now());
 
   useEffect(() => { 
     return () => { }
   }, []);
 
   return (
-    <div>
-      <button onClick={() => {setNumber(number - 1)}}>-</button>
-      {number}
-      <button onClick={() => {setNumber(number + 1)}}>+</button>
-
-      <button onClick={() => application.on({ kind: 'application-quit' }, windowContext)}>Send event</button>
-    </div>
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'block',
+      background: `url(http://localhost:8080/waifu?t=${time})`,
+      backgroundSize: 'contain',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}></div>
   )
 } 

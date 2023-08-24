@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Application, ApplicationConfig, ApplicationManager } from '@/applications/ApplicationManager';
 import styles from '@/styles/Desktop.module.css';
 import { aboutConfig } from '@/applications/AboutApplication';
-import { finderConfig } from '@/applications/Finder/FinderApplication';
+import { finderConfig } from '@/applications/Finder/Finder';
 import { infoConfig } from '@/applications/InfoApplication';
-import { Chain } from './WindowManagement/Chain';
+import { Chain } from '../data/Chain';
 
 const DockApplications = [
   finderConfig,
@@ -20,7 +20,8 @@ interface DockItem {
 
 // Extend the notification system of the dock events (by adding closed/open application)
 // And implement a reducer like in Desktop.tsx
-export const Dock = (manager: ApplicationManager) => {
+export const Dock = (props: { manager: ApplicationManager }) => {
+  const { manager } = props;
   const [dockItems, setDockItems] = useState<DockItem[]>([]);
 
   function constructDock(manager: ApplicationManager): DockItem[] {
@@ -50,8 +51,6 @@ export const Dock = (manager: ApplicationManager) => {
         onClick: () => { manager.open(x.config.path + x.config.appName); }
       })
     });
-
-    console.log(result.toArray());
 
     return result.toArray();
   }

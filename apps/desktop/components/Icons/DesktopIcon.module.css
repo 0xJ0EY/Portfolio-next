@@ -1,0 +1,40 @@
+.container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 120px;
+  min-height: 80px;
+  justify-content: center;
+}
+
+.selected img {
+  background-color: hotpink;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.imageContainerInner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image {
+  display: block;
+  user-select: none;
+}
+
+.title {
+  display: block;
+  text-align: center;
+  user-select: none;
+}
+
+.titleLine {
+  display: inline-block;
+  line-height: 1.2em;
+  padding: 0 5px;
+}

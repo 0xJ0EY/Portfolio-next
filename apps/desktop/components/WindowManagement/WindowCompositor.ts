@@ -1,10 +1,11 @@
-import { Chain, Node } from "./Chain";
-import { LazyExoticComponent } from "react"
+import { Chain, Node } from "../../data/Chain";
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
-export type WindowApplication = LazyExoticComponent<(props: { application: Application, windowContext: WindowContext }) => JSX.Element>;
+
+export type WindowProps = { application: Application, args: string, windowContext: WindowContext };
+export type WindowApplication = React.ComponentType<WindowProps>;
 export type WindowApplicationGenerator = () => WindowApplication;
 
 export interface WindowContext {
@@ -17,6 +18,7 @@ export interface WindowConfig {
   height?: number,
   width?: number,
   title: string,
+  args: string
   readonly application: Application,
   readonly generator: WindowApplicationGenerator
 }
@@ -32,6 +34,7 @@ export class Window {
     public width: number,
     public height: number,
     public title: string,
+    public args: string,
     public readonly application: Application,
     public readonly generator: WindowApplicationGenerator
   ) { }
@@ -103,6 +106,7 @@ export class WindowCompositor {
       config.width ?? 400,
       config.height ?? 80,
       config.title,
+      config.args,
       config.application,
       config.generator
     );
