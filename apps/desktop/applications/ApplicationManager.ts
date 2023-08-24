@@ -172,9 +172,7 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   private openDirectory(path: string): Result<number, Error> {
-    this.open(`/Applications/Finder.app ${path}`)
-
-    return Err(Error("not yet impl"));
+    return this.open(`/Applications/Finder.app ${path}`);
   }
 
   open(argument: string): Result<number, Error> {
