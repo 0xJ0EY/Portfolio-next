@@ -14,13 +14,18 @@ export function DragAndDropView(props: { apis: SystemAPIs }) {
     switch (data.action) {
       case 'start':
       case 'move':
-        const selectedFiles: DesktopIconEntry[] = data.files.nodes.map(x => {
+        const selectedFiles: DesktopIconEntry[] = data.files.nodes.map(entry => {
+          const [x, y] = [
+            data.x - entry.offset.x,
+            data.y - entry.offset.y,
+          ];
+
           return {
             entry: {
-              node: x.item,
-              x: data.x - x.offset.x,
-              y: data.y - x.offset.y,
+              node: entry.item,
+              x, y,
             },
+            x, y,
             selected: false,
             dragging: true
           }

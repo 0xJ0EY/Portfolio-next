@@ -12,7 +12,7 @@ export const ImageWidth   = 60;
 export const TextWidth    = 120;
 export const TextHeight   = 20;
 
-export function DesktopIconHitBox(entry: DirectoryEntry): Rectangle[] {
+export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
   // TODO: Resize text hitbox based on the content
 
   const imageHorizontalCenter = IconWidth / 2;
@@ -66,6 +66,8 @@ function calculateZIndex(entry: DesktopIconEntry, index: number): number {
 
 export type DesktopIconEntry = {
   entry: DirectoryEntry,
+  x: number,
+  y: number
   selected: boolean,
   dragging: boolean,
 }
@@ -79,8 +81,8 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
-      top: `${entry.y}px`,
-      left: `${entry.x}px`,
+      top: `${desktopIconEntry.y}px`,
+      left: `${desktopIconEntry.x}px`,
       zIndex: calculateZIndex(desktopIconEntry, index)
     }}>
       <div className={styles.imageContainer}>

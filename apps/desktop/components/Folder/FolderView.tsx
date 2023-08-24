@@ -1,4 +1,4 @@
-import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, DirectoryEventType, FileSystemDirectory, calculateNodePosition } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -32,11 +32,14 @@ const DraggingThreshold = 5;
 type Props = {
   directory: string,
   apis: SystemAPIs,
-  onFileOpen: (file: DirectoryEntry) => void
+  onFileOpen: (file: DirectoryEntry) => void,
+  localIconPosition?: boolean
 }
 
-export default function FolderView({ directory, apis, onFileOpen }: Props) {
+export default function FolderView({ directory, apis, onFileOpen, localIconPosition }: Props) {
   const fs = apis.fileSystem;
+
+  const useLocalIconPosition = localIconPosition ?? false;
 
   const [files, setFiles] = useState<DesktopIconEntry[]>([]);
   const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
@@ -101,7 +104,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (let node of files.iterFromHead()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file.entry);
+      const hitBox = DesktopIconHitBox(file);
 
       const selected = pointInsideAnyRectangles(point, hitBox);
       const toggleSelected = selected && !hasSelected;
@@ -138,7 +141,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (let node of files.iterFromHead()) {
       const file = node.value; 
-      const hitBox = DesktopIconHitBox(file.entry);
+      const hitBox = DesktopIconHitBox(file);
       file.selected = rectangleAnyIntersection(selectionRect, hitBox);
     }
 
@@ -154,7 +157,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file.entry);
+      const hitBox = DesktopIconHitBox(file);
 
       if (pointInsideAnyRectangles(point, hitBox)) {
         return node.value;
@@ -193,8 +196,8 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       nodes: fileDraggingSelection.current.map(desktopIconEntry => {
       
         const offset = {
-          x: origin.x - desktopIconEntry.entry.x,
-          y: origin.y - desktopIconEntry.entry.y,
+          x: origin.x - desktopIconEntry.x,
+          y: origin.y - desktopIconEntry.y,
         };
 
         return { item: desktopIconEntry.entry.node, position: { x: 0, y: 0}, offset };
@@ -270,8 +273,8 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
       const data: FileSystemItemDragData = {
         nodes: fileDraggingSelection.current.map(desktopIconEntry => {
           const offset = {
-            x: origin.x - desktopIconEntry.entry.x,
-            y: origin.y - desktopIconEntry.entry.y,
+            x: origin.x - desktopIconEntry.x,
+            y: origin.y - desktopIconEntry.y,
           };
 
           const position = {
@@ -369,30 +372,91 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     closeBox();
   }
 
-  function reloadFiles(directory: string) {
+  function reloadSyncedFiles(directory: FileSystemDirectory) {
+    const chain = new Chain<DesktopIconEntry>();
+
+    // Essentially a map to wrap the files in a DesktopIconEntry
+    for (const node of directory.children.iterFromTail()) {
+      chain.append({
+        entry: node.value,
+        selected: false,
+        dragging: false,
+        x: node.value.x,
+        y: node.value.y,
+      });
+    }
+
+    updateFiles(chain);    
+  }
+
+  function reloadLocalFiles(directory: FileSystemDirectory, type: DirectoryEventType) {
+    if (type === 'refresh') { return; }
+
+    const existingChain = localFiles.current;
+    const lookup = new Map<number, DesktopIconEntry>();
+    const newChain = new Chain<DesktopIconEntry>();
+
+    let newDesktopIconEntries: DirectoryEntry[] = [];
+
+    // Create a quick lookup table, so we don't have to look sequentially through the chain
+    // I <3 linked list look up times
+    for (const entry of existingChain.iterFromTail()) {
+      const value = entry.value;
+      const id = value.entry.node.id;
+
+      lookup.set(id, value);
+    }
+
+    for (const node of directory.children.iterFromTail()) {
+      const existingValue = lookup.get(node.value.node.id);
+
+      if (!existingValue) {
+        newDesktopIconEntries.push(node.value);
+        continue;
+      }
+
+      newChain.append({
+        entry: node.value,
+        selected: false,
+        dragging: false,
+        x: existingValue.x,
+        y: existingValue.y,
+      });
+    }
+
+    for (const entry of newDesktopIconEntries) {
+      const pos = calculateNodePosition(directory.settings, directory.content, newChain.toArray());
+
+      newChain.append({
+        entry,
+        selected: false,
+        dragging: false,
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+
+    updateFiles(newChain);
+  }
+
+  function reloadFiles(directory: string, type: DirectoryEventType) {
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return dir; }
 
     currentDirectory.current = directory;
 
-    let chain = new Chain<DesktopIconEntry>();
-
-    for (const node of dir.value.children.iterFromTail()) {
-      chain.append({
-        entry: node.value,
-        selected: false,
-        dragging: false
-      });
+    if (useLocalIconPosition) {
+      reloadLocalFiles(dir.value, type);
+    } else {
+      reloadSyncedFiles(dir.value);
     }
-
-    updateFiles(chain);
 
     return dir;
   }
 
   function loadFiles(directory: string) {
-    const action = () => reloadFiles(directory);
-    const result = action();
+    const action = (type: DirectoryEventType) => reloadFiles(directory, type);
+    const result = action('update');
     
     if (result.ok) {
       return fs.subscribe(result.value, action);
@@ -401,6 +465,7 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
 
   function onFileDrop(evt: FileSystemItemDragEvent) {
     const files = localFiles.current;
+    let parentsToUpdate: Map<number, FileSystemDirectory> = new Map();
     
     if (!ref.current) { return; }
     const folder = ref.current;
@@ -421,28 +486,52 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     }
 
     outer: for (const node of evt.detail.nodes) {
+      if (node.item.parent && node.item.parent.id !== dir.value.id) {
+        const parent = node.item.parent;
+        parentsToUpdate.set(parent.id, parent);
+      }
+
       const result = fs.moveNode(node.item, dir.value);
 
       if (!result.ok) { continue; }
       const directoryEntry = result.value;
-      directoryEntry.x = clamp(node.position.x, horizontal.min, horizontal.max);
-      directoryEntry.y = clamp(node.position.y, vertical.min, vertical.max);
+
+      const positionX = clamp(node.position.x, horizontal.min, horizontal.max);
+      const positionY = clamp(node.position.y, vertical.min, vertical.max);
+
+      if (!useLocalIconPosition) {
+        directoryEntry.x = positionX;
+        directoryEntry.y = positionY;
+      }
       
       const desktopIconEntry: DesktopIconEntry = {
         entry: directoryEntry,
+        x: positionX,
+        y: positionY,
         selected: false,
         dragging: false
       }
 
       for (let fileNode of files.iterFromTail()) {
         if (fileNode.value.entry.node.id === directoryEntry.node.id) {
-          fileNode.value.entry = directoryEntry;
+          fileNode.value = desktopIconEntry;
 
           continue outer;
         }
       }
 
       files.append(desktopIconEntry);
+    }
+
+    if (parentsToUpdate.size > 0) {
+      parentsToUpdate.forEach(x => fs.propagateDirectoryEvent(x, 'update'));
+      fs.propagateDirectoryEvent(dir.value, 'update');
+    } else {
+      // Local Icon Position (Desktop mode) shouldn't update the rest of the views
+      // As it should be isolated from the other views
+      if (!useLocalIconPosition) {
+        fs.propagateDirectoryEvent(dir.value, 'refresh');
+      }
     }
 
     updateFiles(files);
@@ -469,7 +558,9 @@ export default function FolderView({ directory, apis, onFileOpen }: Props) {
     }
   }, [directory]);
 
-  const icons = files.map((entry, index) => <DesktopIcon key={index} desktopIconEntry={entry} index={index} />);
+  const icons = files.map((entry, index) => {
+    return <DesktopIcon key={index} desktopIconEntry={entry} index={index} />
+  });
 
   const selectionBox = SelectionBox(box);
   

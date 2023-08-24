@@ -6,7 +6,7 @@ import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWi
 import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/OperatingSystem";
-import { rectangleIntersection } from "@/applications/math";
+import { Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
 
 type DirectorySettings = {
@@ -167,7 +167,7 @@ export function createBaseFileSystem(): FileSystem {
   return fileSystem;
 }
 
-function entriesWithinSelection(entries: DirectoryEntry[], x: number, y: number, dimensions: { width: number, height: number }): boolean {
+function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): boolean {
   const { width, height } = dimensions;
   // NOTE(Joey): The width & height are used for both the new incoming entry as the already existing entries.
   // It might be a good idea to make this static to the file system/configuration, instead of just randomly defined
@@ -241,10 +241,10 @@ function generatePositionRange(settings: DirectorySettings, content: DirectoryCo
   return steps;
 }
 
-function calculateNodePosition(
+export function calculateNodePosition(
   settings: DirectorySettings,
   content: DirectoryContent,
-  others: DirectoryEntry[]
+  others: Point[]
 ): { x: number, y: number } {
   const nodeBoundingBox = { width: 120, height: 80 };
 
@@ -292,7 +292,9 @@ function targetDirectoryAllowsModification(directory: FileSystemDirectory): bool
   return directory.editable || directory.stickyBit;
 }
 
-export type DirectoryListener = () => void;
+
+export type DirectoryEventType = 'refresh' | 'update';
+export type DirectoryListener = (type: DirectoryEventType) => void;
 
 export class FileSystem {
   private id: number;
@@ -327,11 +329,11 @@ export class FileSystem {
     }
   }
 
-  private propagateDirectoryEvent(directory: FileSystemDirectory) {
+  public propagateDirectoryEvent(directory: FileSystemDirectory, type: DirectoryEventType) {
     const listeners = this.directoryListeners[directory.id];
     if (!listeners) { return; }
 
-    for (const listener of listeners) { listener(); }
+    for (const listener of listeners) { listener(type); }
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
@@ -436,7 +438,6 @@ export class FileSystem {
     };
 
     directory.children.append(entry);
-    this.propagateDirectoryEvent(directory);
 
     return entry;
   }
@@ -450,7 +451,5 @@ export class FileSystem {
 
     const result = chainNode.value;
     parentDirectory.children.unlink(result);
-
-    this.propagateDirectoryEvent(parentDirectory);
   }
 }
