@@ -1,4 +1,4 @@
-import { DirectoryEntry, DirectoryEventType, FileSystemDirectory, calculateNodePosition } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, DirectoryEventType, FileSystemDirectory, calculateNodePosition, constructPath } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -6,7 +6,7 @@ import { DesktopIconEntry, DesktopIconHitBox, IconHeight, IconWidth } from '../I
 import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
-import { clamp } from '../util';
+import { Err, Ok, Result, clamp } from '../util';
 import { SystemAPIs } from '../OperatingSystem';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
@@ -238,9 +238,18 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
         return;
       }
 
+      // Update the position based on the new drop point
+      const coords = dropPoint.getBoundingClientRect();
+
+      for (const node of data.nodes) {
+        node.position = {
+          x: evt.clientX - coords.left - node.offset.x,
+          y: evt.clientY - coords.top - node.offset.y,
+        };
+      }
+
       const moveEvent = new CustomEvent(FileSystemItemDragMove, { detail: data, bubbles: false }); 
       dropPoint?.dispatchEvent(moveEvent);
-
 
       if (dropPoint !== fileDraggingCurrentNode.current) {
         const enterEvent = new CustomEvent(FileSystemItemDragEnter, { detail: data, bubbles: false }); 
@@ -443,7 +452,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return dir; }
 
-    currentDirectory.current = directory;
+    currentDirectory.current = constructPath(dir.value);
 
     if (useLocalIconPosition) {
       reloadLocalFiles(dir.value, type);
@@ -463,6 +472,81 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     }
   }
 
+  function fileMoveToggleSelected(files: Chain<DesktopIconEntry>, evt: FileSystemItemDragEvent) {
+    const selectedFiles: Set<number> = new Set();
+
+    const first = evt.detail.nodes[0] ?? null;
+    if (!first) { return; }
+
+    for (const node of evt.detail.nodes) {
+      selectedFiles.add(node.item.id);
+    }
+
+    for (let node of files.iterFromTail()) {
+      const desktopEntry = node.value;
+      const file = desktopEntry.entry.node;
+
+      if (selectedFiles.has(file.id)) { continue; }
+      if (file.kind !== 'directory') {
+        desktopEntry.selected = false;
+        continue;
+      }
+
+      const hitBox = DesktopIconHitBox(desktopEntry);
+
+      const pos = {
+        x: first.position.x + first.offset.x,
+        y: first.position.y + first.offset.y
+      }
+
+      desktopEntry.selected = pointInsideAnyRectangles(pos, hitBox);
+    }
+  }
+
+  function onFileDropMove(evt: FileSystemItemDragEvent) {
+    const files = localFiles.current;
+
+    fileMoveToggleSelected(files, evt);
+
+    updateFiles(files);
+  }
+
+  function fileDropGetTargetDirectory(files: Chain<DesktopIconEntry>, evt: FileSystemItemDragEvent): Result<FileSystemDirectory, Error> {
+    const selectedFiles: Set<number> = new Set();
+
+    const first = evt.detail.nodes[0] ?? null;
+
+    const dir = fs.getDirectory(currentDirectory.current);
+    if (!dir.ok) { return Err(Error("Unable to lookup currentDirectory")); }
+
+    if (!first) { return Ok(dir.value); }
+
+    for (const node of evt.detail.nodes) {
+      selectedFiles.add(node.item.id);
+    }
+
+    for (let node of files.iterFromTail()) {
+      const file = node.value.entry.node;
+      if (file.kind !== 'directory') { continue; }
+      if (selectedFiles.has(file.id)) { continue; }
+
+      const hitBox = DesktopIconHitBox(node.value);
+
+      const pos = {
+        x: first.position.x + first.offset.x,
+        y: first.position.y + first.offset.y
+      }
+
+      const hit = pointInsideAnyRectangles(pos, hitBox);
+
+      if (hit) {
+        return Ok(file);
+      }
+    }
+    
+    return Ok(dir.value);
+  }
+
   function onFileDrop(evt: FileSystemItemDragEvent) {
     const files = localFiles.current;
     let parentsToUpdate: Map<number, FileSystemDirectory> = new Map();
@@ -470,8 +554,10 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     if (!ref.current) { return; }
     const folder = ref.current;
 
-    const dir = fs.getDirectory(currentDirectory.current);
+    const dir = fileDropGetTargetDirectory(files, evt);
     if (!dir.ok) { return };
+
+    let forceUpdate = constructPath(dir.value) !== currentDirectory.current;
 
     const folderRect = folder.getBoundingClientRect();
     
@@ -489,6 +575,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       if (node.item.parent && node.item.parent.id !== dir.value.id) {
         const parent = node.item.parent;
         parentsToUpdate.set(parent.id, parent);
+        forceUpdate = true;
       }
 
       const result = fs.moveNode(node.item, dir.value);
@@ -523,7 +610,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       files.append(desktopIconEntry);
     }
 
-    if (parentsToUpdate.size > 0) {
+    if (forceUpdate) {
       parentsToUpdate.forEach(x => fs.propagateDirectoryEvent(x, 'update'));
       fs.propagateDirectoryEvent(dir.value, 'update');
     } else {
@@ -532,9 +619,9 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       if (!useLocalIconPosition) {
         fs.propagateDirectoryEvent(dir.value, 'refresh');
       }
-    }
 
-    updateFiles(files);
+      updateFiles(files);
+    }
   }
 
   useEffect(() => {
@@ -542,10 +629,12 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     const folder = ref.current;
 
     folder.addEventListener('pointerdown', onPointerDown);
+    folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
     return () => {
       folder.removeEventListener('pointerdown', onPointerDown);
+      folder.removeEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
       folder.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     };
   }, []);
