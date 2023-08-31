@@ -73,7 +73,7 @@ const getTargetDomain = (): string => {
 
     return transformWebUrlToDesktop(vercelUrl);
   } else {
-    return 'http://localhost:3001'
+    return 'http://192.168.178.134:3001'
   }
 }
 

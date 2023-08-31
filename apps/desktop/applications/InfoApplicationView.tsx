@@ -15,7 +15,7 @@ export default function InfoApplicationView(props: WindowProps) {
       width: '100%',
       height: '100%',
       display: 'block',
-      background: `url(http://localhost:8080/waifu?t=${time})`,
+      background: `url(http://192.168.178.134:8080/waifu?t=${time})`,
       backgroundSize: 'contain',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat'
