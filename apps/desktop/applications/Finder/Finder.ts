@@ -30,10 +30,10 @@ export class Finder extends Application {
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'application-open') {
       this.compositor.open({
-        x: 200,
-        y: 200,
+        x: 100,
+        y: 100,
         height: 400,
-        width: 400,
+        width: 650,
         title: `Finder`,
         application: this,
         args: event.args.length !== 0 ? event.args : '/',

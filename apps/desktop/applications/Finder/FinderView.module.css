@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.locations {
+  background-color: red;
+  width: 140px;
+}
+
+.content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.path {
+  background-color: hotpink;
+  height: 30px;
+  width: 100%;
+}
+
+.folder {
+  flex: 1;
+}
