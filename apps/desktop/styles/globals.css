@@ -8,3 +8,12 @@ html, body {
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
+.systemButton {
+  border-radius: 0;
+  line-height: 13px;
+  padding: 3px 4px 3px;
+  margin: 0;
+  border: none;
+  box-shadow:  inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+}
