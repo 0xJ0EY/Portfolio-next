@@ -136,26 +136,37 @@ export default function FinderView(props: WindowProps) {
     changeDirectory(directory);
     recordHistory(directory);
   }
+
+  function onClickLocation(path: string) {
+    const directory = getFileSystemDirectoryByPath(application, path);
+    if (directory.ok) {
+      changeDirectory(directory.value);
+      recordHistory(directory.value);
+    }
+  }
   
-  const x = pathNodes.map((val, index) => <React.Fragment key={index}><button onClick={() => onClickBreadcrumb(val)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button onClick={() => onClickBreadcrumb(val)}>{val.name}</button></React.Fragment>);
 
   return (
     <div className={styles.container}>
-      <div className={styles.locations}>
-
-        <button disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}>prev</button>
-        <button disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}>next</button>
-        <ul>
-          <li>Applications</li>
-          <li>Desktop</li>
-          <li>Home</li>
-          <li>Documents</li> 
-        </ul>
+      <div className={styles.header}>
+        <div className={styles.folderActions}>
+          <button disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}>prev</button>
+          <button disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}>next</button>
+        </div>
+        <div className={styles.path}>
+          { locations }
+        </div>
       </div>
 
       <div className={styles.content}>
-        <div className={styles.path}>
-          { x }
+        <div className={styles.locations}>
+          <ul>
+            <li><button onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
+            <li><button onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
+            <li><button onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
+            <li><button onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li> 
+          </ul>
         </div>
         <div className={styles.folder}>
           <FolderView directory={path} apis={application.apis} onFileOpen={onFileOpen}></FolderView>

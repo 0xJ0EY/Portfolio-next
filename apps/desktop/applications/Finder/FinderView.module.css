@@ -2,18 +2,27 @@
   display: flex;
   height: 100%;
   width: 100%;
+  flex-direction: column;
 }
 
 .locations {
-  background-color: red;
   width: 140px;
+  margin: 3px;
+  /* background: #fff; */
+  /* box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a; */
+}
+
+.header {
+  width: auto;
+  border: 1px solid black;
+  padding: 3px;
+  margin: 3px;
 }
 
 .content {
   flex: 1;
-
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .path {
@@ -23,5 +32,18 @@
 }
 
 .folder {
+  background: #fff;
+  margin: 3px;
+  padding: 2px;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
   flex: 1;
+}
+
+.locations ul {
+  margin: 0;
+  padding: 0;;
+}
+
+.locations ul li {
+ list-style: none;
 }
