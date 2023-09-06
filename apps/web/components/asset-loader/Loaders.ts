@@ -1,5 +1,5 @@
 import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CurveUtils, DirectionalLight, Loader, LoadingManager, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, Scene, Vector3 } from "three";
-import { CssWorldScale, RendererScenes } from "../renderer/Renderer";
+import { RendererScenes } from "../renderer/Renderer";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
@@ -100,12 +100,11 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const pageWidth = 1280;
   const pageHeight = 980;
 
-  const margin = 0.5;
-  const scale = CssWorldScale;
+  const margin = 0.1;
 
-  const width   = (box.max.x - box.min.x) * scale + margin;
+  const width   = (box.max.x - box.min.x) + margin;
   const height  = width * (pageHeight / pageWidth);
-  const depth   = (box.max.z - box.min.z) * scale;
+  const depth   = (box.max.z - box.min.z);
 
   const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));
 
@@ -119,14 +118,12 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   const iframe = document.createElement('iframe');
   iframe.classList.add("iframe-container");
-  iframe.style.width = `${pageWidth}px`;
-  iframe.style.height = `${pageHeight + 0}px`;
+  iframe.style.width = `100%`;
+  iframe.style.height = `100%`;
   iframe.style.backgroundColor = 'black';
   iframe.style.border = '0 solid black';
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
-
-  console.log(getTargetDomain());
 
   iframe.src = getTargetDomain();
 
@@ -135,15 +132,15 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const cssPage = new CSS3DObject(div);
 
   const [localX, localY, localZ] = [
-    ((box.min.x * scale) - margin / 2) + width / 2,
-    ((box.min.y * scale) - margin / 2) + height / 2,
-    (box.min.z * scale) + depth / 2
+    (box.min.x - margin / 2) + width / 2,
+    (box.min.y - margin / 2) + height / 2,
+    box.min.z + depth / 2
   ];
 
   const [x, y, z] = [
-    display.position.x * scale + localX,
-    display.position.y * scale + localY,
-    display.position.z * scale + localZ
+    display.position.x + localX,
+    display.position.y + localY,
+    display.position.z + localZ
   ];
 
   cssPage.position.set(x, y, z);

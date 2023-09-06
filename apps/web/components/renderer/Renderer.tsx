@@ -14,8 +14,6 @@ import { TouchInputHandler } from './camera/TouchInputHandler';
 import { createUIEventBus } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
 
-export const CssWorldScale = 10;
-
 export interface RendererScenes {
   sourceScene: Scene,
   cutoutScene: Scene,
@@ -77,11 +75,9 @@ const renderWebglContext = (composer: EffectComposer): void => {
 }
 
 const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: PerspectiveCamera): void => {
-  // The CSS renderer does 2 special things
-  // 1. We scale up the scene, this is so that the dom element of the css scene will be rendered at a higher quality
-  // 2. We manually update the world matrix and inverse the transformations of the css elements.
-  //    This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
-  camera.position.multiplyScalar(CssWorldScale);
+  // The CSS renderer does something special to fix the rendering for Safari
+  // We manually update the world matrix and inverse the transformations of the css elements.
+  // This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
   camera.matrixWorldAutoUpdate = false;
   camera.updateMatrixWorld();
   camera.matrixWorldInverse.elements[15] = -1;
@@ -89,7 +85,6 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   renderer.render(scene, camera);
 
   camera.matrixWorldAutoUpdate = true;
-  camera.position.divideScalar(CssWorldScale);
 }
 
 interface RendererProps {
