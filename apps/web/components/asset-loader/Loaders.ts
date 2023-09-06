@@ -98,13 +98,13 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const box = display.geometry.boundingBox ?? new Box3();
 
   const pageWidth = 1280;
-  const pageHeight = 1024;
+  const pageHeight = 980;
 
   const margin = 0.5;
   const scale = CssWorldScale;
 
   const width   = (box.max.x - box.min.x) * scale + margin;
-  const height  = (box.max.y - box.min.y) * scale + margin;
+  const height  = width * (pageHeight / pageWidth);
   const depth   = (box.max.z - box.min.z) * scale;
 
   const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));

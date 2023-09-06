@@ -20,7 +20,7 @@ const getDisplay = (scene: Scene): Mesh | undefined => {
 }
 
 const calculateCameraPosition = (display: Mesh, fov: number) => {
-  const zoomDistance = 3; // User defined number for setting up the zoom
+  const zoomDistance = 2; // User defined number for setting up the zoom
   const bb = display.geometry.boundingBox!;
 
   const width   = bb.max.x - bb.min.x;
@@ -38,7 +38,7 @@ const calculateCameraPosition = (display: Mesh, fov: number) => {
   position.add(centerPoint);
 
   const spherical = new Spherical();
-  spherical.phi = Math.atan2(height, depth);
+  spherical.phi = Math.atan2(height, depth) - 0.02;
 
   const rotation = new Vector3();
   rotation.setFromSpherical(spherical);
