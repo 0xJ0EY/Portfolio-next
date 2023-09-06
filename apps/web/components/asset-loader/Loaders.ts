@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { AssetKeys } from "./AssetKeys";
+import { isSafari } from "../renderer/util";
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";
@@ -100,7 +101,8 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   const pageWidth = 1280;
   const pageHeight = 980;
 
-  const margin = 0.1;
+  // Use a slightly higher margin on Safari, as 0.1 gives white lines and 0.2 is too big for other browser to look nice.
+  const margin = isSafari() ? 0.2 : 0.1;
 
   const width   = (box.max.x - box.min.x) + margin;
   const height  = width * (pageHeight / pageWidth);
