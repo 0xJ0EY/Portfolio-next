@@ -18,6 +18,10 @@ export class LocalWindowCompositor {
     return window;
   }
 
+  public getById(windowId: number): Window | null {
+    return this.instances[windowId] ?? null;
+  }
+
   public update(window: Window): void {
     if (!(window.id in this.instances)) { return; }
 

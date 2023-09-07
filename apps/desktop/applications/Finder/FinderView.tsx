@@ -99,10 +99,20 @@ export default function FinderView(props: WindowProps) {
     changeDirectory(next!.value);
   }
 
+  function updateWindowTitle(path: string) {
+    const window = application.compositor.getById(windowContext.id);
+    if (!window) { return; }
+
+    window.title = `${path} - File Manager`;
+
+    application.compositor.update(window);
+  }
+
   function changeDirectory(directory: FileSystemDirectory) {
     setPathNodes(buildPathNodesFromDirectoryEntry(directory));
     const path = constructPath(directory);
 
+    updateWindowTitle(path);
     setPath(path);
   }
 

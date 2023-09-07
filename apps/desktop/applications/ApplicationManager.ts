@@ -30,8 +30,8 @@ type ApplicationWindowListener = (event: ApplicationWindowEvent) => void;
 
 export abstract class Application {
   constructor(
-    protected readonly compositor: LocalWindowCompositor,
-    protected readonly manager: LocalApplicationManager,
+    public readonly compositor: LocalWindowCompositor,
+    public readonly manager: LocalApplicationManager,
     public readonly apis: SystemAPIs
   ) {}
 
