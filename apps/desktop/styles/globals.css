@@ -15,5 +15,15 @@ html, body {
   padding: 3px 4px 3px;
   margin: 0;
   border: none;
-  box-shadow:  inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+}
+
+.systemButton:hover {
+  background-color: #808080;
+}
+
+.systemButton:active {
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
