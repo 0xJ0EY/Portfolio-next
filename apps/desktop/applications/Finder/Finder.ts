@@ -29,7 +29,7 @@ export class Finder extends Application {
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'application-open') {
-      this.compositor.open({
+      const window = this.compositor.open({
         x: 100,
         y: 100,
         height: 400,
@@ -39,6 +39,9 @@ export class Finder extends Application {
         args: event.args.length !== 0 ? event.args : '/',
         generator: () => { return View; }
       });
+
+      window.minimalHeight  = 250;
+      window.minimalWidth   = 400;
     };
 
     if (event.kind === 'finder-open-file-event') {

@@ -27,6 +27,9 @@ export class Window {
   public order: number = 0;
   public focused: boolean = true;
 
+  public minimalWidth: number = 200;
+  public minimalHeight: number = 100;
+
   constructor(
     public readonly id: number,
     public x: number,

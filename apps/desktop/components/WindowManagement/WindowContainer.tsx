@@ -178,9 +178,10 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
 
-    // TODO: Should be configurable per window
-    const windowMinHeight = 100;
-    const windowMinWidth  = 200; 
+    console.log(windowData.minimalHeight);
+
+    const windowMinHeight = windowData.minimalHeight;
+    const windowMinWidth  = windowData.minimalWidth;
 
     const windowMaxHeight = window.innerHeight;
     const windowMaxWidth  = window.innerWidth;
