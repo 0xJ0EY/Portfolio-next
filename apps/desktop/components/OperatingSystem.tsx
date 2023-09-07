@@ -54,7 +54,7 @@ export const OperatingSystem = () => {
     <div ref={ref} className={styles.operatingSystem}>
       <MenuBar/>
       <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
-      <Dock manager={applicationManager}></Dock>
+      <Dock manager={applicationManager} windowCompositor={windowCompositor}></Dock>
       <DragAndDropView apis={apis}/>
     </div>
   </>

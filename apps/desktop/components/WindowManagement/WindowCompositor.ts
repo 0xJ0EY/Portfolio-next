@@ -30,6 +30,7 @@ export interface WindowConfig {
 export class Window {
   public order: number = 0;
   public focused: boolean = true;
+  public minimized: boolean = false;
 
   public minimalWidth: number = 200;
   public minimalHeight: number = 70;
@@ -233,6 +234,18 @@ export class WindowCompositor {
       window.application.on(createAllWindowsClosedEvent());
       this.updateWindowOrder();
     }
+  }
+
+  public listMinimizedWindows(): Window[] {
+    let windows: Window[] = [];
+
+    for (const windowNode of this.windows.iterFromTail()) {
+      const window = windowNode.value;
+
+      if (window.minimized) { windows.push(window); }
+    }
+
+    return windows;
   }
 
   private findPreviousNodeOfSameApplication(application: Application): Node<Window> | null {

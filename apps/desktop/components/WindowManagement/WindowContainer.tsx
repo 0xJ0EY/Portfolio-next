@@ -10,7 +10,7 @@ const calculateWindowZIndex = (order: number): number => {
 const calculateStyle = (window: Window): React.CSSProperties => {
   return {
     position: 'absolute',
-    display: 'block',
+    display: !window.minimized ? 'block' : 'none',
     top: `${window.y}px`,
     left: `${window.x}px`,
     width: `${window.width}px`,
@@ -278,7 +278,8 @@ type OriginWindow = {
   height: number
 }
 
-const MaximizeIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAACpJREFUKJFjYBhZ4D8uCUYiNGCowaYJmw2MODn4nISsFlkTPg24LBk2AADhTAUEHwpXHwAAAABJRU5ErkJggg==';
+const MinimizeIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAC5JREFUKJFjYBh+gBFK/ydFDyMShxiNjMg2EaOREYNBQCMjTg4OjbjUENQ4lAAAsBUGBRYmg2IAAAAASUVORK5CYII=';
+const MaximizeIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAADBJREFUKJFjYBhZ4D8uCUYiNGCowaYJmw2MODn4nISsFlkTPg0o6mGaiNGAzaLBCACuAwYFQV/6vgAAAABJRU5ErkJggg==';
 const CloseIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAEhJREFUKJFjYKAA/IdiotQwYZHApQEOGHFI4BVHlsSmAKtB6JpwOZERJwefkwhpImgTvtDDFRiUhR5eP6DLozsPV8DgEiceAADT2BMJIsMZOQAAAABJRU5ErkJggg==';
 
 const WindowHeader = (
@@ -327,6 +328,12 @@ const WindowHeader = (
     }
 
     isMaximized.current = !isMaximized.current;
+  }
+
+  function onClickMinimize() {
+    windowData.minimized = true;
+
+    windowCompositor.update(windowData);
   }
 
   function onPointerDown(evt: PointerEvent) {
@@ -409,6 +416,7 @@ const WindowHeader = (
       <span className={styles.headerTitle}>{ windowData.title }</span>
 
       <div className={styles.headerButtons}>
+        <button className='systemButton' draggable="false" onClick={onClickMinimize}><img src={MinimizeIcon} alt='Minimize window'/></button>
         <button className='systemButton' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
         <button className='systemButton' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
       </div>
