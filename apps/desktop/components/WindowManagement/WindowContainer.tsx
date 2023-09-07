@@ -409,8 +409,8 @@ const WindowHeader = (
       <span className={styles.headerTitle}>{ windowData.title }</span>
 
       <div className={styles.headerButtons}>
-        <button className='systemButton' onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
-        <button className='systemButton' onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
+        <button className='systemButton' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
+        <button className='systemButton' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
       </div>
     </div>
     { dragging && <div className={styles.draggingMask}></div> }

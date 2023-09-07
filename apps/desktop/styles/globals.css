@@ -19,8 +19,12 @@ html, body {
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
 }
 
+.systemButton img {
+  user-select: none;
+}
+
 .systemButton:hover {
-  background-color: #808080;
+  background-color: #c9c9c9;
 }
 
 .systemButton:active {
