@@ -3,10 +3,14 @@ import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent,
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
-
 export type WindowProps = { application: Application, args: string, windowContext: WindowContext };
 export type WindowApplication = React.ComponentType<WindowProps>;
 export type WindowApplicationGenerator = () => WindowApplication;
+
+const DefaultWindowWidth = 400;
+const DefaultWindowHeight = 80;
+
+const WindowCollisionMoveDistance = 10;
 
 export interface WindowContext {
   readonly id: number
@@ -28,7 +32,7 @@ export class Window {
   public focused: boolean = true;
 
   public minimalWidth: number = 200;
-  public minimalHeight: number = 100;
+  public minimalHeight: number = 70;
 
   constructor(
     public readonly id: number,
@@ -67,6 +71,9 @@ export class WindowCompositor {
 
   private applicationManager: ApplicationManager | null = null;
 
+  private viewWidth: number = 0;
+  private viewHeight: number = 0;
+
   public registerApplicationManager(applicationManager: ApplicationManager) {
     this.applicationManager = applicationManager;
   }
@@ -100,14 +107,61 @@ export class WindowCompositor {
     return this.windowNodeLookup[windowId]?.value;
   }
 
+  public setSize(width: number, height: number) {
+    this.viewWidth = width;
+    this.viewHeight = height;
+  }
+
   public open(config: WindowConfig): Window {
+    function getWindowsOfTheSameApplication(chain: Chain<Window>, config: WindowConfig) {
+      let results: Window[] = [];
+
+      const applicationConfig = config.application.config();
+
+      for (const windowNode of chain.iterFromTail()) {
+        const config = windowNode.value.application.config();
+
+        if (applicationConfig.appName === config.appName) {
+          results.push(windowNode.value);
+        }
+      }
+
+      return results;
+    }
+
+    let [x, y] = [config.x, config.y];
+
+    const width = config.width ?? DefaultWindowWidth;
+    const height = config.height ?? DefaultWindowHeight;
+
+    const windows = getWindowsOfTheSameApplication(this.windows, config);
+
+    let collision = false;
+
+    do {
+      collision = false;
+
+      const collidedWindow = windows.find(entry => entry.x === x && entry.y === y);
+
+      if (collidedWindow) {
+        const widthFitsInView   = x + width + WindowCollisionMoveDistance <= this.viewWidth;
+        const heightFitsInView  = y + height + WindowCollisionMoveDistance <= this.viewHeight;
+
+        x = widthFitsInView   ? x + WindowCollisionMoveDistance : 0;
+        y = heightFitsInView  ? y + WindowCollisionMoveDistance : 0;
+
+        collision = true;
+      }
+
+    } while (collision);
+
+
     const id = this.windowId++;
     const window = new Window(
       id,
-      config.x,
-      config.y,
-      config.width ?? 400,
-      config.height ?? 80,
+      x, y,
+      config.width ?? DefaultWindowWidth,
+      config.height ?? DefaultWindowHeight,
       config.title,
       config.args,
       config.application,

@@ -69,7 +69,7 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
 export const Desktop = (props: { windowCompositor: WindowCompositor, manager: ApplicationManager, apis: SystemAPIs }) => {
   const { windowCompositor, manager, apis } = props;
 
-  const parentNode = useRef(null);
+  const parentNode = useRef<HTMLDivElement>(null);
 
   const reducer = applicationReducer(windowCompositor);
   const [applicationWindows, dispatch] = useReducer(reducer, []);
@@ -83,6 +83,15 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
     const unsubscribe = windowCompositor.subscribe((evt: WindowEvent) => {
       dispatch(evt);
     });
+
+    if (parentNode.current) {
+      const desktop = parentNode.current;
+
+      windowCompositor.setSize(
+        desktop.clientWidth,
+        desktop.clientHeight
+      )
+    }
 
     return () => { unsubscribe(); }
   }, []);
