@@ -329,13 +329,7 @@ const WindowHeader = (
 
     isMaximized.current = !isMaximized.current;
   }
-
-  function onClickMinimize() {
-    windowData.minimized = true;
-
-    windowCompositor.update(windowData);
-  }
-
+  
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
 
@@ -416,7 +410,7 @@ const WindowHeader = (
       <span className={styles.headerTitle}>{ windowData.title }</span>
 
       <div className={styles.headerButtons}>
-        <button className='systemButton' draggable="false" onClick={onClickMinimize}><img src={MinimizeIcon} alt='Minimize window'/></button>
+        <button className='systemButton' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
         <button className='systemButton' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
         <button className='systemButton' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
       </div>

@@ -236,6 +236,27 @@ export class WindowCompositor {
     }
   }
 
+  public minimize(windowId: number): void {
+    const node = this.windowNodeLookup[windowId];
+    if (!node) { return; }
+
+    const window = node.value;
+    window.minimized = true;
+
+    this.update(window);
+
+    const instances = this.listPreviousNodesOfSameApplication(window.application);
+    let nonMinimizedWindow = instances.find(x => x.value.minimized === false);
+
+    if (nonMinimizedWindow) {
+      // Force update the windows, if no force is used it might be the case that the DOM isn't updated
+      // Due to the node already being the top level node.
+      this.focus(nonMinimizedWindow.value.id, true);
+    } else {
+      this.updateWindowOrder();
+    }
+  }
+
   public listMinimizedWindows(): Window[] {
     let windows: Window[] = [];
 
@@ -246,6 +267,21 @@ export class WindowCompositor {
     }
 
     return windows;
+  }
+
+  private listPreviousNodesOfSameApplication(application: Application): Node<Window>[] {
+    let node = this.windows.getHead();
+    let results: Node<Window>[] = [];
+
+    while (node !== null) {
+      if (node.value.application === application) {
+        results.push(node);
+      }
+
+      node = node.prev;
+    }
+
+    return results;
   }
 
   private findPreviousNodeOfSameApplication(application: Application): Node<Window> | null {
@@ -263,6 +299,22 @@ export class WindowCompositor {
   }
 
   private updateWindowOrder(): void {
+    function focusLastVisibleNode(lastNode: Node<Window>): void {
+      let node: Node<Window> | null = lastNode;
+
+      while (node) {
+        const isMinimized = node.value.minimized === true;
+        const isVisible = !isMinimized;
+
+        if (isVisible) {
+          node.value.focused = true;
+          return;
+        }
+
+        node = node.prev;
+      }
+    }
+
     if (!this.applicationManager) { return; }
 
     let node = this.windows.getTail();
@@ -282,7 +334,7 @@ export class WindowCompositor {
       node.value.focused = false;
 
       if (node.next === null) {
-        node.value.focused = true;
+        focusLastVisibleNode(node);
         this.updateApplicationManager(node);
       }
 

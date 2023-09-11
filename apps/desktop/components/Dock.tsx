@@ -75,7 +75,7 @@ export const Dock = (props: { manager: ApplicationManager, windowCompositor: Win
       function onClickWindow(window: Window) {
         window.minimized = false;
         windowCompositor.update(window);
-        windowCompositor.focus(window.id);
+        windowCompositor.focus(window.id, true);
       }
 
       const windows: DockWindow[] = minimizedWindows.map(x => {
