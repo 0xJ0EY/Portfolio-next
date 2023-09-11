@@ -13,3 +13,8 @@ export function Err<T, E = Error>(error: E): Result<T, E> {
 }
 
 export type Action<T> = () => T
+
+
+export const minimumDigits = (value: number, digits: number): string => {
+  return (value).toLocaleString(undefined, { minimumIntegerDigits: digits });
+}
