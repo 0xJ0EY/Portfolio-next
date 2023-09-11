@@ -4,6 +4,9 @@ export const calculateAspectRatio = (width: number, height: number): number => {
 
 export const isFirefox = (): boolean => navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
+// https://stackoverflow.com/a/23522755
+export const isSafari = (): boolean => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 export const clamp = (val: number, min: number, max: number): number => {
   return Math.max(Math.min(max, val), min);
 }

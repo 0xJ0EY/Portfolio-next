@@ -26,18 +26,30 @@ export interface ApplicationConfig {
   ) => Application
 }
 
+export type MenuItemSpacer = {
+  kind: 'spacer'
+}
+
+export type MenuItem = MenuItemSpacer;
+
+export interface MenuEntries {
+  readonly displayName: string
+  readonly menuItems: MenuItem[]
+}
+
 type ApplicationWindowListener = (event: ApplicationWindowEvent) => void;
 
 export abstract class Application {
   constructor(
-    protected readonly compositor: LocalWindowCompositor,
-    protected readonly manager: LocalApplicationManager,
+    public readonly compositor: LocalWindowCompositor,
+    public readonly manager: LocalApplicationManager,
     public readonly apis: SystemAPIs
   ) {}
 
   private windowListeners: Record<number, ApplicationWindowListener[]> = {};
 
   abstract config(): ApplicationConfig;
+  abstract menuEntries(): MenuEntries;
 
   protected baseHandler(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'all-windows-closed') {
@@ -97,7 +109,19 @@ export interface BaseApplicationManager {
   kill(processId: number): void;
 }
 
-export type ApplicationManagerListener = () => void;
+
+export type ApplicationManagerFocusEvent = {
+  kind: 'focus',
+  application: Application
+}
+
+export type ApplicationManagerUpdateEvent = {
+  kind: 'update'
+}
+
+export type ApplicationManagerEvent = ApplicationManagerFocusEvent | ApplicationManagerUpdateEvent;
+
+export type ApplicationManagerListener = (event: ApplicationManagerEvent) => void;
 
 export class ApplicationManager implements BaseApplicationManager {
 
@@ -128,14 +152,16 @@ export class ApplicationManager implements BaseApplicationManager {
     }
   }
 
-  private publishChanges(): void {
+  private publishChanges(event: ApplicationManagerEvent): void {
     for (const observer of this.observers) {
-      observer();
+      observer(event);
     }
   }
 
   public focus(application: Application) {
     console.log(`Application focussed: ${application.config().displayName}`);
+
+    this.publishChanges({ kind: 'focus', application });
   }
 
   public listApplications(): Application[] {
@@ -165,7 +191,7 @@ export class ApplicationManager implements BaseApplicationManager {
 
       instance.application.on(createApplicationOpenEvent(true, args));
 
-      this.publishChanges();
+      this.publishChanges({ kind: 'update'});
 
       return Ok(this.processId++);
     }
@@ -205,7 +231,7 @@ export class ApplicationManager implements BaseApplicationManager {
 
     this.processes[processId] = null;
 
-    this.publishChanges();
+    this.publishChanges({ kind: 'update' });
   }
 
   reset(): void {

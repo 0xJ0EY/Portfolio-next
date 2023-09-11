@@ -3,10 +3,14 @@ import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent,
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
-
 export type WindowProps = { application: Application, args: string, windowContext: WindowContext };
 export type WindowApplication = React.ComponentType<WindowProps>;
 export type WindowApplicationGenerator = () => WindowApplication;
+
+const DefaultWindowWidth = 400;
+const DefaultWindowHeight = 80;
+
+const WindowCollisionMoveDistance = 10;
 
 export interface WindowContext {
   readonly id: number
@@ -26,6 +30,10 @@ export interface WindowConfig {
 export class Window {
   public order: number = 0;
   public focused: boolean = true;
+  public minimized: boolean = false;
+
+  public minimalWidth: number = 200;
+  public minimalHeight: number = 70;
 
   constructor(
     public readonly id: number,
@@ -64,6 +72,9 @@ export class WindowCompositor {
 
   private applicationManager: ApplicationManager | null = null;
 
+  private viewWidth: number = 0;
+  private viewHeight: number = 0;
+
   public registerApplicationManager(applicationManager: ApplicationManager) {
     this.applicationManager = applicationManager;
   }
@@ -97,14 +108,61 @@ export class WindowCompositor {
     return this.windowNodeLookup[windowId]?.value;
   }
 
+  public setSize(width: number, height: number) {
+    this.viewWidth = width;
+    this.viewHeight = height;
+  }
+
   public open(config: WindowConfig): Window {
+    function getWindowsOfTheSameApplication(chain: Chain<Window>, config: WindowConfig) {
+      let results: Window[] = [];
+
+      const applicationConfig = config.application.config();
+
+      for (const windowNode of chain.iterFromTail()) {
+        const config = windowNode.value.application.config();
+
+        if (applicationConfig.appName === config.appName) {
+          results.push(windowNode.value);
+        }
+      }
+
+      return results;
+    }
+
+    let [x, y] = [config.x, config.y];
+
+    const width = config.width ?? DefaultWindowWidth;
+    const height = config.height ?? DefaultWindowHeight;
+
+    const windows = getWindowsOfTheSameApplication(this.windows, config);
+
+    let collision = false;
+
+    do {
+      collision = false;
+
+      const collidedWindow = windows.find(entry => entry.x === x && entry.y === y);
+
+      if (collidedWindow) {
+        const widthFitsInView   = x + width + WindowCollisionMoveDistance <= this.viewWidth;
+        const heightFitsInView  = y + height + WindowCollisionMoveDistance <= this.viewHeight;
+
+        x = widthFitsInView   ? x + WindowCollisionMoveDistance : 0;
+        y = heightFitsInView  ? y + WindowCollisionMoveDistance : 0;
+
+        collision = true;
+      }
+
+    } while (collision);
+
+
     const id = this.windowId++;
     const window = new Window(
       id,
-      config.x,
-      config.y,
-      config.width ?? 400,
-      config.height ?? 80,
+      x, y,
+      config.width ?? DefaultWindowWidth,
+      config.height ?? DefaultWindowHeight,
       config.title,
       config.args,
       config.application,
@@ -178,6 +236,54 @@ export class WindowCompositor {
     }
   }
 
+  public minimize(windowId: number): void {
+    const node = this.windowNodeLookup[windowId];
+    if (!node) { return; }
+
+    const window = node.value;
+    window.minimized = true;
+
+    this.update(window);
+
+    const instances = this.listPreviousNodesOfSameApplication(window.application);
+    let nonMinimizedWindow = instances.find(x => x.value.minimized === false);
+
+    if (nonMinimizedWindow) {
+      // Force update the windows, if no force is used it might be the case that the DOM isn't updated
+      // Due to the node already being the top level node.
+      this.focus(nonMinimizedWindow.value.id, true);
+    } else {
+      this.updateWindowOrder();
+    }
+  }
+
+  public listMinimizedWindows(): Window[] {
+    let windows: Window[] = [];
+
+    for (const windowNode of this.windows.iterFromTail()) {
+      const window = windowNode.value;
+
+      if (window.minimized) { windows.push(window); }
+    }
+
+    return windows;
+  }
+
+  private listPreviousNodesOfSameApplication(application: Application): Node<Window>[] {
+    let node = this.windows.getHead();
+    let results: Node<Window>[] = [];
+
+    while (node !== null) {
+      if (node.value.application === application) {
+        results.push(node);
+      }
+
+      node = node.prev;
+    }
+
+    return results;
+  }
+
   private findPreviousNodeOfSameApplication(application: Application): Node<Window> | null {
     let node = this.windows.getHead();
 
@@ -193,16 +299,44 @@ export class WindowCompositor {
   }
 
   private updateWindowOrder(): void {
+    function focusLastVisibleNode(lastNode: Node<Window>, applicationManager: ApplicationManager): void {
+      let node: Node<Window> | null = lastNode;
+
+      while (node) {
+        const isMinimized = node.value.minimized === true;
+        const isVisible = !isMinimized;
+
+        if (isVisible) {
+          node.value.focused = true;
+
+          applicationManager.focus(node.value.application);
+          return;
+        }
+
+        node = node.prev;
+      }
+    }
+
+    if (!this.applicationManager) { return; }
+
     let node = this.windows.getTail();
     let order = 0;
+
+    if (node === null) {
+      const applications = this.applicationManager.listApplications();
+      const finder = applications.find(x => x.config().appName === 'Finder.app');
+
+      if (finder) { this.applicationManager.focus(finder); }
+
+      return;
+    }
 
     while (node !== null) {
       node.value.order = order++;
       node.value.focused = false;
 
       if (node.next === null) {
-        node.value.focused = true;
-        this.updateApplicationManager(node);
+        focusLastVisibleNode(node, this.applicationManager);
       }
 
       node = node.next;

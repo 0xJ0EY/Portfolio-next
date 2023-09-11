@@ -164,6 +164,8 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addDirectory(desktop, 'foo', true, true);
   fileSystem.addDirectory(desktop, 'bar', true, true);
 
+  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
+
   return fileSystem;
 }
 

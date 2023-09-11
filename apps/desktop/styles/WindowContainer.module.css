@@ -51,7 +51,14 @@
   flex: 0 1 auto;
 
   height: 30px;
+  line-height: 2em;
+
   user-select: none;
+
+  display: flex;
+  flex-direction: row;
+
+  padding: 0 6px;
 
   z-index: 9999;
 }
@@ -79,4 +86,16 @@
 
   width: 100vw;
   height: 100vh;
+}
+
+.headerTitle {
+  flex-grow: 1;;
+}
+
+.headerButtons {
+  display: inline-block;
+}
+
+.headerButtons button {
+  margin-left: 1px;
 }

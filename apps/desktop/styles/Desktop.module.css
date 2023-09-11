@@ -9,13 +9,6 @@
   position: relative;
 }
 
-@supports (-webkit-touch-callout: none) {
-  /* Hack to have Safari use -webkit-fill-available, and chrome use the default height */
-  .operatingSystem {
-    height: -webkit-fill-available;
-  }
-}
-
 .menuBar {
   background-color: red;
   display: block;

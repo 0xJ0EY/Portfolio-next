@@ -67,6 +67,43 @@ export class Chain<T> {
     return node;
   }
 
+  public insert(parent: Node<T>, element: T) {
+    const next = parent.next;
+    const node = new Node(element);
+
+    // If we have a next, set the new node as the previous item
+    // And the next node as the node's next item
+    if (next) {
+      next.prev = node;
+      node.next = next;
+    }
+
+    // Set normal parent relations
+    node.prev = parent;
+    parent.next = node;
+
+    this.items++;
+
+    return node;
+  }
+
+  // Cut off all the child/next nodes after this node
+  public cutOff(parent: Node<T>) {
+    // Fix the item count in the chain
+    let node = parent.next;
+
+    while (node !== null) {
+      this.items--;
+      node = node.next;
+    }
+
+    // GC should handle the deletion of the nodes, or we created a memory leak somewhere :^)
+    parent.next = null;
+
+    // Set the head to the last element in the list
+    this.head = parent;
+  }
+
   public prepend(element: T): Node<T> {
     return this.prependNode(new Node(element));
   }

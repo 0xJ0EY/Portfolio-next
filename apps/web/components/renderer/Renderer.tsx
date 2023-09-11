@@ -114,6 +114,8 @@ export const Renderer = (props: RendererProps) => {
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
     disableTouchInteraction(cssRenderNode);
     disableTouchInteraction(webglRenderNode);
 

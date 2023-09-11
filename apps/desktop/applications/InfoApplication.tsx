@@ -1,7 +1,7 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { ApplicationEvent } from "./ApplicationEvents";
-import { Application, ApplicationConfig } from "./ApplicationManager";
+import { Application, ApplicationConfig, MenuEntries } from "./ApplicationManager";
 import { LocalApplicationManager } from "./LocalApplicationManager";
 import dynamic from 'next/dynamic';
 import { SystemAPIs } from "@/components/OperatingSystem";
@@ -25,6 +25,13 @@ export class InfoApplication extends Application {
 
   config(): ApplicationConfig {
     return infoConfig;
+  }
+
+  menuEntries(): MenuEntries {
+    return {
+      displayName: 'Info',
+      menuItems: []
+    }
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {

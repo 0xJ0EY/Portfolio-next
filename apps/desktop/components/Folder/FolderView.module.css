@@ -6,14 +6,6 @@
   position: relative;
 }
 
-@supports (-webkit-touch-callout: none) {
-  /* Hack to have Safari use -webkit-fill-available, and chrome use the default height */
-  .folder {
-    height: -webkit-fill-available;
-  }
-}
-
-
 .selectionBox {
   display: block;
   position: absolute;

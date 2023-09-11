@@ -10,7 +10,7 @@ const calculateWindowZIndex = (order: number): number => {
 const calculateStyle = (window: Window): React.CSSProperties => {
   return {
     position: 'absolute',
-    display: 'block',
+    display: !window.minimized ? 'block' : 'none',
     top: `${window.y}px`,
     left: `${window.x}px`,
     width: `${window.width}px`,
@@ -177,10 +177,9 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
 
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
-
-    // TODO: Should be configurable per window
-    const windowMinHeight = 100;
-    const windowMinWidth  = 200; 
+    
+    const windowMinHeight = windowData.minimalHeight;
+    const windowMinWidth  = windowData.minimalWidth;
 
     const windowMaxHeight = window.innerHeight;
     const windowMaxWidth  = window.innerWidth;
@@ -279,6 +278,10 @@ type OriginWindow = {
   height: number
 }
 
+const MinimizeIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAC5JREFUKJFjYBh+gBFK/ydFDyMShxiNjMg2EaOREYNBQCMjTg4OjbjUENQ4lAAAsBUGBRYmg2IAAAAASUVORK5CYII=';
+const MaximizeIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAADBJREFUKJFjYBhZ4D8uCUYiNGCowaYJmw2MODn4nISsFlkTPg0o6mGaiNGAzaLBCACuAwYFQV/6vgAAAABJRU5ErkJggg==';
+const CloseIcon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAEhJREFUKJFjYKAA/IdiotQwYZHApQEOGHFI4BVHlsSmAKtB6JpwOZERJwefkwhpImgTvtDDFRiUhR5eP6DLozsPV8DgEiceAADT2BMJIsMZOQAAAABJRU5ErkJggg==';
+
 const WindowHeader = (
   windowData: Window,
   windowCompositor: WindowCompositor,
@@ -326,7 +329,7 @@ const WindowHeader = (
 
     isMaximized.current = !isMaximized.current;
   }
-
+  
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
 
@@ -404,9 +407,13 @@ const WindowHeader = (
 
   return <>
     <div ref={output} className={classes.join(' ')}>
-      <span>{ windowData.title }</span>
-      <button onClick={onClickMaximize}>Maximize</button>
-      <button onClick={() => { windowCompositor.close(windowData.id) }}>Close</button>
+      <span className={styles.headerTitle}>{ windowData.title }</span>
+
+      <div className={styles.headerButtons}>
+        <button className='systemButton' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
+        <button className='systemButton' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
+        <button className='systemButton' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
+      </div>
     </div>
     { dragging && <div className={styles.draggingMask}></div> }
     </>
