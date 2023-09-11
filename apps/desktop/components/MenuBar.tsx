@@ -14,7 +14,7 @@ function renderClock(date: Date) {
   const hours = minimumDigits(date.getHours(), 2);
   const minutes = minimumDigits(date.getMinutes(), 2);
   
-  const time = `${hours} ${minutes}`
+  const time = `${hours}:${minutes}`
 
   return <>{time}</>
 }
