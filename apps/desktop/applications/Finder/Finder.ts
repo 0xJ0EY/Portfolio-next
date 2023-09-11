@@ -1,7 +1,7 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { ApplicationEvent } from "../ApplicationEvents";
-import { Application, ApplicationConfig } from "../ApplicationManager";
+import { Application, ApplicationConfig, MenuEntries } from "../ApplicationManager";
 import { LocalApplicationManager } from "../LocalApplicationManager";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import dynamic from 'next/dynamic';
@@ -25,6 +25,13 @@ export class Finder extends Application {
 
   config(): ApplicationConfig {
     return finderConfig;
+  }
+
+  menuEntries(): MenuEntries {
+    return {
+      displayName: 'Finder',
+      menuItems: []
+    }
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
