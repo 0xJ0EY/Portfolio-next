@@ -299,7 +299,7 @@ export class WindowCompositor {
   }
 
   private updateWindowOrder(): void {
-    function focusLastVisibleNode(lastNode: Node<Window>): void {
+    function focusLastVisibleNode(lastNode: Node<Window>, applicationManager: ApplicationManager): void {
       let node: Node<Window> | null = lastNode;
 
       while (node) {
@@ -308,6 +308,8 @@ export class WindowCompositor {
 
         if (isVisible) {
           node.value.focused = true;
+
+          applicationManager.focus(node.value.application);
           return;
         }
 
@@ -334,8 +336,7 @@ export class WindowCompositor {
       node.value.focused = false;
 
       if (node.next === null) {
-        focusLastVisibleNode(node);
-        this.updateApplicationManager(node);
+        focusLastVisibleNode(node, this.applicationManager);
       }
 
       node = node.next;
