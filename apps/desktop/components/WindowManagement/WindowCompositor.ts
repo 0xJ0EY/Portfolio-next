@@ -263,8 +263,19 @@ export class WindowCompositor {
   }
 
   private updateWindowOrder(): void {
+    if (!this.applicationManager) { return; }
+
     let node = this.windows.getTail();
     let order = 0;
+
+    if (node === null) {
+      const applications = this.applicationManager.listApplications();
+      const finder = applications.find(x => x.config().appName === 'Finder.app');
+
+      if (finder) { this.applicationManager.focus(finder); }
+
+      return;
+    }
 
     while (node !== null) {
       node.value.order = order++;
