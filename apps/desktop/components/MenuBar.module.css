@@ -8,3 +8,17 @@
 .appEntries {
   flex: 1;
 }
+
+.date {
+  display: inline-block;
+  user-select: none;
+}
+
+.weekday {
+  text-transform: capitalize;
+}
+
+/* We don't do capitalization on months in Dutch */
+.date[data-locale="en"] .month {
+  text-transform: capitalize;
+}
