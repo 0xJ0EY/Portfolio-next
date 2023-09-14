@@ -1,7 +1,7 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { ApplicationEvent } from "../ApplicationEvents";
-import { Application, ApplicationConfig, MenuEntries } from "../ApplicationManager";
+import { Application, ApplicationConfig, MenuEntry } from "../ApplicationManager";
 import { LocalApplicationManager } from "../LocalApplicationManager";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import dynamic from 'next/dynamic';
@@ -27,28 +27,36 @@ export class Finder extends Application {
     return finderConfig;
   }
 
-  menuEntries(): MenuEntries {
-    return {
-      displayName: 'Finder',
-      menuItems: []
-    }
+  menuEntries(): MenuEntry[] {
+    return [{
+      displayOptions: { boldText: true },
+      name: 'Finder',
+      items: [
+        { kind: 'action', value: 'Open window', action: () => this.openNewWindow('/Users/joey/') },
+      ]
+    }]
+  }
+
+  private openNewWindow(path: string) {
+    const window = this.compositor.open({
+      x: 100,
+      y: 100,
+      height: 400,
+      width: 650,
+      title: `Finder`,
+      application: this,
+      args: path,
+      generator: () => { return View; }
+    });
+
+    window.minimalHeight  = 250;
+    window.minimalWidth   = 400;
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'application-open') {
-      const window = this.compositor.open({
-        x: 100,
-        y: 100,
-        height: 400,
-        width: 650,
-        title: `Finder`,
-        application: this,
-        args: event.args.length !== 0 ? event.args : '/',
-        generator: () => { return View; }
-      });
-
-      window.minimalHeight  = 250;
-      window.minimalWidth   = 400;
+      const path = event.args.length !== 0 ? event.args : '/';
+      this.openNewWindow(path);
     };
 
     if (event.kind === 'finder-open-file-event') {

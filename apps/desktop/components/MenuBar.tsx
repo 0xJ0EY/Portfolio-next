@@ -1,13 +1,37 @@
 import { useEffect, useState } from 'react';
 import styles from './MenuBar.module.css';
-import { ApplicationManager, ApplicationManagerEvent, MenuEntries, MenuItem } from '@/applications/ApplicationManager';
+import { ApplicationManager, ApplicationManagerEvent, MenuEntry, MenuItem } from '@/applications/ApplicationManager';
 import { minimumDigits } from './util';
 import { useTranslation, I18n, TFunction } from 'next-i18next';
+import React from 'react';
 
-function renderApplicationMenu(menuItems: MenuEntries | null) {
-  if (!menuItems) { return <>Loading</> };
+function renderApplicationMenu(menuItems: MenuEntry[]) {
+  if (menuItems.length === 0) { return <>Loading</> };
 
-  return <>{menuItems.displayName}</>
+  return menuItems.map((x, i) => <React.Fragment key={i}>{renderMenu(x)}</React.Fragment>);
+}
+
+function renderMenu(menuEntries: MenuEntry) {
+  function renderMenuItem(item: MenuItem) {
+    switch (item.kind) {
+      case 'action':
+        return <button onClick={() => item.action()}>{item.value}</button>
+      case 'spacer':
+        return <hr/>
+    }
+  }
+
+  const menuItems = menuEntries.items.map((x, i) => <React.Fragment key={i}>{renderMenuItem(x)}</React.Fragment>)
+  const menuItemsContainer = menuItems.length > 0 ? <div className={styles.menuContent}>{menuItems}</div> : <></>;
+
+  return (
+    <div className={styles.menu}>
+      <div className={styles.menuEntry} tabIndex={0}>
+        {menuEntries.displayOptions.boldText ? <b>{menuEntries.name}</b> : <span>{menuEntries.name}</span>}
+        {menuItemsContainer}
+      </div>
+    </div>
+  )
 }
 
 function renderDate(date: Date, t: TFunction) {
@@ -40,29 +64,51 @@ function languageSelection(t: TFunction, i18n: I18n) {
     i18n.changeLanguage(language);
   }
 
-  return (
-    <div className={styles.menu}>
-      <div className={styles.menuEntry} tabIndex={0}>
-        <span>{i18n.language.toLowerCase()}</span>
-        <div className={styles.menuContent}>
-          <button onClick={() => changeLanguage('en')}>{t('language.tags.en')} - {t('language.english')}</button>
-          <button onClick={() => changeLanguage('nl')}>{t('language.tags.nl')} - {t('language.dutch')}</button>
-        </div>
-      </div>
-    </div>
-  );
+  const englishEntry  = `${t('language.tags.en')} - ${t('language.english')}`;
+  const dutchEntry    = `${t('language.tags.nl')} - ${t('language.dutch')}`;
+
+  let entry: MenuEntry = {
+    displayOptions: {},
+    name: i18n.language.toLowerCase(),
+    items: [
+      { kind: 'action', value: englishEntry, action: () => changeLanguage('en')},
+      { kind: 'action', value: dutchEntry, action: () => changeLanguage('nl')}
+    ]
+  }
+
+  return renderMenu(entry);
 }
 
 type MenuBarProps = {
   manager: ApplicationManager
 }
 
+const DateAndTime = () => {
+  const { t, i18n } = useTranslation('common');
+  const [date, setDate] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setDate(new Date()), 1000);
+
+    return () => {
+      clearInterval(interval);
+    }
+  });
+
+  return (
+    <div className={styles.date} data-locale={i18n.language}>
+      { renderDate(date, t) }
+      &nbsp;
+      { renderClock(date) }
+    </div>
+  )
+}
+
 export const MenuBar = (props: MenuBarProps) => {
   const { t, i18n } = useTranslation('common');
   const { manager } = props;
 
-  const [appMenuEntries, setAppMenuEntries] = useState<MenuEntries | null>(null);
-  const [date, setDate] = useState(new Date());
+  const [appMenuEntries, setAppMenuEntries] = useState<MenuEntry[]>([]);
 
   function handleApplicationManagerEvent(event: ApplicationManagerEvent) {
     if (event.kind !== 'focus') { return; }
@@ -70,20 +116,11 @@ export const MenuBar = (props: MenuBarProps) => {
     setAppMenuEntries(event.application.menuEntries());
   }
 
-  function changeLang() {
-    if (i18n.language === 'en') {
-      i18n.changeLanguage('nl');
-    } else {
-      i18n.changeLanguage('en');
-    }
-  }
-
   useEffect(() => {
     const unsubscribe = manager.subscribe(handleApplicationManagerEvent);
-    const interval = setInterval(() => setDate(new Date()), 1000);
+    
 
     return () => {
-      clearInterval(interval);
       unsubscribe();
     };
   }, []);  
@@ -95,11 +132,7 @@ export const MenuBar = (props: MenuBarProps) => {
       </div>
       <div className={styles.utility}>
         {languageSelection(t, i18n)}
-        <div className={styles.date} data-locale={i18n.language}>
-          { renderDate(date, t) }
-          &nbsp;
-          { renderClock(date) }
-        </div>
+        <DateAndTime/>
       </div>
     </div>
   </>
