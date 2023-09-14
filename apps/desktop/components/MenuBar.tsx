@@ -35,8 +35,22 @@ function renderClock(date: Date) {
   return <>{time}</>
 }
 
-function languageSelection() {
+function languageSelection(t: TFunction, i18n: I18n) {
+  function changeLanguage(language: string) {
+    i18n.changeLanguage(language);
+  }
 
+  return (
+    <div className={styles.menu}>
+      <div className={styles.menuEntry} tabIndex={0}>
+        <span>{i18n.language.toLowerCase()}</span>
+        <div className={styles.menuContent}>
+          <button onClick={() => changeLanguage('en')}>{t('language.tags.en')} - {t('language.english')}</button>
+          <button onClick={() => changeLanguage('nl')}>{t('language.tags.nl')} - {t('language.dutch')}</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type MenuBarProps = {
@@ -80,7 +94,7 @@ export const MenuBar = (props: MenuBarProps) => {
         { renderApplicationMenu(appMenuEntries) }
       </div>
       <div className={styles.utility}>
-        <button onClick={() => changeLang() }>Change lang</button>
+        {languageSelection(t, i18n)}
         <div className={styles.date} data-locale={i18n.language}>
           { renderDate(date, t) }
           &nbsp;

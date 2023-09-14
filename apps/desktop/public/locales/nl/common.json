@@ -1,4 +1,12 @@
 {
+  "language": {
+    "tags": {
+      "en": "en",
+      "nl": "nl"
+    },
+    "english": "Engels",
+    "dutch": "Nederlands"
+  },
   "date": {
     "weekdays": {
       "0": "zondag",
