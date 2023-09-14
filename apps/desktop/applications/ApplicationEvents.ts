@@ -55,10 +55,10 @@ export function createAllWindowsClosedEvent(): AllWindowsClosedEvent {
   return { kind: 'all-windows-closed' };
 }
 
-export type ApplicationEvent =
-  ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent |
-  WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent |
-  FinderOpenFileEvent;
+type BaseApplicationEvents = ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent | WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent;
+type FinderApplicationEvents = FinderOpenFileEvent;
+
+export type ApplicationEvent = BaseApplicationEvents | FinderApplicationEvents;
 
 export type ApplicationWindowMessage = {
   kind: 'message',
