@@ -130,6 +130,7 @@ export const MenuBar = (props: MenuBarProps) => {
       <div className={styles.appEntries}>
         { renderApplicationMenu(appMenuEntries) }
       </div>
+      <div className={styles.spacer}></div>
       <div className={styles.utility}>
         {languageSelection(t, i18n)}
         <DateAndTime/>
