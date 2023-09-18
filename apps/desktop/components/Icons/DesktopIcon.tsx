@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useState } from 'react';
 import styles from '@/components/Icons/DesktopIcon.module.css';
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
@@ -32,6 +33,23 @@ export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
   };
 
   return [image, text];
+}
+
+function EditTitle(props: { entry: DesktopIconEntry }) {
+  const { entry } = props;
+
+  const [editText, setEditText] = useState(entry.editing.value);
+
+  function onChange(value: string) {
+    setEditText(value);
+    entry.editing.value = value;
+
+    console.log(value);
+
+    console.log(entry);
+  }
+
+  return <input type='input' value={editText} onChange={evt => onChange(evt.target.value)}/>
 }
 
 function RenderTitle(props: { title: string }) {
@@ -70,6 +88,7 @@ export type DesktopIconEntry = {
   y: number
   selected: boolean,
   dragging: boolean,
+  editing: { active: boolean, value: string }
 }
 
 export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {
@@ -78,6 +97,8 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
   const file = entry.node;
 
   const selected = desktopIconEntry.selected ? styles.selected : '';
+
+  const title = desktopIconEntry.editing.active ? <EditTitle entry={desktopIconEntry}/> : <RenderTitle title={file.name}/>;
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
@@ -99,7 +120,7 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
       </div>
 
       <div className={styles.textContainer}>
-        <RenderTitle title={file.name}/>
+        {title}
       </div>
     </div>
   </>

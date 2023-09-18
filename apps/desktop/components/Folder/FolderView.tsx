@@ -306,6 +306,38 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     isDragging.current = false;
   }
 
+  function renameFile(entry: DesktopIconEntry) {
+    entry.editing = { active: true, value: entry.entry.node.name };
+
+    updateFiles(localFiles.current);
+  }
+
+  function stopRenamingFiles() {
+    const files = localFiles.current;
+
+    console.log('stop rename files');
+
+    let update = false;
+
+    for (const file of files.iterFromTail()) {
+      if (file.value.editing.active) {
+        
+        
+
+        
+
+
+        // console.log(file.value.editing);
+
+        file.value.editing.active = false;
+      }
+    }
+
+    if (update) {
+      updateFiles(files);
+    }
+  }
+
   function onPointerDown(evt: PointerEvent) {
     if (!ref.current) { return; }
     
@@ -327,15 +359,29 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       const delta = now - previousClickedFile.current.timestamp;
       const sameFile = previousClickedFile.current.file === file;
 
-      if (delta < 400 && sameFile) {        
+      const openFolder = delta < 400 && sameFile;
+      const renameFolder = delta >= 400 && sameFile;
+
+      if (openFolder) {
+        stopRenamingFiles();
+
         onFileOpen(file.entry);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
-      } else {
+      } else 
+      if (renameFolder) {
+        renameFile(file);
+
+        previousClickedFile.current = { file: null, timestamp: 0 };
+      } else {        
+        // if (!sameFile) { stopRenamingFiles(); }
+
         previousClickedFile.current = { file, timestamp: Date.now() };
       }
       
     } else {
+      stopRenamingFiles();
+
       fileDraggingFolderOrigin.current = undefined;
 
       openSelectionBox(evt);
@@ -392,6 +438,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
         dragging: false,
         x: node.value.x,
         y: node.value.y,
+        editing: { active: false, value: node.value.node.name }
       });
     }
 
@@ -430,6 +477,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
         dragging: false,
         x: existingValue.x,
         y: existingValue.y,
+        editing: { active: false, value: node.value.node.name }
       });
     }
 
@@ -442,6 +490,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
         dragging: false,
         x: pos.x,
         y: pos.y,
+        editing: { active: false, value: entry.node.name }
       });
     }
 
@@ -596,7 +645,8 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
         x: positionX,
         y: positionY,
         selected: false,
-        dragging: false
+        dragging: false,
+        editing: { active: false, value: node.item.name }
       }
 
       for (let fileNode of files.iterFromTail()) {
