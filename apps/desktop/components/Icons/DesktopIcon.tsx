@@ -43,10 +43,6 @@ function EditTitle(props: { entry: DesktopIconEntry }) {
   function onChange(value: string) {
     setEditText(value);
     entry.editing.value = value;
-
-    console.log(value);
-
-    console.log(entry);
   }
 
   return <input type='input' value={editText} onChange={evt => onChange(evt.target.value)}/>

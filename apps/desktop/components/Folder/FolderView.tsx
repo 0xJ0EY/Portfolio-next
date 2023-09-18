@@ -315,18 +315,12 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
   function stopRenamingFiles() {
     const files = localFiles.current;
 
-    console.log('stop rename files');
-
     let update = false;
 
     for (const file of files.iterFromTail()) {
       if (file.value.editing.active) {
         fs.renameNode(file.value.entry.node, file.value.editing.value);
         
-
-
-        // console.log(file.value.editing);
-
         file.value.editing.active = false;
       }
     }
@@ -349,7 +343,10 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
 
       fileDraggingFolderOrigin.current = { x: deltaX, y: deltaY };
 
-      if (!file.selected) { selectFile(evt); }
+      if (!file.selected) {
+        stopRenamingFiles();
+        selectFile(evt);
+      }
 
       onFileDraggingStart(evt);
 
@@ -361,8 +358,6 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       const renameFolder = delta >= 400 && sameFile;
 
       if (openFolder) {
-        stopRenamingFiles();
-
         onFileOpen(file.entry);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
@@ -372,8 +367,6 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
 
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else {        
-        // if (!sameFile) { stopRenamingFiles(); }
-
         previousClickedFile.current = { file, timestamp: Date.now() };
       }
       
