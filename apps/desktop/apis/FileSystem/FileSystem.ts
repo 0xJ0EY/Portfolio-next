@@ -348,6 +348,35 @@ export class FileSystem {
     return Ok(node);
   }
 
+  private updateLookupTableWithPrefix(prefix: string) {
+    Object.entries(this.lookupTable)
+      .filter(([key]) => key.startsWith(prefix))
+      .forEach(([path, node]) => {
+        delete this.lookupTable[path];
+
+        this.lookupTable[constructPath(node)] = node;
+      });
+  }
+
+  public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
+    // TODO: Filter name rules
+    const oldLookupPath = constructPath(node);
+
+    node.name = name;
+
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
+
+    if (node.parent) {
+      this.propagateDirectoryEvent(node.parent, 'update');
+    }
+
+    return Ok(node);
+  }
+
   public moveNode(node: FileSystemNode, directory: FileSystemDirectory): Result<DirectoryEntry, Error> {
     // Check if the node was a parent of the target directory
     if (isParentOfTargetDirectory(directory, node)) {

@@ -321,9 +321,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
 
     for (const file of files.iterFromTail()) {
       if (file.value.editing.active) {
-        
-        
-
+        fs.renameNode(file.value.entry.node, file.value.editing.value);
         
 
 
