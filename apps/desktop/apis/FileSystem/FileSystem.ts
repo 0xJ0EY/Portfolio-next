@@ -294,8 +294,11 @@ function targetDirectoryAllowsModification(directory: FileSystemDirectory): bool
   return directory.editable || directory.stickyBit;
 }
 
+export type DirectoryRefreshEvent = { kind: 'refresh' }
+export type DirectoryUpdateEvent = { kind: 'update' }
+export type DirectoryRenameEvent = { kind: 'rename', path: string }
 
-export type DirectoryEventType = 'refresh' | 'update';
+export type DirectoryEventType = DirectoryRefreshEvent | DirectoryUpdateEvent | DirectoryRenameEvent;
 export type DirectoryListener = (type: DirectoryEventType) => void;
 
 export class FileSystem {
@@ -344,6 +347,56 @@ export class FileSystem {
     if (!node) {
       return Err(Error("Node not found"));
     }
+
+    return Ok(node);
+  }
+
+  private updateLookupTableWithPrefix(prefix: string) {
+    Object.entries(this.lookupTable)
+      .filter(([key]) => key.startsWith(prefix))
+      .forEach(([path, node]) => {
+        delete this.lookupTable[path];
+
+        this.lookupTable[constructPath(node)] = node;
+      });
+  }
+
+  public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
+    function filenameExistsInParent(parent: FileSystemDirectory, name: string): boolean {
+      for (const file of parent.children.iterFromTail()) {
+        if (file.value.node.name === name) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    // We only check for a duplicate names
+    if (!node.parent) {
+      return Err(Error("A parent is required, to rename the directory"));
+    }
+
+    // We allow any other name, like Apple's HFS+
+    if (filenameExistsInParent(node.parent, name)) {
+      return Err(Error("Duplicate filename"));
+    }
+
+    const oldLookupPath = constructPath(node);
+
+    node.name = name;
+
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
+
+    if (node.kind === 'directory') {
+      this.propagateDirectoryEvent(node, {kind: 'rename', path: newLookupPath});
+    }
+
+    this.propagateDirectoryEvent(node.parent, {kind: 'update'});
 
     return Ok(node);
   }
