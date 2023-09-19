@@ -392,10 +392,7 @@ export class FileSystem {
       this.updateLookupTableWithPrefix(oldLookupPath);
     }
 
-    console.log(node.kind);
-
     if (node.kind === 'directory') {
-      console.log(node.id);
       this.propagateDirectoryEvent(node, {kind: 'rename', path: newLookupPath});
     }
 

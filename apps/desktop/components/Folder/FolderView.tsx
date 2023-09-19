@@ -496,13 +496,15 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     }
   }
 
-  function reloadFiles(directory: string, type: DirectoryEventType) {
+  function reloadFiles(directory: string, type: DirectoryEventType): FileSystemDirectory | null {
     if (type.kind === 'rename') {      
       reloadRenamedDirectory(type);
+
+      return null;
     }
 
     const dir = fs.getDirectory(directory);
-    if (!dir.ok) { return dir; }
+    if (!dir.ok) { return null; }
 
     currentDirectory.current = constructPath(dir.value);
 
@@ -512,7 +514,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       reloadSyncedFiles(dir.value);
     }
 
-    return dir;
+    return dir.value;
   }
 
   function loadFiles(directory: string) {
@@ -521,8 +523,8 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     }
     const result = action({kind: 'update'});
     
-    if (result.ok) {
-      return fs.subscribe(result.value, action);
+    if (result) {
+      return fs.subscribe(result, action);
     }
   }
 
