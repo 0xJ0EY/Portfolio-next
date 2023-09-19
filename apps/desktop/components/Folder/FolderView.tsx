@@ -1,4 +1,4 @@
-import { DirectoryEntry, DirectoryEventType, FileSystemDirectory, calculateNodePosition, constructPath } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath } from '@/apis/FileSystem/FileSystem';
 import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -32,7 +32,7 @@ const DraggingThreshold = 5;
 type Props = {
   directory: string,
   apis: SystemAPIs,
-  onFileOpen: (file: DirectoryEntry) => void,
+  onFileOpen: (file: FileSystemNode) => void,
   localIconPosition?: boolean
 }
 
@@ -358,7 +358,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       const renameFolder = delta >= 400 && sameFile;
 
       if (openFolder) {
-        onFileOpen(file.entry);
+        onFileOpen(file.entry.node);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else 
@@ -437,7 +437,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
   }
 
   function reloadLocalFiles(directory: FileSystemDirectory, type: DirectoryEventType) {
-    if (type === 'refresh') { return; }
+    if (type.kind === 'refresh') { return; }
 
     const existingChain = localFiles.current;
     const lookup = new Map<number, DesktopIconEntry>();
@@ -488,7 +488,19 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     updateFiles(newChain);
   }
 
+  function reloadRenamedDirectory(event: DirectoryRenameEvent) {
+    const dir = fs.getDirectory(event.path);
+
+    if (dir.ok) {
+      onFileOpen(dir.value);      
+    }
+  }
+
   function reloadFiles(directory: string, type: DirectoryEventType) {
+    if (type.kind === 'rename') {      
+      reloadRenamedDirectory(type);
+    }
+
     const dir = fs.getDirectory(directory);
     if (!dir.ok) { return dir; }
 
@@ -504,8 +516,10 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
   }
 
   function loadFiles(directory: string) {
-    const action = (type: DirectoryEventType) => reloadFiles(directory, type);
-    const result = action('update');
+    const action = (type: DirectoryEventType) => {
+      return reloadFiles(directory, type);
+    }
+    const result = action({kind: 'update'});
     
     if (result.ok) {
       return fs.subscribe(result.value, action);
@@ -652,13 +666,13 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     }
 
     if (forceUpdate) {
-      parentsToUpdate.forEach(x => fs.propagateDirectoryEvent(x, 'update'));
-      fs.propagateDirectoryEvent(dir.value, 'update');
+      parentsToUpdate.forEach(x => fs.propagateDirectoryEvent(x, {kind: 'update'}));
+      fs.propagateDirectoryEvent(dir.value, {kind: 'update'});
     } else {
       // Local Icon Position (Desktop mode) shouldn't update the rest of the views
       // As it should be isolated from the other views
       if (!useLocalIconPosition) {
-        fs.propagateDirectoryEvent(dir.value, 'refresh');
+        fs.propagateDirectoryEvent(dir.value, {kind: 'refresh'});
       }
 
       updateFiles(files);

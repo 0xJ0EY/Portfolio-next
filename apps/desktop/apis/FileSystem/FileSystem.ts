@@ -294,7 +294,11 @@ function targetDirectoryAllowsModification(directory: FileSystemDirectory): bool
   return directory.editable || directory.stickyBit;
 }
 
-export type DirectoryEventType = 'refresh' | 'update';
+export type DirectoryRefreshEvent = { kind: 'refresh' }
+export type DirectoryUpdateEvent = { kind: 'update' }
+export type DirectoryRenameEvent = { kind: 'rename', path: string }
+
+export type DirectoryEventType = DirectoryRefreshEvent | DirectoryUpdateEvent | DirectoryRenameEvent;
 export type DirectoryListener = (type: DirectoryEventType) => void;
 
 export class FileSystem {
@@ -388,7 +392,14 @@ export class FileSystem {
       this.updateLookupTableWithPrefix(oldLookupPath);
     }
 
-    this.propagateDirectoryEvent(node.parent, 'update');
+    console.log(node.kind);
+
+    if (node.kind === 'directory') {
+      console.log(node.id);
+      this.propagateDirectoryEvent(node, {kind: 'rename', path: newLookupPath});
+    }
+
+    this.propagateDirectoryEvent(node.parent, {kind: 'update'});
 
     return Ok(node);
   }
