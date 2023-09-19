@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from '@/components/Icons/DesktopIcon.module.css';
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
@@ -38,14 +38,27 @@ export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
 function EditTitle(props: { entry: DesktopIconEntry }) {
   const { entry } = props;
 
+  const ref = useRef<HTMLInputElement>(null);
+  
+  const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(entry.editing.value);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.focus();
+    }
+  }, [isEditing])
+
+  useEffect(() => {
+    setIsEditing(true);
+  }, []);
 
   function onChange(value: string) {
     setEditText(value);
     entry.editing.value = value;
   }
 
-  return <input type='input' value={editText} onChange={evt => onChange(evt.target.value)}/>
+  return <input ref={ref} type='input' value={editText} onChange={evt => onChange(evt.target.value)}/>
 }
 
 function RenderTitle(props: { title: string }) {
