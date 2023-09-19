@@ -307,7 +307,7 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
   }
 
   function renameFile(entry: DesktopIconEntry) {
-    entry.editing = { active: true, value: entry.entry.node.name };
+    entry.editing = { active: true, value: entry.entry.node.name, onSave: () => { stopRenamingFiles(); }};
 
     updateFiles(localFiles.current);
   }

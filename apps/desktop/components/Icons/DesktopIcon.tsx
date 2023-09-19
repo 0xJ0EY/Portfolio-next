@@ -39,7 +39,7 @@ function EditTitle(props: { entry: DesktopIconEntry }) {
   const { entry } = props;
 
   const ref = useRef<HTMLInputElement>(null);
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(entry.editing.value);
 
@@ -58,7 +58,21 @@ function EditTitle(props: { entry: DesktopIconEntry }) {
     entry.editing.value = value;
   }
 
-  return <input ref={ref} type='input' value={editText} onChange={evt => onChange(evt.target.value)}/>
+  function onSave() {
+    if (entry.editing.onSave) {
+      entry.editing.onSave();
+    }
+  }
+
+  return (
+    <input
+      ref={ref}
+      type='input'
+      value={editText}
+      onChange={evt => onChange(evt.target.value)}
+      onKeyDown={evt => evt.key === 'Enter' && onSave() }
+    />
+  )
 }
 
 function RenderTitle(props: { title: string }) {
@@ -97,7 +111,7 @@ export type DesktopIconEntry = {
   y: number
   selected: boolean,
   dragging: boolean,
-  editing: { active: boolean, value: string }
+  editing: { active: boolean, value: string, onSave?: () => void }
 }
 
 export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {

@@ -294,7 +294,6 @@ function targetDirectoryAllowsModification(directory: FileSystemDirectory): bool
   return directory.editable || directory.stickyBit;
 }
 
-
 export type DirectoryEventType = 'refresh' | 'update';
 export type DirectoryListener = (type: DirectoryEventType) => void;
 
