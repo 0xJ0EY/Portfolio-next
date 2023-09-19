@@ -4,7 +4,7 @@ import { Window, WindowApplication, WindowCompositor } from './WindowManagement/
 import { WindowEvent } from './WindowManagement/WindowEvents';
 import dynamic from 'next/dynamic';
 import { SystemAPIs } from './OperatingSystem';
-import { DirectoryEntry, constructPath } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, FileSystemNode, constructPath } from '@/apis/FileSystem/FileSystem';
 import { ApplicationManager } from '@/applications/ApplicationManager';
 
 const FolderView = dynamic(() => import('./Folder/FolderView'));
@@ -74,8 +74,8 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
   const reducer = applicationReducer(windowCompositor);
   const [applicationWindows, dispatch] = useReducer(reducer, []);
 
-  function onFileOpen(file: DirectoryEntry) {
-    const path = constructPath(file.node);
+  function onFileOpen(file: FileSystemNode) {
+    const path = constructPath(file);
     manager.open(path);
   }
 

@@ -27,7 +27,8 @@ export function DragAndDropView(props: { apis: SystemAPIs }) {
             },
             x, y,
             selected: false,
-            dragging: true
+            dragging: true,
+            editing: { active: false, value: entry.item.name }
           }
         });
 

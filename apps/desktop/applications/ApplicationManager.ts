@@ -26,15 +26,27 @@ export interface ApplicationConfig {
   ) => Application
 }
 
+
+export type MenuItemAction = {
+  kind: 'action',
+  value: string,
+  action: () => void
+}
+
 export type MenuItemSpacer = {
   kind: 'spacer'
 }
 
-export type MenuItem = MenuItemSpacer;
+export type MenuItem = MenuItemSpacer | MenuItemAction;
 
-export interface MenuEntries {
-  readonly displayName: string
-  readonly menuItems: MenuItem[]
+export interface MenuDisplayOptions {
+  boldText?: boolean
+};
+
+export interface MenuEntry {
+  readonly displayOptions: MenuDisplayOptions,
+  readonly name: string
+  readonly items: MenuItem[]
 }
 
 type ApplicationWindowListener = (event: ApplicationWindowEvent) => void;
@@ -49,7 +61,7 @@ export abstract class Application {
   private windowListeners: Record<number, ApplicationWindowListener[]> = {};
 
   abstract config(): ApplicationConfig;
-  abstract menuEntries(): MenuEntries;
+  abstract menuEntries(): MenuEntry[];
 
   protected baseHandler(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'all-windows-closed') {

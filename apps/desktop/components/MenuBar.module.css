@@ -1,10 +1,65 @@
 .menuBar {
   background-color: darkgray;
   display: flex;
-  padding: 5px; 
+  padding: 0 5px;
   flex: 0 1 auto;
+  line-height: 30px;
 }
 
-.appEntries {
+.spacer {
   flex: 1;
+}
+
+.date {
+  display: inline-block;
+  user-select: none;
+}
+
+.utility {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.weekday {
+  text-transform: capitalize;
+}
+
+/* We don't do capitalization on months in Dutch */
+.date[data-locale="en"] .month {
+  text-transform: capitalize;
+}
+
+.menuEntry {
+  position: relative;
+  display: block;
+  height: 100%;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.menuEntry span {
+  user-select: none;
+}
+
+.menuContent {
+  display: none;
+  z-index: 10000;
+
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding: 2px 5px 5px;
+}
+
+.menu:focus-within .menuContent {
+  display: flex;
+  flex-direction: column;
+
+  background-color: darkgray;
+}
+
+.menuContent button {
+  display: block;
+  white-space: nowrap;
 }

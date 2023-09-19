@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useState, useRef, useEffect } from 'react';
 import styles from '@/components/Icons/DesktopIcon.module.css';
 import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
@@ -32,6 +33,46 @@ export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
   };
 
   return [image, text];
+}
+
+function EditTitle(props: { entry: DesktopIconEntry }) {
+  const { entry } = props;
+
+  const ref = useRef<HTMLInputElement>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(entry.editing.value);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.focus();
+    }
+  }, [isEditing])
+
+  useEffect(() => {
+    setIsEditing(true);
+  }, []);
+
+  function onChange(value: string) {
+    setEditText(value);
+    entry.editing.value = value;
+  }
+
+  function onSave() {
+    if (entry.editing.onSave) {
+      entry.editing.onSave();
+    }
+  }
+
+  return (
+    <input
+      ref={ref}
+      type='input'
+      value={editText}
+      onChange={evt => onChange(evt.target.value)}
+      onKeyDown={evt => evt.key === 'Enter' && onSave() }
+    />
+  )
 }
 
 function RenderTitle(props: { title: string }) {
@@ -70,6 +111,7 @@ export type DesktopIconEntry = {
   y: number
   selected: boolean,
   dragging: boolean,
+  editing: { active: boolean, value: string, onSave?: () => void }
 }
 
 export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {
@@ -78,6 +120,8 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
   const file = entry.node;
 
   const selected = desktopIconEntry.selected ? styles.selected : '';
+
+  const title = desktopIconEntry.editing.active ? <EditTitle entry={desktopIconEntry}/> : <RenderTitle title={file.name}/>;
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
@@ -99,7 +143,7 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
       </div>
 
       <div className={styles.textContainer}>
-        <RenderTitle title={file.name}/>
+        {title}
       </div>
     </div>
   </>

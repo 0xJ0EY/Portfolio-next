@@ -2,7 +2,7 @@ import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useState, useEffect, useRef } from "react";
 import FolderView from "@/components/Folder/FolderView";
 import { ApplicationWindowEvent } from "../ApplicationEvents";
-import { DirectoryEntry, FileSystemDirectory, FileSystemNode, constructPath } from "@/apis/FileSystem/FileSystem";
+import { FileSystemDirectory, FileSystemNode, constructPath } from "@/apis/FileSystem/FileSystem";
 import styles from './FinderView.module.css';
 import { Application } from "../ApplicationManager";
 import React from "react";
@@ -116,12 +116,12 @@ export default function FinderView(props: WindowProps) {
     setPath(path);
   }
 
-  function onFileOpen(file: DirectoryEntry) {
-    if (file.node.kind === 'directory') {
-      changeDirectory(file.node);
-      recordHistory(file.node);
+  function onFileOpen(file: FileSystemNode) {
+    if (file.kind === 'directory') {
+      changeDirectory(file);
+      recordHistory(file);
     } else {
-      const path = constructPath(file.node);
+      const path = constructPath(file);
       application.on({ kind: 'finder-open-file-event', path}, windowContext)
     }
   }
