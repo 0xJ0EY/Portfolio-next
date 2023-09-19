@@ -359,7 +359,26 @@ export class FileSystem {
   }
 
   public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
-    // TODO: Filter name rules
+    function filenameExistsInParent(parent: FileSystemDirectory, name: string): boolean {
+      for (const file of parent.children.iterFromTail()) {
+        if (file.value.node.name === name) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    // We only check for a duplicate names
+    if (!node.parent) {
+      return Err(Error("A parent is required, to rename the directory"));
+    }
+
+    // We allow any other name, like Apple's HFS+
+    if (filenameExistsInParent(node.parent, name)) {
+      return Err(Error("Duplicate filename"));
+    }
+
     const oldLookupPath = constructPath(node);
 
     node.name = name;
@@ -370,9 +389,7 @@ export class FileSystem {
       this.updateLookupTableWithPrefix(oldLookupPath);
     }
 
-    if (node.parent) {
-      this.propagateDirectoryEvent(node.parent, 'update');
-    }
+    this.propagateDirectoryEvent(node.parent, 'update');
 
     return Ok(node);
   }
