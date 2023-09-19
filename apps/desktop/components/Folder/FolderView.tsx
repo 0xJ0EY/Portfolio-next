@@ -306,8 +306,12 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     isDragging.current = false;
   }
 
-  function renameFile(entry: DesktopIconEntry) {
-    entry.editing = { active: true, value: entry.entry.node.name, onSave: () => { stopRenamingFiles(); }};
+  function renameFile(iconEntry: DesktopIconEntry) {
+    // Check if we can rename the file first
+    const fileSystemNode = iconEntry.entry.node;
+    if (!fileSystemNode.editable) { return; }
+
+    iconEntry.editing = { active: true, value: iconEntry.entry.node.name, onSave: () => { stopRenamingFiles(); }};
 
     updateFiles(localFiles.current);
   }
