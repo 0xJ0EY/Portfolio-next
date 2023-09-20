@@ -66,6 +66,7 @@ function EditTitle(props: { entry: DesktopIconEntry }) {
 
   return (
     <input
+      className={styles.editInput}
       ref={ref}
       type='input'
       value={editText}
