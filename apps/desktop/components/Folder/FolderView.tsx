@@ -358,11 +358,13 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       const delta = now - previousClickedFile.current.timestamp;
       const sameFile = previousClickedFile.current.file === file;
 
-      const openFolder = delta < 400 && sameFile;
-      const renameFolder = delta >= 400 && sameFile;
+      const TimeForEdit = 400;
+
+      const openFolder = delta < TimeForEdit && sameFile;
+      const renameFolder = delta >= TimeForEdit && sameFile;
 
       if (openFolder) {
-        onFileOpen(file.entry.node);
+        if (!file.editing.active) { onFileOpen(file.entry.node); }
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else 
