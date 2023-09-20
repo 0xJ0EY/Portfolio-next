@@ -34,7 +34,7 @@
 }
 
 .titleLine {
-  display: inline-block;
+  display: block;
   line-height: 1.2em;
   padding: 0 5px;
 }

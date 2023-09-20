@@ -1,5 +1,5 @@
-import { DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath } from '@/apis/FileSystem/FileSystem';
-import { useState, useRef, useEffect, RefObject, MutableRefObject } from 'react';
+import { DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/FileSystem';
+import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { DesktopIconEntry, DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
@@ -8,6 +8,7 @@ import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
 import { Err, Ok, Result, clamp } from '../util';
 import { SystemAPIs } from '../OperatingSystem';
+import { useTranslation } from 'next-i18next';
 
 const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
 
@@ -29,20 +30,26 @@ function SelectionBox(box: SelectionBox) {
 
 const DraggingThreshold = 5;
 
-type Props = {
+type FolderViewProps = {
   directory: string,
   apis: SystemAPIs,
   onFileOpen: (file: FileSystemNode) => void,
   localIconPosition?: boolean
 }
 
-export default function FolderView({ directory, apis, onFileOpen, localIconPosition }: Props) {
+export type FolderViewHandles = {
+  createNewDirectory: () => void
+}
+
+const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function FolderView(props, forwardRef) {
+  const { directory, apis, onFileOpen, localIconPosition } = props;
   const fs = apis.fileSystem;
 
   const useLocalIconPosition = localIconPosition ?? false;
 
   const [files, setFiles] = useState<DesktopIconEntry[]>([]);
   const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
+  const { t, i18n } = useTranslation('common');
 
   function updateFiles(files: Chain<DesktopIconEntry>) {
     localFiles.current = files;
@@ -687,6 +694,23 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
     }
   }
 
+  function createNewDirectory() {
+    if (!currentDirectory.current) { return; }
+    const dir = fs.getDirectory(currentDirectory.current);
+    if (!dir.ok) { return; }
+
+    const template = t('filesystem.new_directory');
+    const name = generateUniqueNameForDirectory(dir.value, template);
+
+    const newDir = fs.addDirectory(dir.value, name, true, true);
+    fs.propagateDirectoryEvent(dir.value, {kind: 'update'});
+    console.log(newDir);
+  }
+
+  useImperativeHandle(forwardRef, () => ({
+    createNewDirectory: () => createNewDirectory(),
+  }));
+
   useEffect(() => {
     if (!ref.current) { return; }
     const folder = ref.current;
@@ -730,4 +754,6 @@ export default function FolderView({ directory, apis, onFileOpen, localIconPosit
       </div>
     </div>
   </>
-}
+});
+
+export default FolderView;

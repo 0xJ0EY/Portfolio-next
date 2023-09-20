@@ -1,4 +1,8 @@
 {
+  "filesystem": {
+    "new_directory": "naamloze folder",
+    "new_file": "naamloos bestand"
+  },
   "language": {
     "tags": {
       "en": "en",

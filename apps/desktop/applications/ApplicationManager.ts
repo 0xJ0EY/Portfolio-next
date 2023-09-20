@@ -6,6 +6,7 @@ import { LocalApplicationManager } from "./LocalApplicationManager";
 import { ApplicationEvent, ApplicationWindowEvent, createApplicationOpenEvent, createApplicationQuitEvent } from "./ApplicationEvents";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { Action } from "@/components/util";
+import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -214,7 +215,7 @@ export class ApplicationManager implements BaseApplicationManager {
   }
 
   open(argument: string): Result<number, Error> {
-    const parts = argument.split(' ');
+    const parts = parseCommand(argument);
 
     const path = parts.splice(0, 1)[0] ?? '';
     const args = parts.join(' ') ?? '';

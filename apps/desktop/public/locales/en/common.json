@@ -1,4 +1,8 @@
 {
+  "filesystem": {
+    "new_directory": "untitled folder",
+    "new_file": "untitled file"
+  },
   "language": {
     "tags": {
       "en": "en",

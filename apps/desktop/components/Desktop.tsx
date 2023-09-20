@@ -76,7 +76,8 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
 
   function onFileOpen(file: FileSystemNode) {
     const path = constructPath(file);
-    manager.open(path);
+
+    manager.open(`"${path}"`);
   }
 
   useEffect(() => {

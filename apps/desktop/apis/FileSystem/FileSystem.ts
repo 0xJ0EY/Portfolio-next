@@ -121,6 +121,26 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
   }
 }
 
+export function generateUniqueNameForDirectory(directory: FileSystemDirectory, template: string): string {
+  function existsInDirectory(directory: FileSystemDirectory, name: string): boolean {
+    for (const node of directory.children.iterFromTail()) {
+      const nodeName = node.value.node.name;
+
+      if (nodeName === name) { return true; }
+    }
+
+    return false;
+  }
+
+  if (!existsInDirectory(directory, template)) { return template; }
+
+  let iteration = 1;
+
+  while (existsInDirectory(directory, `${template} ${++iteration}`)) {}
+
+  return `${template} ${iteration}`;
+}
+
 export function constructPath(node: FileSystemNode): string {
   let currentNode: FileSystemNode = node;
   let directories = [];
@@ -473,6 +493,8 @@ export class FileSystem {
     this.addNodeToDirectory(parent, directory);
 
     this.lookupTable[constructPath(directory)] = directory;
+
+    console.log(this.lookupTable);
 
     return directory;
   }

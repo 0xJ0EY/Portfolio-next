@@ -1,6 +1,6 @@
 import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useState, useEffect, useRef } from "react";
-import FolderView from "@/components/Folder/FolderView";
+import FolderView, { FolderViewHandles } from "@/components/Folder/FolderView";
 import { ApplicationWindowEvent } from "../ApplicationEvents";
 import { FileSystemDirectory, FileSystemNode, constructPath } from "@/apis/FileSystem/FileSystem";
 import styles from './FinderView.module.css';
@@ -49,6 +49,7 @@ export default function FinderView(props: WindowProps) {
 
   const currentHistoryElement = useRef<Node<FileSystemDirectory> | null>(null);
   const history = useRef(new Chain<FileSystemDirectory>());
+  const folderViewRef = useRef<FolderViewHandles>(null);
 
   function onWindowEvent(event: ApplicationWindowEvent) {
     console.log(event)
@@ -97,6 +98,10 @@ export default function FinderView(props: WindowProps) {
     currentHistoryElement.current = next;
     
     changeDirectory(next!.value);
+  }
+
+  function createDirectory() {
+    folderViewRef.current?.createNewDirectory();
   }
 
   function updateWindowTitle(path: string) {
@@ -160,9 +165,11 @@ export default function FinderView(props: WindowProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.folderActions}>
+        <div className={styles.navigationActions}>
           <button disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}>prev</button>
           <button disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}>next</button>
+                  
+          <button onClick={() => createDirectory()}>create directory</button>
         </div>
         <div className={styles.path}>
           { locations }
@@ -179,7 +186,7 @@ export default function FinderView(props: WindowProps) {
           </ul>
         </div>
         <div className={styles.folder}>
-          <FolderView directory={path} apis={application.apis} onFileOpen={onFileOpen}></FolderView>
+          <FolderView ref={folderViewRef} directory={path} apis={application.apis} onFileOpen={onFileOpen}></FolderView>
         </div>
       </div>
     </div>
