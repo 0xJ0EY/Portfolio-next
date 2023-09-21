@@ -121,10 +121,11 @@ export default function FinderView(props: WindowProps) {
     setPath(path);
   }
 
-  function onFileOpen(file: FileSystemNode) {
+  function onFileOpen(file: FileSystemNode, rename: boolean) {
     if (file.kind === 'directory') {
       changeDirectory(file);
-      recordHistory(file);
+
+      if (!rename) { recordHistory(file); }
     } else {
       const path = constructPath(file);
       application.on({ kind: 'finder-open-file-event', path}, windowContext)

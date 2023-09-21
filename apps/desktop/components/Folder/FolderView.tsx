@@ -33,7 +33,7 @@ const DraggingThreshold = 5;
 type FolderViewProps = {
   directory: string,
   apis: SystemAPIs,
-  onFileOpen: (file: FileSystemNode) => void,
+  onFileOpen: (file: FileSystemNode, rename: boolean) => void,
   localIconPosition?: boolean,
   allowOverflow?: boolean
 }
@@ -375,7 +375,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       if (openFolder) {
         stopRenamingFiles();
 
-        onFileOpen(file.entry.node);
+        onFileOpen(file.entry.node, false);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else 
@@ -509,7 +509,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const dir = fs.getDirectory(event.path);
 
     if (dir.ok) {
-      onFileOpen(dir.value);      
+      onFileOpen(dir.value, true);
     }
   }
 

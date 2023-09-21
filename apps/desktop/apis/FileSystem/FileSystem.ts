@@ -499,8 +499,6 @@ export class FileSystem {
 
     this.lookupTable[constructPath(directory)] = directory;
 
-    console.log(this.lookupTable);
-
     return directory;
   }
 
