@@ -92,13 +92,13 @@ const DateAndTime = () => {
   const [date, setDate] = useState<Date>();
 
   useEffect(() => {
-    const interval = setInterval(() => setDate(new Date()), 1000);
     setDate(new Date());
+    const interval = setInterval(() => setDate(new Date()), 1000);
 
     return () => {
       clearInterval(interval);
     }
-  });
+  }, []);
 
   return (
     <div className={styles.date} data-locale={i18n.language}>
