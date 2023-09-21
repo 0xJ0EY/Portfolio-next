@@ -99,7 +99,13 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
 
   return <>
     <div ref={parentNode} className={styles.windowContainer}>
-      <FolderView directory='/Users/joey/Desktop' apis={apis} onFileOpen={onFileOpen} localIconPosition={true}/>
+      <FolderView
+        directory='/Users/joey/Desktop'
+        apis={apis}
+        onFileOpen={onFileOpen}
+        localIconPosition={true}
+        allowOverflow={true}
+      />
 
       {applicationWindows.map(x => 
         <div key={x.window.id}>

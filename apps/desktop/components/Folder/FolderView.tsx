@@ -34,7 +34,8 @@ type FolderViewProps = {
   directory: string,
   apis: SystemAPIs,
   onFileOpen: (file: FileSystemNode) => void,
-  localIconPosition?: boolean
+  localIconPosition?: boolean,
+  allowOverflow?: boolean
 }
 
 export type FolderViewHandles = {
@@ -42,10 +43,11 @@ export type FolderViewHandles = {
 }
 
 const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function FolderView(props, forwardRef) {
-  const { directory, apis, onFileOpen, localIconPosition } = props;
+  const { directory, apis, onFileOpen, localIconPosition, allowOverflow } = props;
   const fs = apis.fileSystem;
 
   const useLocalIconPosition = localIconPosition ?? false;
+  const overflow = allowOverflow ?? true;
 
   const [files, setFiles] = useState<DesktopIconEntry[]>([]);
   const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
@@ -751,7 +753,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       <div className={styles.selectionBoxContainer}>
         {selectionBox}
       </div>
-      <div ref={iconContainer} className={styles.iconsContainer}>
+      <div ref={iconContainer} className={[styles.iconsContainer, overflow ? styles.overflow : ''].join(' ')}>
         {icons}
       </div>
     </div>

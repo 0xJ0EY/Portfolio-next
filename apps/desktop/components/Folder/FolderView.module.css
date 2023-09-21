@@ -21,6 +21,10 @@
   overflow: auto;
 }
 
+.iconsContainer.overflow {
+  overflow: hidden;
+}
+
 .selectionBoxContainer {
   position: absolute;
   width: 100%;
