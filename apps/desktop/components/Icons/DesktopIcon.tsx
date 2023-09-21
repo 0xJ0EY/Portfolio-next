@@ -14,7 +14,7 @@ export const TextWidth    = 120;
 export const TextHeight   = 20;
 
 
-export const CharactersPerLine = 18;
+export const CharactersPerLine = 14;
 export const MaximumLines = 2;
 
 export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
