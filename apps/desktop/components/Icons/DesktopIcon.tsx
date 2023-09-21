@@ -86,7 +86,7 @@ function RenderTitle(props: { title: string }) {
   const lines = new Array(Math.min(chunks, maxLines));
 
   for (let i = 0, d = 0; i < Math.min(chunks, maxLines); i++, d += size) {
-    lines[i] = title.substring(d, d + size);
+    lines[i] = title.substring(d, d + size).trim();
   }
   
   // If we have more then {maxLines} lines, we add ellipses to the last line
@@ -94,7 +94,13 @@ function RenderTitle(props: { title: string }) {
     lines[maxLines - 1] = lines[maxLines - 1].substring(0, size - 3) + '...';
   }
 
-  const elements = lines.map((x, index) => <span className={styles.titleLine} key={index}>{x}</span>);
+  const elements = lines.map((x, index) => {
+    if (x.length === 0) {
+      return <span className={styles.titleLine} key={index}>&nbsp;</span>
+    }
+
+    return <span className={styles.titleLine} key={index}>{x}</span>
+  });
   return <div className={styles.title}>{ elements }</div>
 }
 

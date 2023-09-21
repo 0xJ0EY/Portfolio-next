@@ -402,6 +402,11 @@ export class FileSystem {
       return Err(Error("Duplicate filename"));
     }
 
+    // We need the name to be at the very least 1 character
+    if (name.length < 1) {
+      return Err(Error("The name is too short"));
+    }
+
     const oldLookupPath = constructPath(node);
 
     node.name = name;
