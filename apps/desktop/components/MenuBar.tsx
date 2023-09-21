@@ -34,7 +34,9 @@ function renderMenu(menuEntries: MenuEntry) {
   )
 }
 
-function renderDate(date: Date, t: TFunction) {
+function renderDate(date: Date | undefined, t: TFunction) {
+  if (date === undefined) { return <></>};
+
   const weekday = t(`date.weekdays_short.${date.getDay()}`);
   const day     = date.getDate().toString();
   const month   = t(`date.months_short.${date.getMonth()}`);
@@ -50,7 +52,9 @@ function renderDate(date: Date, t: TFunction) {
   )
 }
 
-function renderClock(date: Date) { 
+function renderClock(date: Date | undefined) {
+  if (date === undefined) { return <></>};
+
   const hours = minimumDigits(date.getHours(), 2);
   const minutes = minimumDigits(date.getMinutes(), 2);
   
@@ -85,7 +89,7 @@ type MenuBarProps = {
 
 const DateAndTime = () => {
   const { t, i18n } = useTranslation('common');
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState<Date>();
 
   useEffect(() => {
     const interval = setInterval(() => setDate(new Date()), 1000);
