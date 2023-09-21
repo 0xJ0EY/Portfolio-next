@@ -371,7 +371,9 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       const renameFolder = delta >= TimeForEdit && sameFile;
 
       if (openFolder) {
-        if (!file.editing.active) { onFileOpen(file.entry.node); }
+        stopRenamingFiles();
+
+        onFileOpen(file.entry.node);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else 
