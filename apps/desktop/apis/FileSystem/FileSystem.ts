@@ -377,7 +377,12 @@ export class FileSystem {
       .forEach(([path, node]) => {
         delete this.lookupTable[path];
 
-        this.lookupTable[constructPath(node)] = node;
+        const newLookupPath = constructPath(node);
+        this.lookupTable[newLookupPath] = node;
+
+        if (node.kind === 'directory') {
+          this.propagateDirectoryEvent(node, {kind: 'rename', path: newLookupPath});
+        }
       });
   }
 
@@ -415,10 +420,6 @@ export class FileSystem {
 
     if (oldLookupPath !== newLookupPath) {
       this.updateLookupTableWithPrefix(oldLookupPath);
-    }
-
-    if (node.kind === 'directory') {
-      this.propagateDirectoryEvent(node, {kind: 'rename', path: newLookupPath});
     }
 
     this.propagateDirectoryEvent(node.parent, {kind: 'update'});
