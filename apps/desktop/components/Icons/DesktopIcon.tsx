@@ -13,6 +13,10 @@ export const ImageWidth   = 60;
 export const TextWidth    = 120;
 export const TextHeight   = 20;
 
+
+export const CharactersPerLine = 18;
+export const MaximumLines = 2;
+
 export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
   // TODO: Resize text hitbox based on the content
 
@@ -76,23 +80,67 @@ function EditTitle(props: { entry: DesktopIconEntry }) {
   )
 }
 
+
+function chunkString(lineLength: number, value: string): string[] {
+  const chunks = Math.ceil(value.length / lineLength);
+  const lines = new Array(chunks);
+
+  for (let i = 0, d = 0; i < chunks; i++, d += lineLength) {
+    lines[i] = value.substring(d, d + lineLength);
+  }
+
+  return lines;
+}
+
+function contentAwareSplitTitle(lineLength: number, maxLines: number, title: string): string[] {
+  let chunks = title.split(' ');
+  let lines: string[] = [];
+  let line = "";
+
+  function limitLineOutput(lines: string[]): string[] {
+    if (lines.length > maxLines) {
+      const lastLine = lines[maxLines - 1];
+      lines[maxLines - 1] = lastLine.substring(0, lastLine.length - 3) + '...';
+      lines.length = 2;
+    }
+
+    return lines;
+  }
+
+  function appendChunk(chunk: string) {
+    const prependSpace  = line.length !== 0;
+    const fitsInLine    = line.length + chunk.length + (prependSpace ? 1 : 0) <= lineLength;
+
+    if (fitsInLine) {
+      line += (prependSpace ? ' ' : '') + chunk;
+
+    } else {
+      lines.push(line);
+      line = chunk;
+    }
+  }
+
+  for (const chunk of chunks) {
+    if (chunk.length === 0) { continue; }
+    const tooBigForLine = chunk.length >= lineLength;
+
+    if (tooBigForLine) {
+      const parts = chunkString(lineLength, chunk);
+      parts.forEach(x => appendChunk(x));
+
+    } else {
+      appendChunk(chunk);
+    }
+  }
+
+  lines.push(line);
+
+  return limitLineOutput(lines);
+}
+
 function RenderTitle(props: { title: string }) {
   const { title } = props;
-
-  const size = 14;
-  const maxLines = 2;
-
-  const chunks = Math.ceil(title.length / size);
-  const lines = new Array(Math.min(chunks, maxLines));
-
-  for (let i = 0, d = 0; i < Math.min(chunks, maxLines); i++, d += size) {
-    lines[i] = title.substring(d, d + size).trim();
-  }
-  
-  // If we have more then {maxLines} lines, we add ellipses to the last line
-  if (chunks > maxLines) {
-    lines[maxLines - 1] = lines[maxLines - 1].substring(0, size - 3) + '...';
-  }
+  const lines = contentAwareSplitTitle(CharactersPerLine, MaximumLines, title);
 
   const elements = lines.map((x, index) => {
     if (x.length === 0) {
