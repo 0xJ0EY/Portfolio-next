@@ -93,6 +93,7 @@ const DateAndTime = () => {
 
   useEffect(() => {
     const interval = setInterval(() => setDate(new Date()), 1000);
+    setDate(new Date());
 
     return () => {
       clearInterval(interval);
