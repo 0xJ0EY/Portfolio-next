@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
@@ -92,6 +92,20 @@ interface RendererProps {
   actions: UpdateActions
 }
 
+function getBrowserDimensions(): [number, number] {
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  if (isSafari()) {
+    // Safari on iOS (tested on only the physical iPhone 11 pro, and 14 pro in the simulator) renders off-center when a width/height is given that is not even.
+    // Desktop Safari & iPad OS seems fine
+    if (width & 0x01) { width++; }
+    if (height & 0x01) { height++; }
+  }
+
+  return [width, height];
+}
+
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -108,7 +122,8 @@ export const Renderer = (props: RendererProps) => {
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
-    const [width, height] = [window.innerWidth, window.innerHeight];
+
+    const [width, height] = getBrowserDimensions();
 
     const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
@@ -134,7 +149,6 @@ export const Renderer = (props: RendererProps) => {
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
-
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
       const deltaTime = (now - then.current) * 0.001; // Get delta time in seconds
@@ -153,7 +167,7 @@ export const Renderer = (props: RendererProps) => {
     }
     
     const onWindowResize = function() {
-      const [width, height] = [window.innerWidth, window.innerHeight];
+      const [width, height] = getBrowserDimensions();
 
       resizeRenderers(composer, renderer, cssRenderer, width, height);
       resizeCamera(camera, calculateAspectRatio(width, height));
