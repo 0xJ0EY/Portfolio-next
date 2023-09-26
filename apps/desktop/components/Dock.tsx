@@ -112,8 +112,8 @@ export const Dock = (props: { manager: ApplicationManager, windowCompositor: Win
 
   return <>
     <div className={styles.dock}>
-      {dockItems.applications.map((x, i) => <button key={i} onClick={() => { x.onClick(); }}>{x.displayName}{x.active ? ' [active]' : ''}</button>)}
-      {dockItems.minimizedWindows.map((x, i) => <button key={i} onClick={() => { x.onClick(); }}>{x.displayName} [minimized]</button>)}
+      {dockItems.applications.map((x, i) => <button key={i} onPointerDown={() => { x.onClick(); }}>{x.displayName}{x.active ? ' [active]' : ''}</button>)}
+      {dockItems.minimizedWindows.map((x, i) => <button key={i} onPointerDown={() => { x.onClick(); }}>{x.displayName} [minimized]</button>)}
     </div>
   </>
 }

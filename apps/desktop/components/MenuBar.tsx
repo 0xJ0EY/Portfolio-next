@@ -15,7 +15,7 @@ function renderMenu(menuEntries: MenuEntry) {
   function renderMenuItem(item: MenuItem) {
     switch (item.kind) {
       case 'action':
-        return <button onClick={() => item.action()}>{item.value}</button>
+        return <button onPointerDown={() => item.action()}>{item.value}</button>
       case 'spacer':
         return <hr/>
     }

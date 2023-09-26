@@ -161,16 +161,16 @@ export default function FinderView(props: WindowProps) {
     }
   }
   
-  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button onClick={() => onClickBreadcrumb(val)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button onPointerDown={() => onClickBreadcrumb(val)}>{val.name}</button></React.Fragment>);
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.navigationActions}>
-          <button disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}>prev</button>
-          <button disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}>next</button>
+          <button disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}>prev</button>
+          <button disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}>next</button>
                   
-          <button onClick={() => createDirectory()}>create directory</button>
+          <button onPointerDown={() => createDirectory()}>create directory</button>
         </div>
         <div className={styles.path}>
           { locations }
@@ -180,10 +180,10 @@ export default function FinderView(props: WindowProps) {
       <div className={styles.content}>
         <div className={styles.locations}>
           <ul>
-            <li><button onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
-            <li><button onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
-            <li><button onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
-            <li><button onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li> 
+            <li><button onPointerDown={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
+            <li><button onPointerDown={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
+            <li><button onPointerDown={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
+            <li><button onPointerDown={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li> 
           </ul>
         </div>
         <div className={styles.folder}>
