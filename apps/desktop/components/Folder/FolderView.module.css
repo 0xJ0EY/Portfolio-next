@@ -21,7 +21,7 @@
   overflow: auto;
 }
 
-.iconsContainer.overflow {
+.iconsContainer.hideOverflow {
   overflow: hidden;
 }
 

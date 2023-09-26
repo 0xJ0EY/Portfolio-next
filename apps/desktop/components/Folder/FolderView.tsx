@@ -43,11 +43,11 @@ export type FolderViewHandles = {
 }
 
 const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function FolderView(props, forwardRef) {
-  const { directory, apis, onFileOpen, localIconPosition, allowOverflow } = props;
+  const { directory, apis, onFileOpen, localIconPosition, allowOverflow: propOverflow } = props;
   const fs = apis.fileSystem;
 
   const useLocalIconPosition = localIconPosition ?? false;
-  const overflow = allowOverflow ?? true;
+  const allowOverflow = propOverflow ?? true;
 
   const [files, setFiles] = useState<DesktopIconEntry[]>([]);
   const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
@@ -715,6 +715,23 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     createNewDirectory: () => createNewDirectory(),
   }));
 
+  function onResize() {
+    if (useLocalIconPosition) { return; }
+    if (!iconContainer.current) { return; }
+    if (!currentDirectory.current) { return; }
+
+    const dir = fs.getDirectory(currentDirectory.current);
+    if (!dir.ok) { return; }
+
+    const container = iconContainer.current;
+    
+    const folderScrollWidth = container.scrollWidth;
+    const folderScrollHeight = container.scrollHeight;
+
+    dir.value.content.width = folderScrollWidth;
+    dir.value.content.height = folderScrollHeight;
+  }
+
   useEffect(() => {
     if (!ref.current) { return; }
     const folder = ref.current;
@@ -723,10 +740,18 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
+    let observer = new ResizeObserver(onResize);
+    observer.observe(ref.current);
+
+    // Set the correct width / height of the just opened window
+    onResize();
+    
     return () => {
       folder.removeEventListener('pointerdown', onPointerDown);
       folder.removeEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
       folder.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
+      
+      observer.disconnect();
     };
   }, []);
 
@@ -753,7 +778,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       <div className={styles.selectionBoxContainer}>
         {selectionBox}
       </div>
-      <div ref={iconContainer} className={[styles.iconsContainer, overflow ? styles.overflow : ''].join(' ')}>
+      <div ref={iconContainer} className={[styles.iconsContainer, !allowOverflow ? styles.hideOverflow : ''].join(' ')}>
         {icons}
       </div>
     </div>

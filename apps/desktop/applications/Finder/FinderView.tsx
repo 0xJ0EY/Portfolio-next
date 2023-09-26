@@ -187,7 +187,7 @@ export default function FinderView(props: WindowProps) {
           </ul>
         </div>
         <div className={styles.folder}>
-          <FolderView ref={folderViewRef} directory={path} apis={application.apis} onFileOpen={onFileOpen}></FolderView>
+          <FolderView ref={folderViewRef} directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
         </div>
       </div>
     </div>
