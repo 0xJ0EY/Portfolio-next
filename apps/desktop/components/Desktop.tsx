@@ -104,7 +104,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
         apis={apis}
         onFileOpen={onFileOpen}
         localIconPosition={true}
-        allowOverflow={true}
+        allowOverflow={false}
       />
 
       {applicationWindows.map(x => 
