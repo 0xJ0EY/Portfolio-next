@@ -6,7 +6,7 @@ import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWi
 import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
 import { SystemAPIs } from "../../components/OperatingSystem";
-import { Point, rectangleIntersection } from "@/applications/math";
+import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
 
 type DirectorySettings = {
@@ -16,10 +16,11 @@ type DirectorySettings = {
   sortOrigin: 'top-left' | 'top-right',
 }
 
-type DirectoryContent = {
+export type DirectoryContent = {
   view: 'icons' | 'list',
   width: number,
-  height: number
+  height: number,
+  overflowBehavior: 'overflow' | 'overlay'
 }
 
 export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication;
@@ -89,7 +90,8 @@ function createRootNode(): FileSystemDirectory {
     content: {
       view: 'icons',
       width: 800,
-      height: 400
+      height: 400,
+      overflowBehavior: 'overflow',
     },
     name: '/',
     editable: false,
@@ -112,7 +114,8 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     content: {
       view: 'icons',
       width: 800,
-      height: 400
+      height: 400,
+      overflowBehavior: 'overflow',
     },
     name,
     editable,
@@ -189,10 +192,12 @@ export function createBaseFileSystem(): FileSystem {
   return fileSystem;
 }
 
-function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): boolean {
+function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): number {
   const { width, height } = dimensions;
   // NOTE(Joey): The width & height are used for both the new incoming entry as the already existing entries.
   // It might be a good idea to make this static to the file system/configuration, instead of just randomly defined
+
+  let overlapping = 0;
 
   for (const entry of entries) {
     const a = {
@@ -211,23 +216,19 @@ function entriesWithinSelection(entries: Point[], x: number, y: number, dimensio
 
     const overlap = rectangleIntersection(a, b);
 
-    if (overlap) { return true; }
+    if (overlap) { overlapping++; }
   }
 
-  return false;
+  return overlapping;
 }
 
-function generatePositionRange(settings: DirectorySettings, content: DirectoryContent, boundingBox: { width: number, height: number}): { x: number, y: number }[] {
+function generatePosition(iteration: number, settings: DirectorySettings, content: DirectoryContent, boundingBox: BoundingBox): { x: number, y: number } {
   const direction = settings.sortDirection;
-  const origin  = settings.sortOrigin;
-
+  const origin    = settings.sortOrigin;
   const horizontalSteps = Math.floor(content.width / boundingBox.width);
   const verticalSteps = Math.floor(content.height / boundingBox.height);
 
-  let steps = [];
-
   function positionX(iteration: number, direction: 'horizontal' | 'vertical'): number {
-
     switch (direction) {
       case "horizontal":
         if (origin === 'top-right') {
@@ -251,13 +252,22 @@ function generatePositionRange(settings: DirectorySettings, content: DirectoryCo
     }
   }
 
+  const x = positionX(iteration, direction) * boundingBox.width;
+  const y = positionY(iteration, direction) * boundingBox.height;
+
+  return { x, y };
+}
+
+function generatePositionRange(settings: DirectorySettings, content: DirectoryContent, boundingBox: { width: number, height: number}): { x: number, y: number }[] {
+  const horizontalSteps = Math.floor(content.width / boundingBox.width);
+  const verticalSteps = Math.floor(content.height / boundingBox.height);
+
+  let steps = [];
+
   const iterations = horizontalSteps * verticalSteps;
 
   for (let iteration = 0; iteration < iterations; iteration++) {
-    const x = positionX(iteration, direction) * boundingBox.width;
-    const y = positionY(iteration, direction) * boundingBox.height;
-
-    steps.push({ x, y });
+    steps.push(generatePosition(iteration, settings, content, boundingBox));
   }
 
   return steps;
@@ -271,12 +281,40 @@ export function calculateNodePosition(
   const nodeBoundingBox = { width: 120, height: 80 };
 
   const positionRange = generatePositionRange(settings, content, nodeBoundingBox);
-  const possiblePosition = positionRange.find(pos => !entriesWithinSelection(others, pos.x, pos.y, nodeBoundingBox));
+  const possiblePosition = positionRange.find(pos => entriesWithinSelection(others, pos.x, pos.y, nodeBoundingBox) === 0);
 
-  // TODO: handle not having a possible position
-  if (!possiblePosition) { return { x: 0, y: 0 }; }
+  if (possiblePosition) { return possiblePosition; }
 
-  return possiblePosition;
+  // Handle the not possible position behavior
+  switch (content.overflowBehavior) {
+    case 'overflow': {
+      let iteration = positionRange.length;
+      let position: { x: number, y: number };
+
+      do {
+        position = generatePosition(iteration++, settings, content, nodeBoundingBox);
+      } while (entriesWithinSelection(others, position.x, position.y, nodeBoundingBox) !== 0);
+
+      return position;
+    };
+    case 'overlay': {
+      let iteration = 0;
+      let round = 1;
+      let position: { x: number, y: number };
+
+      do {
+        position = generatePosition(iteration++, settings, content, nodeBoundingBox);
+
+        if (iteration !== 0 && iteration % positionRange.length === 0) {
+          iteration = 0;
+          round++;
+        }
+
+      } while(entriesWithinSelection(others, position.x, position.y, nodeBoundingBox) > round);
+
+      return position;
+    }
+  }
 }
 
 export function findNodeInDirectoryChain(directory: FileSystemDirectory, node: FileSystemNode): Result<Node<DirectoryEntry>, Error> {

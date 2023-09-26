@@ -1,4 +1,4 @@
-import { DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/FileSystem';
+import { DirectoryContent, DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/FileSystem';
 import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -455,6 +455,9 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
   function reloadLocalFiles(directory: FileSystemDirectory, type: DirectoryEventType) {
     if (type.kind === 'refresh') { return; }
+    if (!ref.current) { return; }
+    
+    const container = ref.current;
 
     const existingChain = localFiles.current;
     const lookup = new Map<number, DesktopIconEntry>();
@@ -489,8 +492,15 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       });
     }
 
+    const content: DirectoryContent = {
+      view: 'icons',
+      width: container.clientWidth,
+      height: container.clientHeight,
+      overflowBehavior: 'overlay'
+    };
+
     for (const entry of newDesktopIconEntries) {
-      const pos = calculateNodePosition(directory.settings, directory.content, newChain.toArray());
+      const pos = calculateNodePosition(directory.settings, content, newChain.toArray());
 
       newChain.append({
         entry,
@@ -524,6 +534,8 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     if (!dir.ok) { return null; }
 
     currentDirectory.current = constructPath(dir.value);
+
+    console.log(directory, type);
 
     if (useLocalIconPosition) {
       reloadLocalFiles(dir.value, type);
@@ -706,9 +718,8 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const template = t('filesystem.new_directory');
     const name = generateUniqueNameForDirectory(dir.value, template);
 
-    const newDir = fs.addDirectory(dir.value, name, true, true);
+    fs.addDirectory(dir.value, name, true, true);
     fs.propagateDirectoryEvent(dir.value, {kind: 'update'});
-    console.log(newDir);
   }
 
   useImperativeHandle(forwardRef, () => ({

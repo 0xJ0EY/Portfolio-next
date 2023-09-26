@@ -10,6 +10,11 @@ export interface Rectangle {
   y2: number
 }
 
+export interface BoundingBox {
+  width: number,
+  height: number
+}
+
 export const rectangleIntersection = (
   a: Rectangle,
   b: Rectangle
