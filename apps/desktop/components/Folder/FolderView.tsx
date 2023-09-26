@@ -535,8 +535,6 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
     currentDirectory.current = constructPath(dir.value);
 
-    console.log(directory, type);
-
     if (useLocalIconPosition) {
       reloadLocalFiles(dir.value, type);
     } else {
