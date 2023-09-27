@@ -711,18 +711,19 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const dir = fileDropGetTargetDirectory(files, evt);
     if (!dir.ok) { return };
 
-    let forceUpdate = constructPath(dir.value) !== currentDirectory.current;
+    const placingInLocalDirectory = constructPath(dir.value) === currentDirectory.current;
+    let forceUpdate = !placingInLocalDirectory;
 
     const folderRect = folder.getBoundingClientRect();
     
     const horizontal = {
       min: -IconWidth / 2,
-      max: folderRect.width + (IconWidth / 2)
+      max: folderRect.width - (IconWidth / 2)
     };
 
     const vertical = {
       min: -IconHeight / 2,
-      max: folderRect.height + (IconHeight / 2)
+      max: folderRect.height - (IconHeight / 2)
     }
 
     outer: for (const node of evt.detail.nodes) {
@@ -732,13 +733,22 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
         forceUpdate = true;
       }
 
+      let others: Point[] = placingInLocalDirectory ? [] : dir.value.children.toArray();
       const result = fs.moveNode(node.item, dir.value);
 
       if (!result.ok) { continue; }
       const directoryEntry = result.value;
 
-      const positionX = clamp(node.position.x, horizontal.min, horizontal.max);
-      const positionY = clamp(node.position.y, vertical.min, vertical.max);
+      let positionX: number, positionY: number;
+
+      if (placingInLocalDirectory) {
+        positionX = clamp(node.position.x, horizontal.min, horizontal.max);
+        positionY = clamp(node.position.y, vertical.min, vertical.max);
+      } else {
+        const pos = calculateNodePosition(dir.value.settings, dir.value.content, others);
+        positionX = pos.x;
+        positionY = pos.y;
+      }
 
       if (!useLocalIconPosition) {
         directoryEntry.x = positionX;
