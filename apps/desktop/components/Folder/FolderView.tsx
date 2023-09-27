@@ -795,7 +795,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     createNewDirectory: () => createNewDirectory(),
   }));
 
-  function onResize() {
+  function updateDirectoryDimensions() {
     if (useLocalIconPosition) { return; }
     if (!iconContainer.current) { return; }
     if (!currentDirectory.current) { return; }
@@ -821,11 +821,11 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
-    let observer = new ResizeObserver(onResize);
+    let observer = new ResizeObserver(updateDirectoryDimensions);
     observer.observe(ref.current);
 
     // Set the correct width / height of the just opened window
-    onResize();
+    updateDirectoryDimensions();
     
     return () => {
       folder.removeEventListener('touchstart', onTouchDown);
@@ -839,6 +839,8 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
   useEffect(() => { 
     const unsubscribe = loadFiles(directory);
+
+    updateDirectoryDimensions();
 
     return () => {
       if (unsubscribe) { unsubscribe() };
