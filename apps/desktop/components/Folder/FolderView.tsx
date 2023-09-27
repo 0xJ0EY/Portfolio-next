@@ -30,6 +30,8 @@ function SelectionBox(box: SelectionBox) {
 
 const DraggingThreshold = 5;
 
+type Interaction = 'pointer' | 'touch';
+
 type FolderViewProps = {
   directory: string,
   apis: SystemAPIs,
@@ -78,11 +80,11 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
   const [box, setBox] = useState<SelectionBox>({ open: false, x: 0, y: 0, width: 0, height: 0 });
 
-  function getLocalCoordinates(evt: PointerEvent): Point {
+  function getLocalCoordinates(point: Point): Point {
     const dimensions = ref.current!.getBoundingClientRect();
 
-    const localX = evt.clientX - dimensions.left;
-    const localY = evt.clientY - dimensions.top;
+    const localX = point.x - dimensions.left;
+    const localY = point.y - dimensions.top;
 
     return { x: localX, y: localY};
   }
@@ -102,12 +104,12 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     };
   }
 
-  function selectFile(evt: PointerEvent) {
+  function selectFile(position: Point) {
     const files = localFiles.current;
     
     if (!iconContainer.current) { return; }
     const container = iconContainer.current;
-    const point = getCoordinatesInIconContainer(getLocalCoordinates(evt), container);
+    const point = getCoordinatesInIconContainer(getLocalCoordinates(position), container);
 
     let hasSelected = false;
 
@@ -129,14 +131,14 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(files);
   }
 
-  function selectFiles(evt: PointerEvent) {
+  function selectFiles(position: Point) {
     const files = localFiles.current;
     const origin = selectionBoxStart.current;
 
     if (!iconContainer.current) { return; }
     const container = iconContainer.current;
 
-    const current = getLocalCoordinates(evt);
+    const current = getLocalCoordinates(position);
     
     const topLeftPoint = { x: Math.min(origin.x, current.x), y: Math.min(origin.y, current.y) };
     const bottomRightPoint = { x: Math.max(origin.x, current.x), y: Math.max(origin.y, current.y) };
@@ -157,12 +159,12 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(files);
   }
 
-  function clickedFile(evt: PointerEvent): DesktopIconEntry | undefined {
+  function clickedFile(position: Point): DesktopIconEntry | undefined {
     const files = localFiles.current;
 
     if (!iconContainer.current) { return; }
     const container = iconContainer.current;
-    const point = getCoordinatesInIconContainer(getLocalCoordinates(evt), container);
+    const point = getCoordinatesInIconContainer(getLocalCoordinates(position), container);
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
@@ -176,7 +178,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     return undefined;
   }
 
-  function onFileDraggingStart(evt: PointerEvent) {
+  function onFileDraggingStart(position: Point) {
     const files = localFiles.current;
     window.addEventListener('pointermove', onFileDraggingMove);
     window.addEventListener('pointerup', onFileDraggingUp);
@@ -190,7 +192,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
 
     fileDraggingSelection.current = selectedFiles;
-    fileDraggingOrigin.current = { x: evt.clientX, y: evt.clientY };
+    fileDraggingOrigin.current = { x: position.x, y: position.y };
   }
 
   function onFileDraggingMove(evt: PointerEvent) {
@@ -343,25 +345,42 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
   }
 
+  function onTouchDown(evt: TouchEvent) {
+    if (evt.touches.length > 1) { return; }
+
+    const touch = evt.touches[0];
+    const position = { x: touch.clientX, y: touch.clientY };
+
+    handleInteractionStart(position, 'touch');
+  }
+
   function onPointerDown(evt: PointerEvent) {
+    if (evt.pointerType === 'touch') { return; }
+
+    const position = { x: evt.clientX, y: evt.clientY };
+
+    handleInteractionStart(position, 'pointer');
+  }
+
+  function handleInteractionStart(position: Point, interaction: Interaction) {
     if (!ref.current) { return; }
     
-    const file = clickedFile(evt);
+    const file = clickedFile(position);
 
     if (file) {
       const coords = ref.current.getBoundingClientRect();
 
-      const deltaX = evt.clientX - coords.left;
-      const deltaY = evt.clientY - coords.top;
+      const deltaX = position.x - coords.left;
+      const deltaY = position.y - coords.top;
 
       fileDraggingFolderOrigin.current = { x: deltaX, y: deltaY };
 
       if (!file.selected) {
         stopRenamingFiles();
-        selectFile(evt);
+        selectFile(position);
       }
 
-      onFileDraggingStart(evt);
+      onFileDraggingStart(position);
 
       const now = Date.now();
       const delta = now - previousClickedFile.current.timestamp;
@@ -392,20 +411,45 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
       fileDraggingFolderOrigin.current = undefined;
 
-      openSelectionBox(evt);
+      openSelectionBox(position, interaction);
     }
   }
 
-  function openSelectionBox(evt: PointerEvent) {
-    selectionBoxStart.current = getLocalCoordinates(evt);
+  function openSelectionBox(position: Point, interaction: Interaction) {
+    selectionBoxStart.current = getLocalCoordinates(position);
 
-    window.addEventListener('pointermove', moveSelectionBox);
-    window.addEventListener('pointerup', closeSelectionBox);
+    switch (interaction) {
+      case 'pointer': {
+        window.addEventListener('pointermove', moveSelectionBoxViaPointer);
+        window.addEventListener('pointerup', closeSelectionBoxViaPointer);
+        break;
+      }
+      case 'touch': {
+        window.addEventListener('touchmove', moveSelectionBoxViaTouch);
+        window.addEventListener('touchend', closeSelectionBoxViaTouch);
+        break;
+      }
+    }
   }
 
-  function moveSelectionBox(evt: PointerEvent) {
+  function moveSelectionBoxViaPointer(evt: PointerEvent) {
+    if (evt.pointerType === 'touch') { return; }
+
+    const position = { x: evt.clientX, y: evt.clientY };
+
+    moveSelectionBox(position);
+  }
+
+  function moveSelectionBoxViaTouch(evt: TouchEvent) {
+    const touch = evt.touches[0];
+    const position = { x: touch.clientX, y: touch.clientY };
+
+    moveSelectionBox(position);
+  }
+
+  function moveSelectionBox(position: Point) {
     const origin = selectionBoxStart.current;
-    const current = getLocalCoordinates(evt);
+    const current = getLocalCoordinates(position);
 
     const topLeftPoint = { x: Math.min(origin.x, current.x), y: Math.min(origin.y, current.y) };
     const bottomRightPoint = { x: Math.max(origin.x, current.x), y: Math.max(origin.y, current.y) };
@@ -418,20 +462,47 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
     setBox({ open: true, x, y, width, height });
 
-    selectFiles(evt);
+    selectFiles(position);
   }
 
-  function closeSelectionBox(evt: PointerEvent) {
+  function closeSelectionBoxViaPointer(evt: PointerEvent) {
+    if (evt.pointerType === 'touch') { return; }
+
+    const position = { x: evt.clientX, y: evt.clientY };
+
+    closeSelectionBox(position, 'pointer');
+  }
+
+  function closeSelectionBoxViaTouch(evt: TouchEvent) {
+    if (evt.touches.length > 0) { return; }
+
+    const touch = evt.changedTouches[0];
+    const point = { x: touch.clientX, y: touch.clientY };
+
+    closeSelectionBox(point, 'touch');
+  }
+
+  function closeSelectionBox(position: Point, interaction: Interaction) {
     function closeBox() {
       const localBox = box;
       localBox.open = false;
       setBox(localBox);
-  
-      window.removeEventListener('pointermove', moveSelectionBox);
-      window.removeEventListener('pointerup', closeSelectionBox);
+
+      switch (interaction) {
+        case 'pointer': {
+          window.removeEventListener('pointermove', moveSelectionBoxViaPointer);
+          window.removeEventListener('pointerup', closeSelectionBoxViaPointer);
+          break;
+        }
+        case 'touch': {
+          window.removeEventListener('touchmove', moveSelectionBoxViaTouch);
+          window.removeEventListener('touchend', closeSelectionBoxViaTouch);
+          break;
+        }
+      }
     }
 
-    selectFiles(evt);
+    selectFiles(position);
     closeBox();
   }
 
@@ -745,6 +816,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     if (!ref.current) { return; }
     const folder = ref.current;
 
+    folder.addEventListener('touchstart', onTouchDown);
     folder.addEventListener('pointerdown', onPointerDown);
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
@@ -756,6 +828,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     onResize();
     
     return () => {
+      folder.removeEventListener('touchstart', onTouchDown);
       folder.removeEventListener('pointerdown', onPointerDown);
       folder.removeEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
       folder.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);

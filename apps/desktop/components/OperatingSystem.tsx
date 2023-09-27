@@ -22,7 +22,9 @@ const applicationManager = new ApplicationManager(windowCompositor, fileSystem, 
 export const OperatingSystem = () => {
   const ref = useRef<HTMLDivElement>(null);
 
-  function noopTouchEvent(evt: TouchEvent) { evt.preventDefault(); }
+  function noopTouchEvent(evt: TouchEvent) {
+    evt.preventDefault();
+  }
 
   function disableTouchInteraction(element: HTMLElement): void {
     element.addEventListener('touchmove', noopTouchEvent);
