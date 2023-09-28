@@ -148,7 +148,9 @@ export default function FinderView(props: WindowProps) {
 
   }, []);
   
-  function onClickBreadcrumb(directory: FileSystemDirectory) {
+  function onClickBreadcrumb(directory: FileSystemDirectory, index: number) {
+    if (index === pathNodes.length - 1) { return; }
+
     changeDirectory(directory);
     recordHistory(directory);
   }
@@ -161,7 +163,7 @@ export default function FinderView(props: WindowProps) {
     }
   }
   
-  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button onPointerDown={() => onClickBreadcrumb(val)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={styles.breadcrumb} onPointerDown={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
 
   return (
     <div className={styles.container}>

@@ -29,6 +29,14 @@
   background-color: hotpink;
   height: 30px;
   width: 100%;
+  overflow-y: hidden;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: row;
+}
+
+.breadcrumb {
+  display: inline-block;
 }
 
 .folder {

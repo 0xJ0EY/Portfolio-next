@@ -89,11 +89,14 @@
 }
 
 .headerTitle {
-  flex-grow: 1;;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .headerButtons {
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .headerButtons button {
