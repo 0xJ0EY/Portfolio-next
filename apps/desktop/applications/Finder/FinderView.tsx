@@ -45,6 +45,7 @@ function buildPathNodesFromDirectoryEntry(node: FileSystemNode): FileSystemDirec
 export default function FinderView(props: WindowProps) {
   const { application, args, windowContext } = props;
   const [ path, setPath ] = useState(args);
+  const [ canEdit, setCanEdit ] = useState(false);
   const [ pathNodes, setPathNodes ] = useState<FileSystemDirectory[]>([]);
 
   const currentHistoryElement = useRef<Node<FileSystemDirectory> | null>(null);
@@ -117,6 +118,8 @@ export default function FinderView(props: WindowProps) {
     setPathNodes(buildPathNodesFromDirectoryEntry(directory));
     const path = constructPath(directory);
 
+    setCanEdit(directory.editable || directory.stickyBit);
+
     updateWindowTitle(path);
     setPath(path);
   }
@@ -172,7 +175,7 @@ export default function FinderView(props: WindowProps) {
           <button disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}>prev</button>
           <button disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}>next</button>
                   
-          <button onPointerDown={() => createDirectory()}>create directory</button>
+          <button disabled={!canEdit} onPointerDown={() => createDirectory()}>create directory</button>
         </div>
         <div className={styles.path}>
           { locations }
