@@ -375,9 +375,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const file = clickedFile(position);
 
     if (file) {
-      console.log(iconContainer.current.scrollLeft);
       const coords = iconContainer.current.getBoundingClientRect();
-      console.log(coords);
 
       const deltaX = position.x - coords.left - iconContainer.current.scrollLeft;
       const deltaY = position.y - coords.top - iconContainer.current.scrollTop;
