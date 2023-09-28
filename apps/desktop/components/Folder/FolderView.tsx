@@ -196,8 +196,13 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   }
 
   function onFileDraggingMove(evt: PointerEvent) {
-    const deltaX = Math.abs(fileDraggingOrigin.current.x - evt.clientX);
-    const deltaY = Math.abs(fileDraggingOrigin.current.y - evt.clientY);
+    if (!iconContainer.current) { return; }
+
+    const scrollOffsetX = iconContainer.current.scrollLeft;
+    const scrollOffsetY = iconContainer.current.scrollTop;
+
+    const deltaX = Math.abs(fileDraggingOrigin.current.x - evt.clientX - scrollOffsetX);
+    const deltaY = Math.abs(fileDraggingOrigin.current.y - evt.clientY - scrollOffsetY);
 
     const origin = fileDraggingFolderOrigin.current;
 
@@ -221,12 +226,13 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       isDragging.current = true;
 
       // Propagate drag start event
-      fileDraggingSession.current = dragAndDrop.start(data, evt.clientX, evt.clientY);
+      // NOTE(Joey): Not sure why the scrollOffset{x/y} need to be multiplied by 2
+      fileDraggingSession.current = dragAndDrop.start(data, evt.clientX - scrollOffsetX * 2, evt.clientY - scrollOffsetY * 2);
     }
-
+    
     if (isDragging.current && fileDraggingSession.current) {
       // Propagate drag move event
-      fileDraggingSession.current.move(evt.clientX, evt.clientY);
+      fileDraggingSession.current.move(evt.clientX - scrollOffsetX * 2, evt.clientY - scrollOffsetY * 2);
 
       // Get the current target element
       const elements = document.elementsFromPoint(evt.clientX, evt.clientY);
@@ -364,14 +370,17 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
   function handleInteractionStart(position: Point, interaction: Interaction) {
     if (!ref.current) { return; }
+    if (!iconContainer.current) { return; }
     
     const file = clickedFile(position);
 
     if (file) {
-      const coords = ref.current.getBoundingClientRect();
+      console.log(iconContainer.current.scrollLeft);
+      const coords = iconContainer.current.getBoundingClientRect();
+      console.log(coords);
 
-      const deltaX = position.x - coords.left;
-      const deltaY = position.y - coords.top;
+      const deltaX = position.x - coords.left - iconContainer.current.scrollLeft;
+      const deltaY = position.y - coords.top - iconContainer.current.scrollTop;
 
       fileDraggingFolderOrigin.current = { x: deltaX, y: deltaY };
 
