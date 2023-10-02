@@ -9,6 +9,7 @@ import { Dock } from "./Dock";
 import { FileSystem } from '@/apis/FileSystem/FileSystem';
 import styles from '@/styles/Desktop.module.css';
 import { DragAndDropView } from "./DragAndDropView";
+import { sendRequestToParent } from "rpc";
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
@@ -54,6 +55,10 @@ export const OperatingSystem = () => {
 
   return <>
     <div ref={ref} className={styles.operatingSystem}>
+      <button onClick={() => sendRequestToParent({
+        'method': 'touch_interaction_request',
+        'params': {}
+      })}>Foobar</button>
       <MenuBar manager={applicationManager}/>
       <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
       <Dock manager={applicationManager} windowCompositor={windowCompositor}></Dock>

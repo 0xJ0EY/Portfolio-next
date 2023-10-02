@@ -13,6 +13,7 @@ import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { createUIEventBus } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
+import { parseRequestFromChild } from "rpc";
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -106,6 +107,13 @@ function getBrowserDimensions(): [number, number] {
   return [width, height];
 }
 
+function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
+  return function(event: MessageEvent) {
+    const request = parseRequestFromChild(event);
+
+  }
+}
+
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -118,7 +126,7 @@ export const Renderer = (props: RendererProps) => {
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
-
+    
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
@@ -138,6 +146,8 @@ export const Renderer = (props: RendererProps) => {
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents);
     const mouseInputHandler = new MouseInputHandler(cameraHandler);
     const touchInputHandler = new TouchInputHandler(cameraHandler);
+
+    const desktopEventClosure = handleDesktopRequestsClosure(cameraHandler);
 
     const composer = createComposer(renderer, width, height);
 
@@ -189,9 +199,14 @@ export const Renderer = (props: RendererProps) => {
 
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
+
+      window.removeEventListener('resize', onWindowResize, false);
+      window.removeEventListener('message', desktopEventClosure, false);
     }
 
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('message', desktopEventClosure, false);
+
     animate(performance.now());
 
     return () => onDestroy();
