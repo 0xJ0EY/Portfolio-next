@@ -110,7 +110,10 @@ function getBrowserDimensions(): [number, number] {
 function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
   return function(event: MessageEvent) {
     const request = parseRequestFromChild(event);
+    if (!request.ok) { return; }
+    const value = request.value;
 
+    console.log(value);
   }
 }
 

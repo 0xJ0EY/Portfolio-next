@@ -103,16 +103,12 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  handleMouseUp(data: MouseData): void {
+  private handleMouseUp(data: MouseData): void {
     this.manager.changeState(CameraHandlerState.FreeRoam);
   }
 
-  handleMouseMove(data: MouseData): void {
+  private handleMouseMove(data: MouseData): void {
     this.updateCursor(data.pointerCoordinates());
-  }
-
-  handleMouseScroll(data: MouseData): void {
-    this.ctx.cameraController.zoom(data.zoomDelta());
   }
 
   handleMouseEvent(data: MouseData) {
