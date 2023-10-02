@@ -6,7 +6,8 @@ import { DesktopIconEntry, DesktopIconHitBox, IconHeight, IconWidth } from '../I
 import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
-import { Err, Ok, Result, clamp } from '../util';
+import { clamp } from '../util';
+import { Err, Ok, Result } from "result";
 import { SystemAPIs } from '../OperatingSystem';
 import { useTranslation } from 'next-i18next';
 

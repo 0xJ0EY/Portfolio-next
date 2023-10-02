@@ -1,4 +1,4 @@
-import { Result } from "@/components/util";
+import { Result } from "result";
 import { ApplicationManager, BaseApplicationManager } from "./ApplicationManager";
 
 export class LocalApplicationManager implements BaseApplicationManager {
