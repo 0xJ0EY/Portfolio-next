@@ -11,7 +11,7 @@ import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
-import { createUIEventBus } from '@/events/UserInteractionEvents';
+import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
 import { parseRequestFromChild } from "rpc";
 
@@ -113,7 +113,12 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
     if (!request.ok) { return; }
     const value = request.value;
 
-    console.log(value);
+    if (value.method === 'touch_interaction_request') {
+      const data = TouchData.fromRpcMessage(value.data);
+      const event = toUserInteractionTouchEvent(data);
+
+      cameraHandler.emitUserInteractionEvent(event);
+    }
   }
 }
 
@@ -162,6 +167,7 @@ export const Renderer = (props: RendererProps) => {
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
+    
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
       const deltaTime = (now - then.current) * 0.001; // Get delta time in seconds

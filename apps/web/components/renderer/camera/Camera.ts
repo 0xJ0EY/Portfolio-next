@@ -50,8 +50,7 @@ export class CameraController {
   }
 
   public moveCameraLeft(distance: number): void {
-    // 1.5708 is 90 deg in radians
-    const angle = this.spherical.theta + 1.5708;
+    const angle = this.spherical.theta + degToRad(90);
 
     const x = distance * Math.sin(angle);
     const z = distance * Math.cos(angle);

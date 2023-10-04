@@ -8,7 +8,7 @@ export function parseRequestFromChild(event: MessageEvent): Result<Request> {
     case 'touch_interaction_request': {
       return Ok({
         'method': 'touch_interaction_request',
-        'event': event.data['event'],
+        'data': event.data['data'],
       });
     }
     default: {

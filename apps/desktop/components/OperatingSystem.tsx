@@ -26,7 +26,7 @@ function buildTouchInteractionRequestData(source: 'start' | 'move' | 'end', evt:
   for (let i = 0; i < evt.touches.length; i++) {
     const touch = evt.touches[i];
 
-    touches[i] = { x: touch.clientX, y: touch.clientY };
+    touches[i] = { x: touch.pageX, y: touch.pageY };
   }
 
   return { source, touches };

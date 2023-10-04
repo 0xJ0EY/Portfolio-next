@@ -1,6 +1,7 @@
 import { Raycaster, Vector2 } from "three";
 import { CameraHandlerContext } from "../CameraHandler";
-import { PointerCoordinates } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, TouchData } from "@/events/UserInteractionEvents";
+import { CameraController } from "../Camera";
 
 export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
   // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)
@@ -21,5 +22,40 @@ export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: Point
     if (first.object.name !== "Display") { return false; }
 
     return true;
+  }
+}
+
+export function isMouseRotateCamera(data: MouseData): boolean {
+  return data.isPrimaryDown();
+}
+
+export function isTouchTap(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
+
+export function isTouchRotateCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
+
+export function isMouseMoveCamera(data: MouseData): boolean {
+  return data.isSecondaryDown();
+}
+
+export function isTouchMoveCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(2) || data.hasTouchesDown(3);
+}
+
+export function isTouchZoom(data: TouchData): boolean {
+  return data.hasTouchesDown(2);
+}
+
+export class PanOriginData {
+  constructor(
+    public touchData: TouchData,
+    public zoomDistance: number
+  ) {}
+
+  static create(cameraController: CameraController, touchData: TouchData): PanOriginData {
+    return new PanOriginData(touchData, cameraController.getZoom());
   }
 }

@@ -1,5 +1,6 @@
 import { BoundingBox } from "@/data/BoundingBox";
 import { EventBus } from "./EventBus";
+import { TouchInteractionData } from "rpc";
 
 export class TouchConfirmationData {
   constructor(
@@ -98,6 +99,7 @@ export class MouseData {
 }
 
 export type TouchDataSource = 'start' | 'move' | 'end';
+export type TouchDataOrigin = 'self' | 'rpc';
 
 export class TouchElement {
   constructor(
@@ -113,7 +115,8 @@ export class TouchElement {
 export class TouchData {
   constructor(
     public source: TouchDataSource,
-    public touches: TouchElement[]
+    public touches: TouchElement[],
+    public origin: TouchDataOrigin
   ) {}
 
   static fromTouchEvent(source: TouchDataSource, evt: TouchEvent): TouchData {
@@ -124,8 +127,19 @@ export class TouchData {
       touches.push(elem);
     }
 
-    return new TouchData(source, touches);
+    return new TouchData(source, touches, 'self');
   };
+
+  static fromRpcMessage(message: TouchInteractionData): TouchData {
+    let touches = [];
+
+    for (const touch of message.touches) {
+      const elem = new TouchElement(touch.x, touch.y);
+      touches.push(elem);
+    }
+
+    return new TouchData(message.source, touches, 'rpc');
+  }
 
   hasTouchesDown(amount: number): boolean {
     return this.touches.length === amount;
