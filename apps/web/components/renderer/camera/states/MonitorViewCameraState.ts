@@ -84,9 +84,18 @@ export class MonitorViewCameraState extends CameraState {
 
     const callback = () => {
       this.ctx.disableWebGLPointerEvents();
+
+      this.ctx.cameraController.setOriginBoundaryX(2.0);
+      this.ctx.cameraController.setOriginBoundaryY(0.5);
     }
 
     this.ctx.cameraController.transition(position, spherical, distance, 1000, callback);
+
+    this.ctx.cameraController.setMinZoom(1.0);
+    this.ctx.cameraController.setMaxZoom(4.0);
+
+    this.ctx.cameraController.setOriginBoundaryX(null);
+    this.ctx.cameraController.setOriginBoundaryY(null);
   }
 
   private setupZoomEvent(data: TouchData) {
