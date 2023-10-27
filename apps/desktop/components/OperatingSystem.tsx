@@ -47,8 +47,6 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  // const previousMovementData = useRef<PointerCoordinates | null>(null);
-
   function handleTouchStartEvent(evt: TouchEvent) {
     evt.preventDefault();
 
