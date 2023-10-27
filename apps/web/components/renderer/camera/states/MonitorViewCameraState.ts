@@ -92,7 +92,7 @@ export class MonitorViewCameraState extends CameraState {
     this.ctx.cameraController.transition(position, spherical, distance, 1000, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
-    this.ctx.cameraController.setMaxZoom(4.0);
+    this.ctx.cameraController.setMaxZoom(5.0);
 
     this.ctx.cameraController.setOriginBoundaryX(null);
     this.ctx.cameraController.setOriginBoundaryY(null);
