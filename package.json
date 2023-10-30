@@ -15,11 +15,15 @@
   "devDependencies": {
     "eslint-config-custom": "*",
     "prettier": "latest",
-    "turbo": "latest"
+    "turbo": "^1.10.16"
   },
   "engines": {
     "node": ">=14.0.0"
   },
-  "dependencies": {},
-  "packageManager": "npm@9.5.1"
+  "packageManager": "npm@9.5.1",
+  "dependencies": {
+    "i18next": "^23.5.1",
+    "next-i18next": "^14.0.3",
+    "react-i18next": "^13.2.2"
+  }
 }

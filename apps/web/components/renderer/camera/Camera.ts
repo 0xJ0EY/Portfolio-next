@@ -2,22 +2,18 @@ import { AssetKeys } from "@/components/asset-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
-enum CameraState {
-  Idle,
-  FreeRoam
-}
-
 // Should be responsible for managing the different states of camera
 // and that the camera will not collide with the nearest object
 export class CameraController {
-  static readonly State = CameraState;
-
-  private currentState = CameraController.State.Idle;
-
   private actions: ((deltaTime: number) => boolean)[] = [];
 
   private enabled: boolean = true;
   private target: Vector3 = new Vector3(0, 0, 0);
+
+  private origin: Vector3 = new Vector3(0, 0, 0);
+  private originBoundaryX: number | null = null;
+  private originBoundaryY: number | null = null;
+  private originBoundaryZ: number | null = null;
 
   private spherical: Spherical = new Spherical();
   private sphericalDelta: Spherical = new Spherical();
@@ -46,10 +42,6 @@ export class CameraController {
     return this.scene;
   }
 
-  state(): CameraState {
-    return this.currentState;
-  }
-
   public moveCameraForward(distance: number): void {
     const x = distance * Math.sin(this.spherical.theta);
     const z = distance * Math.cos(this.spherical.theta);
@@ -59,12 +51,11 @@ export class CameraController {
   }
 
   public moveCameraUp(distance: number): void {
-    this.panOffset.y -= distance;
+    this.panOffset.y += distance;
   }
 
   public moveCameraLeft(distance: number): void {
-    // 1.5708 is 90 deg in radians
-    const angle = this.spherical.theta + 1.5708;
+    const angle = this.spherical.theta + degToRad(90);
 
     const x = distance * Math.sin(angle);
     const z = distance * Math.cos(angle);
@@ -96,13 +87,22 @@ export class CameraController {
   private lerp(start: number, end: number, amt: number): number {
     return (1 - amt) * start + amt * end;
   }
-  
-  public transition(targetPosition: Vector3, targetRotation: Spherical, targetZoom: number, durationInMs: number) {
+
+  public transition(
+    targetPosition: Vector3,
+    targetRotation: Spherical,
+    targetZoom:
+    number,
+    durationInMs: number,
+    callback?: () => void
+    ) {
     let timePassedInMs = 0;
-    
+
     const originalPosition = this.target.clone();
     const originalRotation = this.spherical.clone();
     const originalZoom = this.currentZoomDistance;
+
+    this.origin.copy(targetPosition);
 
     const action = (deltaTime: number) => {
       timePassedInMs += 1000 * deltaTime;
@@ -125,10 +125,90 @@ export class CameraController {
 
       this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
 
-      return progress === 1;
+      const isDone = progress === 1;
+
+      if (isDone && callback !== undefined) {
+        callback();
+      }
+
+      return isDone;
     }
 
     this.actions.push(action);
+  }
+
+  public getPanOffset(): Vector3 {
+    return this.panOffset;
+  }
+
+  public setPanOffsetX(value: number): void {
+    this.panOffset.setX(value);
+  }
+
+  public setPanOffsetY(value: number): void {
+    this.panOffset.setY(value);
+  }
+
+  public setPanOffsetZ(value: number): void {
+    this.panOffset.setZ(value);
+  }
+
+  public setMinZoom(zoom: number): void {
+    this.minZoomDistance = zoom;
+  }
+
+  public getMinZoom(): number {
+    return this.minZoomDistance;
+  }
+
+  public setMaxZoom(zoom: number): void {
+    this.maxZoomDistance = zoom;
+  }
+
+  public getMaxZoom(): number {
+    return this.maxZoomDistance;
+  }
+
+  public getZoom(): number {
+    return this.currentZoomDistance;
+  }
+
+  public resetOriginBoundary(): void {
+    this.setOriginBoundaryX(null);
+    this.setOriginBoundaryY(null);
+    this.setOriginBoundaryZ(null);
+  }
+
+  public getOriginBoundaryX(): number | null {
+    return this.originBoundaryX;
+  }
+
+  public setOriginBoundaryX(value: number | null) {
+    this.originBoundaryX = value;
+  }
+
+  public getOriginBoundaryY(): number | null {
+    return this.originBoundaryY;
+  }
+
+  public setOriginBoundaryY(value: number | null) {
+    this.originBoundaryY = value;
+  }
+
+  public getOriginBoundaryZ(): number | null {
+    return this.originBoundaryZ;
+  }
+
+  public setOriginBoundaryZ(value: number | null) {
+    this.originBoundaryZ = value;
+  }
+
+  public setZoom(distance: number): void {
+    this.currentZoomDistance = clamp(
+      distance,
+      this.minZoomDistance,
+      this.maxZoomDistance
+    );
   }
 
   public zoom(amount: number): void {
@@ -213,7 +293,7 @@ export class CameraController {
     const result = action(deltaTime);
 
     if (result === true) { this.popAction(); }
-    
+
     const done = result === true && !this.hasActions();
 
     if (done) { this.enabled = true; }
@@ -241,10 +321,23 @@ export class CameraController {
 
     this.target.add(this.panOffset);
 
+    function applyBoundaryClamping(clampValue: number, origin: number, value: number): number {
+      const upper = value <= origin + clampValue;
+      const lower = value >= origin - clampValue;
+
+      if (upper && lower) { return value; }
+
+      return origin + (upper ? -clampValue : clampValue);
+    }
+
+    if (this.originBoundaryX) { this.target.setX(applyBoundaryClamping(this.originBoundaryX, this.origin.x, this.target.x)); }
+    if (this.originBoundaryY) { this.target.setY(applyBoundaryClamping(this.originBoundaryY, this.origin.y, this.target.y)); }
+    if (this.originBoundaryZ) { this.target.setZ(applyBoundaryClamping(this.originBoundaryZ, this.origin.z, this.target.z)); }
+
     this.camera.position.copy(this.target).add(offset);
     this.camera.lookAt(this.target);
 
     this.sphericalDelta.set(0,0,0);
     this.panOffset.set(0, 0, 0);
   }
-};
+}

@@ -1,4 +1,5 @@
-import { CameraHandler, PointerData } from "./CameraHandlers";
+import { MouseData, toUserInteractionMouseEvent } from "@/events/UserInteractionEvents";
+import { CameraHandler } from "./CameraHandler";
 
 export class MouseInputHandler {
   private onMouseDownListener: (evt: MouseEvent) => void;
@@ -8,12 +9,7 @@ export class MouseInputHandler {
   private onWheelListener: (evt: WheelEvent) => void;
   private onMouseLeaveListener: (evt: MouseEvent) => void;
 
-  constructor(
-    private handler: CameraHandler,
-    private cssRenderNode: HTMLElement,
-    private webglRenderNode: HTMLElement
-  ) {
-
+  constructor(private handler: CameraHandler) {
     this.onMouseDownListener    = this.onMouseDown.bind(this);
     this.onMouseUpListener      = this.onMouseUp.bind(this);
     this.onMouseMoveListener    = this.onMouseMove.bind(this);
@@ -21,19 +17,16 @@ export class MouseInputHandler {
     this.onWheelListener        = this.onWheel.bind(this);
     this.onMouseLeaveListener   = this.onMouseLeave.bind(this);
 
+    this.create();
+  }
+
+  create(): void {
     window.addEventListener('mousedown', this.onMouseDownListener);
     window.addEventListener('mouseup', this.onMouseUpListener);
     window.addEventListener('mousemove', this.onMouseMoveListener);
     window.addEventListener('contextmenu', this.onContextMenuListener);
     window.addEventListener('wheel', this.onWheelListener);
     window.addEventListener('mouseleave', this.onMouseLeaveListener);
-    
-    this.create();
-  }
-
-  create(): void {
-    this.cssRenderNode.style.touchAction    = 'none';
-    this.webglRenderNode.style.touchAction  = 'none';
   }
 
   destroy(): void {
@@ -41,24 +34,29 @@ export class MouseInputHandler {
     window.removeEventListener('mouseup', this.onMouseUpListener);
     window.removeEventListener('mousemove', this.onMouseMoveListener);
     window.removeEventListener('contextmenu', this.onContextMenuListener);
-    window.removeEventListener('wheel', this.onWheelListener);
     window.removeEventListener('mouseleave', this.onMouseLeaveListener);
+    window.removeEventListener('wheel', this.onWheelListener);
   }
 
   private onMouseDown(evt: MouseEvent) {
-    const data = PointerData.fromMouseEvent(evt);
-    this.handler.onPointerDown(data);
+    const data = MouseData.fromMouseEvent('down', evt);
+    const event = toUserInteractionMouseEvent(data);
+
+    this.handler.emitUserInteractionEvent(event);
   }
 
   private onMouseUp(evt: MouseEvent) {
-    
-    const data = PointerData.fromMouseEvent(evt);
-    this.handler.onPointerUp(data);
+    const data = MouseData.fromMouseEvent('up', evt);
+    const event = toUserInteractionMouseEvent(data);
+
+    this.handler.emitUserInteractionEvent(event);
   }
 
   private onMouseMove(evt: MouseEvent) {
-    const data = PointerData.fromMouseEvent(evt);
-    this.handler.onPointerMove(data);
+    const data = MouseData.fromMouseEvent('move', evt);
+    const event = toUserInteractionMouseEvent(data);
+
+    this.handler.emitUserInteractionEvent(event);
   }
 
   private onContextMenu(evt: MouseEvent) {
@@ -66,10 +64,16 @@ export class MouseInputHandler {
   }
 
   private onWheel(evt: WheelEvent) {
-    
+    const data = MouseData.fromWheelEvent('wheel', evt);
+    const event = toUserInteractionMouseEvent(data);
+
+    this.handler.emitUserInteractionEvent(event);
   }
 
   private onMouseLeave(evt: MouseEvent) {
+    const data = MouseData.fromMouseEvent('leave', evt);
+    const event = toUserInteractionMouseEvent(data);
 
+    this.handler.emitUserInteractionEvent(event);
   }
 }

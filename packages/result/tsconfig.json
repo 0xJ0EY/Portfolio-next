@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/react-library.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"]
 }

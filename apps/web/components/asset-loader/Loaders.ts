@@ -4,6 +4,10 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { AssetKeys } from "./AssetKeys";
+import { isSafari } from "../renderer/util";
+
+export const DisplayParentName = "DisplayParent";
+export const DisplayName = "Display";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type UpdateActions = UpdateAction[];
@@ -26,7 +30,7 @@ const createLights = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   directionalLight.position.x = .75;
   directionalLight.position.z = .9;
   scenes.sourceScene.add(directionalLight);
-  
+
   return null;
 };
 
@@ -43,14 +47,47 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
   plane.userData[AssetKeys.CameraCollidable] = true;
 
   scenes.sourceScene.add(plane.clone());
-  
+
   return null;
+}
+
+const transformWebUrlToDesktop = (webUrl: string): string => {
+  const parts = webUrl.split('-');
+
+  const index = parts.findIndex(x => x === 'web');
+  parts[index] = 'desktop';
+
+  return 'https://' + parts.join('-');
+}
+
+const getTargetDomain = (): string => {
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
+
+  if (env === 'production') {
+    return 'https://portfolio-next-web.vercel.app/';
+  }
+
+  if (env === 'preview' || env === 'development') {
+    console.log(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL);
+
+    const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? window.location.host;
+
+    return transformWebUrlToDesktop(vercelUrl);
+  } else {
+    return 'http://192.168.178.134:3001'
+  }
 }
 
 const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
+  gltf.scene.name = DisplayParentName;
 
-  const display = gltf.scene.children.find((x) => x.name === "Display") as Mesh<BufferGeometry, Material>;        
+  // Correct for desk hight
+  for (const x of gltf.scene.children) {
+    x.position.y += 5.59;
+  }
+
+  const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
   display.material.stencilWrite = true;
   display.material.transparent = true;
@@ -61,14 +98,15 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   const box = display.geometry.boundingBox ?? new Box3();
 
-  const pageWidth = 1000;
-  const pageHeight = 998;
+  const pageWidth = 1280;
+  const pageHeight = 980;
 
-  const margin = 0.5;
+  // Use a slightly higher margin on Safari, as 0.1 gives white lines and 0.2 is too big for other browser to look nice.
+  const margin = isSafari() ? 0.2 : 0.1;
 
-  const width   = (box.max.x - box.min.x) * 10 + margin;
-  const height  = (box.max.y - box.min.y) * 10 + margin;
-  const depth   = (box.max.z - box.min.z) * 10;
+  const width   = (box.max.x - box.min.x) + margin;
+  const height  = width * (pageHeight / pageWidth);
+  const depth   = (box.max.z - box.min.z);
 
   const planeHeight = Math.sqrt(Math.pow(depth, 2) + Math.pow(height, 2));
 
@@ -82,31 +120,53 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
 
   const iframe = document.createElement('iframe');
   iframe.classList.add("iframe-container");
-  iframe.style.width = `${pageWidth}px`;
-  iframe.style.height = `${pageHeight + 0}px`;
-  iframe.style.backgroundColor = 'white';
-  iframe.style.border = '32px solid black';
+  iframe.style.width = `100%`;
+  iframe.style.height = `100%`;
+  iframe.style.backgroundColor = 'black';
+  iframe.style.border = '0 solid black';
   iframe.style.boxSizing = 'border-box';
-  // iframe.src = "http://localhost:3001";
-  iframe.src = "https://joeyderuiter.me";
+  iframe.style.padding = '32px';
+
+  iframe.src = getTargetDomain();
 
   div.appendChild(iframe);
 
   const cssPage = new CSS3DObject(div);
 
+  const [localX, localY, localZ] = [
+    (box.min.x - margin / 2) + width / 2,
+    (box.min.y - margin / 2) + height / 2,
+    box.min.z + depth / 2
+  ];
+
   const [x, y, z] = [
-    ((box.min.x * 10) - margin / 2) + width / 2,
-    ((box.min.y * 10) - margin / 2) + height / 2,
-    (box.min.z * 10) + depth / 2
+    display.position.x + localX,
+    display.position.y + localY,
+    display.position.z + localZ
   ];
 
   cssPage.position.set(x, y, z);
 
   cssPage.scale.set(viewWidthScale, viewHeightScale, 1);
   cssPage.rotateX(Math.atan(height / depth) - degToRad(90));
+
   scenes.cssScene.add(cssPage);
   scenes.sourceScene.add(gltf.scene);
   scenes.cutoutScene.add(cutoutDisplay);
+
+  return null;
+}
+
+const createDesk = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+  const gltf = await loader.loadAsync("/assets/Desk.gltf");
+
+  gltf.scene.position.y = -1.3;
+
+  for (const obj of gltf.scene.children) {
+    obj.userData[AssetKeys.CameraCollidable] = true;
+  }
+
+  scenes.sourceScene.add(gltf.scene);
 
   return null;
 }
@@ -118,7 +178,8 @@ export const loadRenderScenes = async (manager: LoadingManager | undefined): Pro
   const actions = [
     createLights(rendererScenes),
     createFloors(rendererScenes),
-    createMonitor(gltfLoader, rendererScenes)
+    createMonitor(gltfLoader, rendererScenes),
+    createDesk(gltfLoader, rendererScenes),
   ];
 
   const result = await Promise.all(actions);
@@ -132,7 +193,7 @@ export const loadRenderScenes = async (manager: LoadingManager | undefined): Pro
       } else {
         acc.push(cur);
       }
-      
+
       return acc;
     }, []);
 

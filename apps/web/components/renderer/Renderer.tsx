@@ -1,8 +1,7 @@
 import styles from './Renderer.module.css'
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { RefObject, useEffect, useRef } from "react";
+import { MutableRefObject, RefObject, useEffect, useRef } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
@@ -10,7 +9,11 @@ import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
-import { CameraHandler } from './camera/CameraHandlers';
+import { CameraHandler } from './camera/CameraHandler';
+import { TouchInputHandler } from './camera/TouchInputHandler';
+import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
+import { RendererTouchUserInterface } from './RendererTouchUserInterface';
+import { parseRequestFromChild, sendResponseToChild } from "rpc";
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -73,11 +76,9 @@ const renderWebglContext = (composer: EffectComposer): void => {
 }
 
 const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: PerspectiveCamera): void => {
-  // The CSS renderer does 2 special things
-  // 1. We scale up the scene, this is so that the dom element of the css scene will be rendered at a higher quality
-  // 2. We manually update the world matrix and inverse the transformations of the css elements.
-  //    This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
-  camera.position.multiplyScalar(10);
+  // The CSS renderer does something special to fix the rendering for Safari
+  // We manually update the world matrix and inverse the transformations of the css elements.
+  // This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
   camera.matrixWorldAutoUpdate = false;
   camera.updateMatrixWorld();
   camera.matrixWorldInverse.elements[15] = -1;
@@ -85,7 +86,6 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   renderer.render(scene, camera);
 
   camera.matrixWorldAutoUpdate = true;
-  camera.position.divideScalar(10);
 }
 
 interface RendererProps {
@@ -93,27 +93,116 @@ interface RendererProps {
   actions: UpdateActions
 }
 
+function getBrowserDimensions(): [number, number] {
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  if (isSafari()) {
+    // Safari on iOS (tested on only the physical iPhone 11 pro, and 14 pro in the simulator) renders off-center when a width/height is given that is not even.
+    // Desktop Safari & iPad OS seems fine
+    if (width & 0x01) { width++; }
+    if (height & 0x01) { height++; }
+  }
+
+  return [width, height];
+}
+
+function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
+  return function(event: MessageEvent) {
+    const request = parseRequestFromChild(event);
+    if (!request.ok) { return; }
+    const value = request.value;
+
+    const context = cameraHandler.getContext();
+    const controller = context.cameraController;
+
+    switch (value.method) {
+      case 'set_possible_camera_parameters_request': {
+
+        const minZoom = controller.getMinZoom();
+        const maxZoom = controller.getMaxZoom();
+        const distance = value.currentZoom;
+
+        const distanceDelta = distance - minZoom;
+        const zoomDelta = maxZoom - minZoom;
+
+        const zoomInPercentage = distanceDelta / zoomDelta;
+        
+        console.log('==============');
+
+        
+
+
+        console.log(controller.getPanOffset());
+        console.log(zoomInPercentage);
+
+      } break;
+      case 'camera_zoom_distance_request': {
+
+        const minZoom = controller.getMinZoom();
+        const maxZoom = controller.getMaxZoom();
+        const currentZoom = controller.getZoom();
+
+        sendResponseToChild(event.source as Window, {
+          method: 'camera_zoom_distance_response',
+          max_distance: maxZoom,
+          min_distance: minZoom,
+          current_distance: currentZoom,
+          max_horizontal_offset: 10,
+          horizontal_offset: 0,
+          max_vertical_offset: 10,
+          vertical_offset: 0
+        });
+
+      } break;
+      case 'set_camera_parameters_request': {
+        const distance = value.currentZoom;
+
+        controller.setZoom(distance);
+        controller.setPanOffsetX(value.horizontalOffset);
+        controller.setPanOffsetY(value.verticalOffset);
+
+        console.log(controller.getPanOffset());
+
+      } break;
+    }
+  }
+}
+
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
-  let then: number | null = null;
+  const touchEvents = createUIEventBus();
+
+  const touchUserInterface = RendererTouchUserInterface(touchEvents);
+
+  let then: MutableRefObject<number | null> = useRef(null);
 
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
-
+    
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
-    const [width, height] = [window.innerWidth, window.innerHeight];
+
+    const [width, height] = getBrowserDimensions();
 
     const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    disableTouchInteraction(cssRenderNode);
+    disableTouchInteraction(webglRenderNode);
+
     const cameraController  = new CameraController(camera, scene);
-    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode);
-    const mouseInputHandler = new MouseInputHandler(cameraHandler, cssRenderNode, webglRenderNode);
+    const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents);
+    const mouseInputHandler = new MouseInputHandler(cameraHandler);
+    const touchInputHandler = new TouchInputHandler(cameraHandler);
+
+    const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
     const composer = createComposer(renderer, width, height);
 
@@ -125,11 +214,11 @@ export const Renderer = (props: RendererProps) => {
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
-
+    
     const animate = function(now: number) {
-      if (then == null) { then = now; }
-      const deltaTime = (now - then) * 0.001; // Get delta time in seconds
-      then = now;
+      if (then.current == null) { then.current = now; }
+      const deltaTime = (now - then.current) * 0.001; // Get delta time in seconds
+      then.current = now;
 
       animationFrameId = requestAnimationFrame(animate);
 
@@ -144,7 +233,7 @@ export const Renderer = (props: RendererProps) => {
     }
     
     const onWindowResize = function() {
-      const [width, height] = [window.innerWidth, window.innerHeight]
+      const [width, height] = getBrowserDimensions();
 
       resizeRenderers(composer, renderer, cssRenderer, width, height);
       resizeCamera(camera, calculateAspectRatio(width, height));
@@ -153,16 +242,27 @@ export const Renderer = (props: RendererProps) => {
     const onDestroy = function() {
       if (animationFrameId) { cancelAnimationFrame(animationFrameId); }
 
+      enableTouchInteraction(cssRenderNode);
+      enableTouchInteraction(webglRenderNode);
+
       renderer.dispose();
       renderer.forceContextLoss();
 
       mouseInputHandler.destroy();
+      touchInputHandler.destroy();
+
+      cameraHandler.destroy();
 
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
+
+      window.removeEventListener('resize', onWindowResize, false);
+      window.removeEventListener('message', handleDesktopEvent, false);
     }
 
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('message', handleDesktopEvent, false);
+
     animate(performance.now());
 
     return () => onDestroy();
@@ -171,6 +271,7 @@ export const Renderer = (props: RendererProps) => {
     <div className={styles.renderer}>
       <div className={styles.cssOutput} ref={cssOutputRef}></div>
       <div className={styles.webglOutput} ref={webglOutputRef}></div>
+      {touchUserInterface}
     </div>
   );
 };

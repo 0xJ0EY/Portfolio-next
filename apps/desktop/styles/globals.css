@@ -1,7 +1,33 @@
 html, body {
   padding: 0;
   margin: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #000;
+
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.systemButton {
+  border-radius: 0;
+  line-height: 13px;
+  padding: 3px 4px 3px;
+  margin: 0;
+  border: none;
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+}
+
+.systemButton img {
+  user-select: none;
+}
+
+.systemButton:hover {
+  background-color: #c9c9c9;
+}
+
+.systemButton:active {
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
