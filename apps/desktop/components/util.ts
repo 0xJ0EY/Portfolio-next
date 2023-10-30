@@ -1,15 +1,7 @@
+import { TouchData } from "@/data/TouchData";
+
 export const clamp = (val: number, min: number, max: number): number => {
   return Math.max(Math.min(max, val), min);
-}
-
-export type Result<T, E = Error> = { ok: true, value: T } | { ok: false, value: E }
-
-export function Ok<T, E = Error>(value: T): Result<T, E> {
-  return { ok: true, value };
-}
-
-export function Err<T, E = Error>(error: E): Result<T, E> {
-  return { ok: false, value: error };
 }
 
 export type Action<T> = () => T
@@ -17,4 +9,21 @@ export type Action<T> = () => T
 
 export const minimumDigits = (value: number, digits: number): string => {
   return (value).toLocaleString(undefined, { minimumIntegerDigits: digits });
+}
+
+
+export function isTouchTap(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
+
+export function isTouchRotateCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(1);
+}
+
+export function isTouchMoveCamera(data: TouchData): boolean {
+  return data.hasTouchesDown(2) || data.hasTouchesDown(3);
+}
+
+export function isTouchZoom(data: TouchData): boolean {
+  return data.hasTouchesDown(2);
 }

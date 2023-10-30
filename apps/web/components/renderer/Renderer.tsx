@@ -11,8 +11,9 @@ import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
-import { createUIEventBus } from '@/events/UserInteractionEvents';
+import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
+import { parseRequestFromChild, sendResponseToChild } from "rpc";
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -106,6 +107,68 @@ function getBrowserDimensions(): [number, number] {
   return [width, height];
 }
 
+function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
+  return function(event: MessageEvent) {
+    const request = parseRequestFromChild(event);
+    if (!request.ok) { return; }
+    const value = request.value;
+
+    const context = cameraHandler.getContext();
+    const controller = context.cameraController;
+
+    switch (value.method) {
+      case 'set_possible_camera_parameters_request': {
+
+        const minZoom = controller.getMinZoom();
+        const maxZoom = controller.getMaxZoom();
+        const distance = value.currentZoom;
+
+        const distanceDelta = distance - minZoom;
+        const zoomDelta = maxZoom - minZoom;
+
+        const zoomInPercentage = distanceDelta / zoomDelta;
+        
+        console.log('==============');
+
+        
+
+
+        console.log(controller.getPanOffset());
+        console.log(zoomInPercentage);
+
+      } break;
+      case 'camera_zoom_distance_request': {
+
+        const minZoom = controller.getMinZoom();
+        const maxZoom = controller.getMaxZoom();
+        const currentZoom = controller.getZoom();
+
+        sendResponseToChild(event.source as Window, {
+          method: 'camera_zoom_distance_response',
+          max_distance: maxZoom,
+          min_distance: minZoom,
+          current_distance: currentZoom,
+          max_horizontal_offset: 10,
+          horizontal_offset: 0,
+          max_vertical_offset: 10,
+          vertical_offset: 0
+        });
+
+      } break;
+      case 'set_camera_parameters_request': {
+        const distance = value.currentZoom;
+
+        controller.setZoom(distance);
+        controller.setPanOffsetX(value.horizontalOffset);
+        controller.setPanOffsetY(value.verticalOffset);
+
+        console.log(controller.getPanOffset());
+
+      } break;
+    }
+  }
+}
+
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -118,7 +181,7 @@ export const Renderer = (props: RendererProps) => {
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
-
+    
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
@@ -139,6 +202,8 @@ export const Renderer = (props: RendererProps) => {
     const mouseInputHandler = new MouseInputHandler(cameraHandler);
     const touchInputHandler = new TouchInputHandler(cameraHandler);
 
+    const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
+
     const composer = createComposer(renderer, width, height);
 
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
@@ -149,6 +214,7 @@ export const Renderer = (props: RendererProps) => {
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
+    
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
       const deltaTime = (now - then.current) * 0.001; // Get delta time in seconds
@@ -189,9 +255,14 @@ export const Renderer = (props: RendererProps) => {
 
       cssRenderNode.removeChild(cssRenderer.domElement);
       webglRenderNode.removeChild(renderer.domElement);
+
+      window.removeEventListener('resize', onWindowResize, false);
+      window.removeEventListener('message', handleDesktopEvent, false);
     }
 
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('message', handleDesktopEvent, false);
+
     animate(performance.now());
 
     return () => onDestroy();

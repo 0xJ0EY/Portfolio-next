@@ -7,7 +7,7 @@ import styles from './FinderView.module.css';
 import { Application } from "../ApplicationManager";
 import React from "react";
 import { Chain, Node } from "@/data/Chain";
-import { Err, Ok, Result } from "@/components/util";
+import { Err, Ok, Result } from "result";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }

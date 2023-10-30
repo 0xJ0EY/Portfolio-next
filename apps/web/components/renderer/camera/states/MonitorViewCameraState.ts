@@ -1,14 +1,18 @@
 import { ArrowHelper, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Scene, Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { constructIsOverDisplay } from "./util";
-import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+import { PanOriginData, constructIsOverDisplay, isTouchTap, isTouchZoom } from "./util";
+import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, TouchDataSource, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
 import { degToRad } from "three/src/math/MathUtils";
 import { calculateAspectRatio } from "../../util";
 
-function isTouchTap(data: TouchData): boolean {
-  return data.hasTouchesDown(1);
+function isOwnOrigin(data: TouchData): boolean {
+  return data.origin === 'self';
+}
+
+function isRpcOrigin(data: TouchData): boolean {
+  return data.origin === 'rpc';
 }
 
 const getDisplay = (scene: Scene): Mesh | undefined => {
@@ -63,6 +67,7 @@ const calculateCameraPosition = (display: Mesh, fov: number) => {
 export class MonitorViewCameraState extends CameraState {
 
   private isOverDisplay: (data: PointerCoordinates) => boolean;
+  private panOrigin: PanOriginData | null = null;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -79,9 +84,39 @@ export class MonitorViewCameraState extends CameraState {
 
     const callback = () => {
       this.ctx.disableWebGLPointerEvents();
+
+      this.ctx.cameraController.setOriginBoundaryX(2.0);
+      this.ctx.cameraController.setOriginBoundaryY(0.5);
     }
 
     this.ctx.cameraController.transition(position, spherical, distance, 1000, callback);
+
+    this.ctx.cameraController.setMinZoom(1.0);
+    this.ctx.cameraController.setMaxZoom(5.0);
+
+    this.ctx.cameraController.setOriginBoundaryX(null);
+    this.ctx.cameraController.setOriginBoundaryY(null);
+  }
+
+  private setupZoomEvent(data: TouchData) {
+    if (isTouchZoom(data)) {
+      this.panOrigin = PanOriginData.create(this.ctx.cameraController, data);
+    } else {
+      this.panOrigin = null;
+    }
+  }
+
+  private handleZoomEvent(data: TouchData) {
+    if (this.panOrigin === null) { return; }
+
+    const origin = this.panOrigin.touchData;
+    const bb1 = origin.boundingBox();
+    const bb2 = data.boundingBox();
+
+    const zoomDistance = this.panOrigin.zoomDistance;
+    const zoomOffset = (bb2.diagonal() - bb1.diagonal()) * 0.01;
+
+    this.ctx.cameraController.setZoom(zoomDistance + zoomOffset);
   }
 
   private updateCursor(data: PointerCoordinates): void {
@@ -103,16 +138,12 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  handleMouseUp(data: MouseData): void {
+  private handleMouseUp(data: MouseData): void {
     this.manager.changeState(CameraHandlerState.FreeRoam);
   }
 
-  handleMouseMove(data: MouseData): void {
+  private handleMouseMove(data: MouseData): void {
     this.updateCursor(data.pointerCoordinates());
-  }
-
-  handleMouseScroll(data: MouseData): void {
-    this.ctx.cameraController.zoom(data.zoomDelta());
   }
 
   handleMouseEvent(data: MouseData) {
@@ -138,15 +169,29 @@ export class MonitorViewCameraState extends CameraState {
     this.manager.emitUserInteractionEvent(event);
   }
 
-  private handleTouchStart(data: TouchData) {
+  private handleOwnOriginTouchStart(data: TouchData) {
     if (isTouchTap(data)) {
       this.handleTouchOutsideDisplay(data);
     }
   }
 
+  private handleRpcOriginTouchStart(data: TouchData) {
+    this.setupZoomEvent(data);
+  }
+
   private handleTouchEvent(data: TouchData) {
-    if (data.source === 'start') {
-      this.handleTouchStart(data);
+    console.log(data);
+
+    if (data.source === 'start' && isOwnOrigin(data)) {
+      this.handleOwnOriginTouchStart(data);
+    }
+
+    if (data.source === 'start' && isRpcOrigin(data)) {
+      this.handleRpcOriginTouchStart(data);
+    }
+
+    if (data.source === 'move' && isRpcOrigin(data)) {
+      this.handleZoomEvent(data);
     }
   }
 }

@@ -7,5 +7,9 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.0",
+    "@types/react": "18.2.24"
   }
 }

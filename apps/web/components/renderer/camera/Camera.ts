@@ -10,6 +10,11 @@ export class CameraController {
   private enabled: boolean = true;
   private target: Vector3 = new Vector3(0, 0, 0);
 
+  private origin: Vector3 = new Vector3(0, 0, 0);
+  private originBoundaryX: number | null = null;
+  private originBoundaryY: number | null = null;
+  private originBoundaryZ: number | null = null;
+
   private spherical: Spherical = new Spherical();
   private sphericalDelta: Spherical = new Spherical();
 
@@ -50,8 +55,7 @@ export class CameraController {
   }
 
   public moveCameraLeft(distance: number): void {
-    // 1.5708 is 90 deg in radians
-    const angle = this.spherical.theta + 1.5708;
+    const angle = this.spherical.theta + degToRad(90);
 
     const x = distance * Math.sin(angle);
     const z = distance * Math.cos(angle);
@@ -98,6 +102,8 @@ export class CameraController {
     const originalRotation = this.spherical.clone();
     const originalZoom = this.currentZoomDistance;
 
+    this.origin.copy(targetPosition);
+
     const action = (deltaTime: number) => {
       timePassedInMs += 1000 * deltaTime;
       const progress = Math.min(timePassedInMs / durationInMs, 1);
@@ -131,8 +137,70 @@ export class CameraController {
     this.actions.push(action);
   }
 
+  public getPanOffset(): Vector3 {
+    return this.panOffset;
+  }
+
+  public setPanOffsetX(value: number): void {
+    this.panOffset.setX(value);
+  }
+
+  public setPanOffsetY(value: number): void {
+    this.panOffset.setY(value);
+  }
+
+  public setPanOffsetZ(value: number): void {
+    this.panOffset.setZ(value);
+  }
+
+  public setMinZoom(zoom: number): void {
+    this.minZoomDistance = zoom;
+  }
+
+  public getMinZoom(): number {
+    return this.minZoomDistance;
+  }
+
+  public setMaxZoom(zoom: number): void {
+    this.maxZoomDistance = zoom;
+  }
+
+  public getMaxZoom(): number {
+    return this.maxZoomDistance;
+  }
+
   public getZoom(): number {
     return this.currentZoomDistance;
+  }
+
+  public resetOriginBoundary(): void {
+    this.setOriginBoundaryX(null);
+    this.setOriginBoundaryY(null);
+    this.setOriginBoundaryZ(null);
+  }
+
+  public getOriginBoundaryX(): number | null {
+    return this.originBoundaryX;
+  }
+
+  public setOriginBoundaryX(value: number | null) {
+    this.originBoundaryX = value;
+  }
+
+  public getOriginBoundaryY(): number | null {
+    return this.originBoundaryY;
+  }
+
+  public setOriginBoundaryY(value: number | null) {
+    this.originBoundaryY = value;
+  }
+
+  public getOriginBoundaryZ(): number | null {
+    return this.originBoundaryZ;
+  }
+
+  public setOriginBoundaryZ(value: number | null) {
+    this.originBoundaryZ = value;
   }
 
   public setZoom(distance: number): void {
@@ -253,10 +321,23 @@ export class CameraController {
 
     this.target.add(this.panOffset);
 
+    function applyBoundaryClamping(clampValue: number, origin: number, value: number): number {
+      const upper = value <= origin + clampValue;
+      const lower = value >= origin - clampValue;
+
+      if (upper && lower) { return value; }
+
+      return origin + (upper ? -clampValue : clampValue);
+    }
+
+    if (this.originBoundaryX) { this.target.setX(applyBoundaryClamping(this.originBoundaryX, this.origin.x, this.target.x)); }
+    if (this.originBoundaryY) { this.target.setY(applyBoundaryClamping(this.originBoundaryY, this.origin.y, this.target.y)); }
+    if (this.originBoundaryZ) { this.target.setZ(applyBoundaryClamping(this.originBoundaryZ, this.origin.z, this.target.z)); }
+
     this.camera.position.copy(this.target).add(offset);
     this.camera.lookAt(this.target);
 
     this.sphericalDelta.set(0,0,0);
     this.panOffset.set(0, 0, 0);
   }
-};
+}

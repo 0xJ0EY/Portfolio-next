@@ -1,44 +1,8 @@
 import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { constructIsOverDisplay } from "./util";
+import { PanOriginData, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
 import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
-import { CameraController } from "../Camera";
-
-function isMouseRotateCamera(data: MouseData): boolean {
-  return data.isPrimaryDown();
-}
-
-function isTouchTap(data: TouchData): boolean {
-  return data.hasTouchesDown(1);
-}
-
-function isTouchRotateCamera(data: TouchData): boolean {
-  return data.hasTouchesDown(1);
-}
-
-function isMouseMoveCamera(data: MouseData): boolean {
-  return data.isSecondaryDown();
-}
-
-function isTouchMoveCamera(data: TouchData): boolean {
-  return data.hasTouchesDown(2) || data.hasTouchesDown(3);
-}
-
-function isTouchZoom(data: TouchData): boolean {
-  return data.hasTouchesDown(2);
-}
-
-class PanOriginData {
-  constructor(
-    public touchData: TouchData,
-    public zoomDistance: number
-  ) {}
-
-  static create(cameraController: CameraController, touchData: TouchData): PanOriginData {
-    return new PanOriginData(touchData, cameraController.getZoom());
-  }
-}
 
 export class FreeRoamCameraState extends CameraState {
 
@@ -68,6 +32,13 @@ export class FreeRoamCameraState extends CameraState {
     const zoom = 10.0;
 
     this.ctx.cameraController.transition(position, rotation, zoom, 1000);
+
+    this.ctx.cameraController.setMinZoom(2.0);
+    this.ctx.cameraController.setMaxZoom(15.0);
+
+    this.ctx.cameraController.setOriginBoundaryX(null);
+    this.ctx.cameraController.setOriginBoundaryY(null);
+    this.ctx.cameraController.setOriginBoundaryZ(null);
   }
 
   private handleDisplayClick(data: PointerCoordinates): void {

@@ -98,6 +98,7 @@ export class MouseData {
 }
 
 export type TouchDataSource = 'start' | 'move' | 'end';
+export type TouchDataOrigin = 'self' | 'rpc';
 
 export class TouchElement {
   constructor(
@@ -113,7 +114,8 @@ export class TouchElement {
 export class TouchData {
   constructor(
     public source: TouchDataSource,
-    public touches: TouchElement[]
+    public touches: TouchElement[],
+    public origin: TouchDataOrigin
   ) {}
 
   static fromTouchEvent(source: TouchDataSource, evt: TouchEvent): TouchData {
@@ -124,7 +126,7 @@ export class TouchData {
       touches.push(elem);
     }
 
-    return new TouchData(source, touches);
+    return new TouchData(source, touches, 'self');
   };
 
   hasTouchesDown(amount: number): boolean {
