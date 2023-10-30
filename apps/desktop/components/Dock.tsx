@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { ApplicationConfig, ApplicationManager } from '@/applications/ApplicationManager';
+import React, { useEffect, useState } from 'react';
+import { ApplicationConfig, ApplicationManager, ApplicationManagerEvent } from '@/applications/ApplicationManager';
 import styles from '@/styles/Desktop.module.css';
 import { aboutConfig } from '@/applications/AboutApplication';
 import { finderConfig } from '@/applications/Finder/Finder';
 import { infoConfig } from '@/applications/InfoApplication';
-import { Chain } from '../data/Chain';
 import { Window, WindowCompositor } from './WindowManagement/WindowCompositor';
 import { WindowEvent } from './WindowManagement/WindowEvents';
+import Image from 'next/image';
 
 const DockApplications = [
   finderConfig,
@@ -30,62 +30,111 @@ class DockItems {
   public minimizedWindows: DockWindow[] = [];
 }
 
+type ApplicationDockItem = { kind: 'application', config: ApplicationConfig, active: boolean, onClick: () => void }
+type MinimizedApplicationDockItem = { kind: 'minimized_application', title: string, config: ApplicationConfig, onClick: () => void }
+type SeparatorDockItem = { kind: 'separator' }
+type DirectoryDockItem = { kind: 'directory' }
+
+type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDockItem | DirectoryDockItem;
+
+function DockItemViewApplication(item: ApplicationDockItem) {
+  return (<>
+    <button onClick={() => item.onClick()}>
+      <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={64} height={64}></Image>
+    </button>
+  </>)
+}
+
+function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
+  return (<>
+    <button onClick={() => item.onClick()}>
+      <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={64} height={64}></Image>
+    </button>
+  </>)
+}
+
+function DockItemSeparator() {
+  return <>seperator</>
+}
+
+function DockItemDirectory(item: DirectoryDockItem) {
+  return <>directory</>
+}
+
+function DockItemView(item: DockItem) {
+  switch (item.kind) {
+    case 'application': return DockItemViewApplication(item)
+    case 'minimized_application': return DockItemMinimizedApplication(item);
+    case 'separator': return DockItemSeparator();
+    case 'directory': return DockItemDirectory(item);
+  }
+}
+
 // Extend the notification system of the dock events (by adding closed/open application)
 // And implement a reducer like in Desktop.tsx
-export const Dock = (props: { manager: ApplicationManager, windowCompositor: WindowCompositor }) => {
+export function Dock(props: { manager: ApplicationManager, windowCompositor: WindowCompositor }) {
   const { manager, windowCompositor } = props;
-  const [dockItems, setDockItems] = useState<DockItems>(new DockItems());
+  const [dockItems, setDockItems] = useState<DockItem[]>([]);
 
-  function constructDock(manager: ApplicationManager, windowCompositor: WindowCompositor): DockItems {
-    const dockItems = new DockItems();
+  function constructDock(manager: ApplicationManager, windowCompositor: WindowCompositor): DockItem[] {
+    let content: DockItem[] = [];
 
     const dockApplications    = DockApplications;
     const activeApplications  = manager.listApplications().map(x => x.config());
     const minimizedWindows    = windowCompositor.listMinimizedWindows();
 
-    const items: Record<string, { config: ApplicationConfig, active: boolean }> = {};
-
     {
-      dockApplications.forEach(x => items[x.displayName] = {
+      const items: Record<string, { config: ApplicationConfig, active: boolean }> = {};
+
+      dockApplications.forEach(x => items[x.appName] = {
         config: x,
         active: false
       });
 
-      activeApplications.forEach(x => items[x.displayName] = {
+      activeApplications.forEach(x => items[x.appName] = {
         config: x,
         active: true
       });
 
-      let result = new Chain<DockApplication>();
+      Object.values(items)
+        .sort((a, b) => { 
+        // Bubble sorting time 😎
+          const aPriority = a.config.dockPriority ?? 0;
+          const bPriority = b.config.dockPriority ?? 0;
 
-      // TODO: Special rules for Finder
-      // TODO: Add a bin
-      Object.values(items).forEach(x => {
-        result.append({
-          displayName: x.config.displayName,
-          active: x.active,
-          onClick: () => { manager.open(x.config.path + x.config.appName); }
-        })
-      });
-
-      dockItems.applications = result.toArray();
+          return aPriority - bPriority;
+        }).forEach(item => {
+          content.push({
+            kind: 'application',
+            config: item.config,
+            active: item.active,
+            onClick: () => { manager.open(item.config.path + item.config.appName); }
+          });
+        });
     }
+
+    content.push({ kind: 'separator' });
 
     {
-      function onClickWindow(window: Window) {
-        window.minimized = false;
-        windowCompositor.update(window);
-        windowCompositor.focus(window.id, true);
+      function onClickMinimizedApplicationWindow(applicationWindow: Window) {
+        applicationWindow.minimized = false;
+        windowCompositor.update(applicationWindow);
+        windowCompositor.focus(applicationWindow.id, true);
       }
 
-      const windows: DockWindow[] = minimizedWindows.map(x => {
-        return { displayName: x.title, onClick: () => { onClickWindow(x); }}
+      minimizedWindows.forEach(window => {
+        content.push({
+          kind: 'minimized_application',
+          title: window.title,
+          config: window.application.config(),
+          onClick: () => onClickMinimizedApplicationWindow(window)
+        });
       });
-
-      dockItems.minimizedWindows = windows;
     }
 
-    return dockItems;
+    // TODO: Add trash can
+
+    return content;
   }
 
   function handleApplicationManager() {
@@ -93,7 +142,7 @@ export const Dock = (props: { manager: ApplicationManager, windowCompositor: Win
   }
 
   function handleWindowCompositor(windowEvent: WindowEvent) {
-    if (windowEvent.event === 'update_window') {
+    if (windowEvent.event === 'minimize_window' || windowEvent.event === 'maximize_window') {
       setDockItems(constructDock(manager, windowCompositor));
     }
   }
@@ -112,8 +161,7 @@ export const Dock = (props: { manager: ApplicationManager, windowCompositor: Win
 
   return <>
     <div className={styles.dock}>
-      {dockItems.applications.map((x, i) => <button key={i} onPointerDown={() => { x.onClick(); }}>{x.displayName}{x.active ? ' [active]' : ''}</button>)}
-      {dockItems.minimizedWindows.map((x, i) => <button key={i} onPointerDown={() => { x.onClick(); }}>{x.displayName} [minimized]</button>)}
+      { dockItems.map((item, i) => <React.Fragment key={i}>{DockItemView(item)}</React.Fragment>) }
     </div>
   </>
 }

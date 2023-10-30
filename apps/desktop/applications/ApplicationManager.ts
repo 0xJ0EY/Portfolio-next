@@ -18,6 +18,7 @@ class ApplicationContext {
 
 export interface ApplicationConfig {
   readonly displayName: string,
+  readonly dockPriority: number | null,
   readonly path: string,
   readonly appName: string,
   readonly appIcon: ApplicationIcon,

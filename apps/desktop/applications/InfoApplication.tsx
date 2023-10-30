@@ -10,6 +10,7 @@ const View = dynamic(() => import('./InfoApplicationView'));
 
 export class InfoConfig implements ApplicationConfig {
   public readonly displayName = 'Info';
+  public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Info.app';
   public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Info application' };

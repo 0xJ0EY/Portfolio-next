@@ -10,6 +10,7 @@ const View = dynamic(() => import('./FinderView'));
 
 export class FinderConfig implements ApplicationConfig {
   public readonly displayName = 'Finder';
+  public readonly dockPriority = -100;
   public readonly path = '/Applications/';
   public readonly appName = 'Finder.app';
   public readonly appIcon = { src: '/icons/finder-icon.png', alt: 'Finder application' };

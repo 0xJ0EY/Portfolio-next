@@ -10,6 +10,7 @@ const View = dynamic(() => import('./AboutApplicationView'));
 
 export class AboutConfig implements ApplicationConfig {
   public readonly displayName = 'About';
+  public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'About.app';
   public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'About application' };

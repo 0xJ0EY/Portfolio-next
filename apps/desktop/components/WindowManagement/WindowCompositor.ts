@@ -1,5 +1,5 @@
 import { Chain, Node } from "../../data/Chain";
-import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent } from "./WindowEvents";
+import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent, MinimizeWindowEvent, MaximizeWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 
@@ -255,6 +255,21 @@ export class WindowCompositor {
     } else {
       this.updateWindowOrder();
     }
+
+    this.publish(MinimizeWindowEvent(window.id));
+  }
+
+  public maximize(windowId: number): void {
+    const node = this.windowNodeLookup[windowId];
+    if (!node) { return; }
+
+    const window = node.value;
+    window.minimized = false;
+
+    this.update(window);
+    this.focus(window.id, true);
+
+    this.publish(MaximizeWindowEvent(window.id));
   }
 
   public listMinimizedWindows(): Window[] {
