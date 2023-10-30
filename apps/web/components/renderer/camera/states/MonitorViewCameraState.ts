@@ -86,7 +86,7 @@ export class MonitorViewCameraState extends CameraState {
       this.ctx.disableWebGLPointerEvents();
 
       this.ctx.cameraController.setOriginBoundaryX(2.0);
-      this.ctx.cameraController.setOriginBoundaryY(0.5);
+      this.ctx.cameraController.setOriginBoundaryY(1.5);
     }
 
     this.ctx.cameraController.transition(position, spherical, distance, 1000, callback);

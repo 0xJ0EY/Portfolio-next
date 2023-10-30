@@ -39,7 +39,7 @@ type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDo
 
 function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
-    <button onClick={() => item.onClick()}>
+    <button onPointerDown={() => item.onClick()}>
       <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={64} height={64}></Image>
     </button>
   </>)
@@ -47,7 +47,7 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
-    <button onClick={() => item.onClick()}>
+    <button onPointerDown={() => item.onClick()}>
       <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={64} height={64}></Image>
     </button>
   </>)
