@@ -834,8 +834,8 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     if (!ref.current) { return; }
     const folder = ref.current;
 
-    folder.addEventListener('touchstart', onTouchDown);
-    folder.addEventListener('pointerdown', onPointerDown);
+    folder.addEventListener('touchstart', onTouchDown, { passive: true });
+    folder.addEventListener('pointerdown', onPointerDown, { passive: true });
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
