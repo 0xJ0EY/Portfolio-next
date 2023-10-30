@@ -135,9 +135,9 @@ export const OperatingSystem = () => {
   }
 
   function disableBrowserZoomTouchInteraction(element: HTMLElement): void {
-    element.addEventListener('touchstart', handleTouchStartEvent);
-    element.addEventListener('touchmove', handleTouchMoveEvent);
-    element.addEventListener('touchend', handleTouchEndEvent);
+    element.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
+    element.addEventListener('touchmove', handleTouchMoveEvent, { passive: true });
+    element.addEventListener('touchend', handleTouchEndEvent, { passive: true });
   }
 
   function enableBrowserZoomTouchInteraction(element: HTMLElement): void {
