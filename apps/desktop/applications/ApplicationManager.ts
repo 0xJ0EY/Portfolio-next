@@ -1,4 +1,4 @@
-import { FileSystem, FileSystemApplication, FileSystemDirectory, constructPath } from "@/apis/FileSystem/FileSystem";
+import { ApplicationIcon, FileSystem, FileSystemApplication, FileSystemDirectory, constructPath } from "@/apis/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "result";
@@ -20,6 +20,7 @@ export interface ApplicationConfig {
   readonly displayName: string,
   readonly path: string,
   readonly appName: string,
+  readonly appIcon: ApplicationIcon,
   readonly entrypoint: (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,

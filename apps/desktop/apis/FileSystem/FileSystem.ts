@@ -17,6 +17,11 @@ type DirectorySettings = {
   sortOrigin: 'top-left' | 'top-right',
 }
 
+export type ApplicationIcon = {
+  src: string,
+  alt: string
+}
+
 export type DirectoryContent = {
   view: 'icons' | 'list',
   width: number,
@@ -55,6 +60,7 @@ export type FileSystemFile = {
 export type FileSystemApplication = {
   id: number,
   parent: FileSystemDirectory
+  icon: ApplicationIcon,
   kind: 'application'
   name: string,
   editable: boolean,
@@ -65,6 +71,7 @@ function createApplication(
   id: number,
   parent: FileSystemDirectory,
   name: string,
+  icon: ApplicationIcon,
   entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application
 ): FileSystemApplication {
   return {
@@ -72,6 +79,7 @@ function createApplication(
     parent,
     kind: 'application',
     name,
+    icon,
     editable: false,
     entrypoint
   }
@@ -122,6 +130,14 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     editable,
     stickyBit,
     children: new Chain()
+  }
+}
+
+export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
+  switch (node.kind) {
+    case 'application': return node.icon;
+    case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    case "file": return { src: '/icons/folder-icon.png', alt: 'File icon' }
   }
 }
 
@@ -523,7 +539,7 @@ export class FileSystem {
     const parent = this.lookupTable[config.path];
     if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
 
-    const application = createApplication(++this.id, parent, config.appName, config.entrypoint);
+    const application = createApplication(++this.id, parent, config.appName, config.appIcon, config.entrypoint);
 
     this.addNodeToDirectory(parent, application);
 

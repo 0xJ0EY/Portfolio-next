@@ -12,6 +12,7 @@ export class InfoConfig implements ApplicationConfig {
   public readonly displayName = 'Info';
   public readonly path = '/Applications/';
   public readonly appName = 'Info.app';
+  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Info application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,

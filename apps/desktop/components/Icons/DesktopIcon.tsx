@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import styles from '@/components/Icons/DesktopIcon.module.css';
-import { DirectoryEntry } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, getIconFromNode } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
 
 export const IconWidth    = 120;
@@ -175,8 +175,8 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
   const file = entry.node;
 
   const selected = desktopIconEntry.selected ? styles.selected : '';
-
   const title = desktopIconEntry.editing.active ? <EditTitle entry={desktopIconEntry}/> : <RenderTitle title={file.name}/>;
+  const icon = getIconFromNode(entry.node);
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
@@ -189,8 +189,8 @@ export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry,
           <Image
             draggable="false"
             className={styles.image}
-            src="/icons/folder-icon.png"
-            alt='folder icon'
+            src={icon.src}
+            alt={icon.alt}
             width={ImageWidth}
             height={ImageHeight}
             />
