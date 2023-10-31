@@ -1,8 +1,8 @@
 import { Application, ApplicationConfig } from "@/applications/ApplicationManager";
 import { Action } from "../../components/util";
 import { Err, Ok, Result } from "result";
-import { infoConfig } from "@/applications/InfoApplication";
-import { aboutConfig } from "@/applications/AboutApplication";
+import { infoConfig } from "@/applications/Info/InfoApplication";
+import { aboutConfig } from "@/applications/About/AboutApplication";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";

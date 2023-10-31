@@ -1,8 +1,8 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
-import { ApplicationEvent } from "./ApplicationEvents";
-import { Application, ApplicationConfig, MenuEntry } from "./ApplicationManager";
-import { LocalApplicationManager } from "./LocalApplicationManager";
+import { ApplicationEvent } from "../ApplicationEvents";
+import { Application, ApplicationConfig, MenuEntry } from "../ApplicationManager";
+import { LocalApplicationManager } from "../LocalApplicationManager";
 import dynamic from 'next/dynamic';
 import { SystemAPIs } from "@/components/OperatingSystem";
 
