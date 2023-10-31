@@ -7,6 +7,7 @@ import { infoConfig } from '@/applications/Info/InfoApplication';
 import { Window, WindowCompositor } from '../WindowManagement/WindowCompositor';
 import { WindowEvent } from '../WindowManagement/WindowEvents';
 import Image from 'next/image';
+import { ApplicationIcon } from '@/apis/FileSystem/FileSystem';
 
 const DockApplications = [
   finderConfig,
@@ -25,22 +26,18 @@ interface DockWindow {
   onClick: () => void
 }
 
-class DockItems {
-  public applications: DockApplication[] = [];
-  public minimizedWindows: DockWindow[] = [];
-}
 
 type ApplicationDockItem = { kind: 'application', config: ApplicationConfig, active: boolean, onClick: () => void }
 type MinimizedApplicationDockItem = { kind: 'minimized_application', title: string, config: ApplicationConfig, onClick: () => void }
 type SeparatorDockItem = { kind: 'separator' }
-type DirectoryDockItem = { kind: 'directory' }
+type DirectoryDockItem = { kind: 'directory', title: string, icon: ApplicationIcon, onClick: () => void }
 
 type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDockItem | DirectoryDockItem;
 
 function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
     <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.config.displayName}>
-      <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={64} height={64}></Image>
+      <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
       <div className={[styles.status, item.active ? styles.active : styles.inactive].join(' ')}></div>
     </button>
   </>)
@@ -49,7 +46,7 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
     <button onPointerDown={() => item.onClick()}>
-      <Image src={item.config.appIcon.src} alt={item.config.appIcon.src} width={30} height={30}></Image>
+      <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={30} height={30}></Image>
     </button>
   </>)
 }
@@ -59,7 +56,12 @@ function DockItemSeparator() {
 }
 
 function DockItemDirectory(item: DirectoryDockItem) {
-  return <>directory</>
+  return (<>
+    <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.title}>
+      <Image src={item.icon.src} alt={item.icon.alt} width={64} height={64}></Image>
+      <div className={styles.status}></div>
+    </button>
+  </>)
 }
 
 function DockItemView(item: DockItem) {
@@ -71,7 +73,7 @@ function DockItemView(item: DockItem) {
   }
 }
 
-// Extend the notification system of the dock events (by adding closed/open application)
+
 // And implement a reducer like in Desktop.tsx
 export function Dock(props: { manager: ApplicationManager, windowCompositor: WindowCompositor }) {
   const { manager, windowCompositor } = props;
@@ -133,7 +135,18 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
       });
     }
 
-    // TODO: Add trash can
+    {
+      function onClickDirectory(path: string) {
+        manager.open(`/Applications/Finder.app ${path}`);
+      }
+      
+      content.push({
+        kind: 'directory',
+        title: 'Trash',
+        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+        onClick: () => onClickDirectory('/Users/joey/Trash')
+      });
+    }
 
     return content;
   }
