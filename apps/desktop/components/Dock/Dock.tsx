@@ -15,18 +15,6 @@ const DockApplications = [
   infoConfig
 ];
 
-interface DockApplication {
-  displayName: string,
-  active: boolean,
-  onClick: () => void
-}
-
-interface DockWindow {
-  displayName: string,
-  onClick: () => void
-}
-
-
 type ApplicationDockItem = { kind: 'application', config: ApplicationConfig, active: boolean, onClick: () => void }
 type MinimizedApplicationDockItem = { kind: 'minimized_application', title: string, config: ApplicationConfig, onClick: () => void }
 type SeparatorDockItem = { kind: 'separator' }
@@ -45,14 +33,15 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
-    <button onPointerDown={() => item.onClick()}>
-      <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={30} height={30}></Image>
+    <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.config.displayName}>
+      <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
+      <div className={[styles.status].join(' ')}></div>
     </button>
   </>)
 }
 
 function DockItemSeparator() {
-  return <>seperator</>
+  return (<div className={styles.separator}></div>)
 }
 
 function DockItemDirectory(item: DirectoryDockItem) {

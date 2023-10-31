@@ -62,3 +62,8 @@
 .inactive {
   background: yellow;
 }
+
+.separator {
+  border-left: 1px solid black;
+  margin: 7px;
+}
