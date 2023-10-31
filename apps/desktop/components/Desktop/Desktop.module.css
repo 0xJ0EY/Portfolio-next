@@ -18,7 +18,7 @@
   pointer-events: none;
   width: 100vw;
   /* TODO: Change this to the eventual height of the dock */
-  height: calc(100% - 88px);
+  height: calc(100% - 90px);
 }
 
 .applicationContainer > * {

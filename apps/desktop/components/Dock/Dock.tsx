@@ -114,7 +114,9 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
         windowCompositor.focus(applicationWindow.id, true);
       }
 
-      minimizedWindows.forEach(window => {
+      minimizedWindows
+        .slice(0, Math.min(minimizedWindows.length, 5))
+        .forEach(window => {
         content.push({
           kind: 'minimized_application',
           title: window.title,
