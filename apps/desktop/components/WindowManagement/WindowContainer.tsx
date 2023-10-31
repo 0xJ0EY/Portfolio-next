@@ -380,7 +380,7 @@ const WindowHeader = (
     const windowY = windowRef.y - deltaY;
 
     windowData.x = windowX;
-    windowData.y = windowY;
+    windowData.y = Math.max(windowY, 0);
 
     windowCompositor.update(windowData);
   }

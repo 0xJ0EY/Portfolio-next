@@ -161,7 +161,9 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
 
   return <>
     <div className={styles.dock}>
-      { dockItems.map((item, i) => <React.Fragment key={i}>{DockItemView(item)}</React.Fragment>) }
+      <div data-drop-point="true" className={styles.dockContainer}>
+        { dockItems.map((item, i) => <React.Fragment key={i}>{DockItemView(item)}</React.Fragment>) }
+      </div>
     </div>
   </>
 }

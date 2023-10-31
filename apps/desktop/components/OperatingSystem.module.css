@@ -1,0 +1,12 @@
+.operatingSystem {
+  margin: 0;
+  padding: 0;
+  width: 100dvw;
+  width: 100vw;
+  height: 100dvh;
+  height: 100vh;
+  display: flex;
+  flex-flow: column;
+  overflow: hidden;
+  position: relative;
+}

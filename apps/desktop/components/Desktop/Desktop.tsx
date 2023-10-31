@@ -1,14 +1,14 @@
-import styles from '@/styles/Desktop.module.css';
+import styles from './Desktop.module.css';
 import React, { useEffect, useRef, useReducer, useState } from "react";
-import { Window, WindowApplication, WindowCompositor } from './WindowManagement/WindowCompositor';
-import { WindowEvent } from './WindowManagement/WindowEvents';
+import { Window, WindowApplication, WindowCompositor } from '../WindowManagement/WindowCompositor';
+import { WindowEvent } from '../WindowManagement/WindowEvents';
 import dynamic from 'next/dynamic';
-import { SystemAPIs } from './OperatingSystem';
+import { SystemAPIs } from '../OperatingSystem';
 import { DirectoryEntry, FileSystemNode, constructPath } from '@/apis/FileSystem/FileSystem';
 import { ApplicationManager } from '@/applications/ApplicationManager';
 
-const FolderView = dynamic(() => import('./Folder/FolderView'));
-const WindowContainer = dynamic(() => import('./WindowManagement/WindowContainer'));
+const FolderView = dynamic(() => import('../Folder/FolderView'));
+const WindowContainer = dynamic(() => import('../WindowManagement/WindowContainer'));
 
 interface ApplicationData {
   window: Window,
@@ -97,8 +97,19 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
     return () => { unsubscribe(); }
   }, []);
 
-  return <>
-    <div ref={parentNode} className={styles.windowContainer}>
+
+  const applications = applicationWindows.map(x => 
+    <WindowContainer
+      key={x.window.id}
+      window={x.window}
+      WindowApp={x.application}
+      windowCompositor={windowCompositor}
+      parent={parentNode.current}
+    />
+  );
+
+  return (
+    <div className={styles.desktop}>
       <FolderView
         directory='/Users/joey/Desktop'
         apis={apis}
@@ -107,14 +118,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
         allowOverflow={false}
       />
 
-      {applicationWindows.map(x => 
-        <div key={x.window.id}>
-          <WindowContainer
-            window={x.window}
-            WindowApp={x.application}
-            windowCompositor={windowCompositor}
-            parent={parentNode.current}/>
-        </div>)}
-    </div>
-  </>
+      <div ref={parentNode} className={styles.applicationContainer}>{applications}</div>
+  </div>
+  )
 }

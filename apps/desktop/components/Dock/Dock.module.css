@@ -1,6 +1,8 @@
 .dock {
-  display: block;
-  background-color: blue;
+  z-index: 10000;
+
+  position: absolute;
+  display: flex;
 
   height: 66px;
   width: 100%;
@@ -8,4 +10,15 @@
   flex: 0 1 auto;
 
   bottom: 0;
+
+  pointer-events: none;
+
+  justify-content: center;
+}
+
+.dockContainer {
+  display: block;
+  background-color: red;
+
+  pointer-events: all;
 }
