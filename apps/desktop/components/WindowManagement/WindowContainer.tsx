@@ -4,7 +4,7 @@ import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
 const calculateWindowZIndex = (order: number): number => {
-  return 1000 + order * 1000;
+  return 1000 + order * 10;
 }
 
 const calculateStyle = (window: Window): React.CSSProperties => {
