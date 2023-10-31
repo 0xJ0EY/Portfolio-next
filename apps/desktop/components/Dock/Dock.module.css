@@ -1,0 +1,11 @@
+.dock {
+  display: block;
+  background-color: blue;
+
+  height: 66px;
+  width: 100%;
+
+  flex: 0 1 auto;
+
+  bottom: 0;
+}

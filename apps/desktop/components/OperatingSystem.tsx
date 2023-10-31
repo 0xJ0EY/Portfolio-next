@@ -5,7 +5,7 @@ import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
 import React, { MutableRefObject, useEffect, useRef, useState } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop";
-import { Dock } from "./Dock";
+import { Dock } from "./Dock/Dock";
 import { FileSystem } from '@/apis/FileSystem/FileSystem';
 import styles from '@/styles/Desktop.module.css';
 import { DragAndDropView } from "./DragAndDropView";

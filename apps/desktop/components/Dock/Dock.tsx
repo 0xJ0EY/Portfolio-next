@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ApplicationConfig, ApplicationManager, ApplicationManagerEvent } from '@/applications/ApplicationManager';
-import styles from '@/styles/Desktop.module.css';
+import styles from './Dock.module.css';
 import { aboutConfig } from '@/applications/AboutApplication';
 import { finderConfig } from '@/applications/Finder/Finder';
 import { infoConfig } from '@/applications/InfoApplication';
-import { Window, WindowCompositor } from './WindowManagement/WindowCompositor';
-import { WindowEvent } from './WindowManagement/WindowEvents';
+import { Window, WindowCompositor } from '../WindowManagement/WindowCompositor';
+import { WindowEvent } from '../WindowManagement/WindowEvents';
 import Image from 'next/image';
 
 const DockApplications = [
