@@ -102,6 +102,8 @@ export default function FinderView(props: WindowProps) {
   }
 
   function createDirectory() {
+    if (!canEdit) { return; }
+
     folderViewRef.current?.createNewDirectory();
   }
 
