@@ -4,21 +4,59 @@
   position: absolute;
   display: flex;
 
-  height: 66px;
   width: 100%;
 
   flex: 0 1 auto;
-
   bottom: 0;
-
   pointer-events: none;
-
   justify-content: center;
 }
 
 .dockContainer {
-  display: block;
-  background-color: red;
-
+  display: flex;
+  border: 4px solid black;
+  background-color: #c0c0c0;
   pointer-events: all;
+}
+
+.dockApplication {
+  position: relative;
+  height: 74px;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  background: none;
+
+  border: none;
+  padding: 0;
+  margin: 0 4px;
+}
+
+.dockApplication:hover::after {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  width: 200px;
+  transform: translateX(-50%);
+  content: attr(data-tooltip);
+}
+
+.dockApplication img {
+  display: block;
+  max-height: calc(100% - 10px);
+}
+
+.dockApplication .status {
+  display: block;
+  height: 10px;
+  width: 100%;
+  /* background: blue; */
+}
+
+.active {
+  background: green;
+}
+
+.inactive {
+  background: yellow;
 }
