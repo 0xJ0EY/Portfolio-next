@@ -9,25 +9,37 @@ html, body {
   box-sizing: border-box;
 }
 
-.systemButton {
+.systemButton,
+.headerButton {
   border-radius: 0;
-  line-height: 13px;
-  padding: 3px 4px 3px;
+  line-height: 15px;
+  padding: 3px 5px 5px;
   margin: 0;
   border: none;
   background-color: #dcdcdc;
+  font-size: 0.8em;
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  user-select: none;
+  cursor: pointer;
 }
 
-.systemButton img {
+.headerButton {
+  line-height: 13px;
+  padding: 3px 4px 3px;
+}
+
+.systemButton img,
+.headerButton img {
   user-select: none;
 }
 
-.systemButton:hover {
+.systemButton:hover,
+.headerButton:hover {
   background-color: #c9c9c9;
 }
 
-.systemButton:active {
+.systemButton:active,
+.headerButton:active {
   background-color: #dcdcdc;
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
