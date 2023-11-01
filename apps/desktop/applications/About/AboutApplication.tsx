@@ -41,11 +41,15 @@ export class AboutApplication extends Application {
     this.baseHandler(event, windowContext);
 
     if (event.kind === 'application-open') {
+      const y       = 100;
+      const width   = window.innerWidth * 0.75;
+      const height  = window.innerHeight * 0.75 - y;
+      const x       = (window.innerWidth - width) / 2;
+      
       this.compositor.open({
-        x: 200,
-        y: 200,
-        height: 400,
-        width: 400,
+        x, y,
+        height,
+        width,
         title: "About application",
         application: this,
         args: event.args,
@@ -55,8 +59,6 @@ export class AboutApplication extends Application {
 
     if (event.kind === 'application-quit') {
       if (!windowContext) { return; }
-
-      // this.manager.exit();
     }
   }
 }

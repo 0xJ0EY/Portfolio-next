@@ -69,9 +69,6 @@
 
 .content {
   box-sizing: content-box;
-  height: (100% - 6px); /* TODO: Find a cleaner solution than this */
-  width: (100% - 6px);
-
   flex: 1 1 auto;
   margin: 3px;
 }

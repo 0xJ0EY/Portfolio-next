@@ -43,3 +43,20 @@ html, body {
   background-color: #dcdcdc;
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
+
+.content {
+  background: #fff;
+  margin: 3px;
+  padding: 2px;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+  flex: 1;
+  overflow: auto;
+}
+
+.contentOuter {
+  display: flex;
+  flex: 1 1;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}

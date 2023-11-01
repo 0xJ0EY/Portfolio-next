@@ -147,7 +147,7 @@ export const OperatingSystem = () => {
   }
 
   useEffect(() => {
-    applicationManager.open('/Applications/Finder.app /Users/joey/Desktop');
+    applicationManager.open('/Applications/About.app');
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)

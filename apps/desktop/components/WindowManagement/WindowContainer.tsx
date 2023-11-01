@@ -15,7 +15,6 @@ const calculateStyle = (window: Window): React.CSSProperties => {
     left: `${window.x}px`,
     width: `${window.width}px`,
     height: `${window.height}px`,
-    backgroundColor: 'red',
     zIndex: calculateWindowZIndex(window.order),
   };
 }
