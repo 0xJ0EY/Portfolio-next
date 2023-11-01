@@ -9,8 +9,8 @@
 .selectionBox {
   display: block;
   position: absolute;
-  background-color: hotpink;
-  opacity: 0.7;
+  background-color: rgba(105, 205, 249, 0.2);
+  border: 1px solid rgba(105, 205, 249, 0.8);;
   z-index: 1000;
 }
 
