@@ -147,6 +147,7 @@ export const OperatingSystem = () => {
   }
 
   useEffect(() => {
+    applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
 
     if (ref.current) {
