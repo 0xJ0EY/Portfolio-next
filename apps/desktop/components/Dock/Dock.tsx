@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApplicationConfig, ApplicationManager, ApplicationManagerEvent } from '@/applications/ApplicationManager';
 import styles from './Dock.module.css';
-import { aboutConfig } from '@/applications/About/AboutApplication';
+import { aboutConfig } from '@/applications/About/About';
 import { finderConfig } from '@/applications/Finder/Finder';
 import { infoConfig } from '@/applications/Info/InfoApplication';
 import { Window, WindowCompositor } from '../WindowManagement/WindowCompositor';

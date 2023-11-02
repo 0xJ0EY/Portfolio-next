@@ -2,7 +2,7 @@ import { Application, ApplicationConfig } from "@/applications/ApplicationManage
 import { Action } from "../../components/util";
 import { Err, Ok, Result } from "result";
 import { infoConfig } from "@/applications/Info/InfoApplication";
-import { aboutConfig } from "@/applications/About/AboutApplication";
+import { aboutConfig } from "@/applications/About/About";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/Finder";
 import { LocalApplicationManager } from "@/applications/LocalApplicationManager";
