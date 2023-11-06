@@ -1,6 +1,5 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState, useRef, RefObject } from 'react';
-import styles from './AboutView.module.css'
 
 type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
 
@@ -24,13 +23,13 @@ function HomeSubView(params: SubViewParams) {
 
 function SubViewNavigation(params: SubViewParams) {
   return (<>
-    <div className={styles.navigationWrapper}>
-      <div className='logo'>
+    <div className='w-32'>
+      <div>
         <span className='block'>Joey</span>
         <span className='block'>de Ruiter</span>
       </div>
 
-      <div className={styles.navigation}>
+      <div className='flex flex-col m-2'>
         <a href="#" onPointerUp={() => params.changeParent('home')}>Home</a>
         <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
         <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
@@ -43,9 +42,9 @@ function SubViewNavigation(params: SubViewParams) {
 
 function AboutSubView(params: SubViewParams) {
   return (<>
-    <div className={styles.wrapper}>
+    <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className={styles.content}>
+      <div className='flex flex-auto'>
         <h1>About</h1>
       </div>
     </div>
@@ -54,9 +53,9 @@ function AboutSubView(params: SubViewParams) {
 
 function ExperienceSubView(params: SubViewParams) {
   return (<>
-    <div className={styles.wrapper}>
+    <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className={styles.content}>
+      <div className='flex flex-auto'>
         <h1>Experience</h1>
       </div>
     </div>
@@ -65,9 +64,9 @@ function ExperienceSubView(params: SubViewParams) {
 
 function ProjectsSubView(params: SubViewParams) {
   return (<>
-    <div className={styles.wrapper}>
+    <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className={styles.content}>
+      <div className='flex flex-auto'>
         <h1>Project</h1>
       </div>
     </div>
@@ -76,9 +75,9 @@ function ProjectsSubView(params: SubViewParams) {
 
 function ContactSubView(params: SubViewParams) {
   return (<>
-    <div className={styles.wrapper}>
+    <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className={styles.content}>
+      <div className='flex flex-auto'>
         <h1>Contact</h1>
       </div>
     </div>
