@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Century Schoolbook';
+  font-style: sans-serif;
+  font-weight: normal;
+  src: local('Century Schoolbook'), url('/fonts/century_schoolbook.ttf') format('truetype');
+}
+
 html, body {
   padding: 0;
   margin: 0;

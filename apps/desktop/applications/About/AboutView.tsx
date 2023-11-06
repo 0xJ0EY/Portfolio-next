@@ -1,5 +1,6 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState, useRef, RefObject } from 'react';
+import styles from './AboutView.module.css';
 
 type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
 
@@ -9,8 +10,8 @@ type SubViewParams = {
 
 function HomeSubView(params: SubViewParams) {
   return (<>
-    <h1>Joey de Ruiter</h1>
-    <h3>Software engineer</h3>
+    <h1 className={styles['home-title']}>Joey de Ruiter</h1>
+    <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
     <div>
       <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
@@ -23,13 +24,13 @@ function HomeSubView(params: SubViewParams) {
 
 function SubViewNavigation(params: SubViewParams) {
   return (<>
-    <div className='w-32'>
+    <div className='w-56 p-6'>
       <div>
-        <span className='block'>Joey</span>
-        <span className='block'>de Ruiter</span>
+        <span className={styles['logo-part']}>Joey</span>
+        <span className={styles['logo-part']}>de Ruiter</span>
       </div>
 
-      <div className='flex flex-col m-2'>
+      <div className='flex flex-col mt-4'>
         <a href="#" onPointerUp={() => params.changeParent('home')}>Home</a>
         <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
         <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>

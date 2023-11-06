@@ -1,0 +1,22 @@
+.home-title {
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  font-weight: normal;
+}
+
+.home-subtitle {
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: normal
+}
+
+.logo-part {
+  display: block;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
