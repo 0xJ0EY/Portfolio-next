@@ -1,0 +1,23 @@
+.wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.navigationWrapper {
+  width: 160px;
+}
+
+.navigationWrapper.logo {
+  display: block;
+}
+
+.navigation {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+}

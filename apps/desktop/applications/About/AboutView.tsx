@@ -1,5 +1,6 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState, useRef, RefObject } from 'react';
+import styles from './AboutView.module.css'
 
 type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
 
@@ -22,23 +23,66 @@ function HomeSubView(params: SubViewParams) {
 }
 
 function SubViewNavigation(params: SubViewParams) {
-  return (<></>)
+  return (<>
+    <div className={styles.navigationWrapper}>
+      <div className='logo'>
+        <span>Joey</span>
+        <span>de Ruiter</span>
+      </div>
+
+      <div className={styles.navigation}>
+        <a href="#" onPointerUp={() => params.changeParent('home')}>Home</a>
+        <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
+        <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
+        <a href="#" onPointerUp={() => params.changeParent('projects')}>Projects</a>
+        <a href="#" onPointerUp={() => params.changeParent('contact')}>Contact</a>
+      </div>
+    </div>
+  </>)
 }
 
 function AboutSubView(params: SubViewParams) {
-  return <>About subview</>
+  return (<>
+    <div className={styles.wrapper}>
+      { SubViewNavigation(params) }
+      <div className={styles.content}>
+        <h1>About</h1>
+      </div>
+    </div>
+  </>);
 }
 
 function ExperienceSubView(params: SubViewParams) {
-  return <>Experience subview</>
+  return (<>
+    <div className={styles.wrapper}>
+      { SubViewNavigation(params) }
+      <div className={styles.content}>
+        <h1>Experience</h1>
+      </div>
+    </div>
+  </>);
 }
 
 function ProjectsSubView(params: SubViewParams) {
-  return <>Projects subview</>
+  return (<>
+    <div className={styles.wrapper}>
+      { SubViewNavigation(params) }
+      <div className={styles.content}>
+        <h1>Project</h1>
+      </div>
+    </div>
+  </>);
 }
 
 function ContactSubView(params: SubViewParams) {
-  return <>Contact subview</>
+  return (<>
+    <div className={styles.wrapper}>
+      { SubViewNavigation(params) }
+      <div className={styles.content}>
+        <h1>Contact</h1>
+      </div>
+    </div>
+  </>);
 }
 
 function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
@@ -54,7 +98,7 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
 export default function AboutApplicationView(props: WindowProps) {
   useEffect(() => { }, []);
 
-  const [subView, setSubView] = useState<SubView>('home');
+  const [subView, setSubView] = useState<SubView>('about');
 
   return (
     <div className="contentOuter">
