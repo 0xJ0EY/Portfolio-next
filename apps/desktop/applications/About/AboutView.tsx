@@ -10,14 +10,16 @@ type SubViewParams = {
 
 function HomeSubView(params: SubViewParams) {
   return (<>
-    <h1 className={styles['home-title']}>Joey de Ruiter</h1>
-    <h3 className={styles['home-subtitle']}>Software engineer</h3>
+    <div className="flex flex-col">
+      <h1 className={styles['home-title']}>Joey de Ruiter</h1>
+      <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
-    <div>
-      <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
-      <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
-      <a href="#" onPointerUp={() => params.changeParent('projects')}>Projects</a>
-      <a href="#" onPointerUp={() => params.changeParent('contact')}>Contact</a>
+      <div className='flex justify-center'>
+        <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
+        <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
+        <a href="#" onPointerUp={() => params.changeParent('projects')}>Projects</a>
+        <a href="#" onPointerUp={() => params.changeParent('contact')}>Contact</a>
+      </div>
     </div>
   </>)
 }
@@ -98,7 +100,7 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
 export default function AboutApplicationView(props: WindowProps) {
   useEffect(() => { }, []);
 
-  const [subView, setSubView] = useState<SubView>('about');
+  const [subView, setSubView] = useState<SubView>('home');
 
   return (
     <div className="contentOuter">

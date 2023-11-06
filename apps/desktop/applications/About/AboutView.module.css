@@ -1,4 +1,6 @@
 .home-title {
+  display: flex;
+  justify-content: center;
   font-family: 'Century Schoolbook', sans-serif;
   font-size: 2rem;
   text-transform: uppercase;
@@ -7,6 +9,8 @@
 }
 
 .home-subtitle {
+  display: flex;
+  justify-content: center;
   font-family: 'Century Schoolbook', sans-serif;
   font-size: 1rem;
   text-transform: uppercase;
@@ -19,4 +23,8 @@
   font-size: 1.5rem;
   letter-spacing: -1px;
   text-transform: uppercase;
+}
+
+.home-page {
+  display: flex;
 }
