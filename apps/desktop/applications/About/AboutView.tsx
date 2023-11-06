@@ -26,8 +26,8 @@ function SubViewNavigation(params: SubViewParams) {
   return (<>
     <div className={styles.navigationWrapper}>
       <div className='logo'>
-        <span>Joey</span>
-        <span>de Ruiter</span>
+        <span className='block'>Joey</span>
+        <span className='block'>de Ruiter</span>
       </div>
 
       <div className={styles.navigation}>
