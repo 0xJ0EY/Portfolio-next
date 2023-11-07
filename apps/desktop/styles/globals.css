@@ -25,8 +25,8 @@ html, body {
   border-radius: 0;
   line-height: 15px;
   padding: 3px 5px 5px;
-  margin: 0;
   border: none;
+  color: #000;
   background-color: #dcdcdc;
   font-size: 0.8em;
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;

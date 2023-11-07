@@ -14,7 +14,17 @@
   font-family: 'Century Schoolbook', sans-serif;
   font-size: 1rem;
   text-transform: uppercase;
-  font-weight: normal
+  font-weight: normal;
+  margin-top: 0.5rem;
+}
+
+.navigation {
+  min-width: 12rem;
+}
+
+.page-h1 {
+  font-family: 'Century Schoolbook', sans-serif;
+  font-weight: 2rem;
 }
 
 .logo-part {

@@ -14,11 +14,11 @@ function HomeSubView(params: SubViewParams) {
       <h1 className={styles['home-title']}>Joey de Ruiter</h1>
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
-      <div className='flex justify-center'>
-        <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
-        <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
-        <a href="#" onPointerUp={() => params.changeParent('projects')}>Projects</a>
-        <a href="#" onPointerUp={() => params.changeParent('contact')}>Contact</a>
+      <div className='flex justify-center mt-3'>
+        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('about')}>About</button>
+        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('experience')}>Experience</button>
+        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('projects')}>Projects</button>
+        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('contact')}>Contact</button>
       </div>
     </div>
   </>)
@@ -26,18 +26,18 @@ function HomeSubView(params: SubViewParams) {
 
 function SubViewNavigation(params: SubViewParams) {
   return (<>
-    <div className='w-56 p-6'>
+    <div className={`w-48 p-6 ${styles['navigation']}`}>
       <div>
         <span className={styles['logo-part']}>Joey</span>
         <span className={styles['logo-part']}>de Ruiter</span>
       </div>
 
       <div className='flex flex-col mt-4'>
-        <a href="#" onPointerUp={() => params.changeParent('home')}>Home</a>
-        <a href="#" onPointerUp={() => params.changeParent('about')}>About</a>
-        <a href="#" onPointerUp={() => params.changeParent('experience')}>Experience</a>
-        <a href="#" onPointerUp={() => params.changeParent('projects')}>Projects</a>
-        <a href="#" onPointerUp={() => params.changeParent('contact')}>Contact</a>
+        <button className='systemButton' onPointerUp={() => params.changeParent('home')}>Home</button>
+        <button className='systemButton' onPointerUp={() => params.changeParent('about')}>About</button>
+        <button className='systemButton' onPointerUp={() => params.changeParent('experience')}>Experience</button>
+        <button className='systemButton' onPointerUp={() => params.changeParent('projects')}>Projects</button>
+        <button className='systemButton' onPointerUp={() => params.changeParent('contact')}>Contact</button>
       </div>
     </div>
   </>)
@@ -47,8 +47,8 @@ function AboutSubView(params: SubViewParams) {
   return (<>
     <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto'>
-        <h1>About</h1>
+      <div className='flex flex-auto p-6 flex-col'>
+        <h1 className={styles['page-h1']}>About</h1>
       </div>
     </div>
   </>);
@@ -58,8 +58,9 @@ function ExperienceSubView(params: SubViewParams) {
   return (<>
     <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto'>
-        <h1>Experience</h1>
+      <div className='flex flex-auto p-6 flex-col'>
+        <h1 className={styles['page-h1']}>Experience</h1>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis voluptate deleniti nemo nam eum sunt repellat? Dolorum nemo qui sit eveniet officia voluptatem similique consequuntur deserunt, sint quis maxime. Doloribus?</p>
       </div>
     </div>
   </>);
@@ -69,8 +70,8 @@ function ProjectsSubView(params: SubViewParams) {
   return (<>
     <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto'>
-        <h1>Projects</h1>
+      <div className='flex flex-auto p-6 flex-col'>
+        <h1 className={styles['page-h1']}>Projects</h1>
       </div>
     </div>
   </>);
@@ -80,8 +81,8 @@ function ContactSubView(params: SubViewParams) {
   return (<>
     <div className='flex h-full'>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto'>
-        <h1>Contact</h1>
+      <div className='flex flex-auto p-6 flex-col'>
+        <h1 className={styles['page-h1']}>Contact</h1>
       </div>
     </div>
   </>);
