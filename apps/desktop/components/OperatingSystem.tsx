@@ -2,7 +2,7 @@ import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
 import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
-import React, { MutableRefObject, useEffect, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
 import { Dock } from "./Dock/Dock";
@@ -47,9 +47,11 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  function handleTouchStartEvent(evt: TouchEvent) {
+  function handleGestureStart(evt: Event): void {
     evt.preventDefault();
+  }
 
+  function handleTouchStartEvent(evt: TouchEvent) {
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
 
     if (evt.touches.length === 2) {
@@ -135,12 +137,14 @@ export const OperatingSystem = () => {
   }
 
   function disableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.addEventListener('gesturestart', handleGestureStart, { passive: false });
     element.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
     element.addEventListener('touchmove', handleTouchMoveEvent, { passive: true });
     element.addEventListener('touchend', handleTouchEndEvent, { passive: true });
   }
 
   function enableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.removeEventListener('gesturestart', handleGestureStart);
     element.removeEventListener('touchstart', handleTouchStartEvent);
     element.removeEventListener('touchmove', handleTouchMoveEvent);
     element.removeEventListener('touchend', handleTouchEndEvent);

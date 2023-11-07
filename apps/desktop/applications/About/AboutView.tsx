@@ -15,10 +15,10 @@ function HomeSubView(params: SubViewParams) {
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
       <div className='flex justify-center mt-3'>
-        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('about')}>About</button>
-        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('experience')}>Experience</button>
-        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('projects')}>Projects</button>
-        <button className='mx-1 systemButton' onPointerUp={() => params.changeParent('contact')}>Contact</button>
+        <button className='mx-1 systemButton' onClick={() => params.changeParent('about')}>About</button>
+        <button className='mx-1 systemButton' onClick={() => params.changeParent('experience')}>Experience</button>
+        <button className='mx-1 systemButton' onClick={() => params.changeParent('projects')}>Projects</button>
+        <button className='mx-1 systemButton' onClick={() => params.changeParent('contact')}>Contact</button>
       </div>
     </div>
   </>)
@@ -33,11 +33,11 @@ function SubViewNavigation(params: SubViewParams) {
       </div>
 
       <div className='flex flex-col mt-4'>
-        <button className='systemButton' onPointerUp={() => params.changeParent('home')}>Home</button>
-        <button className='systemButton' onPointerUp={() => params.changeParent('about')}>About</button>
-        <button className='systemButton' onPointerUp={() => params.changeParent('experience')}>Experience</button>
-        <button className='systemButton' onPointerUp={() => params.changeParent('projects')}>Projects</button>
-        <button className='systemButton' onPointerUp={() => params.changeParent('contact')}>Contact</button>
+        <button className='systemButton' onClick={() => params.changeParent('home')}>Home</button>
+        <button className='systemButton' onClick={() => params.changeParent('about')}>About</button>
+        <button className='systemButton' onClick={() => params.changeParent('experience')}>Experience</button>
+        <button className='systemButton' onClick={() => params.changeParent('projects')}>Projects</button>
+        <button className='systemButton' onClick={() => params.changeParent('contact')}>Contact</button>
       </div>
     </div>
   </>)
