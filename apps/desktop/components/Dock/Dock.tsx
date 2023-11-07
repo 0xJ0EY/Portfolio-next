@@ -133,6 +133,13 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
       
       content.push({
         kind: 'directory',
+        title: 'Documents',
+        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+        onClick: () => onClickDirectory('/Users/joey/Documents')
+      });
+
+      content.push({
+        kind: 'directory',
         title: 'Trash',
         icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
         onClick: () => onClickDirectory('/Users/joey/Trash')
