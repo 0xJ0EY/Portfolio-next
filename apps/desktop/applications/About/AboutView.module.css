@@ -24,7 +24,8 @@
 
 .page-h1 {
   font-family: 'Century Schoolbook', sans-serif;
-  font-weight: 2rem;
+  font-weight: normal;
+  font-size: 2rem;
 }
 
 .logo-part {
