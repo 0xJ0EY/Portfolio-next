@@ -1,5 +1,5 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useEffect, useState, useRef, RefObject } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './AboutView.module.css';
 
 type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
@@ -10,7 +10,7 @@ type SubViewParams = {
 
 function HomeSubView(params: SubViewParams) {
   return (<>
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full justify-center">
       <h1 className={styles['home-title']}>Joey de Ruiter</h1>
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
@@ -70,7 +70,7 @@ function ProjectsSubView(params: SubViewParams) {
     <div className='flex h-full'>
       { SubViewNavigation(params) }
       <div className='flex flex-auto'>
-        <h1>Project</h1>
+        <h1>Projects</h1>
       </div>
     </div>
   </>);
