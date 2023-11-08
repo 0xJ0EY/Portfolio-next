@@ -24,7 +24,7 @@ type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDo
 
 function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
-    <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.config.displayName}>
+    <button className={styles.dockApplication} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
       <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
       <div className={[styles.status, item.active ? styles.active : styles.inactive].join(' ')}></div>
     </button>
@@ -33,7 +33,7 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
-    <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.config.displayName}>
+    <button className={styles.dockApplication} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
       <Image src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
       <div className={[styles.status].join(' ')}></div>
     </button>
@@ -46,7 +46,7 @@ function DockItemSeparator() {
 
 function DockItemDirectory(item: DirectoryDockItem) {
   return (<>
-    <button className={styles.dockApplication} onPointerDown={() => item.onClick()} data-tooltip={item.title}>
+    <button className={styles.dockApplication} onClick={() => item.onClick()} data-tooltip={item.title}>
       <Image src={item.icon.src} alt={item.icon.alt} width={64} height={64}></Image>
       <div className={styles.status}></div>
     </button>

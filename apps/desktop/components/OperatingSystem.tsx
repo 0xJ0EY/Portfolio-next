@@ -14,7 +14,7 @@ import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
 
-const ButtonNode = 'BUTTON';
+const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
@@ -42,6 +42,20 @@ function handleParentResponsesClosure(
   }
 }
 
+function findButtonNodeInDOM(value: HTMLElement): HTMLElement | null {
+  let element: HTMLElement | null = value;
+
+  while (element !== null) {
+    if (element.nodeName === NodeNameButton) {
+      return element;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
+}
+
 export const OperatingSystem = () => {
   const ref = useRef<HTMLDivElement>(null);
   const touchOrigin = useRef<TouchData | null>(null);
@@ -59,17 +73,13 @@ export const OperatingSystem = () => {
     // If it is the first touch, record the node if it is a button
     if (evt.touches.length !== 1) { return; }
 
-    const target = evt.target as HTMLElement;
-
-    if (target.nodeName === ButtonNode) {
-      targetedButton.current = target;
-    }
+    targetedButton.current = findButtonNodeInDOM(evt.target as HTMLElement);
   }
 
   function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
     if (!isPhoneSafari()) { return; }
     if (evt.target === null) { return; }
-    if (evt.target !== targetedButton.current) { return; }
+    if (findButtonNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
 
     evt.target.dispatchEvent(new Event('click', { bubbles: true }));
   }
