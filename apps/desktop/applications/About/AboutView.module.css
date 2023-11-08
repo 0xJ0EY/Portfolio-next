@@ -1,23 +1,41 @@
-.wrapper {
+.home-title {
   display: flex;
-  height: 100%;
+  justify-content: center;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  font-weight: normal;
 }
 
-.navigationWrapper {
-  width: 160px;
-}
-
-.navigationWrapper.logo {
-  display: block;
+.home-subtitle {
+  display: flex;
+  justify-content: center;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: normal;
+  margin-top: 0.5rem;
 }
 
 .navigation {
-  margin: 10px;
-  display: flex;
-  flex-direction: column;
+  min-width: 12rem;
 }
 
-.content {
+.page-h1 {
+  font-family: 'Century Schoolbook', sans-serif;
+  font-weight: normal;
+  font-size: 2rem;
+}
+
+.logo-part {
+  display: block;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
+
+.home-page {
   display: flex;
-  flex: 1;
 }

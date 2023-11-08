@@ -2,7 +2,7 @@ import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
 import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
-import React, { MutableRefObject, useEffect, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
 import { Dock } from "./Dock/Dock";
@@ -12,7 +12,9 @@ import { DragAndDropView } from "./DragAndDropView";
 import { parseResponseFromParent, sendRequestToParent } from "rpc";
 import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
-import { clamp, isTouchMoveCamera, isTouchZoom } from "./util";
+import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
+
+const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
@@ -40,6 +42,20 @@ function handleParentResponsesClosure(
   }
 }
 
+function findButtonNodeInDOM(value: HTMLElement): HTMLElement | null {
+  let element: HTMLElement | null = value;
+
+  while (element !== null) {
+    if (element.nodeName === NodeNameButton) {
+      return element;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
+}
+
 export const OperatingSystem = () => {
   const ref = useRef<HTMLDivElement>(null);
   const touchOrigin = useRef<TouchData | null>(null);
@@ -47,10 +63,37 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  function handleTouchStartEvent(evt: TouchEvent) {
+  const targetedButton = useRef<HTMLElement | null>(null);
+
+  function handlePhoneSafariButtonClickStart(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    // Always reset the targeted button
+    targetedButton.current = null;
+
+    // If it is the first touch, record the node if it is a button
+    if (evt.touches.length !== 1) { return; }
+
+    targetedButton.current = findButtonNodeInDOM(evt.target as HTMLElement);
+  }
+
+  function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    if (evt.target === null) { return; }
+    if (findButtonNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
+
+    evt.target.dispatchEvent(new Event('click', { bubbles: true }));
+  }
+
+  function handleGestureStart(evt: Event): void {
     evt.preventDefault();
+  }
+
+  function handleTouchStartEvent(evt: TouchEvent) {
+    if (isPhoneSafari()) { evt.preventDefault(); }
 
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
+
+    handlePhoneSafariButtonClickStart(evt);
 
     if (evt.touches.length === 2) {
       touchOrigin.current = TouchData.fromTouchEvent('start', evt);
@@ -121,6 +164,8 @@ export const OperatingSystem = () => {
   function handleTouchEndEvent(evt: TouchEvent) {
     evt.preventDefault();
 
+    handlePhoneSafariButtonClickRelease(evt);
+
     if (evt.touches.length !== 0) { return; }
     if (camera.current === null) { return; }
 
@@ -135,12 +180,14 @@ export const OperatingSystem = () => {
   }
 
   function disableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.addEventListener('gesturestart', handleGestureStart, { passive: false });
     element.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
     element.addEventListener('touchmove', handleTouchMoveEvent, { passive: true });
     element.addEventListener('touchend', handleTouchEndEvent, { passive: true });
   }
 
   function enableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.removeEventListener('gesturestart', handleGestureStart);
     element.removeEventListener('touchstart', handleTouchStartEvent);
     element.removeEventListener('touchmove', handleTouchMoveEvent);
     element.removeEventListener('touchend', handleTouchEndEvent);
@@ -149,6 +196,8 @@ export const OperatingSystem = () => {
   useEffect(() => {
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
+
+    console.log('phone safari: ', isPhoneSafari());
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)
