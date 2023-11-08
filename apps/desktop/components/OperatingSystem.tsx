@@ -12,7 +12,9 @@ import { DragAndDropView } from "./DragAndDropView";
 import { parseResponseFromParent, sendRequestToParent } from "rpc";
 import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
-import { clamp, isTouchMoveCamera, isTouchZoom } from "./util";
+import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
+
+const ButtonNode = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
@@ -47,12 +49,41 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
+  const targetedButton = useRef<HTMLElement | null>(null);
+
+  function handlePhoneSafariButtonClickStart(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    // Always reset the targeted button
+    targetedButton.current = null;
+
+    // If it is the first touch, record the node if it is a button
+    if (evt.touches.length !== 1) { return; }
+
+    const target = evt.target as HTMLElement;
+
+    if (target.nodeName === ButtonNode) {
+      targetedButton.current = target;
+    }
+  }
+
+  function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    if (evt.target === null) { return; }
+    if (evt.target !== targetedButton.current) { return; }
+
+    evt.target.dispatchEvent(new Event('click', { bubbles: true }));
+  }
+
   function handleGestureStart(evt: Event): void {
     evt.preventDefault();
   }
 
   function handleTouchStartEvent(evt: TouchEvent) {
+    if (isPhoneSafari()) { evt.preventDefault(); }
+
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
+
+    handlePhoneSafariButtonClickStart(evt);
 
     if (evt.touches.length === 2) {
       touchOrigin.current = TouchData.fromTouchEvent('start', evt);
@@ -123,6 +154,8 @@ export const OperatingSystem = () => {
   function handleTouchEndEvent(evt: TouchEvent) {
     evt.preventDefault();
 
+    handlePhoneSafariButtonClickRelease(evt);
+
     if (evt.touches.length !== 0) { return; }
     if (camera.current === null) { return; }
 
@@ -153,6 +186,8 @@ export const OperatingSystem = () => {
   useEffect(() => {
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
+
+    console.log('phone safari: ', isPhoneSafari());
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)
