@@ -170,19 +170,19 @@ export type FolderIconEntry = {
 }
 
 export default function FolderIcon(props: { folderIconEntry: FolderIconEntry, index: number }) {
-  const { folderIconEntry: desktopIconEntry, index } = props;
-  const entry = desktopIconEntry.entry;
+  const { folderIconEntry: folderIconEntry, index } = props;
+  const entry = folderIconEntry.entry;
   const file = entry.node;
 
-  const selected = desktopIconEntry.selected ? styles.selected : '';
-  const title = desktopIconEntry.editing.active ? <EditTitle entry={desktopIconEntry}/> : <RenderTitle title={file.name}/>;
+  const selected = folderIconEntry.selected ? styles.selected : '';
+  const title = folderIconEntry.editing.active ? <EditTitle entry={folderIconEntry}/> : <RenderTitle title={file.name}/>;
   const icon = getIconFromNode(entry.node);
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
-      top: `${desktopIconEntry.y}px`,
-      left: `${desktopIconEntry.x}px`,
-      zIndex: calculateZIndex(desktopIconEntry, index)
+      top: `${folderIconEntry.y}px`,
+      left: `${folderIconEntry.x}px`,
+      zIndex: calculateZIndex(folderIconEntry, index)
     }}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
