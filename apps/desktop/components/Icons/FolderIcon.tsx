@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
-import styles from '@/components/Icons/DesktopIcon.module.css';
+import styles from '@/components/Icons/FolderIcon.module.css';
 import { DirectoryEntry, getIconFromNode } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
 
@@ -17,7 +17,7 @@ export const TextHeight   = 20;
 export const CharactersPerLine = 14;
 export const MaximumLines = 2;
 
-export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
+export function FolderIconHitBox(entry: FolderIconEntry): Rectangle[] {
   // TODO: Resize text hitbox based on the content
 
   const imageHorizontalCenter = IconWidth / 2;
@@ -39,7 +39,7 @@ export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
   return [image, text];
 }
 
-function EditTitle(props: { entry: DesktopIconEntry }) {
+function EditTitle(props: { entry: FolderIconEntry }) {
   const { entry } = props;
 
   const ref = useRef<HTMLInputElement>(null);
@@ -152,7 +152,7 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
-function calculateZIndex(entry: DesktopIconEntry, index: number): number {
+function calculateZIndex(entry: FolderIconEntry, index: number): number {
   let result = entry.dragging ? 100_000 : 0;
   
   result += index;
@@ -160,7 +160,7 @@ function calculateZIndex(entry: DesktopIconEntry, index: number): number {
   return result;
 }
 
-export type DesktopIconEntry = {
+export type FolderIconEntry = {
   entry: DirectoryEntry,
   x: number,
   y: number
@@ -169,8 +169,8 @@ export type DesktopIconEntry = {
   editing: { active: boolean, value: string, onSave?: () => void }
 }
 
-export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {
-  const { desktopIconEntry, index } = props;
+export default function FolderIcon(props: { folderIconEntry: FolderIconEntry, index: number }) {
+  const { folderIconEntry: desktopIconEntry, index } = props;
   const entry = desktopIconEntry.entry;
   const file = entry.node;
 

@@ -2,7 +2,7 @@ import { DirectoryContent, DirectoryEntry, DirectoryEventType, DirectoryRenameEv
 import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
-import { DesktopIconEntry, DesktopIconHitBox, IconHeight, IconWidth } from '../Icons/DesktopIcon';
+import { FolderIconEntry, FolderIconHitBox, IconHeight, IconWidth } from '../Icons/FolderIcon';
 import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
@@ -11,7 +11,7 @@ import { Err, Ok, Result } from "result";
 import { SystemAPIs } from '../OperatingSystem';
 import { useTranslation } from 'next-i18next';
 
-const DesktopIcon = dynamic(() => import('../Icons/DesktopIcon'));
+const FolderIcon = dynamic(() => import('../Icons/FolderIcon'));
 
 interface SelectionBox {
   open: boolean,
@@ -52,11 +52,11 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   const useLocalIconPosition = localIconPosition ?? false;
   const allowOverflow = propOverflow ?? true;
 
-  const [files, setFiles] = useState<DesktopIconEntry[]>([]);
-  const localFiles = useRef<Chain<DesktopIconEntry>>(new Chain());
+  const [files, setFiles] = useState<FolderIconEntry[]>([]);
+  const localFiles = useRef<Chain<FolderIconEntry>>(new Chain());
   const { t } = useTranslation('common');
 
-  function updateFiles(files: Chain<DesktopIconEntry>) {
+  function updateFiles(files: Chain<FolderIconEntry>) {
     localFiles.current = files;
     setFiles(files.toArray());
   } 
@@ -70,12 +70,12 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   const selectionBoxStart = useRef({ x: 0, y: 0 });
 
   const isDragging = useRef(false);
-  const previousClickedFile = useRef<{ file: DesktopIconEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
+  const previousClickedFile = useRef<{ file: FolderIconEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
 
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
   const fileDraggingFolderOrigin = useRef<Point>();
 
-  const fileDraggingSelection  = useRef<DesktopIconEntry[]>([]);
+  const fileDraggingSelection  = useRef<FolderIconEntry[]>([]);
   const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
   const fileDraggingSession: MutableRefObject<DragAndDropSession | null> = useRef(null);
 
@@ -116,7 +116,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
     for (let node of files.iterFromHead()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = FolderIconHitBox(file);
 
       const selected = pointInsideAnyRectangles(point, hitBox);
       const toggleSelected = selected && !hasSelected;
@@ -153,14 +153,14 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
     for (let node of files.iterFromHead()) {
       const file = node.value; 
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = FolderIconHitBox(file);
       file.selected = rectangleAnyIntersection(selectionRect, hitBox);
     }
 
     updateFiles(files);
   }
 
-  function clickedFile(position: Point): DesktopIconEntry | undefined {
+  function clickedFile(position: Point): FolderIconEntry | undefined {
     const files = localFiles.current;
 
     if (!iconContainer.current) { return; }
@@ -169,7 +169,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
-      const hitBox = DesktopIconHitBox(file);
+      const hitBox = FolderIconHitBox(file);
 
       if (pointInsideAnyRectangles(point, hitBox)) {
         return node.value;
@@ -184,7 +184,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     window.addEventListener('pointermove', onFileDraggingMove);
     window.addEventListener('pointerup', onFileDraggingUp);
 
-    const selectedFiles: DesktopIconEntry[] = [];
+    const selectedFiles: FolderIconEntry[] = [];
 
     for (const node of files.iterFromTail()) {
       const file = node.value;
@@ -210,14 +210,14 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     if (!origin) { return; }
 
     const data: FileSystemItemDragData = {
-      nodes: fileDraggingSelection.current.map(desktopIconEntry => {
+      nodes: fileDraggingSelection.current.map(folderIcon => {
       
         const offset = {
-          x: origin.x - desktopIconEntry.x,
-          y: origin.y - desktopIconEntry.y,
+          x: origin.x - folderIcon.x,
+          y: origin.y - folderIcon.y,
         };
 
-        return { item: desktopIconEntry.entry.node, position: { x: 0, y: 0}, offset };
+        return { item: folderIcon.entry.node, position: { x: 0, y: 0}, offset };
       })
     };
 
@@ -298,10 +298,10 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     // 3. apply the offset to the local position
     if (fileDraggingCurrentNode.current) {
       const data: FileSystemItemDragData = {
-        nodes: fileDraggingSelection.current.map(desktopIconEntry => {
+        nodes: fileDraggingSelection.current.map(folderIcon => {
           const offset = {
-            x: origin.x - desktopIconEntry.x,
-            y: origin.y - desktopIconEntry.y,
+            x: origin.x - folderIcon.x,
+            y: origin.y - folderIcon.y,
           };
 
           const position = {
@@ -309,7 +309,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
             y: evt.clientY - coords.top - offset.y,
           };
 
-          return { item: desktopIconEntry.entry.node, position, offset };
+          return { item: folderIcon.entry.node, position, offset };
         })
       }
 
@@ -324,7 +324,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     isDragging.current = false;
   }
 
-  function renameFile(iconEntry: DesktopIconEntry) {
+  function renameFile(iconEntry: FolderIconEntry) {
     // Check if we can rename the file first
     const fileSystemNode = iconEntry.entry.node;
     if (!fileSystemNode.editable) { return; }
@@ -515,9 +515,9 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   }
 
   function reloadSyncedFiles(directory: FileSystemDirectory) {
-    const chain = new Chain<DesktopIconEntry>();
+    const chain = new Chain<FolderIconEntry>();
 
-    // Essentially a map to wrap the files in a DesktopIconEntry
+    // Essentially a map to wrap the files in a FolderIconEntries
     for (const node of directory.children.iterFromTail()) {
       chain.append({
         entry: node.value,
@@ -539,10 +539,10 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const container = ref.current;
 
     const existingChain = localFiles.current;
-    const lookup = new Map<number, DesktopIconEntry>();
-    const newChain = new Chain<DesktopIconEntry>();
+    const lookup = new Map<number, FolderIconEntry>();
+    const newChain = new Chain<FolderIconEntry>();
 
-    let newDesktopIconEntries: DirectoryEntry[] = [];
+    let newDirectoryEntries: DirectoryEntry[] = [];
 
     // Create a quick lookup table, so we don't have to look sequentially through the chain
     // I <3 linked list look up times
@@ -557,7 +557,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       const existingValue = lookup.get(node.value.node.id);
 
       if (!existingValue) {
-        newDesktopIconEntries.push(node.value);
+        newDirectoryEntries.push(node.value);
         continue;
       }
 
@@ -578,7 +578,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       overflowBehavior: 'overlay'
     };
 
-    for (const entry of newDesktopIconEntries) {
+    for (const entry of newDirectoryEntries) {
       const pos = calculateNodePosition(directory.settings, content, newChain.toArray());
 
       newChain.append({
@@ -634,7 +634,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
   }
 
-  function fileMoveToggleSelected(files: Chain<DesktopIconEntry>, evt: FileSystemItemDragEvent) {
+  function fileMoveToggleSelected(files: Chain<FolderIconEntry>, evt: FileSystemItemDragEvent) {
     const selectedFiles: Set<number> = new Set();
 
     const first = evt.detail.nodes[0] ?? null;
@@ -654,7 +654,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
         continue;
       }
 
-      const hitBox = DesktopIconHitBox(desktopEntry);
+      const hitBox = FolderIconHitBox(desktopEntry);
 
       const pos = {
         x: first.position.x + first.offset.x,
@@ -673,7 +673,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(files);
   }
 
-  function fileDropGetTargetDirectory(files: Chain<DesktopIconEntry>, evt: FileSystemItemDragEvent): Result<FileSystemDirectory, Error> {
+  function fileDropGetTargetDirectory(files: Chain<FolderIconEntry>, evt: FileSystemItemDragEvent): Result<FileSystemDirectory, Error> {
     const selectedFiles: Set<number> = new Set();
 
     const first = evt.detail.nodes[0] ?? null;
@@ -692,7 +692,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       if (file.kind !== 'directory') { continue; }
       if (selectedFiles.has(file.id)) { continue; }
 
-      const hitBox = DesktopIconHitBox(node.value);
+      const hitBox = FolderIconHitBox(node.value);
 
       const pos = {
         x: first.position.x + first.offset.x,
@@ -763,7 +763,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
         directoryEntry.y = positionY;
       }
       
-      const desktopIconEntry: DesktopIconEntry = {
+      const folderIconEntry: FolderIconEntry = {
         entry: directoryEntry,
         x: positionX,
         y: positionY,
@@ -774,13 +774,13 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
       for (let fileNode of files.iterFromTail()) {
         if (fileNode.value.entry.node.id === directoryEntry.node.id) {
-          fileNode.value = desktopIconEntry;
+          fileNode.value = folderIconEntry;
 
           continue outer;
         }
       }
 
-      files.append(desktopIconEntry);
+      files.append(folderIconEntry);
     }
 
     if (forceUpdate) {
@@ -866,7 +866,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   }, [directory]);
 
   const icons = files.map((entry, index) => {
-    return <DesktopIcon key={index} desktopIconEntry={entry} index={index} />
+    return <FolderIcon key={index} folderIconEntry={entry} index={index} />
   });
 
   const selectionBox = SelectionBox(box);
