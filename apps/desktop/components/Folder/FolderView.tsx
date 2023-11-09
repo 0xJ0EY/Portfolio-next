@@ -1,4 +1,4 @@
-import { DirectoryContent, DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/FileSystem';
+import { DirectoryContent, DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, DirectorySettings, FileSystemDirectory, FileSystemNode, calculateNodePosition, constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/FileSystem';
 import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -579,7 +579,14 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     };
 
     for (const entry of newDirectoryEntries) {
-      const pos = calculateNodePosition(directory.settings, content, newChain.toArray());
+      const desktopSettings: DirectorySettings = {
+        alwaysOpenAsIconView: false,
+        sortBy: null, // TODO: Implement this
+        sortDirection: 'vertical',
+        sortOrigin: 'top-right',
+      };
+
+      const pos = calculateNodePosition(desktopSettings, content, newChain.toArray());
 
       newChain.append({
         entry,

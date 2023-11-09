@@ -10,7 +10,7 @@ import { SystemAPIs } from "../../components/OperatingSystem";
 import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
 
-type DirectorySettings = {
+export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
   sortBy: null, // TODO: Implement this
   sortDirection: 'horizontal' | 'vertical',
@@ -244,34 +244,32 @@ function entriesWithinSelection(entries: Point[], x: number, y: number, dimensio
 function generatePosition(iteration: number, settings: DirectorySettings, content: DirectoryContent, boundingBox: BoundingBox): { x: number, y: number } {
   const direction = settings.sortDirection;
   const origin    = settings.sortOrigin;
-  const horizontalSteps = Math.floor(content.width / boundingBox.width);
-  const verticalSteps = Math.floor(content.height / boundingBox.height);
+  const gridWidth   = Math.floor(content.width / boundingBox.width);
+  const gridHeight  = Math.floor(content.height / boundingBox.height);
 
   function positionX(iteration: number, direction: 'horizontal' | 'vertical'): number {
     switch (direction) {
       case "horizontal":
-        if (origin === 'top-right') {
-          return horizontalSteps - iteration % horizontalSteps;
-        } else {
-          return iteration % horizontalSteps;
-        }
+        return iteration % gridWidth;
 
       case "vertical":
-        return Math.floor(iteration / verticalSteps);
+        return Math.floor(iteration / gridHeight);
     }
   }
 
   function positionY(iteration: number, direction: 'horizontal' | 'vertical'): number {
     switch (direction) {
       case "horizontal":
-        return Math.floor(iteration / horizontalSteps);
+        return Math.floor(iteration / gridWidth);
 
       case "vertical":
-        return iteration % verticalSteps;
+        return iteration % gridHeight;
     }
   }
 
-  const x = positionX(iteration, direction) * boundingBox.width;
+  let x = positionX(iteration, direction) * boundingBox.width;
+  if (origin === 'top-right') { x = (content.width - boundingBox.width) - x; }
+
   const y = positionY(iteration, direction) * boundingBox.height;
 
   return { x, y };
