@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './MenuBar.module.css';
 import { ApplicationManager, ApplicationManagerEvent, MenuEntry, MenuItem } from '@/applications/ApplicationManager';
 import { minimumDigits } from './util';
@@ -16,10 +16,10 @@ function renderApplicationMenu(menuItems: MenuEntry[]) {
     });
   }
 
-  return items.map((x, i) => <React.Fragment key={i}>{renderMenu(x)}</React.Fragment>);
+  return items.map((x, i) => <React.Fragment key={i}>{RenderMenu(x)}</React.Fragment>);
 }
 
-function renderMenu(menuEntries: MenuEntry) {
+function RenderMenu(menuEntries: MenuEntry) {
   const ref = useRef(null);
   const [isOpen, setOpen] = useState<boolean>(false);
 
@@ -124,7 +124,7 @@ function languageSelection(t: TFunction, i18n: I18n) {
     ]
   }
 
-  return renderMenu(entry);
+  return RenderMenu(entry);
 }
 
 type MenuBarProps = {
