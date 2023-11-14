@@ -19,11 +19,11 @@ html, body {
   box-sizing: border-box;
 }
 
-.systemButton,
-.headerButton {
+.systemButton, .system-button,
+.headerButton, .header-button {
   border-radius: 0;
   line-height: 15px;
-  padding: 3px 5px 5px;
+  padding: 5px;
   border: none;
   color: #000;
   background-color: #dcdcdc;
@@ -33,23 +33,23 @@ html, body {
   cursor: pointer;
 }
 
-.headerButton {
+.headerButton, .header-button {
   line-height: 13px;
   padding: 3px 4px 3px;
 }
 
-.systemButton img,
-.headerButton img {
+.systemButton img, .system-button img,
+.headerButton img, .header-button img {
   user-select: none;
 }
 
-.systemButton:hover,
-.headerButton:hover {
+.systemButton:hover, .system-button:hover,
+.headerButton:hover, .header-button:hover {
   background-color: #c9c9c9;
 }
 
-.systemButton:active,
-.headerButton:active {
+.systemButton:active, .system-button:active,
+.headerButton:active, .header-button:active {
   background-color: #dcdcdc;
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }

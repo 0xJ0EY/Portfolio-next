@@ -3,7 +3,8 @@
   display: flex;
   padding: 0 5px;
   flex: 0 1 auto;
-  line-height: 30px;
+  line-height: 40px;
+  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #c8c8c8,inset -2px -2px grey,inset 2px 2px #fff;
 }
 
 .spacer {
@@ -43,20 +44,16 @@
 }
 
 .menuContent {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  background-color: darkgray;
   z-index: 10000;
 
   position: absolute;
   top: 100%;
   left: 0;
-  padding: 2px 5px 5px;
-}
-
-.menu:focus-within .menuContent {
-  display: flex;
-  flex-direction: column;
-
-  background-color: darkgray;
+  padding: 5px;
+  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #c8c8c8,inset -2px -2px grey,inset 2px 2px #fff;
 }
 
 .menuContent button {
