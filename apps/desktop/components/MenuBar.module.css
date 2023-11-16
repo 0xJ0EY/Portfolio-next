@@ -15,12 +15,15 @@
   display: flex;
   align-items: center;
   user-select: none;
+  padding-right: 8px;
 }
 
 .utility {
   display: flex;
   flex-direction: row;
   gap: 8px;
+  margin: 5px;
+  border: 1px solid #000;
 }
 
 .weekday {
