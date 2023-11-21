@@ -21,7 +21,7 @@
   pointer-events: all;
 }
 
-.dockApplication {
+.dock-application {
   position: relative;
   height: 74px;
   width: 64px;
@@ -35,7 +35,7 @@
   margin: 0 4px;
 }
 
-.dockApplication:hover::after {
+.dock-application:hover::after {
   position: absolute;
   top: -25px;
   left: 50%;
@@ -44,24 +44,23 @@
   content: attr(data-tooltip);
 }
 
-.dockApplication img {
+.dock-application .dock-app-image {
   display: block;
-  max-height: calc(100% - 10px);
+  max-height: calc(100% - 12px);
 }
 
-.dockApplication .status {
-  display: block;
-  height: 10px;
+.dock-app-active-image {
+  max-height: 100%;
+  height: 100%;
+}
+
+.dock-application .status {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+  height: 12px;
   width: 100%;
   /* background: blue; */
-}
-
-.active {
-  background: green;
-}
-
-.inactive {
-  background: yellow;
 }
 
 .separator {
