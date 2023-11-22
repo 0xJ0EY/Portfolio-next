@@ -1,4 +1,4 @@
-import { ApplicationIcon, FileSystem, FileSystemApplication, FileSystemDirectory, constructPath } from "@/apis/FileSystem/FileSystem";
+import { ApplicationIcon, FileSystem, FileSystemApplication, FileSystemDirectory, FileSystemNode } from "@/apis/FileSystem/FileSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { WindowCompositor, WindowContext } from "@/components/WindowManagement/WindowCompositor";
 import { Err, Ok, Result } from "result";
@@ -7,6 +7,7 @@ import { ApplicationEvent, ApplicationWindowEvent, createApplicationOpenEvent, c
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { Action } from "@/components/util";
 import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
+import { constructPath } from "@/apis/FileSystem/Util";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
@@ -216,6 +217,24 @@ export class ApplicationManager implements BaseApplicationManager {
     return this.open(`/Applications/Finder.app ${path}`);
   }
 
+
+
+  private openFileSystemNode(node: FileSystemNode, path: string, args: string): Result<number, Error> {
+    switch (node.kind) {
+      case 'application': return this.openApplication(node, path, args);
+      case 'directory': return this.openDirectory(path);
+      case 'hyperlink': {
+
+        // Hyperlink content is only editable by me, so we don't have to be very rigorous with the safety checks
+        const target      = node.target;
+        const targetPath  = constructPath(target);
+
+        return this.openFileSystemNode(target, targetPath, args);
+      };
+      default: return Err(Error("Not yet implemented"))
+    }
+  }
+
   open(argument: string): Result<number, Error> {
     const parts = parseCommand(argument);
 
@@ -228,12 +247,7 @@ export class ApplicationManager implements BaseApplicationManager {
 
     const value = node.value;
 
-    // TODO: Open text file in text file viewer
-    switch (value.kind) {
-      case 'application': return this.openApplication(value, path, args);
-      case 'directory': return this.openDirectory(path);
-      default: return Err(Error("Not yet implemented"))
-    }
+    return this.openFileSystemNode(value, path, args);
   }
 
   kill(processId: number): void {

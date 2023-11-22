@@ -9,6 +9,7 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
+import { constructPath } from "./Util";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -29,7 +30,7 @@ export type DirectoryContent = {
   overflowBehavior: 'overflow' | 'overlay'
 }
 
-export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication;
+export type FileSystemNode = FileSystemDirectory | FileSystemFile | FileSystemApplication | FileSystemHyperLink;
 
 export type DirectoryEntry = {
   node: FileSystemNode,
@@ -48,6 +49,16 @@ export type FileSystemDirectory = {
   editable: boolean,
   stickyBit: boolean,
 };
+
+export type FileSystemHyperLink = {
+  id: number,
+  parent: FileSystemDirectory,
+  kind: 'hyperlink',
+  icon: ApplicationIcon,
+  target: FileSystemNode,
+  editable: boolean,
+  name: string
+}
 
 export type FileSystemFile = {
   id: number,
@@ -133,10 +144,24 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
   }
 }
 
+function createHyperLink(id: number, parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean): FileSystemHyperLink {
+  return {
+    id,
+    parent,
+    target,
+    kind: 'hyperlink',
+    icon,
+    name,
+    editable
+  }
+}
+
 export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
   switch (node.kind) {
-    case 'application': return node.icon;
+    case 'application':
+    case 'hyperlink': return node.icon;
     case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
     case "file": return { src: '/icons/folder-icon.png', alt: 'File icon' }
   }
 }
@@ -161,25 +186,6 @@ export function generateUniqueNameForDirectory(directory: FileSystemDirectory, t
   return `${template} ${iteration}`;
 }
 
-export function constructPath(node: FileSystemNode): string {
-  let currentNode: FileSystemNode = node;
-  let directories = [];
-
-  // Adds a backwards slash to end end of the path, if it is a directory
-  if (node.kind === 'directory') { directories.push(''); }
-
-  while (currentNode.parent !== null) {
-    directories.push(currentNode.name);
-    currentNode = currentNode.parent;
-  }
-
-  directories.push(''); // Adds a backwards slash for the root
-
-  const path = directories.reverse().join('/');
-
-  return path;
-}
-
 export function createBaseFileSystem(): FileSystem {
   const fileSystem = new FileSystem();
   const rootEntry = fileSystem.getDirectory('/');
@@ -200,13 +206,15 @@ export function createBaseFileSystem(): FileSystem {
   // Create macOS like Users folder
   const users = fileSystem.addDirectory(root, 'Users', false, false);
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
-  const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
-  fileSystem.addDirectory(desktop, 'foo', true, true);
-  fileSystem.addDirectory(desktop, 'bar', true, true);
 
   const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
+  const trash = fileSystem.addDirectory(joey, 'Trash', false, true);
 
-  fileSystem.addDirectory(joey, 'Trash', false, true);
+  const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
+  const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
+
+  fileSystem.addHyperLink(desktop, documents, 'Documents', tempIcon, true);
+  fileSystem.addHyperLink(desktop, trash, 'Trash', tempIcon, true);
 
   return fileSystem;
 }
@@ -556,6 +564,16 @@ export class FileSystem {
     this.lookupTable[constructPath(directory)] = directory;
 
     return directory;
+  }
+
+  public addHyperLink(parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean) {
+    const hyperlink = createHyperLink(++this.id, parent, target, name, icon, editable);
+
+    this.addNodeToDirectory(parent, hyperlink);
+
+    this.lookupTable[constructPath(hyperlink)] = hyperlink;
+
+    return hyperlink;
   }
 
   public addNodeToDirectory(directory: FileSystemDirectory, node: FileSystemNode): DirectoryEntry {

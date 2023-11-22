@@ -4,8 +4,9 @@ import { Window, WindowApplication, WindowCompositor } from '../WindowManagement
 import { WindowEvent } from '../WindowManagement/WindowEvents';
 import dynamic from 'next/dynamic';
 import { SystemAPIs } from '../OperatingSystem';
-import { DirectoryEntry, FileSystemNode, constructPath } from '@/apis/FileSystem/FileSystem';
+import { DirectoryEntry, FileSystemNode } from '@/apis/FileSystem/FileSystem';
 import { ApplicationManager } from '@/applications/ApplicationManager';
+import { constructPath } from '@/apis/FileSystem/Util';
 
 const FolderView = dynamic(() => import('../Folder/FolderView'));
 const WindowContainer = dynamic(() => import('../WindowManagement/WindowContainer'));

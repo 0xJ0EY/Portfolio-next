@@ -2,12 +2,13 @@ import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useState, useEffect, useRef } from "react";
 import FolderView, { FolderViewHandles } from "@/components/Folder/FolderView";
 import { ApplicationWindowEvent } from "../ApplicationEvents";
-import { FileSystemDirectory, FileSystemNode, constructPath } from "@/apis/FileSystem/FileSystem";
+import { FileSystemDirectory, FileSystemNode } from "@/apis/FileSystem/FileSystem";
 import styles from './FinderView.module.css';
 import { Application } from "../ApplicationManager";
 import React from "react";
 import { Chain, Node } from "@/data/Chain";
 import { Err, Ok, Result } from "result";
+import { constructPath } from "@/apis/FileSystem/Util";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }
