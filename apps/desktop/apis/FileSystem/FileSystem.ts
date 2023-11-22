@@ -166,26 +166,6 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
   }
 }
 
-export function generateUniqueNameForDirectory(directory: FileSystemDirectory, template: string): string {
-  function existsInDirectory(directory: FileSystemDirectory, name: string): boolean {
-    for (const node of directory.children.iterFromTail()) {
-      const nodeName = node.value.node.name;
-
-      if (nodeName === name) { return true; }
-    }
-
-    return false;
-  }
-
-  if (!existsInDirectory(directory, template)) { return template; }
-
-  let iteration = 1;
-
-  while (existsInDirectory(directory, `${template} ${++iteration}`)) {}
-
-  return `${template} ${iteration}`;
-}
-
 export function createBaseFileSystem(): FileSystem {
   const fileSystem = new FileSystem();
   const rootEntry = fileSystem.getDirectory('/');
