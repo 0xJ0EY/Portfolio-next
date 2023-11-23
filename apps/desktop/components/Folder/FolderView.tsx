@@ -27,7 +27,7 @@ function SelectionBox(box: SelectionBox) {
     return <></>
   }
 
-  return <div className={styles.selectionBox} style={{width: box.width, height: box.height, top: box.y, left: box.x}}></div>
+  return <div className={styles['selection-box']} style={{width: box.width, height: box.height, top: box.y, left: box.x}}></div>
 }
 
 const DraggingThreshold = 5;
@@ -885,10 +885,10 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       className={styles.folder}
       data-drop-point="true"
     >
-      <div className={styles.selectionBoxContainer}>
+      <div className={styles['selection-box-container']}>
         {selectionBox}
       </div>
-      <div ref={iconContainer} className={[styles.iconsContainer, !allowOverflow ? styles.hideOverflow : ''].join(' ')}>
+      <div ref={iconContainer} className={[styles['icons-container'], !allowOverflow ? styles['hide-overflow'] : ''].join(' ')}>
         {icons}
       </div>
     </div>
