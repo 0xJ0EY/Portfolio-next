@@ -2,13 +2,30 @@ import { AssetKeys } from "@/components/asset-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
+
+type Action = (deltaTime: number) => ActionResult;
+
+type ActionResult = {
+  done: boolean,
+  blocking: boolean
+}
+
 // Should be responsible for managing the different states of camera
 // and that the camera will not collide with the nearest object
 export class CameraController {
-  private actions: ((deltaTime: number) => boolean)[] = [];
+  private actions: Action[] = [];
 
   private enabled: boolean = true;
   private target: Vector3 = new Vector3(0, 0, 0);
+
+  private cameraFollowEnabled: boolean = false;
+  private cameraFollowDampingFactor: number = 1.0;
+  private targetFollowPosition: Vector3 = new Vector3(0, 0, 0);
+  private cameraFollowPosition: Vector3 = new Vector3(0, 0, 0);
+  private cameraPosition: Vector3 = new Vector3(0, 0, 0);
+
+  private dampingEnabled: boolean = false;
+  private dampingFactor: number = 25;
 
   private origin: Vector3 = new Vector3(0, 0, 0);
   private originBoundaryX: number | null = null;
@@ -42,12 +59,36 @@ export class CameraController {
     return this.scene;
   }
 
+  public enableDamping(): void {
+    this.dampingEnabled = true;
+  }
+
+  public disableDamping(): void {
+    this.dampingEnabled = false;
+  }
+
+  public enableCameraFollow(): void {
+    this.cameraFollowEnabled = true;
+    this.targetFollowPosition.copy(this.target);
+    this.cameraFollowPosition.copy(this.target);
+  }
+
+  public disableCameraFollow(): void {
+    this.cameraFollowEnabled = false;
+  }
+
   public moveCameraForward(distance: number): void {
     const x = distance * Math.sin(this.spherical.theta);
     const z = distance * Math.cos(this.spherical.theta);
 
     this.panOffset.x -= x;
     this.panOffset.z -= z;
+  }
+
+  public moveToHeight(height: number): void {
+    const delta = this.target.y - height;
+
+    this.moveCameraUp(delta);
   }
 
   public moveCameraUp(distance: number): void {
@@ -88,11 +129,32 @@ export class CameraController {
     return (1 - amt) * start + amt * end;
   }
 
+  public autoZoom(targetZoom: number, durationInMs: number, callback?: () => void) {
+    let timePassedInMs = 0;
+    const originalZoom = this.currentZoomDistance;
+
+    const action = (deltaTime: number) => {
+      timePassedInMs += 1000 * deltaTime;
+      const progress = Math.min(timePassedInMs / durationInMs, 1);
+
+      this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
+
+      const isDone = progress === 1;
+
+      if (isDone && callback !== undefined) {
+        callback();
+      }
+
+      return { done: isDone, blocking: false };
+    }
+
+    this.actions.push(action);
+  }
+
   public transition(
     targetPosition: Vector3,
     targetRotation: Spherical,
-    targetZoom:
-    number,
+    targetZoom: number,
     durationInMs: number,
     callback?: () => void
     ) {
@@ -102,7 +164,7 @@ export class CameraController {
     const originalRotation = this.spherical.clone();
     const originalZoom = this.currentZoomDistance;
 
-    this.origin.copy(targetPosition);
+    this.setOriginToPosition(targetPosition);
 
     const action = (deltaTime: number) => {
       timePassedInMs += 1000 * deltaTime;
@@ -131,7 +193,7 @@ export class CameraController {
         callback();
       }
 
-      return isDone;
+      return { done: isDone, blocking: true };
     }
 
     this.actions.push(action);
@@ -171,6 +233,14 @@ export class CameraController {
 
   public getZoom(): number {
     return this.currentZoomDistance;
+  }
+
+  public updateOrigin(): void {
+    this.setOriginToPosition(this.target);
+  }
+
+  public setOriginToPosition(target: Vector3): void {
+    this.origin.copy(target);
   }
 
   public resetOriginBoundary(): void {
@@ -275,11 +345,11 @@ export class CameraController {
     return this.actions.length > 0;
   }
 
-  private getAction(): ((deltaTime: number) => boolean) {
+  private getAction(): Action {
     return this.actions[0];
   }
 
-  private popAction(): ((deltaTime: number) => boolean) {
+  private popAction(): Action {
     return this.actions.shift()!;
   }
 
@@ -287,30 +357,36 @@ export class CameraController {
     if (!this.hasActions()) { return; }
 
     // Disable user interaction when executing actions
-    this.enabled = false;
-
     const action = this.getAction();
     const result = action(deltaTime);
 
-    if (result === true) { this.popAction(); }
+    this.enabled = !result.blocking;
 
-    const done = result === true && !this.hasActions();
+    if (result.done === true) { this.popAction(); }
 
-    if (done) { this.enabled = true; }
+    const isDone = result.done === true && !this.hasActions();
+
+    if (isDone) { this.enabled = true; }
   }
 
   public update(deltaTime: number): void {
     this.processActions(deltaTime);
 
-    const offset: Vector3 = new Vector3();
+    const dampingFactor = this.dampingFactor * deltaTime;
 
-    offset.copy(this.camera.position).sub(this.target);
+    const offset: Vector3 = new Vector3();
+    offset.copy(this.cameraPosition).sub(this.target);
     offset.applyQuaternion(this.quat);
 
     this.spherical.setFromVector3(offset);
 
-    this.spherical.theta += this.sphericalDelta.theta;
-    this.spherical.phi += this.sphericalDelta.phi;
+    if (this.dampingEnabled) {
+      this.spherical.theta += this.sphericalDelta.theta * dampingFactor;
+      this.spherical.phi += this.sphericalDelta.phi * dampingFactor;
+    } else {
+      this.spherical.theta += this.sphericalDelta.theta;
+      this.spherical.phi += this.sphericalDelta.phi;
+    }
 
     this.spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this.spherical.phi));
     this.spherical.makeSafe();
@@ -319,7 +395,11 @@ export class CameraController {
     offset.setFromSpherical(this.spherical);
     offset.applyQuaternion(this.quatInverse);
 
-    this.target.add(this.panOffset);
+    if (this.dampingEnabled) {
+      this.target.addScaledVector(this.panOffset, dampingFactor);
+    } else {
+      this.target.add(this.panOffset);
+    }
 
     function applyBoundaryClamping(clampValue: number, origin: number, value: number): number {
       const upper = value <= origin + clampValue;
@@ -334,10 +414,38 @@ export class CameraController {
     if (this.originBoundaryY) { this.target.setY(applyBoundaryClamping(this.originBoundaryY, this.origin.y, this.target.y)); }
     if (this.originBoundaryZ) { this.target.setZ(applyBoundaryClamping(this.originBoundaryZ, this.origin.z, this.target.z)); }
 
-    this.camera.position.copy(this.target).add(offset);
-    this.camera.lookAt(this.target);
 
-    this.sphericalDelta.set(0,0,0);
-    this.panOffset.set(0, 0, 0);
+    if (this.cameraFollowEnabled) {
+      const targetPositionDelta = new Vector3();
+      targetPositionDelta.copy(this.target).sub(this.targetFollowPosition);
+      targetPositionDelta.multiplyScalar(this.cameraFollowDampingFactor * deltaTime);
+      this.targetFollowPosition.add(targetPositionDelta);
+
+      const followPositionDelta = new Vector3();
+      followPositionDelta.copy(this.targetFollowPosition).sub(this.cameraFollowPosition);
+      followPositionDelta.multiplyScalar(this.cameraFollowDampingFactor * deltaTime);
+
+      this.cameraFollowPosition.add(followPositionDelta);
+
+      this.cameraPosition.copy(this.target).add(offset);
+      this.camera.position.copy(this.cameraFollowPosition).add(offset);
+
+      this.camera.lookAt(this.targetFollowPosition);
+    } else {
+      this.cameraPosition.copy(this.target).add(offset);
+      this.camera.position.copy(this.cameraPosition);
+
+      this.camera.lookAt(this.target);
+    }
+
+    if (this.dampingEnabled) {
+      this.sphericalDelta.theta *= (1 - dampingFactor);
+      this.sphericalDelta.phi   *= (1 - dampingFactor);
+
+      this.panOffset.multiplyScalar(1  - dampingFactor);
+    } else {
+      this.sphericalDelta.set(0,0,0);
+      this.panOffset.set(0, 0, 0);
+    }
   }
 }

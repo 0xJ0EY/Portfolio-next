@@ -5,6 +5,8 @@ import { MonitorViewCameraState } from "./states/MonitorViewCameraState";
 import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { UnsubscribeHandler } from "@/events/EventBus";
 import { Scene } from "three";
+import { CinematicCameraState } from "./states/CinematicCameraState";
+import { DeskViewCameraState } from "./states/DeskViewCameraState";
 
 export class CameraHandlerContext {
   constructor(
@@ -40,6 +42,8 @@ export class CameraHandlerContext {
 export enum CameraHandlerState {
   FreeRoam,
   MonitorView,
+  Cinematic,
+  DeskView,
 }
 
 export class CameraHandler {
@@ -57,6 +61,7 @@ export class CameraHandler {
 
     this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
     cameraController.moveCameraUp(5.5); // TODO: Move this to an actual camera init state
+    cameraController.updateOrigin();
 
     this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
   }
@@ -69,6 +74,8 @@ export class CameraHandler {
     switch (state) {
       case CameraHandlerState.FreeRoam: return new FreeRoamCameraState(this, this.ctx);
       case CameraHandlerState.MonitorView: return new MonitorViewCameraState(this, this.ctx);
+      case CameraHandlerState.Cinematic: return new CinematicCameraState(this, this.ctx);
+      case CameraHandlerState.DeskView: return new DeskViewCameraState(this, this.ctx);
       default: throw new Error("unsupported state");
     }
   }

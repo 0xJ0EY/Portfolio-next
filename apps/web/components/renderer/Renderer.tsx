@@ -127,12 +127,8 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         const zoomDelta = maxZoom - minZoom;
 
         const zoomInPercentage = distanceDelta / zoomDelta;
-        
-        console.log('==============');
 
-        
-
-
+        // TODO: Implement zoom in percentage view
         console.log(controller.getPanOffset());
         console.log(zoomInPercentage);
 
@@ -161,8 +157,6 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         controller.setZoom(distance);
         controller.setPanOffsetX(value.horizontalOffset);
         controller.setPanOffsetY(value.verticalOffset);
-
-        console.log(controller.getPanOffset());
 
       } break;
     }

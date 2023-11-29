@@ -31,7 +31,11 @@ export class FreeRoamCameraState extends CameraState {
 
     const zoom = 10.0;
 
+    this.ctx.cameraController.moveCameraUp(5.5);
+
     this.ctx.cameraController.transition(position, rotation, zoom, 1000);
+    this.ctx.cameraController.enableDamping();
+    this.ctx.cameraController.disableCameraFollow();
 
     this.ctx.cameraController.setMinZoom(2.0);
     this.ctx.cameraController.setMaxZoom(15.0);
