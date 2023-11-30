@@ -51,10 +51,10 @@ export class DeskViewCameraState extends CameraState {
 
   private handleMouseMoveOverDisplay(data: MouseData): void {
     if (!this.isOverDisplay(data)) { return; }
-    // this.manager.changeState(CameraHandlerState.MonitorView);
+    this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
-  private calculateDeskCameraPosition(coords: PointerCoordinates, originalCameraPosition: Vector3): Vector3 {
+  private calculateDeskCameraPosition(coords: PointerCoordinates, cameraTarget: Vector3): Vector3 {
     const centerWidth   = window.innerWidth / 2;
     const centerHeight  = window.innerHeight / 2;
 
@@ -70,8 +70,8 @@ export class DeskViewCameraState extends CameraState {
     const panOffsetX = (widthOffsetFromCenter * widthOffset) - widthOffset;
     const panOffsetY = (heightOffsetFromCenter * heightOffset) - heightOffset;
 
-    const deltaX = panOffsetX - originalCameraPosition.x;
-    const deltaY = panOffsetY - originalCameraPosition.y;
+    const deltaX = panOffsetX - cameraTarget.x;
+    const deltaY = panOffsetY - cameraTarget.y;
 
     const result = new Vector3();
     result.x = deltaX;
@@ -81,9 +81,9 @@ export class DeskViewCameraState extends CameraState {
   }
 
   private handleMouseMovePanCamera(data: MouseData): void {
-    const cameraPosition = this.ctx.cameraController.getCamera().position;
+    const cameraTarget = this.ctx.cameraController.getTarget();
 
-    const { x, y } = this.calculateDeskCameraPosition(data, cameraPosition);
+    const { x, y } = this.calculateDeskCameraPosition(data, cameraTarget);
     this.ctx.cameraController.setPanOffsetX(x);
     // this.ctx.cameraController.setPanOffsetY(y);
   }

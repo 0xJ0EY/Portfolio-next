@@ -34,8 +34,8 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.moveCameraUp(5.5);
 
     this.ctx.cameraController.transition(position, rotation, zoom, 1000);
-    this.ctx.cameraController.enableDamping();
-    this.ctx.cameraController.disableCameraFollow();
+    this.ctx.cameraController.disableDamping();
+    this.ctx.cameraController.enableCameraFollow();
 
     this.ctx.cameraController.setMinZoom(2.0);
     this.ctx.cameraController.setMaxZoom(15.0);

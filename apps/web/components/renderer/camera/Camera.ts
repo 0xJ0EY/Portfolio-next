@@ -42,7 +42,7 @@ export class CameraController {
   public minPolarAngle = 0; // radians
   public maxPolarAngle = Math.PI - degToRad(45); // radians
 
-  private quat = new Quaternion().setFromUnitVectors(this.camera.up, new Vector3( 0, 1, 0 ));
+  private quat = new Quaternion().setFromUnitVectors(this.camera.up, new Vector3(0, 1, 0));
   private quatInverse = this.quat.clone().invert();
 
   private minZoomDistance = 2.5;
@@ -50,6 +50,10 @@ export class CameraController {
   private currentZoomDistance = 10;
 
   constructor(private camera: PerspectiveCamera, private scene: Scene) {}
+
+  public getTarget(): Vector3 {
+    return this.target;
+  }
 
   public getCamera(): PerspectiveCamera {
     return this.camera;
@@ -160,7 +164,7 @@ export class CameraController {
     ) {
     let timePassedInMs = 0;
 
-    const originalPosition = this.target.clone();
+    const originalPosition = this.cameraFollowEnabled ? this.targetFollowPosition.clone() : this.target.clone();
     const originalRotation = this.spherical.clone();
     const originalZoom = this.currentZoomDistance;
 
