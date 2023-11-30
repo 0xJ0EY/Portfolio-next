@@ -35,7 +35,7 @@ export class DeskViewCameraState extends CameraState {
     this.ctx.cameraController.enableCameraFollowLimitMovementSpeed();
     this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.2);
 
-    this.ctx.cameraController.autoZoom(distance, 1000, callback);
+    this.ctx.cameraController.autoZoom(distance, 750, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
     this.ctx.cameraController.setMaxZoom(5.0);
@@ -60,7 +60,7 @@ export class DeskViewCameraState extends CameraState {
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
-  private calculateDeskCameraPosition(coords: PointerCoordinates, cameraTarget: Vector3): Vector3 {
+  private calculateDeskCameraPosition(coords: PointerCoordinates, cameraTarget: Vector3, cameraOrigin: Vector3): Vector3 {
     const centerWidth   = window.innerWidth / 2;
     const centerHeight  = window.innerHeight / 2;
 
@@ -76,8 +76,8 @@ export class DeskViewCameraState extends CameraState {
     const panOffsetX = (widthOffsetFromCenter * widthOffset) - widthOffset;
     const panOffsetY = (heightOffsetFromCenter * heightOffset) - heightOffset;
 
-    const deltaX = panOffsetX - cameraTarget.x;
-    const deltaY = panOffsetY - cameraTarget.y;
+    const deltaX = (cameraOrigin.x + panOffsetX) - cameraTarget.x;
+    const deltaY = (cameraOrigin.y - panOffsetY) - cameraTarget.y;
 
     const result = new Vector3();
     result.x = deltaX;
@@ -88,10 +88,12 @@ export class DeskViewCameraState extends CameraState {
 
   private handleMouseMovePanCamera(data: MouseData): void {
     const cameraTarget = this.ctx.cameraController.getTarget();
+    const cameraOrigin = this.ctx.cameraController.getOrigin();
 
-    const { x, y } = this.calculateDeskCameraPosition(data, cameraTarget);
+    const { x, y } = this.calculateDeskCameraPosition(data, cameraTarget, cameraOrigin);
+
     this.ctx.cameraController.setPanOffsetX(x);
-    // this.ctx.cameraController.setPanOffsetY(y);
+    this.ctx.cameraController.setPanOffsetY(y);
   }
 
   private handleMouseMove(data: MouseData): void {

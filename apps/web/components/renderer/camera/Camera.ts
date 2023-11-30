@@ -57,6 +57,10 @@ export class CameraController {
     return this.target;
   }
 
+  public getOrigin(): Vector3 {
+    return this.origin;
+  }
+
   public getCamera(): PerspectiveCamera {
     return this.camera;
   }
