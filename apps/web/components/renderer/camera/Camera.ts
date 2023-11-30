@@ -19,13 +19,15 @@ export class CameraController {
   private target: Vector3 = new Vector3(0, 0, 0);
 
   private cameraFollowEnabled: boolean = false;
-  private cameraFollowDampingFactor: number = 1.0;
+  private cameraFollowLimitMovementSpeed: boolean = true;
+  private cameraFollowMaxMovementSpeed: number = 0.35;
+  private cameraFollowDampingFactor: number = 2;
   private targetFollowPosition: Vector3 = new Vector3(0, 0, 0);
   private cameraFollowPosition: Vector3 = new Vector3(0, 0, 0);
   private cameraPosition: Vector3 = new Vector3(0, 0, 0);
 
   private dampingEnabled: boolean = false;
-  private dampingFactor: number = 25;
+  private dampingFactor: number = 20;
 
   private origin: Vector3 = new Vector3(0, 0, 0);
   private originBoundaryX: number | null = null;
@@ -79,6 +81,18 @@ export class CameraController {
 
   public disableCameraFollow(): void {
     this.cameraFollowEnabled = false;
+  }
+
+  public enableCameraFollowLimitMovementSpeed(): void {
+    this.cameraFollowLimitMovementSpeed = true;
+  }
+
+  public disableCameraFollowLimitMovementSpeed(): void {
+    this.cameraFollowLimitMovementSpeed = false;
+  }
+
+  public setCameraFollowMaxMovementSpeed(value: number): void {
+    this.cameraFollowMaxMovementSpeed = value;
   }
 
   public moveCameraForward(distance: number): void {
@@ -422,6 +436,15 @@ export class CameraController {
     if (this.cameraFollowEnabled) {
       const targetPositionDelta = new Vector3();
       targetPositionDelta.copy(this.target).sub(this.targetFollowPosition);
+
+      if (this.cameraFollowLimitMovementSpeed) {
+        const ms = this.cameraFollowMaxMovementSpeed;
+
+        targetPositionDelta.x = clamp(targetPositionDelta.x, -ms, ms);
+        targetPositionDelta.y = clamp(targetPositionDelta.y, -ms, ms);
+        targetPositionDelta.z = clamp(targetPositionDelta.z, -ms, ms);
+      }
+
       targetPositionDelta.multiplyScalar(this.cameraFollowDampingFactor * deltaTime);
       this.targetFollowPosition.add(targetPositionDelta);
 

@@ -5,6 +5,10 @@ import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../Came
 import { Vector3 } from "three";
 
 export class DeskViewCameraState extends CameraState {
+
+  private maxCameraWidthOffset: number = 2.0;
+  private maxCameraHeightOffset: number = 0.5;
+
   private isOverDisplay: (data: PointerCoordinates) => boolean;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
@@ -23,19 +27,21 @@ export class DeskViewCameraState extends CameraState {
     const { distance } = calculateCameraPosition(display, cameraFov, zoomDistance);
 
     const callback = () => {
-      // this.ctx.cameraController.enableDamping();
+      this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.5);
     }
 
-    this.ctx.cameraController.disableDamping();
+    this.ctx.cameraController.enableDamping();
     this.ctx.cameraController.enableCameraFollow();
+    this.ctx.cameraController.enableCameraFollowLimitMovementSpeed();
+    this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.2);
 
     this.ctx.cameraController.autoZoom(distance, 1000, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
     this.ctx.cameraController.setMaxZoom(5.0);
 
-    this.ctx.cameraController.setOriginBoundaryX(2.0);
-    this.ctx.cameraController.setOriginBoundaryY(1.5);
+    this.ctx.cameraController.setOriginBoundaryX(this.maxCameraWidthOffset);
+    this.ctx.cameraController.setOriginBoundaryY(this.maxCameraHeightOffset);
   }
 
   onUserEvent(data: UserInteractionEvent): void {
@@ -64,8 +70,8 @@ export class DeskViewCameraState extends CameraState {
     // range (0.0 ... 2.00) 0 = top, 2 = bottom
     const heightOffsetFromCenter = coords.y / centerHeight;
 
-    const widthOffset = 2;
-    const heightOffset = 1.5;
+    const widthOffset = this.maxCameraWidthOffset;
+    const heightOffset = this.maxCameraHeightOffset;
 
     const panOffsetX = (widthOffsetFromCenter * widthOffset) - widthOffset;
     const panOffsetY = (heightOffsetFromCenter * heightOffset) - heightOffset;
