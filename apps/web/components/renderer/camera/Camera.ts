@@ -79,12 +79,21 @@ export class CameraController {
 
   public enableCameraFollow(): void {
     this.cameraFollowEnabled = true;
-    this.targetFollowPosition.copy(this.target);
-    this.cameraFollowPosition.copy(this.target);
+    this.syncFollowPositionToTarget();
   }
 
   public disableCameraFollow(): void {
     this.cameraFollowEnabled = false;
+    this.syncTargetToFollowPosition();
+  }
+
+  public syncFollowPositionToTarget(): void {
+    this.targetFollowPosition.copy(this.target);
+    this.cameraFollowPosition.copy(this.target);
+  }
+
+  public syncTargetToFollowPosition(): void {
+    this.target.copy(this.targetFollowPosition);
   }
 
   public enableCameraFollowLimitMovementSpeed(): void {
