@@ -1,6 +1,6 @@
 import { CameraController } from "./Camera";
 import { FreeRoamCameraState } from "./states/FreeRoamCameraState";
-import { CameraState } from "./CameraState";
+import { CameraState, UpdatableCameraState } from "./CameraState";
 import { MonitorViewCameraState } from "./states/MonitorViewCameraState";
 import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { UnsubscribeHandler } from "@/events/EventBus";
@@ -59,8 +59,13 @@ export class CameraHandler {
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
 
-    this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
+    this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
+
+
     cameraController.moveCameraUp(5.5); // TODO: Move this to an actual camera init state
+    cameraController.moveCameraForward(-5);
+
+
     cameraController.updateOrigin();
 
     this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
@@ -80,11 +85,11 @@ export class CameraHandler {
     }
   }
 
-  getContext(): CameraHandlerContext {
+  public getContext(): CameraHandlerContext {
     return this.ctx;
   }
 
-  changeState(state: CameraHandlerState) {
+  public changeState(state: CameraHandlerState) {
     if (this.state.isTransitioning()) return;
 
     this.getContext().setCursor('default');
@@ -93,11 +98,17 @@ export class CameraHandler {
     this.state.transition();
   }
 
-  emitUserInteractionEvent(event: UserInteractionEvent) {
+  public emitUserInteractionEvent(event: UserInteractionEvent) {
     this.eventBus.emit(event);
   }
 
-  onUserInteractionEvent(event: UserInteractionEvent) {
+  public onUserInteractionEvent(event: UserInteractionEvent) {
     this.state.onUserEvent(event);
+  }
+
+  public update(deltaTime: number): void {
+    if (this.state instanceof UpdatableCameraState) {
+      this.state.update(deltaTime);
+    }
   }
 }

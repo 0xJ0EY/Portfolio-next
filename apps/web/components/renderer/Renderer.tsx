@@ -14,6 +14,7 @@ import { TouchInputHandler } from './camera/TouchInputHandler';
 import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendResponseToChild } from "rpc";
+import { CameraState } from './camera/CameraState';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -224,6 +225,7 @@ export const Renderer = (props: RendererProps) => {
       renderCssContext(cssScene, cssRenderer, camera);
 
       cameraController.update(deltaTime);
+      cameraHandler.update(deltaTime);
     }
     
     const onWindowResize = function() {

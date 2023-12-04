@@ -149,6 +149,20 @@ export class CameraController {
     this.sphericalDelta.phi -= radians;
   }
 
+  public setRotationTheta(radians: number): void {
+    if (!this.enabled) { return; }
+
+    const correction = radians - this.spherical.theta;
+    this.sphericalDelta.theta = correction;
+  }
+
+  public setRotationPhi(radians: number): void {
+    if (!this.enabled) { return; }
+
+    const correction = radians - this.spherical.phi;
+    this.sphericalDelta.phi = correction;
+  }
+
   public rotateCameraLeft(radians: number): void {
     if (!this.enabled) { return; }
 
@@ -444,7 +458,6 @@ export class CameraController {
     if (this.originBoundaryX) { this.target.setX(applyBoundaryClamping(this.originBoundaryX, this.origin.x, this.target.x)); }
     if (this.originBoundaryY) { this.target.setY(applyBoundaryClamping(this.originBoundaryY, this.origin.y, this.target.y)); }
     if (this.originBoundaryZ) { this.target.setZ(applyBoundaryClamping(this.originBoundaryZ, this.origin.z, this.target.z)); }
-
 
     if (this.cameraFollowEnabled) {
       const targetPositionDelta = new Vector3();
