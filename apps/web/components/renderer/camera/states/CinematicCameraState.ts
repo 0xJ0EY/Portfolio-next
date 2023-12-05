@@ -1,11 +1,13 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { CameraState, UpdatableCameraState } from "../CameraState";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
-import { constructIsOverDisplay } from "./util";
+import { calculateCameraPosition, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad, lerp } from "three/src/math/MathUtils";
+import { Spherical, Vector3 } from "three";
 
 export class CinematicCameraState extends UpdatableCameraState {
 
+  private cameraRotationSpeed = 7.5;
   private isOverDisplay: (data: PointerCoordinates) => boolean;
   private progress: number = 0;
 
@@ -16,30 +18,44 @@ export class CinematicCameraState extends UpdatableCameraState {
   }
 
   transition(): void {
-    this.ctx.cameraController.enableCameraFollow();
+    const display = getDisplay(this.ctx.scene);
+    if (!display) { return; }
+
+    const position = new Vector3();
+    position.y = 5.5;
+
+    const rotation = new Spherical();
+    rotation.phi = 1.0;
+    rotation.theta = 0.0;
+
+    const zoom = 10.0;
+
+    this.ctx.cameraController.transition(position, rotation, zoom, 0);
   }
 
   private calculateRotation(progress: number): number {
     const min = degToRad(-30);
     const max = degToRad(30);
 
-    progress %= 100;
+    const moveToRight = progress < 50;
+    const t = moveToRight ? progress / 50 : (progress - 50) / 50;
+    const ease = easeInOutSine(t);
 
-    if (progress < 50) {
-      return lerp(min, max, (progress * 2) / 100);
+    const delta = max - min;
+
+    if (moveToRight) {
+      return min + (delta * ease);
     } else {
-      return lerp(max, min, ((progress - 50) * 2) / 100);
+      return max - (delta * ease);
     }
-
-    // return 0;
-
   }
 
   update(deltaTime: number): void {
-    this.progress += 10 * deltaTime;
+    this.progress += this.cameraRotationSpeed * deltaTime;
 
-    this.ctx.cameraController.setRotationPhi(degToRad(50));
     this.ctx.cameraController.setRotationTheta(this.calculateRotation(this.progress));
+
+    this.progress %= 100;
   }
 
   onUserEvent(data: UserInteractionEvent): void {
@@ -50,7 +66,7 @@ export class CinematicCameraState extends UpdatableCameraState {
   }
 
 
-  private handleMouseOverMonitor(data: PointerCoordinates): void {
+  private handleOverMonitor(data: PointerCoordinates): void {
     const overDisplay = this.isOverDisplay(data);
 
     if (overDisplay) {
@@ -59,11 +75,10 @@ export class CinematicCameraState extends UpdatableCameraState {
   }
 
   private handleMouseEvent(data: MouseData) {
-    this.handleMouseOverMonitor(data);
-
+    this.handleOverMonitor(data);
   }
 
-  private handleTouchEvent(data: TouchData) {}
-
-
+  private handleTouchEvent(data: TouchData) {
+    this.handleOverMonitor(data.pointerCoordinates());
+  }
 }

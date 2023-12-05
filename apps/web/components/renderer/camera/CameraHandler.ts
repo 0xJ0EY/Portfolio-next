@@ -61,10 +61,10 @@ export class CameraHandler {
 
     this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
 
-
     cameraController.moveCameraUp(5.5); // TODO: Move this to an actual camera init state
     cameraController.moveCameraForward(-5);
 
+    this.state.transition();
 
     cameraController.updateOrigin();
 
