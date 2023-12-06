@@ -62,8 +62,6 @@ export class CameraHandler {
     this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
     this.state.transition();
 
-    cameraController.updateOrigin();
-
     this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
   }
 

@@ -213,7 +213,7 @@ export class CameraController {
 
     const action = (deltaTime: number) => {
       timePassedInMs += 1000 * deltaTime;
-      const progress = Math.min(timePassedInMs / durationInMs, 1);
+      const progress = durationInMs !== 0 ? Math.min(timePassedInMs / durationInMs, 1) : 1;
 
       const x = this.lerp(originalPosition.x, targetPosition.x, progress);
       const y = this.lerp(originalPosition.y, targetPosition.y, progress);
