@@ -33,7 +33,7 @@ export class DeskViewCameraState extends CameraState {
     this.ctx.cameraController.enableDamping();
     this.ctx.cameraController.enableCameraFollow();
     this.ctx.cameraController.enableCameraFollowLimitMovementSpeed();
-    this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.2);
+    this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.25);
 
     this.ctx.cameraController.autoZoom(distance, 750, callback);
 
