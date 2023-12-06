@@ -27,7 +27,7 @@ export class CameraController {
   private cameraPosition: Vector3 = new Vector3(0, 0, 0);
 
   private dampingEnabled: boolean = false;
-  private dampingFactor: number = 0.05;
+  private dampingFactor: number = 0.225;
 
   private origin: Vector3 = new Vector3(0, 0, 0);
   private originBoundaryX: number | null = null;
