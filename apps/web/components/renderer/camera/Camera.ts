@@ -21,13 +21,13 @@ export class CameraController {
   private cameraFollowEnabled: boolean = false;
   private cameraFollowLimitMovementSpeed: boolean = true;
   private cameraFollowMaxMovementSpeed: number = 0.35;
-  private cameraFollowDampingFactor: number = 2;
+  private cameraFollowDampingFactor: number = 0.05;
   private targetFollowPosition: Vector3 = new Vector3(0, 0, 0);
   private cameraFollowPosition: Vector3 = new Vector3(0, 0, 0);
   private cameraPosition: Vector3 = new Vector3(0, 0, 0);
 
   private dampingEnabled: boolean = false;
-  private dampingFactor: number = 20;
+  private dampingFactor: number = 0.05;
 
   private origin: Vector3 = new Vector3(0, 0, 0);
   private originBoundaryX: number | null = null;
@@ -417,7 +417,7 @@ export class CameraController {
   public update(deltaTime: number): void {
     this.processActions(deltaTime);
 
-    const dampingFactor = this.dampingFactor * deltaTime;
+    const dampingFactor = this.dampingFactor;
 
     const offset: Vector3 = new Vector3();
     offset.copy(this.cameraPosition).sub(this.target);
@@ -471,12 +471,12 @@ export class CameraController {
         targetPositionDelta.z = clamp(targetPositionDelta.z, -ms, ms);
       }
 
-      targetPositionDelta.multiplyScalar(this.cameraFollowDampingFactor * deltaTime);
+      targetPositionDelta.multiplyScalar(this.cameraFollowDampingFactor);
       this.targetFollowPosition.add(targetPositionDelta);
 
       const followPositionDelta = new Vector3();
       followPositionDelta.copy(this.targetFollowPosition).sub(this.cameraFollowPosition);
-      followPositionDelta.multiplyScalar(this.cameraFollowDampingFactor * deltaTime);
+      followPositionDelta.multiplyScalar(this.cameraFollowDampingFactor);
 
       this.cameraFollowPosition.add(followPositionDelta);
 
@@ -497,7 +497,7 @@ export class CameraController {
 
       this.panOffset.multiplyScalar(1  - dampingFactor);
     } else {
-      this.sphericalDelta.set(0,0,0);
+      this.sphericalDelta.set(0, 0, 0);
       this.panOffset.set(0, 0, 0);
     }
   }
