@@ -31,7 +31,8 @@ export class FreeRoamCameraState extends CameraState {
 
     const zoom = 10.0;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 1000);
+    this.ctx.cameraController.enableDamping();
+    this.ctx.cameraController.disableCameraFollow();
 
     this.ctx.cameraController.setMinZoom(2.0);
     this.ctx.cameraController.setMaxZoom(15.0);
@@ -39,6 +40,8 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.setOriginBoundaryX(null);
     this.ctx.cameraController.setOriginBoundaryY(null);
     this.ctx.cameraController.setOriginBoundaryZ(null);
+
+    this.ctx.cameraController.transition(position, rotation, zoom, 500);
   }
 
   private handleDisplayClick(data: PointerCoordinates): void {
