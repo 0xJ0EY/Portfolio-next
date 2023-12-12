@@ -13,14 +13,16 @@ import { parseResponseFromParent, sendRequestToParent } from "rpc";
 import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
+import { SoundService } from "@/apis/Sound/Sound";
 
 const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
+const sound = new SoundService();
 
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem };
-const apis: SystemAPIs = { dragAndDrop, fileSystem };
+export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem, sound: SoundService };
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
