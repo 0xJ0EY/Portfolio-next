@@ -1,7 +1,7 @@
 import { ObserverSubject } from "@/data/Observer";
 
 export class SoundService extends ObserverSubject<boolean> {
-  private enabled = false;
+  private enabled = true;
 
   public isEnabled(): boolean {
     return this.enabled;
@@ -19,5 +19,12 @@ export class SoundService extends ObserverSubject<boolean> {
 
   private notifyEnabledStatus(): void {
     this.notify(this.enabled);
+  }
+
+  public play(source: string): void {
+    if (!this.enabled) { return; }
+
+    const audio = new Audio(source);
+    audio.play();
   }
 }

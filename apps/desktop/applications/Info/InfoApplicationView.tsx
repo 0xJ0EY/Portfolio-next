@@ -7,8 +7,7 @@ export default function InfoApplicationView(props: WindowProps) {
   const [time, _] = useState(Date.now());
 
   function onClickButton() {
-    const audio = new Audio('/sounds/meow.mp3');
-    audio.play();
+    application.apis.sound.play('/sounds/meow.mp3');
   }
 
   useEffect(() => { 
