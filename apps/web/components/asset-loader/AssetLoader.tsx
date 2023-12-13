@@ -4,7 +4,7 @@ import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { createRenderScenes, loadRenderScenes, UpdateActions } from "./Loaders";
 import { sendMessageToChild } from "rpc";
 
-function soundManagement() {
+function useSoundManagement() {
   const [isSoundEnabled, setSoundEnabled] = useState(true);
 
   function toggleSound() {
@@ -35,7 +35,7 @@ function soundManagement() {
 
 export function AssetLoader() {
   const [loading, setLoading] = useState(true);
-  const {isSoundEnabled, toggleSound} = soundManagement();
+  const {isSoundEnabled, toggleSound} = useSoundManagement();
   const [scenes, setScenes] = useState<RendererScenes>(createRenderScenes());
   const [actions, setActions] = useState<UpdateActions>([]);
   
