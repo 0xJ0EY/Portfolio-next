@@ -13,7 +13,7 @@ import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
 import { RendererTouchUserInterface } from './RendererTouchUserInterface';
-import { parseRequestFromChild, sendResponseToChild } from "rpc";
+import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { CameraState } from './camera/CameraState';
 
 export interface RendererScenes {
@@ -140,7 +140,7 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         const maxZoom = controller.getMaxZoom();
         const currentZoom = controller.getZoom();
 
-        sendResponseToChild(event.source as Window, {
+        sendMessageToChild(event.source as Window, {
           method: 'camera_zoom_distance_response',
           max_distance: maxZoom,
           min_distance: minZoom,
