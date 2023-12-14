@@ -3,6 +3,9 @@ import { ObserverSubject } from "@/data/Observer";
 export class SoundService extends ObserverSubject<boolean> {
   private enabled = true;
 
+  private index = 0;
+  private activeAudio: HTMLAudioElement[] = [];
+
   public isEnabled(): boolean {
     return this.enabled;
   }
@@ -10,21 +13,88 @@ export class SoundService extends ObserverSubject<boolean> {
   public enable(): void {
     this.enabled = true;
     this.notifyEnabledStatus();
+    this.unmuteAll();
   }
 
   public disable(): void {
     this.enabled = false;
     this.notifyEnabledStatus();
+    this.muteAll();
   }
 
   private notifyEnabledStatus(): void {
     this.notify(this.enabled);
   }
 
-  public play(source: string): void {
-    if (!this.enabled) { return; }
+  public mute(index: number): void {
+    const audio = this.activeAudio[index] ?? null;
+
+    if (!audio) { return; }
+
+    audio.muted = true;
+  }
+
+  public unmute(index: number): void {
+    const audio = this.activeAudio[index] ?? null;
+
+    if (!audio) { return; }
+
+    audio.muted = false;
+  }
+
+  // NOTE(Joey): Due to how the Audio interface only mutes and unmutes its own "audio" and not other audio elements that might be
+  // toggled by the isEnabled status. Having these methods public might give the wrong impression, so we refrain from that.
+  private muteAll(): void {
+    for (const key of this.activeAudio.keys()) {
+      this.mute(key);
+    }
+  }
+
+  private unmuteAll(): void {
+    for (const key of this.activeAudio.keys()) {
+      this.unmute(key);
+    }
+  }
+
+  public stop(index: number): void {
+    const audio = this.activeAudio[index] ?? null;
+
+    if (!audio) { return; }
+
+    audio.pause();
+    delete this.activeAudio[index];
+  }
+
+  public clear(): void {
+    this.index = 0;
+    this.activeAudio = [];
+  }
+
+  public play(source: string): number {
+    const currentIndex = this.index++;
 
     const audio = new Audio(source);
+    audio.muted = !this.enabled;
     audio.play();
+
+    this.activeAudio[currentIndex] = audio;
+
+    audio.addEventListener('ended', () => { delete this.activeAudio[currentIndex]; });
+
+    return currentIndex;
+  }
+
+  public playOnRepeat(source: string): number {
+    const currentIndex = this.index++;
+
+    const audio = new Audio(source);
+    audio.muted = !this.enabled;
+    audio.play();
+
+    this.activeAudio[currentIndex] = audio;
+
+    audio.addEventListener('ended', () => { this.activeAudio[currentIndex]?.play(); });
+
+    return currentIndex;
   }
 }
