@@ -54,6 +54,15 @@ html, body {
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
 
+.system-button:disabled,
+.header-button:disabled {
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: auto;
+  color: grey;
+}
+
 .content {
   background: #fff;
   margin: 3px;
