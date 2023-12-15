@@ -9,28 +9,31 @@ import { Dock } from "./Dock/Dock";
 import { FileSystem } from '@/apis/FileSystem/FileSystem';
 import styles from './OperatingSystem.module.css';
 import { DragAndDropView } from "./DragAndDropView";
-import { parseResponseFromParent, sendRequestToParent } from "rpc";
+import { parseMessageFromParent, sendRequestToParent } from "rpc";
 import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
+import { SoundService } from "@/apis/Sound/Sound";
 
 const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
+const sound = new SoundService();
 
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem };
-const apis: SystemAPIs = { dragAndDrop, fileSystem };
+export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem, sound: SoundService };
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
 
 function handleParentResponsesClosure(
   initialCamera: MutableRefObject<Camera | null>,
-  camera: MutableRefObject<Camera | null>
+  camera: MutableRefObject<Camera | null>,
+  apis: SystemAPIs
 ) {
   return function(event: MessageEvent) {
-    const response = parseResponseFromParent(event);
+    const response = parseMessageFromParent(event);
     if (!response.ok) { return; }
 
     const value = response.value;
@@ -38,7 +41,15 @@ function handleParentResponsesClosure(
     if (value.method === 'camera_zoom_distance_response') {
       initialCamera.current = Camera.handleParentResponse(value);
       camera.current = Camera.handleParentResponse(value);
-    }    
+    }
+
+    if (value.method === 'enable_sound_message') {
+      if (value.enabled) {
+        apis.sound.enable();
+      } else {
+        apis.sound.disable();
+      }
+    }
   }
 }
 
@@ -201,7 +212,7 @@ export const OperatingSystem = () => {
       disableBrowserZoomTouchInteraction(ref.current)
     }
 
-    const handleParentEvent = handleParentResponsesClosure(initialCamera, camera);
+    const handleParentEvent = handleParentResponsesClosure(initialCamera, camera, apis);
     window.addEventListener('message', handleParentEvent, false);
 
     return () => {
