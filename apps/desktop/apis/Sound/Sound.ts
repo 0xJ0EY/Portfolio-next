@@ -84,10 +84,11 @@ export class SoundService extends ObserverSubject<boolean> {
     return currentIndex;
   }
 
-  public playOnRepeat(source: string): number {
+  public playOnRepeat(source: string, volume: number = 1.0): number {
     const currentIndex = this.index++;
 
     const audio = new Audio(source);
+    audio.volume = volume;
     audio.muted = !this.enabled;
     audio.play();
 
