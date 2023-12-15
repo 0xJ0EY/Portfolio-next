@@ -42,6 +42,14 @@ export class SoundService extends ObserverSubject<boolean> {
     audio.muted = false;
   }
 
+  public volume(index: number, volume: number): void {
+    const audio = this.activeAudio[index] ?? null;
+
+    if (!audio) { return; }
+
+    audio.volume = volume;
+  }
+
   // NOTE(Joey): Due to how the Audio interface only mutes and unmutes its own "audio" and not other audio elements that might be
   // toggled by the isEnabled status. Having these methods public might give the wrong impression, so we refrain from that.
   private muteAll(): void {
@@ -70,7 +78,7 @@ export class SoundService extends ObserverSubject<boolean> {
     this.activeAudio = [];
   }
 
-  public play(source: string): number {
+  public play(source: string, volume: number = 1.0): number {
     const currentIndex = this.index++;
 
     const audio = new Audio(source);
