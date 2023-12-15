@@ -408,10 +408,10 @@ const WindowHeader = (
     <div ref={output} className={classes.join(' ')}>
       <span className={styles.headerTitle}>{ windowData.title }</span>
 
-      <div className={styles.headerButtons}>
-        <button className='headerButton' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
-        <button className='headerButton' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
-        <button className='headerButton' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
+      <div className={styles['header-buttons']}>
+        <button className='header-button' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
+        <button className='header-button' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
+        <button className='header-button' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
       </div>
     </div>
     { dragging && <div className={styles.draggingMask}></div> }

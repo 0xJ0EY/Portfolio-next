@@ -169,7 +169,7 @@ export default function FinderView(props: WindowProps) {
     }
   }
   
-  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['systemButton', styles.breadcrumb].join(' ')} onPointerDown={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onPointerDown={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
  
   return (
     <div className={styles.container}>
