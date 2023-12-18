@@ -15,7 +15,7 @@ function getFileSystemTextNodeByPath(application: Application, path: string): Re
 }
 
 export default function NotesApplicationView(props: WindowProps) {
-  const { application, args } = props;
+  const { application, args, windowContext } = props;
   const [ content, setContent ] = useState('');
 
   const textFileRef = useRef<FileSystemTextFile>();
@@ -42,14 +42,25 @@ export default function NotesApplicationView(props: WindowProps) {
     return file;
   }
 
+  function updateWindowTitle(file: FileSystemTextFile) {
+    const window = application.compositor.getById(windowContext.id);
+    if (!window) { return; }
+
+    window.title = `${file.name}${file.filenameExtension} - Notes`
+
+    application.compositor.update(window);
+  }
+
   useEffect(() => {
     const file = loadFile(path);
 
     if (!file.ok) { return; }
 
-    const unsubscribe = application.apis.fileSystem.subscribe(file.value, (evt) => { 
-      console.log('notes event:', evt);
+    const unsubscribe = application.apis.fileSystem.subscribe(file.value, (evt) => {
+      updateWindowTitle(file.value);
     });
+
+    updateWindowTitle(file.value);
 
     return () => { unsubscribe(); }
   }, []);
