@@ -217,12 +217,15 @@ export class ApplicationManager implements BaseApplicationManager {
     return this.open(`/Applications/Finder.app ${path}`);
   }
 
-
+  private openTextFile(path: string): Result<number, Error> {
+    return this.open(`/Applications/Notes.app ${path}`);
+  }
 
   private openFileSystemNode(node: FileSystemNode, path: string, args: string): Result<number, Error> {
     switch (node.kind) {
       case 'application': return this.openApplication(node, path, args);
       case 'directory': return this.openDirectory(path);
+      case 'textfile': return this.openTextFile(path);
       case 'hyperlink': {
 
         // Hyperlink content is only editable by me, so we don't have to be very rigorous with the safety checks

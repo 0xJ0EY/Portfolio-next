@@ -1,4 +1,4 @@
-import { DirectoryContent, DirectoryEntry, DirectoryEventType, DirectoryRenameEvent, DirectorySettings, FileSystemDirectory, FileSystemNode, calculateNodePosition} from '@/apis/FileSystem/FileSystem';
+import { DirectoryContent, DirectoryEntry, NodeEventType, NodeRenameEvent, DirectorySettings, FileSystemDirectory, FileSystemNode, calculateNodePosition} from '@/apis/FileSystem/FileSystem';
 import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
@@ -533,7 +533,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(chain);    
   }
 
-  function reloadLocalFiles(directory: FileSystemDirectory, type: DirectoryEventType) {
+  function reloadLocalFiles(directory: FileSystemDirectory, type: NodeEventType) {
     if (type.kind === 'refresh') { return; }
     if (!ref.current) { return; }
     
@@ -602,7 +602,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(newChain);
   }
 
-  function reloadRenamedDirectory(event: DirectoryRenameEvent) {
+  function reloadRenamedDirectory(event: NodeRenameEvent) {
     const dir = fs.getDirectory(event.path);
 
     if (dir.ok) {
@@ -610,7 +610,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
   }
 
-  function reloadFiles(directory: string, type: DirectoryEventType): FileSystemDirectory | null {
+  function reloadFiles(directory: string, type: NodeEventType): FileSystemDirectory | null {
     if (type.kind === 'rename') {      
       reloadRenamedDirectory(type);
 
@@ -632,9 +632,10 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   }
 
   function loadFiles(directory: string) {
-    const action = (type: DirectoryEventType) => {
+    const action = (type: NodeEventType) => {
       return reloadFiles(directory, type);
     }
+
     const result = action({kind: 'update'});
     
     if (result) {
@@ -792,13 +793,13 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
 
     if (forceUpdate) {
-      parentsToUpdate.forEach(x => fs.propagateDirectoryEvent(x, {kind: 'update'}));
-      fs.propagateDirectoryEvent(dir.value, {kind: 'update'});
+      parentsToUpdate.forEach(x => fs.propagateNodeEvent(x, {kind: 'update'}));
+      fs.propagateNodeEvent(dir.value, {kind: 'update'});
     } else {
       // Local Icon Position (Desktop mode) shouldn't update the rest of the views
       // As it should be isolated from the other views
       if (!useLocalIconPosition) {
-        fs.propagateDirectoryEvent(dir.value, {kind: 'refresh'});
+        fs.propagateNodeEvent(dir.value, {kind: 'refresh'});
       }
 
       updateFiles(files);
@@ -814,7 +815,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     const name = generateUniqueNameForDirectory(dir.value, template);
 
     fs.addDirectory(dir.value, name, true, true);
-    fs.propagateDirectoryEvent(dir.value, {kind: 'update'});
+    fs.propagateNodeEvent(dir.value, {kind: 'update'});
   }
 
   useImperativeHandle(forwardRef, () => ({

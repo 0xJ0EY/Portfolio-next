@@ -175,7 +175,7 @@ export default function FolderIcon(props: { folderIconEntry: FolderIconEntry, in
   const file = entry.node;
 
   const selected = folderIconEntry.selected ? styles.selected : '';
-  const title = folderIconEntry.editing.active ? <EditTitle entry={folderIconEntry}/> : <RenderTitle title={file.name}/>;
+  const title = folderIconEntry.editing.active ? <EditTitle entry={folderIconEntry}/> : <RenderTitle title={file.name + file.filenameExtension}/>;
   const icon = getIconFromNode(entry.node);
 
   return <>
