@@ -2,7 +2,7 @@ import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useState, useEffect, useRef } from "react";
 import FolderView, { FolderViewHandles } from "@/components/Folder/FolderView";
 import { ApplicationWindowEvent } from "../ApplicationEvents";
-import { FileSystemDirectory, FileSystemNode } from "@/apis/FileSystem/FileSystem";
+import { FileSystemDirectory, FileSystemNode, FileSystemTextFile } from "@/apis/FileSystem/FileSystem";
 import styles from './FinderView.module.css';
 import { Application } from "../ApplicationManager";
 import React from "react";
@@ -52,10 +52,6 @@ export default function FinderView(props: WindowProps) {
   const currentHistoryElement = useRef<Node<FileSystemDirectory> | null>(null);
   const history = useRef(new Chain<FileSystemDirectory>());
   const folderViewRef = useRef<FolderViewHandles>(null);
-
-  function onWindowEvent(event: ApplicationWindowEvent) {
-    console.log(event)
-  }
 
   function recordHistory(directory: FileSystemDirectory) {
     if (currentHistoryElement.current) {
@@ -139,8 +135,6 @@ export default function FinderView(props: WindowProps) {
   }
 
   useEffect(() => {
-    const unsubscribe = application.subscribeToWindowEvents(windowContext.id, onWindowEvent);
-
     const directory = getFileSystemDirectoryByPath(application, path);
     if (directory.ok) {
       changeDirectory(directory.value);
@@ -148,7 +142,6 @@ export default function FinderView(props: WindowProps) {
     }
 
     return () => {
-      unsubscribe();
       clearHistory();
     }
 
