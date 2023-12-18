@@ -30,19 +30,28 @@ export default function NotesApplicationView(props: WindowProps) {
     textFileRef.current.content = content;
   }
 
-  function loadFile(path: string) {
+  function loadFile(path: string): Result<FileSystemTextFile, Error> {
     const file = getFileSystemTextNodeByPath(application, path);
-    
-    if (!file.ok) { return; }
-    const value = file.value;
-    
-    setContent(value.content);
 
+    if (!file.ok) { return file; }
+    const value = file.value;
+
+    setContent(value.content);
     textFileRef.current = value;
+
+    return file;
   }
 
   useEffect(() => {
-    loadFile(path);
+    const file = loadFile(path);
+
+    if (!file.ok) { return; }
+
+    const unsubscribe = application.apis.fileSystem.subscribe(file.value, (evt) => { 
+      console.log('notes event:', evt);
+    });
+
+    return () => { unsubscribe(); }
   }, []);
 
   return (
