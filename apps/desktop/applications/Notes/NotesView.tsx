@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Application } from "../ApplicationManager";
 import { Err, Ok, Result } from "result";
 import { FileSystemTextFile } from "@/apis/FileSystem/FileSystem";
+import { generateUniqueNameForDirectory } from "@/apis/FileSystem/Util";
+import { useTranslation } from "react-i18next";
 
 function getFileSystemTextNodeByPath(application: Application, path: string): Result<FileSystemTextFile, Error> {
   const node = application.apis.fileSystem.getNode(path);
@@ -18,14 +20,27 @@ export default function NotesApplicationView(props: WindowProps) {
   const { application, args, windowContext } = props;
   const [ content, setContent ] = useState('');
 
+  const fs = application.apis.fileSystem;
+  const { t } = useTranslation('common');
+
   const textFileRef = useRef<FileSystemTextFile>();
 
   const path = args;
 
-  function onSave() {
-    if (!textFileRef.current) { return; }
+  function createOnSave() {
+    const documentsDirectory = fs.getDirectory('/Users/joey/Documents/');
+    if (!documentsDirectory.ok) { return;}
 
-    console.log(textFileRef.current);
+    const template = t('filesystem.new_file');
+    const title = generateUniqueNameForDirectory(documentsDirectory.value, template);
+    const textFile = fs.addTextFile(documentsDirectory.value, title, content, true);
+
+    textFileRef.current = textFile;
+    updateWindowTitle(textFile);
+  }
+
+  function onSave() {
+    if (!textFileRef.current) { createOnSave(); return; }
 
     textFileRef.current.content = content;
   }
@@ -56,7 +71,7 @@ export default function NotesApplicationView(props: WindowProps) {
 
     if (!file.ok) { return; }
 
-    const unsubscribe = application.apis.fileSystem.subscribe(file.value, (evt) => {
+    const unsubscribe = fs.subscribe(file.value, (evt) => {
       updateWindowTitle(file.value);
     });
 
