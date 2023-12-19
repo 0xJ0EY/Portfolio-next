@@ -9,7 +9,7 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
-import { constructPath } from "./Util";
+import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 
 export type DirectorySettings = {

@@ -10,7 +10,7 @@ import { clamp } from '../util';
 import { Err, Ok, Result } from "result";
 import { SystemAPIs } from '../OperatingSystem';
 import { useTranslation } from 'next-i18next';
-import { constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/Util';
+import { constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/util';
 
 const FolderIcon = dynamic(() => import('../Icons/FolderIcon'));
 

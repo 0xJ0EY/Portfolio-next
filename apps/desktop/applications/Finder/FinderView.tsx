@@ -8,7 +8,7 @@ import { Application } from "../ApplicationManager";
 import React from "react";
 import { Chain, Node } from "@/data/Chain";
 import { Err, Ok, Result } from "result";
-import { constructPath } from "@/apis/FileSystem/Util";
+import { constructPath } from "@/apis/FileSystem/util";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }

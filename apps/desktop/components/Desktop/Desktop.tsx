@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { SystemAPIs } from '../OperatingSystem';
 import { DirectoryEntry, FileSystemNode } from '@/apis/FileSystem/FileSystem';
 import { ApplicationManager } from '@/applications/ApplicationManager';
-import { constructPath } from '@/apis/FileSystem/Util';
+import { constructPath } from '@/apis/FileSystem/util';
 
 const FolderView = dynamic(() => import('../Folder/FolderView'));
 const WindowContainer = dynamic(() => import('../WindowManagement/WindowContainer'));

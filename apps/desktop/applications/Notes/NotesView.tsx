@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Application } from "../ApplicationManager";
 import { Err, Ok, Result } from "result";
 import { FileSystemTextFile } from "@/apis/FileSystem/FileSystem";
-import { generateUniqueNameForDirectory } from "@/apis/FileSystem/Util";
+import { generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
 import { useTranslation } from "react-i18next";
 
 function getFileSystemTextNodeByPath(application: Application, path: string): Result<FileSystemTextFile, Error> {

@@ -7,7 +7,7 @@ import { ApplicationEvent, ApplicationWindowEvent, createApplicationOpenEvent, c
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { Action } from "@/components/util";
 import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
-import { constructPath } from "@/apis/FileSystem/Util";
+import { constructPath } from "@/apis/FileSystem/util";
 
 // ApplicationContext should hold meta data/instances that is important to the application manager, but not to anyone else.
 class ApplicationContext {
