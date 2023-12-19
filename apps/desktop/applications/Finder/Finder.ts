@@ -68,7 +68,7 @@ export class Finder extends Application {
     if (event.kind === 'finder-open-file-event') {
       if (!windowContext) { return }
 
-      this.manager.open(event.path);
+      this.manager.open(`"${event.path}"`);
     }
   }
 }

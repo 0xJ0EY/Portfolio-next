@@ -16,7 +16,7 @@ export function constructPath(node: FileSystemNode): string {
 
   const path = directories.reverse().join('/');
 
-  return path;
+  return path + node.filenameExtension;
 }
 
 export function generateUniqueNameForDirectory(directory: FileSystemDirectory, template: string): string {
