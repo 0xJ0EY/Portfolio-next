@@ -28,11 +28,8 @@ export class MonitorViewCameraState extends CameraState {
 
       this.ctx.cameraController.setOriginBoundaryX(2.0);
       this.ctx.cameraController.setOriginBoundaryY(1.5);
-
-      this.ctx.cameraController.syncFollowPositionToTarget();
     }
 
-    // this.ctx.cameraController.enableCameraFollow();
     this.ctx.cameraController.enableDamping();
 
     this.ctx.cameraController.transition(position, spherical, distance, distance * 350, callback);
