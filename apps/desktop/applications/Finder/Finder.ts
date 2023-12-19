@@ -44,7 +44,7 @@ export class Finder extends Application {
       x: 100,
       y: 100,
       height: 400,
-      width: 650,
+      width: 670,
       title: `Finder`,
       application: this,
       args: path,
