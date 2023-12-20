@@ -48,3 +48,10 @@ export const pointInsideAnyRectangles = (
 ): boolean => {
   return rects.some(x => pointInsideRectangle(point, x));
 }
+
+export const pointIndexInsideAnyRectangles = (
+  point: Point,
+  rects: Rectangle[]
+): number => {
+  return rects.findIndex(x => pointInsideRectangle(point, x));
+}

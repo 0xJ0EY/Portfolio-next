@@ -3,7 +3,7 @@ import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, u
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { FolderIconEntry, FolderIconHitBox, IconHeight, IconWidth } from '../Icons/FolderIcon';
-import { Point, Rectangle, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
+import { Point, Rectangle, pointIndexInsideAnyRectangles, pointInsideAnyRectangles, rectangleAnyIntersection } from '@/applications/math';
 import { Chain } from '../../data/Chain';
 import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave, FileSystemItemDragMove } from '@/apis/DragAndDrop/DragAndDrop';
 import { clamp } from '../util';
@@ -33,6 +33,7 @@ function SelectionBox(box: SelectionBox) {
 const DraggingThreshold = 5;
 
 type Interaction = 'pointer' | 'touch';
+type ClickedIcon = { iconEntry: FolderIconEntry, clickedOnTheIcon: boolean }
 
 type FolderViewProps = {
   directory: string,
@@ -71,7 +72,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
   const selectionBoxStart = useRef({ x: 0, y: 0 });
 
   const isDragging = useRef(false);
-  const previousClickedFile = useRef<{ file: FolderIconEntry | null, timestamp: number }>({ file: null, timestamp: 0 });
+  const previousClickedFile = useRef<{ file: ClickedIcon | null, timestamp: number }>({ file: null, timestamp: 0 });
 
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
   const fileDraggingFolderOrigin = useRef<Point>();
@@ -161,7 +162,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     updateFiles(files);
   }
 
-  function clickedFile(position: Point): FolderIconEntry | undefined {
+  function clickedFile(position: Point): ClickedIcon | undefined {
     const files = localFiles.current;
 
     if (!iconContainer.current) { return; }
@@ -172,8 +173,10 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       const file = node.value;
       const hitBox = FolderIconHitBox(file);
 
-      if (pointInsideAnyRectangles(point, hitBox)) {
-        return node.value;
+      const index = pointIndexInsideAnyRectangles(point, hitBox);
+
+      if (index >= 0) {
+        return { iconEntry: node.value, clickedOnTheIcon: index === 0 };
       }
     }
 
@@ -384,31 +387,29 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
       fileDraggingFolderOrigin.current = { x: deltaX, y: deltaY };
 
-      if (!file.selected) {
+      if (!file.iconEntry.selected) {
         stopRenamingFiles();
         selectFile(position);
       }
 
       onFileDraggingStart(position);
 
-      const now = Date.now();
-      const delta = now - previousClickedFile.current.timestamp;
-      const sameFile = previousClickedFile.current.file === file;
+      const sameFile = previousClickedFile.current.file?.iconEntry === file.iconEntry;
+      const sameHitBox = previousClickedFile.current.file?.clickedOnTheIcon === file.clickedOnTheIcon;
+      const clickedOnIcon = file.clickedOnTheIcon;
 
-      const TimeForEdit = 400;
-
-      const openFolder = delta < TimeForEdit && sameFile;
-      const renameFolder = delta >= TimeForEdit && sameFile;
+      const openFolder = sameFile && clickedOnIcon;
+      const renameFolder = sameFile && sameHitBox && !clickedOnIcon;
 
       if (openFolder) {
         stopRenamingFiles();
 
-        onFileOpen(file.entry.node, false);
+        onFileOpen(file.iconEntry.entry.node, false);
         
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else 
       if (renameFolder) {
-        renameFile(file);
+        renameFile(file.iconEntry);
 
         previousClickedFile.current = { file: null, timestamp: 0 };
       } else {        
