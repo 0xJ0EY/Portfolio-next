@@ -13,27 +13,27 @@ export const ImageWidth   = 60;
 export const TextWidth    = 120;
 export const TextHeight   = 20;
 
-
 export const CharactersPerLine = 14;
 export const MaximumLines = 2;
 
-export function FolderIconHitBox(entry: FolderIconEntry): Rectangle[] {
-  // TODO: Resize text hitbox based on the content
+export function FolderIconHitBox(iconEntry: FolderIconEntry): Rectangle[] {
+  const title = iconEntry.entry.node.name + iconEntry.entry.node.filenameExtension;
+  const lines = contentAwareSplitTitle(CharactersPerLine, MaximumLines, title);
 
   const imageHorizontalCenter = IconWidth / 2;
 
   const image: Rectangle = {
-    x1: entry.x + (imageHorizontalCenter - (ImageWidth / 2)),
-    x2: entry.x + (imageHorizontalCenter + (ImageWidth / 2)),
-    y1: entry.y,
-    y2: entry.y + ImageHeight
+    x1: iconEntry.x + (imageHorizontalCenter - (ImageWidth / 2)),
+    x2: iconEntry.x + (imageHorizontalCenter + (ImageWidth / 2)),
+    y1: iconEntry.y,
+    y2: iconEntry.y + ImageHeight
   };
 
   const text: Rectangle = {
-    x1: entry.x,
-    x2: entry.x + IconWidth,
-    y1: entry.y + (IconHeight - TextHeight),
-    y2: entry.y + IconHeight
+    x1: iconEntry.x,
+    x2: iconEntry.x + IconWidth,
+    y1: iconEntry.y + ImageHeight,
+    y2: iconEntry.y + ImageHeight + (TextHeight * lines.length),
   };
 
   return [image, text];
