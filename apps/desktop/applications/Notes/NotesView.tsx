@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Application } from "../ApplicationManager";
 import { Err, Ok, Result } from "result";
 import { FileSystemTextFile } from "@/apis/FileSystem/FileSystem";
-import { generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
+import { constructPath, generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
 import { useTranslation } from "react-i18next";
 
 function getFileSystemTextNodeByPath(application: Application, path: string): Result<FileSystemTextFile, Error> {
@@ -61,7 +61,9 @@ export default function NotesApplicationView(props: WindowProps) {
     const window = application.compositor.getById(windowContext.id);
     if (!window) { return; }
 
-    window.title = `${file.name}${file.filenameExtension} - Notes`
+    const path = constructPath(file);
+
+    window.title = `${path} - Notes`
 
     application.compositor.update(window);
   }
@@ -83,7 +85,7 @@ export default function NotesApplicationView(props: WindowProps) {
   return (
     <>
       <div>
-        <button onClick={onSave}>Save</button>
+        <button className="system-button" onClick={onSave}>Save</button>
       </div>
       <textarea
         className={styles['textarea']}
