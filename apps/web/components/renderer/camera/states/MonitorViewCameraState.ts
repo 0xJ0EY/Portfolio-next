@@ -1,12 +1,13 @@
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, calculateCameraPosition, constructIsOverDisplay, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom } from "./util";
-import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
 
   private isOverDisplay: (data: PointerCoordinates) => boolean;
   private panOrigin: PanOriginData | null = null;
+  private wasOverDisplay: boolean = false;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -62,18 +63,41 @@ export class MonitorViewCameraState extends CameraState {
     this.ctx.cameraController.setZoom(zoomDistance + zoomOffset);
   }
 
-  private updateCursor(data: PointerCoordinates): void {
+  private updateCursor(data: MouseData): void {
     const overDisplay = this.isOverDisplay(data);
+
+    const hasChangedOverDisplay = (): boolean => overDisplay !== this.wasOverDisplay;
 
     if (overDisplay) {
       this.ctx.disableWebGLPointerEvents();
       this.ctx.setCursor('auto');
+
+      if (hasChangedOverDisplay()) {
+        const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+        this.manager.emitUserInteractionEvent(cancelEvent);
+      }
     } else {
       this.ctx.enableWebGLPointerEvents();
       this.ctx.setCursor('pointer');
 
-      this.manager.changeState(CameraHandlerState.DeskView);
+      if (hasChangedOverDisplay()) {
+        const onSuccess = () => {
+          this.manager.changeState(CameraHandlerState.DeskView);
+        };
+
+        const confirm = ConfirmationData.fromMouseData(
+          data,
+          600,
+          onSuccess,
+          null,
+        );
+
+        const confirmEvent = toUserInteractionMouseConfirmationEvent(confirm);
+        this.manager.emitUserInteractionEvent(confirmEvent);
+      }
     }
+
+    this.wasOverDisplay = overDisplay;
   }
 
   onUserEvent(data: UserInteractionEvent): void {
@@ -88,7 +112,7 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private handleMouseMove(data: MouseData): void {
-    this.updateCursor(data.pointerCoordinates());
+    this.updateCursor(data);
   }
 
   handleMouseEvent(data: MouseData) {
@@ -103,7 +127,7 @@ export class MonitorViewCameraState extends CameraState {
       this.manager.changeState(CameraHandlerState.FreeRoam);
     };
 
-    const confirm = TouchConfirmationData.fromTouchData(
+    const confirm = ConfirmationData.fromTouchData(
       data,
       600,
       onSuccess,

@@ -2,7 +2,7 @@ import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
-import { MouseData, PointerCoordinates, TouchConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class FreeRoamCameraState extends CameraState {
 
@@ -167,7 +167,7 @@ export class FreeRoamCameraState extends CameraState {
       this.manager.changeState(CameraHandlerState.MonitorView);
     };
 
-    const confirm = TouchConfirmationData.fromTouchData(
+    const confirm = ConfirmationData.fromTouchData(
       data,
       600,
       onSuccess,

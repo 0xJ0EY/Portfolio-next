@@ -12,7 +12,7 @@ import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
-import { RendererTouchUserInterface } from './RendererTouchUserInterface';
+import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 
 export interface RendererScenes {
@@ -195,11 +195,12 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
-  const {isSoundEnabled, toggleSound} = useSoundManagement();
+  const { isSoundEnabled, toggleSound } = useSoundManagement();
 
   const touchEvents = createUIEventBus();
 
-  const touchUserInterface = RendererTouchUserInterface(touchEvents);
+  const mouseProgressCircle = HandleMouseProgressCircle(touchEvents);
+  const touchProgressCircle = HandleTouchProgressCircle(touchEvents);
 
   let then: MutableRefObject<number | null> = useRef(null);
 
@@ -299,7 +300,8 @@ export const Renderer = (props: RendererProps) => {
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>
-      {touchUserInterface}
+      {mouseProgressCircle}
+      {touchProgressCircle}
     </div>
   );
 };
