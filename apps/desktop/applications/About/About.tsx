@@ -1,6 +1,6 @@
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
-import { WindowContext } from "@/components/WindowManagement/WindowCompositor";
-import { ApplicationEvent } from "../ApplicationEvents";
+import { WindowContext, Window } from "@/components/WindowManagement/WindowCompositor";
+import { ApplicationEvent, ApplicationOpenEvent } from "../ApplicationEvents";
 import { Application, ApplicationConfig, MenuEntry } from "../ApplicationManager";
 import { LocalApplicationManager } from "../LocalApplicationManager";
 import dynamic from 'next/dynamic';
@@ -24,7 +24,6 @@ export class AboutConfig implements ApplicationConfig {
 export const aboutConfig = new AboutConfig();
 
 export class AboutApplication extends Application {
-  
   config(): ApplicationConfig {
     return aboutConfig;
   }
@@ -37,24 +36,28 @@ export class AboutApplication extends Application {
     }]
   }
 
+  private createNewWindow(event: ApplicationOpenEvent): Window {
+    const y       = 100;
+    const width   = window.innerWidth * 0.75;
+    const height  = window.innerHeight * 0.75 - y;
+    const x       = (window.innerWidth - width) / 2;
+
+    return this.compositor.open({
+      x, y,
+      height,
+      width,
+      title: "About application",
+      application: this,
+      args: event.args,
+      generator: () => { return View; }
+    });
+  }
+
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     this.baseHandler(event, windowContext);
 
     if (event.kind === 'application-open') {
-      const y       = 100;
-      const width   = window.innerWidth * 0.75;
-      const height  = window.innerHeight * 0.75 - y;
-      const x       = (window.innerWidth - width) / 2;
-      
-      this.compositor.open({
-        x, y,
-        height,
-        width,
-        title: "About application",
-        application: this,
-        args: event.args,
-        generator: () => { return View; }
-      });
+      this.createNewWindow(event);
     };
 
     if (event.kind === 'application-quit') {
