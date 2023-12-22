@@ -11,6 +11,7 @@ import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
 import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
+import { doomConfig } from "@/applications/Doom/Doom";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -202,6 +203,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(infoConfig);
   fileSystem.addApplication(notesConfig);
+  fileSystem.addApplication(doomConfig);
 
   // Create unix like /home folder (macOS also has one)
   fileSystem.addDirectory(root, 'home', false, false);
