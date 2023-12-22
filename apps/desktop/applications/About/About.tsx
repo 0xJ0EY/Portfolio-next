@@ -15,7 +15,7 @@ export class AboutConfig implements ApplicationConfig {
   public readonly appName = 'About.app';
   public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'About application' };
   public readonly entrypoint = (
-    compositor:LocalWindowCompositor,
+    compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
     apis: SystemAPIs
   ) => new AboutApplication(compositor, manager, apis);
