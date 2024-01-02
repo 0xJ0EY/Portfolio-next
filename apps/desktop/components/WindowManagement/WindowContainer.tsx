@@ -407,6 +407,7 @@ const WindowHeader = (
   return <>
     <div ref={output} className={classes.join(' ')}>
       <span className={styles.headerTitle}>{ windowData.title }</span>
+      <div className={styles.lines}></div>
 
       <div className={styles['header-buttons']}>
         <button className='header-button' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>

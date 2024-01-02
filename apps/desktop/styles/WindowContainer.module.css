@@ -1,4 +1,3 @@
-/* TODO: Fix Z-index issues, set it to variables, or ranges w.e. */
 .container {
   position: relative;
   display: block;
@@ -9,7 +8,6 @@
   box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #c8c8c8,inset -2px -2px grey,inset 2px 2px #fff;
 }
 
-/* TODO: Fix the Z-index mess that is around here :^) */
 .contentContainer {
   position: relative;
   display: flex;
@@ -43,11 +41,13 @@
 }
 
 .focused.header {
-  background-color: aquamarine;
+  background: rgb(255,106,0);
+  background: linear-gradient(90deg, rgba(255,106,0,1) 0%, rgba(156,65,0,1) 100%);
 }
 
 .header {
-  background-color: hotpink;
+  background: rgb(142,142,141);
+  background: linear-gradient(90deg, rgba(142,142,141,1) 0%, rgba(184,184,184,1) 100%);
   flex: 0 1 auto;
 
   height: 30px;
@@ -59,11 +59,21 @@
   flex-direction: row;
 
   padding: 0 6px;
+  color: #202020;
 
   z-index: 9999;
 }
 
 .header > span {
+  pointer-events: none;
+  flex-basis: fit-content;
+}
+
+.lines {
+  flex-grow: 1000;
+  margin: 3px 5px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAAXNSR0IArs4c6QAAABFJREFUCJljYICC/wwMDAwMAAYJAQAxUlJAAAAAAElFTkSuQmCC);
+  image-rendering: pixelated;
   pointer-events: none;
 }
 
@@ -95,6 +105,7 @@
 .header-buttons {
   display: inline-block;
   flex-shrink: 0;
+  flex-basis: fit-content;
 }
 
 .header-buttons button {

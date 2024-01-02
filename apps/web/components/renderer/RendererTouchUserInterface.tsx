@@ -61,8 +61,6 @@ export const HandleMouseProgressCircle = (eventBus: UserInteractionEventBus) => 
   function handleMouseEvent(data: MouseData): void {
     if (!localStatus) { return; }
 
-    console.log(localStatus);
-
     let status = localStatus;
 
     status.x = data.x;

@@ -124,7 +124,6 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.width = `100%`;
   iframe.style.height = `100%`;
   iframe.style.backgroundColor = 'black';
-  iframe.style.border = '0 solid black';
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
 
