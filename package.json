@@ -24,6 +24,7 @@
   },
   "packageManager": "npm@9.5.1",
   "dependencies": {
+    "emulators-ui": "^0.73.9",
     "i18next": "^23.5.1",
     "next-i18next": "^14.0.3",
     "react-i18next": "^13.2.2"
