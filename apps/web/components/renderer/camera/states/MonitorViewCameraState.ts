@@ -9,6 +9,8 @@ export class MonitorViewCameraState extends CameraState {
   private panOrigin: PanOriginData | null = null;
   private wasOverDisplay: boolean = false;
 
+  private lastUserInteractionEvent: UserInteractionEvent | null = null;
+
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
 
@@ -83,6 +85,12 @@ export class MonitorViewCameraState extends CameraState {
       if (hasChangedOverDisplay()) {
         const onSuccess = () => {
           this.manager.changeState(CameraHandlerState.DeskView);
+
+          // Due to a design constraint, we need to "replay" the last effect, to get a nice flowing transition
+          // Otherwise the user will have to send a new user interaction event before a nice transition is played
+          if (this.lastUserInteractionEvent) {
+            this.manager.emitUserInteractionEvent(this.lastUserInteractionEvent);
+          }
         };
 
         const confirm = ConfirmationData.fromMouseData(
@@ -101,6 +109,8 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   onUserEvent(data: UserInteractionEvent): void {
+    this.lastUserInteractionEvent = data;
+
     switch (data.event) {
       case 'mouse_event': return this.handleMouseEvent(data.data);
       case 'touch_event': return this.handleTouchEvent(data.data);
