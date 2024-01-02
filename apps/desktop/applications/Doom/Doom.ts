@@ -18,12 +18,12 @@ export class DoomConfig implements ApplicationConfig {
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
     apis: SystemAPIs
-  ) => new NotesApplication(compositor, manager, apis);
+  ) => new DoomApplication(compositor, manager, apis);
 }
 
 export const doomConfig = new DoomConfig();
 
-export class NotesApplication extends Application {
+export class DoomApplication extends Application {
   private currentWindow: Window | null = null;
 
   config(): ApplicationConfig {
