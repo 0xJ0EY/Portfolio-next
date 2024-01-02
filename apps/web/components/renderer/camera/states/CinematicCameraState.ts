@@ -1,8 +1,8 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
-import { CameraState, UpdatableCameraState } from "../CameraState";
+import { UpdatableCameraState } from "../CameraState";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
-import { calculateCameraPosition, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
-import { degToRad, lerp } from "three/src/math/MathUtils";
+import { constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
+import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
 
 export class CinematicCameraState extends UpdatableCameraState {
@@ -31,6 +31,7 @@ export class CinematicCameraState extends UpdatableCameraState {
     const zoom = 10.0;
 
     this.ctx.cameraController.transition(position, rotation, zoom, 0);
+    this.ctx.setCursor('pointer');
   }
 
   private calculateRotation(progress: number): number {
@@ -65,7 +66,6 @@ export class CinematicCameraState extends UpdatableCameraState {
     }
   }
 
-
   private handleOverMonitor(data: PointerCoordinates): void {
     const overDisplay = this.isOverDisplay(data);
 
@@ -74,8 +74,15 @@ export class CinematicCameraState extends UpdatableCameraState {
     }
   }
 
+  private handleMouseClickEvent(data: MouseData): void {
+    if (!data.isPrimaryDown()) { return; }
+
+    this.manager.changeState(CameraHandlerState.MonitorView);
+  }
+
   private handleMouseEvent(data: MouseData) {
     this.handleOverMonitor(data);
+    this.handleMouseClickEvent(data);
   }
 
   private handleTouchEvent(data: TouchData) {
