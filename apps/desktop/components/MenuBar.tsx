@@ -1,35 +1,79 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './MenuBar.module.css';
 import { ApplicationManager, ApplicationManagerEvent, MenuEntry, MenuItem } from '@/applications/ApplicationManager';
 import { minimumDigits } from './util';
 import { useTranslation, I18n, TFunction } from 'next-i18next';
 import React from 'react';
 
-function renderApplicationMenu(menuItems: MenuEntry[]) {
-  if (menuItems.length === 0) { return <>Loading</> };
+function renderApplicationMenu(menuItems: MenuEntry[]) {  
+  let items = menuItems;
 
-  return menuItems.map((x, i) => <React.Fragment key={i}>{renderMenu(x)}</React.Fragment>);
+  if (items.length === 0) {
+    items.push({
+      displayOptions: {},
+      name: 'Loading',
+      items: []
+    });
+  }
+
+  return items.map((x, i) => <React.Fragment key={i}>{RenderMenu(x)}</React.Fragment>);
 }
 
-function renderMenu(menuEntries: MenuEntry) {
+function RenderMenu(menuEntries: MenuEntry) {
+  const ref = useRef(null);
+  const [isOpen, setOpen] = useState<boolean>(false);
+
   function renderMenuItem(item: MenuItem) {
     switch (item.kind) {
       case 'action':
-        return <button onPointerDown={() => item.action()}>{item.value}</button>
+        const menuAction = () => {
+          item.action();
+          setOpen(false);
+        }
+
+        return <button className='system-button' onClick={menuAction}>{item.value}</button>
       case 'spacer':
         return <hr/>
     }
   }
 
+  function onClickMenuTitle() {
+    if (!ref.current) { return; }
+    if (isOpen) { return; }
+
+    const head = ref.current;
+    const handleClickAfterOpeningMenu = (evt: PointerEvent)  => onClickAfterOpeningMenu(evt, head);
+
+    function onClickAfterOpeningMenu(evt: PointerEvent, head: HTMLElement) { 
+      function isClickInMenu(evt: PointerEvent, head: HTMLElement): boolean {
+        let current: HTMLElement | null = evt.target as HTMLElement;
+  
+        while (current !== null) {
+          if (current === head) { return true; }
+  
+          current = current.parentElement;
+        }
+  
+        return false;
+      }
+      
+      if (isClickInMenu(evt, head)) { return; }
+  
+      setOpen(false);
+      window.removeEventListener('pointerdown', handleClickAfterOpeningMenu);
+    }
+
+    setOpen(true);
+    window.addEventListener('pointerdown', handleClickAfterOpeningMenu);
+  }
+  
   const menuItems = menuEntries.items.map((x, i) => <React.Fragment key={i}>{renderMenuItem(x)}</React.Fragment>)
   const menuItemsContainer = menuItems.length > 0 ? <div className={styles.menuContent}>{menuItems}</div> : <></>;
 
   return (
-    <div className={styles.menu}>
-      <div className={styles.menuEntry} tabIndex={0}>
-        {menuEntries.displayOptions.boldText ? <b>{menuEntries.name}</b> : <span>{menuEntries.name}</span>}
-        {menuItemsContainer}
-      </div>
+    <div ref={ref} className={styles.menuEntry}>
+      <button className='system-button' onClick={onClickMenuTitle}>{menuEntries.displayOptions.boldText ? <b>{menuEntries.name}</b> : <span>{menuEntries.name}</span>}</button>
+      {isOpen && menuItemsContainer}
     </div>
   )
 }
@@ -80,7 +124,7 @@ function languageSelection(t: TFunction, i18n: I18n) {
     ]
   }
 
-  return renderMenu(entry);
+  return RenderMenu(entry);
 }
 
 type MenuBarProps = {
@@ -124,11 +168,11 @@ export const MenuBar = (props: MenuBarProps) => {
   useEffect(() => {
     const unsubscribe = manager.subscribe(handleApplicationManagerEvent);
     
-
     return () => {
+      setAppMenuEntries([]);
       unsubscribe();
     };
-  }, []);  
+  }, []);
 
   return <>
     <div className={styles.menuBar}>

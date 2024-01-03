@@ -2,33 +2,38 @@ import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
 import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
-import React, { MutableRefObject, useEffect, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
-import { Desktop } from "./Desktop";
-import { Dock } from "./Dock";
+import { Desktop } from "./Desktop/Desktop";
+import { Dock } from "./Dock/Dock";
 import { FileSystem } from '@/apis/FileSystem/FileSystem';
-import styles from '@/styles/Desktop.module.css';
+import styles from './OperatingSystem.module.css';
 import { DragAndDropView } from "./DragAndDropView";
-import { parseResponseFromParent, sendRequestToParent } from "rpc";
+import { parseMessageFromParent, sendRequestToParent } from "rpc";
 import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
-import { clamp, isTouchMoveCamera, isTouchZoom } from "./util";
+import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
+import { SoundService } from "@/apis/Sound/Sound";
+
+const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
 const dragAndDrop = new DragAndDropService();
+const sound = new SoundService();
 
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem };
-const apis: SystemAPIs = { dragAndDrop, fileSystem };
+export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem, sound: SoundService };
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
 
 function handleParentResponsesClosure(
   initialCamera: MutableRefObject<Camera | null>,
-  camera: MutableRefObject<Camera | null>
+  camera: MutableRefObject<Camera | null>,
+  apis: SystemAPIs
 ) {
   return function(event: MessageEvent) {
-    const response = parseResponseFromParent(event);
+    const response = parseMessageFromParent(event);
     if (!response.ok) { return; }
 
     const value = response.value;
@@ -36,8 +41,30 @@ function handleParentResponsesClosure(
     if (value.method === 'camera_zoom_distance_response') {
       initialCamera.current = Camera.handleParentResponse(value);
       camera.current = Camera.handleParentResponse(value);
-    }    
+    }
+
+    if (value.method === 'enable_sound_message') {
+      if (value.enabled) {
+        apis.sound.enable();
+      } else {
+        apis.sound.disable();
+      }
+    }
   }
+}
+
+function findButtonNodeInDOM(value: HTMLElement): HTMLElement | null {
+  let element: HTMLElement | null = value;
+
+  while (element !== null) {
+    if (element.nodeName === NodeNameButton) {
+      return element;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
 }
 
 export const OperatingSystem = () => {
@@ -47,10 +74,37 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  function handleTouchStartEvent(evt: TouchEvent) {
+  const targetedButton = useRef<HTMLElement | null>(null);
+
+  function handlePhoneSafariButtonClickStart(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    // Always reset the targeted button
+    targetedButton.current = null;
+
+    // If it is the first touch, record the node if it is a button
+    if (evt.touches.length !== 1) { return; }
+
+    targetedButton.current = findButtonNodeInDOM(evt.target as HTMLElement);
+  }
+
+  function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
+    if (!isPhoneSafari()) { return; }
+    if (evt.target === null) { return; }
+    if (findButtonNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
+
+    evt.target.dispatchEvent(new Event('click', { bubbles: true }));
+  }
+
+  function handleGestureStart(evt: Event): void {
     evt.preventDefault();
+  }
+
+  function handleTouchStartEvent(evt: TouchEvent) {
+    if (isPhoneSafari()) { evt.preventDefault(); }
 
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
+
+    handlePhoneSafariButtonClickStart(evt);
 
     if (evt.touches.length === 2) {
       touchOrigin.current = TouchData.fromTouchEvent('start', evt);
@@ -121,6 +175,8 @@ export const OperatingSystem = () => {
   function handleTouchEndEvent(evt: TouchEvent) {
     evt.preventDefault();
 
+    handlePhoneSafariButtonClickRelease(evt);
+
     if (evt.touches.length !== 0) { return; }
     if (camera.current === null) { return; }
 
@@ -135,25 +191,28 @@ export const OperatingSystem = () => {
   }
 
   function disableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.addEventListener('gesturestart', handleGestureStart, { passive: false });
     element.addEventListener('touchstart', handleTouchStartEvent, { passive: false });
     element.addEventListener('touchmove', handleTouchMoveEvent, { passive: true });
     element.addEventListener('touchend', handleTouchEndEvent, { passive: true });
   }
 
   function enableBrowserZoomTouchInteraction(element: HTMLElement): void {
+    element.removeEventListener('gesturestart', handleGestureStart);
     element.removeEventListener('touchstart', handleTouchStartEvent);
     element.removeEventListener('touchmove', handleTouchMoveEvent);
     element.removeEventListener('touchend', handleTouchEndEvent);
   }
 
   useEffect(() => {
-    applicationManager.open('/Applications/Finder.app /Users/joey/Desktop');
+    applicationManager.open('/Applications/Finder.app');
+    applicationManager.open('/Applications/About.app');
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)
     }
 
-    const handleParentEvent = handleParentResponsesClosure(initialCamera, camera);
+    const handleParentEvent = handleParentResponsesClosure(initialCamera, camera, apis);
     window.addEventListener('message', handleParentEvent, false);
 
     return () => {

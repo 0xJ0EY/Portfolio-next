@@ -1,13 +1,13 @@
 import { Result, Err, Ok } from "result";
-import { Request, Response } from "./structure";
+import { RequestToParent, MessageFromParent } from "./structure";
 
-export function sendResponseToChild(target: Window | null, response: Response) {
+export function sendMessageToChild(target: Window | null, message: MessageFromParent) {
   if (!target) { return; }
   
-  target.postMessage(response, '*');
+  target.postMessage(message, '*');
 }
 
-export function parseRequestFromChild(event: MessageEvent): Result<Request> {
+export function parseRequestFromChild(event: MessageEvent): Result<RequestToParent> {
   // NOTE: As this is the serialization function, we do not know for certain that the data from event.data[...] exists.
   const method = event.data['method'] ?? null;
 

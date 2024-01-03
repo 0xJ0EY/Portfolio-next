@@ -1,10 +1,12 @@
 import { CameraController } from "./Camera";
 import { FreeRoamCameraState } from "./states/FreeRoamCameraState";
-import { CameraState } from "./CameraState";
+import { CameraState, UpdatableCameraState } from "./CameraState";
 import { MonitorViewCameraState } from "./states/MonitorViewCameraState";
 import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { UnsubscribeHandler } from "@/events/EventBus";
 import { Scene } from "three";
+import { CinematicCameraState } from "./states/CinematicCameraState";
+import { DeskViewCameraState } from "./states/DeskViewCameraState";
 
 export class CameraHandlerContext {
   constructor(
@@ -40,6 +42,8 @@ export class CameraHandlerContext {
 export enum CameraHandlerState {
   FreeRoam,
   MonitorView,
+  Cinematic,
+  DeskView,
 }
 
 export class CameraHandler {
@@ -55,8 +59,8 @@ export class CameraHandler {
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
 
-    this.state = this.stateToInstance(CameraHandlerState.FreeRoam)!;
-    cameraController.moveCameraUp(5.5); // TODO: Move this to an actual camera init state
+    this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
+    this.state.transition();
 
     this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
   }
@@ -69,15 +73,17 @@ export class CameraHandler {
     switch (state) {
       case CameraHandlerState.FreeRoam: return new FreeRoamCameraState(this, this.ctx);
       case CameraHandlerState.MonitorView: return new MonitorViewCameraState(this, this.ctx);
+      case CameraHandlerState.Cinematic: return new CinematicCameraState(this, this.ctx);
+      case CameraHandlerState.DeskView: return new DeskViewCameraState(this, this.ctx);
       default: throw new Error("unsupported state");
     }
   }
 
-  getContext(): CameraHandlerContext {
+  public getContext(): CameraHandlerContext {
     return this.ctx;
   }
 
-  changeState(state: CameraHandlerState) {
+  public changeState(state: CameraHandlerState) {
     if (this.state.isTransitioning()) return;
 
     this.getContext().setCursor('default');
@@ -86,11 +92,17 @@ export class CameraHandler {
     this.state.transition();
   }
 
-  emitUserInteractionEvent(event: UserInteractionEvent) {
+  public emitUserInteractionEvent(event: UserInteractionEvent) {
     this.eventBus.emit(event);
   }
 
-  onUserInteractionEvent(event: UserInteractionEvent) {
+  public onUserInteractionEvent(event: UserInteractionEvent) {
     this.state.onUserEvent(event);
+  }
+
+  public update(deltaTime: number): void {
+    if (this.state instanceof UpdatableCameraState) {
+      this.state.update(deltaTime);
+    }
   }
 }

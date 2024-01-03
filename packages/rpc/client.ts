@@ -1,18 +1,18 @@
 import { Err, Ok, Result } from "result";
-import { Request, Response } from "./structure";
+import { RequestToParent, MessageFromParent } from "./structure";
 
-export function sendRequestToParent(request: Request) {
+export function sendRequestToParent(request: RequestToParent) {
   const parent = window.top;
   if (!parent) { throw new Error("Can not send a message to the parent"); }
 
   return sendRequest(parent, request);
 }
 
-export function sendRequest(target: Window, request: Request) {
+export function sendRequest(target: Window, request: RequestToParent) {
   target.postMessage(request, '*');
 }
 
-export function parseResponseFromParent(event: MessageEvent): Result<Response> {
+export function parseMessageFromParent(event: MessageEvent): Result<MessageFromParent> {
   const method = event.data['method'] ?? null;
 
   switch (method) {
@@ -30,6 +30,14 @@ export function parseResponseFromParent(event: MessageEvent): Result<Response> {
         max_vertical_offset: event.data['max_vertical_offset'],
       });
     }
+
+    case 'enable_sound_message': {
+      return Ok({
+        method: 'enable_sound_message',
+        enabled: event.data['enabled']
+      });
+    }
+
     default: {
       return Err(Error("Not a deserializable data structure"));
     }

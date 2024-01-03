@@ -1,33 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Century Schoolbook';
+  font-style: sans-serif;
+  font-weight: normal;
+  src: local('Century Schoolbook'), url('/fonts/century_schoolbook.ttf') format('truetype');
+}
+
 html, body {
   padding: 0;
   margin: 0;
-
-  box-sizing: border-box;
+  overscroll-behavior: none;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-.systemButton {
+.system-button,
+.header-button {
   border-radius: 0;
-  line-height: 13px;
-  padding: 3px 4px 3px;
-  margin: 0;
+  line-height: 15px;
+  padding: 5px;
   border: none;
+  color: #000;
   background-color: #dcdcdc;
+  font-size: 0.8em;
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  user-select: none;
+  cursor: pointer;
 }
 
-.systemButton img {
+.header-button {
+  line-height: 13px;
+  padding: 3px 4px 3px;
+}
+
+.system-button img,
+.header-button img {
   user-select: none;
 }
 
-.systemButton:hover {
+.system-button:hover,
+.header-button:hover {
   background-color: #c9c9c9;
 }
 
-.systemButton:active {
+.system-button:active,
+.header-button:active {
   background-color: #dcdcdc;
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
+}
+
+.system-button:disabled,
+.header-button:disabled {
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: auto;
+  color: grey;
+}
+
+.content {
+  background: #fff;
+  margin: 3px;
+  padding: 2px;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+  flex: 1;
+  overflow: auto;
+}
+
+.contentOuter {
+  display: flex;
+  flex: 1 1;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
 }

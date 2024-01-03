@@ -6,26 +6,26 @@
   position: relative;
 }
 
-.selectionBox {
+.selection-box {
   display: block;
   position: absolute;
-  background-color: hotpink;
-  opacity: 0.7;
+  background-color: rgba(105, 205, 249, 0.2);
+  border: 1px solid rgba(105, 205, 249, 0.8);;
   z-index: 1000;
 }
 
-.iconsContainer {
+.icons-container {
   position: absolute;
   width: 100%;
   height: 100%;
   overflow: auto;
 }
 
-.iconsContainer.hideOverflow {
+.icons-container.hide-overflow {
   overflow: hidden;
 }
 
-.selectionBoxContainer {
+.selection-box-container {
   position: absolute;
   width: 100%;
   height: 100%;

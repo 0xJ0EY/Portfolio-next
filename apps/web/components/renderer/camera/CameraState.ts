@@ -15,3 +15,7 @@ export abstract class CameraState {
 
   abstract onUserEvent(data: UserInteractionEvent): void;
 }
+
+export abstract class UpdatableCameraState extends CameraState {
+  abstract update(deltaTime: number): void;
+}

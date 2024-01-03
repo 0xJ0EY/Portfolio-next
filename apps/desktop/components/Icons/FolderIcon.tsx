@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
-import styles from '@/components/Icons/DesktopIcon.module.css';
+import styles from '@/components/Icons/FolderIcon.module.css';
 import { DirectoryEntry, getIconFromNode } from '@/apis/FileSystem/FileSystem';
 import { Rectangle } from '@/applications/math';
 
@@ -13,33 +13,33 @@ export const ImageWidth   = 60;
 export const TextWidth    = 120;
 export const TextHeight   = 20;
 
-
 export const CharactersPerLine = 14;
 export const MaximumLines = 2;
 
-export function DesktopIconHitBox(entry: DesktopIconEntry): Rectangle[] {
-  // TODO: Resize text hitbox based on the content
+export function FolderIconHitBox(iconEntry: FolderIconEntry): Rectangle[] {
+  const title = iconEntry.entry.node.name + iconEntry.entry.node.filenameExtension;
+  const lines = contentAwareSplitTitle(CharactersPerLine, MaximumLines, title);
 
   const imageHorizontalCenter = IconWidth / 2;
 
   const image: Rectangle = {
-    x1: entry.x + (imageHorizontalCenter - (ImageWidth / 2)),
-    x2: entry.x + (imageHorizontalCenter + (ImageWidth / 2)),
-    y1: entry.y,
-    y2: entry.y + ImageHeight
+    x1: iconEntry.x + (imageHorizontalCenter - (ImageWidth / 2)),
+    x2: iconEntry.x + (imageHorizontalCenter + (ImageWidth / 2)),
+    y1: iconEntry.y,
+    y2: iconEntry.y + ImageHeight
   };
 
   const text: Rectangle = {
-    x1: entry.x,
-    x2: entry.x + IconWidth,
-    y1: entry.y + (IconHeight - TextHeight),
-    y2: entry.y + IconHeight
+    x1: iconEntry.x,
+    x2: iconEntry.x + IconWidth,
+    y1: iconEntry.y + ImageHeight,
+    y2: iconEntry.y + ImageHeight + (TextHeight * lines.length),
   };
 
   return [image, text];
 }
 
-function EditTitle(props: { entry: DesktopIconEntry }) {
+function EditTitle(props: { entry: FolderIconEntry }) {
   const { entry } = props;
 
   const ref = useRef<HTMLInputElement>(null);
@@ -152,7 +152,7 @@ function RenderTitle(props: { title: string }) {
   return <div className={styles.title}>{ elements }</div>
 }
 
-function calculateZIndex(entry: DesktopIconEntry, index: number): number {
+function calculateZIndex(entry: FolderIconEntry, index: number): number {
   let result = entry.dragging ? 100_000 : 0;
   
   result += index;
@@ -160,7 +160,7 @@ function calculateZIndex(entry: DesktopIconEntry, index: number): number {
   return result;
 }
 
-export type DesktopIconEntry = {
+export type FolderIconEntry = {
   entry: DirectoryEntry,
   x: number,
   y: number
@@ -169,20 +169,20 @@ export type DesktopIconEntry = {
   editing: { active: boolean, value: string, onSave?: () => void }
 }
 
-export default function DesktopIcon(props: { desktopIconEntry: DesktopIconEntry, index: number }) {
-  const { desktopIconEntry, index } = props;
-  const entry = desktopIconEntry.entry;
+export default function FolderIcon(props: { folderIconEntry: FolderIconEntry, index: number }) {
+  const { folderIconEntry: folderIconEntry, index } = props;
+  const entry = folderIconEntry.entry;
   const file = entry.node;
 
-  const selected = desktopIconEntry.selected ? styles.selected : '';
-  const title = desktopIconEntry.editing.active ? <EditTitle entry={desktopIconEntry}/> : <RenderTitle title={file.name}/>;
+  const selected = folderIconEntry.selected ? styles.selected : '';
+  const title = folderIconEntry.editing.active ? <EditTitle entry={folderIconEntry}/> : <RenderTitle title={file.name + file.filenameExtension}/>;
   const icon = getIconFromNode(entry.node);
 
   return <>
     <div className={file.kind + " " + styles.container + ' ' + selected} style={{
-      top: `${desktopIconEntry.y}px`,
-      left: `${desktopIconEntry.x}px`,
-      zIndex: calculateZIndex(desktopIconEntry, index)
+      top: `${folderIconEntry.y}px`,
+      left: `${folderIconEntry.x}px`,
+      zIndex: calculateZIndex(folderIconEntry, index)
     }}>
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>

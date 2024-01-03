@@ -1,7 +1,7 @@
 import { BoundingBox } from "@/data/BoundingBox";
 import { EventBus } from "./EventBus";
 
-export class TouchConfirmationData {
+export class ConfirmationData {
   constructor(
     public x: number,
     public y: number,
@@ -11,7 +11,7 @@ export class TouchConfirmationData {
     public callbackCancelation: (() => void) | null,
   ) {}
 
-  static fromTouchData(
+  public static fromTouchData(
     data: TouchData,
     durationInMS: number,
     callbackSuccess: () => void,
@@ -19,7 +19,25 @@ export class TouchConfirmationData {
   ) {
     const coords = data.pointerCoordinates();
 
-    return new TouchConfirmationData(
+    return new ConfirmationData(
+      coords.x,
+      coords.y,
+      Date.now(),
+      durationInMS,
+      callbackSuccess,
+      callbackCancelation
+    );
+  }
+
+  public static fromMouseData(
+    data: MouseData,
+    durationInMS: number,
+    callbackSuccess: () => void,
+    callbackCancelation: (() => void) | null
+  ) {
+    const coords = data.pointerCoordinates();
+
+    return new ConfirmationData(
       coords.x,
       coords.y,
       Date.now(),
@@ -32,7 +50,16 @@ export class TouchConfirmationData {
 
 export type TouchConfirmationEvent = {
   event: 'touch_confirmation_event';
-  data: TouchConfirmationData;
+  data: ConfirmationData;
+}
+
+export type MouseConfirmationEvent = {
+  event: 'mouse_confirmation_event',
+  data: ConfirmationData
+}
+
+export type CancelMouseConfirmationEvent = {
+  event: 'cancel_mouse_confirmation_event'
 }
 
 export type UserTouchEvent = {
@@ -155,8 +182,16 @@ export class TouchData {
   }
 }
 
-export const toUserInteractionTouchConfirmationEvent = (data: TouchConfirmationData): TouchConfirmationEvent => {
+export const toUserInteractionTouchConfirmationEvent = (data: ConfirmationData): TouchConfirmationEvent => {
   return { event: 'touch_confirmation_event', data };
+}
+
+export const toUserInteractionMouseConfirmationEvent = (data: ConfirmationData): MouseConfirmationEvent => {
+  return { event: 'mouse_confirmation_event', data };
+}
+
+export const cancelUserInteractionMouseConfirmationEvent = (): CancelMouseConfirmationEvent => {
+  return { event: 'cancel_mouse_confirmation_event' };
 }
 
 export const toUserInteractionTouchEvent = (data: TouchData): UserTouchEvent => {
@@ -167,7 +202,7 @@ export const toUserInteractionMouseEvent = (data: MouseData): UserMouseEvent => 
   return { event: 'mouse_event', data };
 }
 
-export type UserInteractionEvent = UserTouchEvent | UserMouseEvent | TouchConfirmationEvent;
+export type UserInteractionEvent = UserTouchEvent | UserMouseEvent | TouchConfirmationEvent | MouseConfirmationEvent | CancelMouseConfirmationEvent;
 export type UserInteractionEventBus = EventBus<UserInteractionEvent>;
 
 export const createUIEventBus = (): UserInteractionEventBus => {

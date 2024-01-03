@@ -44,7 +44,7 @@ export class Finder extends Application {
       x: 100,
       y: 100,
       height: 400,
-      width: 650,
+      width: 670,
       title: `Finder`,
       application: this,
       args: path,
@@ -57,6 +57,10 @@ export class Finder extends Application {
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     if (event.kind === 'application-open') {
+
+      // Do not open a Finder window on the first start, due to the Operating system starting Finder at "boot"
+      if (event.isFirst) { return; }
+
       const path = event.args.length !== 0 ? event.args : '/';
       this.openNewWindow(path);
     };
@@ -64,7 +68,7 @@ export class Finder extends Application {
     if (event.kind === 'finder-open-file-event') {
       if (!windowContext) { return }
 
-      this.manager.open(event.path);
+      this.manager.open(`"${event.path}"`);
     }
   }
 }

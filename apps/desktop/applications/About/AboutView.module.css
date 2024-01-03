@@ -1,0 +1,41 @@
+.home-title {
+  display: flex;
+  justify-content: center;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  font-weight: normal;
+}
+
+.home-subtitle {
+  display: flex;
+  justify-content: center;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: normal;
+  margin-top: 0.5rem;
+}
+
+.navigation {
+  min-width: 12rem;
+}
+
+.page-h1 {
+  font-family: 'Century Schoolbook', sans-serif;
+  font-weight: normal;
+  font-size: 2rem;
+}
+
+.logo-part {
+  display: block;
+  font-family: 'Century Schoolbook', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
+
+.home-page {
+  display: flex;
+}

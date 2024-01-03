@@ -1,5 +1,5 @@
 import styles from './Renderer.module.css'
-import { MutableRefObject, RefObject, useEffect, useRef } from "react";
+import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
@@ -12,14 +12,43 @@ import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
-import { RendererTouchUserInterface } from './RendererTouchUserInterface';
-import { parseRequestFromChild, sendResponseToChild } from "rpc";
+import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
+import { parseRequestFromChild, sendMessageToChild } from "rpc";
 
 export interface RendererScenes {
   sourceScene: Scene,
   cutoutScene: Scene,
   cssScene: Scene
 };
+
+function useSoundManagement() {
+  const [isSoundEnabled, setSoundEnabled] = useState(true);
+
+  function toggleSound() {
+    if (isSoundEnabled) {
+      disableSound();
+    } else {
+      enableSound();
+    }
+  }
+
+  function sendSoundStateToChild(enabled: boolean) {
+    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
+  }
+
+  function enableSound() {
+    setSoundEnabled(true);
+    sendSoundStateToChild(true);
+  }
+
+  function disableSound() {
+    setSoundEnabled(false);
+    sendSoundStateToChild(false);
+  }
+
+  return {isSoundEnabled, toggleSound, enableSound, disableSound};
+}
 
 const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
   const camera = new PerspectiveCamera(fov, aspectRatio, 0.1, 1000);
@@ -127,12 +156,8 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         const zoomDelta = maxZoom - minZoom;
 
         const zoomInPercentage = distanceDelta / zoomDelta;
-        
-        console.log('==============');
 
-        
-
-
+        // TODO: Implement zoom in percentage view
         console.log(controller.getPanOffset());
         console.log(zoomInPercentage);
 
@@ -143,7 +168,7 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         const maxZoom = controller.getMaxZoom();
         const currentZoom = controller.getZoom();
 
-        sendResponseToChild(event.source as Window, {
+        sendMessageToChild(event.source as Window, {
           method: 'camera_zoom_distance_response',
           max_distance: maxZoom,
           min_distance: minZoom,
@@ -162,8 +187,6 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         controller.setPanOffsetX(value.horizontalOffset);
         controller.setPanOffsetY(value.verticalOffset);
 
-        console.log(controller.getPanOffset());
-
       } break;
     }
   }
@@ -172,9 +195,12 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
 export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+  const { isSoundEnabled, toggleSound } = useSoundManagement();
+
   const touchEvents = createUIEventBus();
 
-  const touchUserInterface = RendererTouchUserInterface(touchEvents);
+  const mouseProgressCircle = HandleMouseProgressCircle(touchEvents);
+  const touchProgressCircle = HandleTouchProgressCircle(touchEvents);
 
   let then: MutableRefObject<number | null> = useRef(null);
 
@@ -230,6 +256,7 @@ export const Renderer = (props: RendererProps) => {
       renderCssContext(cssScene, cssRenderer, camera);
 
       cameraController.update(deltaTime);
+      cameraHandler.update(deltaTime);
     }
     
     const onWindowResize = function() {
@@ -269,9 +296,12 @@ export const Renderer = (props: RendererProps) => {
   }, []);
   return (
     <div className={styles.renderer}>
-      <div className={styles.cssOutput} ref={cssOutputRef}></div>
-      <div className={styles.webglOutput} ref={webglOutputRef}></div>
-      {touchUserInterface}
+      <button className={styles['mute-button']} onClick={() => toggleSound()}>{isSoundEnabled ? 'Mute' : 'Unmute'}</button>
+
+      <div className={styles['css-output']} ref={cssOutputRef}></div>
+      <div className={styles['webgl-output']} ref={webglOutputRef}></div>
+      {mouseProgressCircle}
+      {touchProgressCircle}
     </div>
   );
 };

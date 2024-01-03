@@ -4,7 +4,7 @@ import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
 const calculateWindowZIndex = (order: number): number => {
-  return 1000 + order * 1000;
+  return 1000 + order * 10;
 }
 
 const calculateStyle = (window: Window): React.CSSProperties => {
@@ -15,7 +15,6 @@ const calculateStyle = (window: Window): React.CSSProperties => {
     left: `${window.x}px`,
     width: `${window.width}px`,
     height: `${window.height}px`,
-    backgroundColor: 'red',
     zIndex: calculateWindowZIndex(window.order),
   };
 }
@@ -380,7 +379,7 @@ const WindowHeader = (
     const windowY = windowRef.y - deltaY;
 
     windowData.x = windowX;
-    windowData.y = windowY;
+    windowData.y = Math.max(windowY, 0);
 
     windowCompositor.update(windowData);
   }
@@ -408,11 +407,12 @@ const WindowHeader = (
   return <>
     <div ref={output} className={classes.join(' ')}>
       <span className={styles.headerTitle}>{ windowData.title }</span>
+      <div className={styles.lines}></div>
 
-      <div className={styles.headerButtons}>
-        <button className='systemButton' draggable="false" onPointerDown={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
-        <button className='systemButton' draggable="false" onPointerDown={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
-        <button className='systemButton' draggable="false" onPointerDown={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
+      <div className={styles['header-buttons']}>
+        <button className='header-button' draggable="false" onClick={() => { windowCompositor.minimize(windowData.id)}}><img src={MinimizeIcon} alt='Minimize window'/></button>
+        <button className='header-button' draggable="false" onClick={onClickMaximize}><img src={MaximizeIcon} alt='Maximize window'/></button>
+        <button className='header-button' draggable="false" onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window'/></button>
       </div>
     </div>
     { dragging && <div className={styles.draggingMask}></div> }

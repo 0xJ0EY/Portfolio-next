@@ -1,0 +1,71 @@
+.dock {
+  z-index: 10000;
+
+  position: absolute;
+  display: flex;
+
+  width: 100%;
+
+  flex: 0 1 auto;
+  bottom: 0;
+  pointer-events: none;
+  justify-content: center;
+}
+
+.dockContainer {
+  display: flex;
+  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #c8c8c8,inset -2px -2px grey,inset 2px 2px #fff;
+  padding: 4px;
+  margin: 4px;
+  background-color: #c0c0c0;
+  pointer-events: all;
+}
+
+.dock-application {
+  position: relative;
+  height: 74px;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  background: none;
+  user-select: none;
+
+  border: none;
+  padding: 0;
+  margin: 0 4px;
+}
+
+.dock-application:hover::after {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  width: 200px;
+  transform: translateX(-50%);
+  content: attr(data-tooltip);
+  color: #000;
+  text-decoration: none;
+}
+
+.dock-application .dock-app-image {
+  display: block;
+  max-height: calc(100% - 12px);
+}
+
+.dock-app-active-image {
+  max-height: 100%;
+  height: 100%;
+}
+
+.dock-application .status {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+  height: 12px;
+  width: 100%;
+  /* background: blue; */
+}
+
+.separator {
+  border-left: 1px solid black;
+  margin: 7px;
+}

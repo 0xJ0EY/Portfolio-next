@@ -1,0 +1,25 @@
+.desktop {
+  position: relative;
+  background-color: #11b2b2;
+  display: block;
+
+  flex: 1 1 auto;
+  width: 100%;
+
+  overflow: visible;
+}
+
+.applicationContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  
+  pointer-events: none;
+  width: 100vw;
+  /* TODO: Change this to the eventual height of the dock */
+  height: calc(100% - 90px);
+}
+
+.applicationContainer > * {
+  pointer-events: initial;
+}

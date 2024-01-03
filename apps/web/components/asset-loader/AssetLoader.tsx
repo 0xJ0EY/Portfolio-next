@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { createRenderScenes, loadRenderScenes, UpdateActions } from "./Loaders";
+import { sendMessageToChild } from "rpc";
 
 export function AssetLoader() {
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,10 @@ export function AssetLoader() {
   if (loading) {
     return <>Loading!</>
   } else {
-    return <Renderer scenes={scenes} actions={actions} />
+    return (
+      <>
+        <Renderer scenes={scenes} actions={actions} />
+      </>
+    )
   }
 };

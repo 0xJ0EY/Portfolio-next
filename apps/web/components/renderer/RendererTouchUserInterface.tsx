@@ -1,16 +1,16 @@
-import { TouchConfirmationData, TouchData, UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
+import { ConfirmationData, MouseData, TouchData, UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInteractionEvents";
 import { useEffect, useState } from "react";
 import { clamp } from "./util";
 
-class ConfirmationData {
+class ProgressCircleData {
   constructor(public x: number, public y: number, public progress: number) {}
 
-  static fromTouchConfirmationData(data: TouchConfirmationData, progress: number): ConfirmationData {
-    return new ConfirmationData(data.x, data.y, progress);
+  static fromConfirmationData(data: ConfirmationData, progress: number): ProgressCircleData {
+    return new ProgressCircleData(data.x, data.y, progress);
   }
 };
 
-const ProgressCircle = (data: ConfirmationData) => {
+const ProgressCircle = (data: ProgressCircleData) => {
   const radius = 50;
   const strokeWidth = 20;
 
@@ -49,34 +49,103 @@ const ProgressCircle = (data: ConfirmationData) => {
   </>
 }
 
-export const RendererTouchUserInterface = (userInteractionEventBus: UserInteractionEventBus) => {
-    const [viewStatus, setStatus] = useState<ConfirmationData | null>(null);
-    let localStatus: TouchConfirmationData | null = null;
+export const HandleMouseProgressCircle = (eventBus: UserInteractionEventBus) => {
+  const [viewStatus, setStatus] = useState<ProgressCircleData | null>(null);
+  let localStatus: ConfirmationData | null = null;
+
+  function clearStatus(): void {
+    localStatus = null;
+    setStatus(null);
+  }
+
+  function handleMouseEvent(data: MouseData): void {
+    if (!localStatus) { return; }
+
+    let status = localStatus;
+
+    status.x = data.x;
+    status.y = data.y;
+  }
+
+  function handleMouseConfirmationEvent(data: ConfirmationData): void {
+    localStatus = data;
+    setStatus(ProgressCircleData.fromConfirmationData(data, 0));
+  }
+
+  function handleCancelConfirmationMouseEvent(): void {
+    clearStatus();
+  }
+
+  function handleUserInteractionEvent(evt: UserInteractionEvent): void {
+    switch (evt.event) {
+      case 'mouse_event': return handleMouseEvent(evt.data);
+      case 'mouse_confirmation_event': return handleMouseConfirmationEvent(evt.data);
+      case 'cancel_mouse_confirmation_event': return handleCancelConfirmationMouseEvent();
+    }
+  }
+
+  function handleSuccess(): void {
+    localStatus?.callbackSuccess();
+    clearStatus();
+  }
+
+  function update() {
+    if (localStatus === null) { return; }
   
-    const updateLocalStatus = (data: TouchConfirmationData | null): void => {
+    const now = Date.now();
+    const delta = now - localStatus.creationTime;
+
+    const progress = Math.min(delta / localStatus.durationInMS, 1.0);
+
+    setStatus(ProgressCircleData.fromConfirmationData(localStatus, progress));
+
+    if (progress === 1.0) { handleSuccess(); }
+  }
+
+  useEffect(() => {
+    let unsubscribeHandler = eventBus.subscribe(handleUserInteractionEvent);
+
+    const interval = setInterval(update, 0.5);
+
+    return () => {
+      unsubscribeHandler();
+      clearInterval(interval);
+    }
+  }, []);
+
+  if (viewStatus === null) { return <></>; }
+
+  return ProgressCircle(viewStatus);
+}
+
+export const HandleTouchProgressCircle = (eventBus: UserInteractionEventBus) => {
+    const [viewStatus, setStatus] = useState<ProgressCircleData | null>(null);
+    let localStatus: ConfirmationData | null = null;
+  
+    function updateLocalStatus(data: ConfirmationData | null): void {
       localStatus = data;
     }
 
-    const clearStatus = (): void => {
+    function clearStatus(): void {
       updateLocalStatus(null);
       setStatus(null);
     }
     
-    const handleTouchEvent = (data: TouchData): void => {
+    function handleTouchEvent(data: TouchData): void {
       if (!checkIfOnlyOneFinger(data)) { handleCancelation(); };
       if (!checkIfCloseByOrigin(data)) { handleCancelation(); };
     }
   
-    const handleTouchConfirmationEvent = (data: TouchConfirmationData): void => {
+    function handleTouchConfirmationEvent(data: ConfirmationData): void {
       updateLocalStatus(data);
-      setStatus(ConfirmationData.fromTouchConfirmationData(data, 0));
+      setStatus(ProgressCircleData.fromConfirmationData(data, 0));
     }
   
-    const checkIfOnlyOneFinger = (evt: TouchData): boolean => {
+    function checkIfOnlyOneFinger(evt: TouchData): boolean {
       return !evt.hasMoreTouchesDownThan(1);
     }
   
-    const checkIfCloseByOrigin = (evt: TouchData): boolean => {
+    function checkIfCloseByOrigin(evt: TouchData): boolean {
       if (localStatus === null) { return false; }
   
       const [ originX, originY ] = [localStatus.x, localStatus.y];
@@ -90,12 +159,12 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
       return deltaX < threshold && deltaY < threshold;
     }
     
-    const handleSuccess = (): void => {
+    function handleSuccess(): void {
       localStatus?.callbackSuccess();
       clearStatus();
     };
   
-    const handleCancelation = (): void => {
+    function handleCancelation(): void {
       if (localStatus?.callbackCancelation !== null) {
         localStatus?.callbackCancelation();
       }
@@ -103,14 +172,14 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
       clearStatus();
     };
   
-    const handleUserInteractionEvent = (evt: UserInteractionEvent) => {
+    function handleUserInteractionEvent(evt: UserInteractionEvent): void {
       switch (evt.event) {
         case 'touch_event': return handleTouchEvent(evt.data);
         case 'touch_confirmation_event': return handleTouchConfirmationEvent(evt.data);
       }
     }
   
-    const update = () => {
+    function update(): void {
       if (localStatus === null) { return; }
   
       const now = Date.now();
@@ -118,13 +187,13 @@ export const RendererTouchUserInterface = (userInteractionEventBus: UserInteract
   
       const progress = Math.min(delta / localStatus.durationInMS, 1.0);
 
-      setStatus(ConfirmationData.fromTouchConfirmationData(localStatus, progress));
+      setStatus(ProgressCircleData.fromConfirmationData(localStatus, progress));
   
       if (progress === 1.0) { handleSuccess(); }
     };
   
     useEffect(() => {
-      let unsubscribeHandler = userInteractionEventBus.subscribe(handleUserInteractionEvent);
+      let unsubscribeHandler = eventBus.subscribe(handleUserInteractionEvent);
   
       const interval = setInterval(update, 0.5);
   

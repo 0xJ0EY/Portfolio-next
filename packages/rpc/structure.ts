@@ -45,5 +45,10 @@ export type CameraZoomDistanceResponse = {
   'max_vertical_offset': number,
 }
 
-export type Request = TouchInteractionRequest | CameraZoomDistanceRequest | SetPossibleCameraParametersRequest | SetCameraParametersRequest;
-export type Response = CameraZoomDistanceResponse; 
+export type EnableSoundMessage = {
+  'method': 'enable_sound_message',
+  'enabled': boolean,
+}
+
+export type RequestToParent = TouchInteractionRequest | CameraZoomDistanceRequest | SetPossibleCameraParametersRequest | SetCameraParametersRequest;
+export type MessageFromParent = CameraZoomDistanceResponse | EnableSoundMessage;
