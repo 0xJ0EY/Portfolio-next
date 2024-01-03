@@ -1,18 +1,14 @@
 import { CommandInterface, Emulators } from "emulators";
 import { EmulatorsUi } from "emulators-ui";
-import { Layers } from "emulators-ui/dist/types/dom/layers";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 declare const emulators: Emulators;
 declare const emulatorsUi: EmulatorsUi;
-
 
 class Runner {
   private active: boolean = true;
   private audioHandler: ((volume: number) => void) | null = null;
   private ci: CommandInterface | null = null;
-
-  constructor() {}
 
   private changeVolume(volume: number): void {
     if (!this.audioHandler) { return; }
@@ -21,7 +17,8 @@ class Runner {
   }
 
   public async start(canvas: HTMLCanvasElement, gameLocation: string) {
-    // this.active = true;
+    this.active = true;
+
     const bundle = await emulatorsUi.network.resolveBundle(gameLocation);
     this.ci = await emulators.dosboxWorker(bundle);
 
@@ -29,7 +26,6 @@ class Runner {
 
     const rgba = new Uint8ClampedArray(320 * 200 * 4);
     
-
     // This is a quite leaky abstraction, because we force as cast to layers
     // This is due to me not wanting to implementing everything there is in the layers object
     // and the webgl function only depending on a few items
@@ -43,9 +39,14 @@ class Runner {
 
     // emulatorsUi.graphics.webGl(layers, this.ci);
     
-
     const ctx = canvas.getContext('2d');
     if (!ctx) { return; }
+
+    function renderFrame() {
+      if (!ctx) { return; }
+
+      ctx.putImageData(new ImageData(rgba, 320, 200), 0, 0);
+    }
 
     this.ci.events().onFrame((rgb) => {
       if (!this.active || !rgb) { this.ci?.exit(); return; }
@@ -57,7 +58,7 @@ class Runner {
         rgba[frame * 4 + 3] = 255;
       }
 
-      ctx.putImageData(new ImageData(rgba, 320, 200), 0, 0);
+      requestAnimationFrame(renderFrame);
     });
   }
 
