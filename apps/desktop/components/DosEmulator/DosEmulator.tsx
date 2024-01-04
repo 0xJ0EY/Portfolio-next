@@ -1,5 +1,6 @@
 import { CommandInterface, Emulators } from "emulators";
 import { EmulatorsUi } from "emulators-ui";
+import { Layers } from "emulators-ui/dist/types/dom/layers";
 import { useEffect, useRef } from "react";
 
 declare const emulators: Emulators;
@@ -29,37 +30,42 @@ class Runner {
     // This is a quite leaky abstraction, because we force as cast to layers
     // This is due to me not wanting to implementing everything there is in the layers object
     // and the webgl function only depending on a few items
-    // const layers = {
-    //   canvas,
-    //   width: canvas.clientWidth,
-    //   height: canvas.clientHeight,
-    //   addOnResize: (params: (w: number, h: number) => {}) => {},
-    //   removeOnResize: (params: (w: number, h: number) => {}) => {},
-    // } as Layers;
+    const layers = {
+      canvas,
+      width: canvas.clientWidth,
+      height: canvas.clientHeight,
+      addOnResize: (params: (w: number, h: number) => {}) => {},
+      removeOnResize: (params: (w: number, h: number) => {}) => {},
+    } as Layers;
 
-    // emulatorsUi.graphics.webGl(layers, this.ci);
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) { return; }
+    emulatorsUi.graphics.webGl(layers, this.ci);
 
-    function renderFrame() {
-      if (!ctx) { return; }
 
-      ctx.putImageData(new ImageData(rgba, 320, 200), 0, 0);
-    }
-
-    this.ci.events().onFrame((rgb) => {
-      if (!this.active || !rgb) { this.ci?.exit(); return; }
-
-      for (let frame = 0; frame < 320 * 200; ++frame) {
-        rgba[frame * 4 + 0] = rgb![frame * 3 + 0];
-        rgba[frame * 4 + 1] = rgb![frame * 3 + 1];
-        rgba[frame * 4 + 2] = rgb![frame * 3 + 2];
-        rgba[frame * 4 + 3] = 255;
-      }
-
-      requestAnimationFrame(renderFrame);
+    this.ci.events().onFrame(() => {
+      if (!this.active) { this.ci?.exit(); return; }
     });
+    
+    // const ctx = canvas.getContext('2d');
+    // if (!ctx) { return; }
+
+    // function renderFrame() {
+    //   if (!ctx) { return; }
+
+    //   ctx.putImageData(new ImageData(rgba, 320, 200), 0, 0);
+    // }
+
+    // this.ci.events().onFrame((rgb) => {
+    //   if (!this.active || !rgb) { this.ci?.exit(); return; }
+
+    //   for (let frame = 0; frame < 320 * 200; ++frame) {
+    //     rgba[frame * 4 + 0] = rgb![frame * 3 + 0];
+    //     rgba[frame * 4 + 1] = rgb![frame * 3 + 1];
+    //     rgba[frame * 4 + 2] = rgb![frame * 3 + 2];
+    //     rgba[frame * 4 + 3] = 255;
+    //   }
+
+    //   requestAnimationFrame(renderFrame);
+    // });
   }
 
   public stop() {
