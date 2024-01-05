@@ -27,6 +27,8 @@ export function isTouchZoom(data: TouchData): boolean {
   return data.hasTouchesDown(2);
 }
 
+export const isFirefox = (): boolean => navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
 export const isSafari = (): boolean => /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 /*

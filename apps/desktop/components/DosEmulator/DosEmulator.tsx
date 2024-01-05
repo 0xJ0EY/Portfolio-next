@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { DosWebGLRenderer } from "./DosWebGLRenderer";
 import { SoundService } from "@/apis/Sound/Sound";
 import styles from './DosEmulator.module.css';
+import { isFirefox } from "../util";
 
 declare const emulators: Emulators;
 declare const emulatorsUi: EmulatorsUi;
@@ -132,7 +133,6 @@ class Runner {
   }
 
   public sendKeyEvent(keyCode: number, pressed: boolean) {
-    console.log(keyCode, pressed);
     this.ci?.sendKeyEvent(keyCode, pressed);
   }
 
@@ -169,6 +169,8 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
 
     if (canvasContainerRef.current === null) { return; }
     if (canvasRef.current === null) { return; }
+
+    let movementOrigin: { x: number, y: number } | null = null; 
 
     const runner = new Runner();
     const observer = new ResizeObserver((target) => {
@@ -215,7 +217,27 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
     } 
 
     const onMouseMove = (evt: MouseEvent) => {
-      runner.sendMouseMovement(evt.movementX, evt.movementY);
+
+      if (isFirefox()) {
+        /*
+        There is something wrong with the way Firefox calculates the movementX/movementY values
+        It is depended on how to outer iframe looks at the monitor. To offset this issue, we take a initial measurement
+        That we subtract from every following measurement
+
+        This might have the consequence that the always have the wrong measurement if the initial measurement is off.
+        */
+
+        if (movementOrigin === null) {
+          movementOrigin = { x: evt.movementX, y: evt.movementY };
+        }
+  
+        const deltaX = evt.movementX - movementOrigin.x;
+        const deltaY = evt.movementY - movementOrigin.y;
+  
+        runner.sendMouseMovement(deltaX, deltaY);
+    } else {
+        runner.sendMouseMovement(evt.movementX, evt.movementY);
+      }
     }
 
     const onPointerLockChange = () => {
@@ -250,11 +272,6 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
       document.removeEventListener('keyup', handleKeyUp, false);
       document.removeEventListener('pointerlockchange', onPointerLockChange, false);
 
-      if (canvasRef.current) {
-        canvasRef.current.removeEventListener('mousedown', handleMouseDown, false);
-        canvasRef.current.removeEventListener('mouseup', handleMouseUp, false);  
-      }
-      
       document.removeEventListener('mousemove', onMouseMove, false);
     }
   }, []);
