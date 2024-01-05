@@ -1,5 +1,4 @@
 import { CommandInterface } from "emulators";
-import { Layers } from "emulators-ui/dist/types/dom/layers";
 
 /*
 ** Modified WebGL renderer from the "emulators-ui" webgl renderer
@@ -128,106 +127,6 @@ export class DosWebGLRenderer {
 
     this.onResize();
   }
-}
-
-export function webGl(canvas: HTMLCanvasElement, ci: CommandInterface) {
-  const gl = canvas.getContext("webgl");
-  if (gl === null) {
-    throw new Error("Unable to create webgl context on given canvas");
-  }
-
-  const shaderProgram     = initShaderProgram(gl, vsSource, fsSource);
-  const vertexPosition    = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-  const textureCoord      = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-  const uSampler          = gl.getUniformLocation(shaderProgram, "uSampler");
-
-  initBuffers(gl, vertexPosition, textureCoord);
-
-  const texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-  const pixel = new Uint8Array([0, 0, 0]);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, pixel);
-
-  gl.useProgram(shaderProgram);
-  gl.activeTexture(gl.TEXTURE0);
-  gl.uniform1i(uSampler, 0);
-
-  let containerWidth = canvas.clientWidth;
-  let containerHeight = canvas.clientHeight;
-  let frameWidth = 0;
-  let frameHeight = 0;
-
-  const onResize = () => {
-    const aspect = frameWidth / frameHeight;
-
-    let width = containerWidth;
-    let height = containerWidth / aspect;
-
-    if (height > containerHeight) {
-      height = containerHeight;
-      width = containerHeight * aspect;
-    }
-
-    canvas.style.position = "relative";
-    canvas.style.top = (containerHeight - height) / 2 + "px";
-    canvas.style.left = (containerWidth - width) / 2 + "px";
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-  };
-
-  const onResizeLayer = (w: number, h: number) => {
-    containerWidth = w;
-    containerHeight = h;
-    onResize();
-  };
-  // layers.addOnResize(onResizeLayer);
-
-  const onResizeFrame = (w: number, h: number) => {
-    frameWidth = w;
-    frameHeight = h;
-    canvas.width = frameWidth;
-    canvas.height = frameHeight;
-    gl.viewport(0, 0, frameWidth, frameHeight);
-    onResize();
-  };
-  ci.events().onFrameSize(onResizeFrame);
-  onResizeFrame(ci.width(), ci.height());
-
-  let requestAnimationFrameId: number | null = null;
-  let frame: Uint8Array | null = null;
-  let frameFormat: number = 0;
-
-  ci.events().onFrame((rgb, rgba) => {
-    frame = rgb != null ? rgb : rgba;
-    frameFormat = rgb != null ? gl.RGB : gl.RGBA;
-    if (requestAnimationFrameId === null) {
-      requestAnimationFrameId = requestAnimationFrame(updateTexture);
-    }
-  });
-
-  const updateTexture = () => {
-    gl.texImage2D(gl.TEXTURE_2D, 0, frameFormat,
-      frameWidth, frameHeight, 0, frameFormat, gl.UNSIGNED_BYTE,
-      frame);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    requestAnimationFrameId = null;
-    frame = null;
-  };
-
-  canvas.addEventListener('resize', () => {
-    console.log('canvas resize');
-    onResizeLayer(canvas.clientWidth, canvas.clientHeight);
-  });
-
-  ci.events().onExit(() => {
-    // layers.removeOnResize(onResizeLayer);
-  });
 }
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {

@@ -2,6 +2,7 @@ import { CommandInterface, Emulators } from "emulators";
 import { EmulatorsUi } from "emulators-ui";
 import { useEffect, useRef } from "react";
 import { DosWebGLRenderer } from "./DosWebGLRenderer";
+import { SoundService } from "@/apis/Sound/Sound";
 import styles from './DosEmulator.module.css';
 
 declare const emulators: Emulators;
@@ -9,15 +10,18 @@ declare const emulatorsUi: EmulatorsUi;
 
 class Runner {
   private active: boolean = true;
+  private volume: number = 1.0;
+
   private audioHandler: ((volume: number) => void) | null = null;
   private ci: CommandInterface | null = null;
 
   private renderer: DosWebGLRenderer | null = null;
 
-  private changeVolume(volume: number): void {
-    if (!this.audioHandler) { return; }
+  public changeVolume(volume: number): void {
+    this.volume = volume;
 
-    this.audioHandler(volume);
+    if (!this.audioHandler) { return; }
+    this.audioHandler(this.volume);
   }
 
   public async start(
@@ -35,8 +39,8 @@ class Runner {
 
     this.audioHandler = emulatorsUi.sound.audioNode(this.ci);
 
-    // TEMP: For debug :^)
-    this.changeVolume(0);
+    console.log(this.volume);
+    this.changeVolume(this.volume);
     
     this.renderer = new DosWebGLRenderer(
       settings.canvas,
@@ -44,7 +48,7 @@ class Runner {
       settings.width,
       settings.height,
       () => this.active
-    );
+   );
   }
 
   public resize(width: number, height: number): void {
@@ -59,9 +63,13 @@ class Runner {
   }
 }
 
-export default function DosEmulator(props: { gameLocation: string }) {
+export default function DosEmulator(props: { gameLocation: string, soundService: SoundService }) {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  function handleSound(isEnabled: boolean, runner: Runner): void {
+    runner.changeVolume(isEnabled ? 0.6 : 0.0);
+  }
   
   useEffect(() => {
     emulators.pathPrefix = "/emulators/";
@@ -80,6 +88,9 @@ export default function DosEmulator(props: { gameLocation: string }) {
     const width   = canvasContainerRef.current.clientWidth;
     const height  = canvasContainerRef.current.clientHeight;
 
+    const soundServiceUnsubscribe = props.soundService.subscribe((isEnabled) => handleSound(isEnabled, runner));
+    handleSound(props.soundService.isEnabled(), runner);
+
     runner.start(
       {
         canvas: canvasRef.current,
@@ -93,13 +104,14 @@ export default function DosEmulator(props: { gameLocation: string }) {
     return () => {
       runner.stop();
       observer.disconnect();
+      soundServiceUnsubscribe();
     }
   }, []);
 
   return (
     <>
       <div className={styles['emulator-container']} ref={canvasContainerRef}>
-        <canvas className={styles['emulator']} ref={canvasRef}></canvas>
+        <canvas ref={canvasRef}></canvas>
       </div>
     </>
   );
