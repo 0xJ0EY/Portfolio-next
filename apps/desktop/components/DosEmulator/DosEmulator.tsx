@@ -120,8 +120,6 @@ class Runner {
     this.ci = await emulators.dosboxWorker(bundle);
 
     this.audioHandler = emulatorsUi.sound.audioNode(this.ci);
-
-    console.log(this.volume);
     this.changeVolume(this.volume);
     
     this.renderer = new DosWebGLRenderer(
@@ -140,6 +138,14 @@ class Runner {
 
   public resize(width: number, height: number): void {
     this.renderer?.resize(width, height);
+  }
+
+  public sendMouseClick(button: number, pressed: boolean): void {
+    this.ci?.sendMouseButton(button, pressed);
+  }
+
+  public sendMouseMovement(x: number, y: number): void {
+    this.ci?.sendMouseRelativeMotion(x, y);
   }
 
   public stop() {
@@ -181,8 +187,49 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
     const handleKeyDown = (evt: KeyboardEvent) => runner.sendKeyEvent(domKeyboardCodeToDosKeyCode(evt.code), true);
     const handleKeyUp = (evt: KeyboardEvent) => runner.sendKeyEvent(domKeyboardCodeToDosKeyCode(evt.code), false);
     
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown, false);
+    document.addEventListener('keyup', handleKeyUp, false);
+
+    const hasPointerLock = (): boolean => {
+      return document.pointerLockElement === canvasRef.current;
+    }
+
+    const requestPointerLock = () => {
+      if (!canvasRef.current) { return; }
+      const canvas = canvasRef.current;
+
+      canvas.requestPointerLock();
+    }
+
+    const handleMouseDown = (evt: MouseEvent) => {
+      if (!hasPointerLock()) {
+        requestPointerLock();
+        return;
+      }
+      
+      runner.sendMouseClick(evt.button, true);
+    }
+
+    const handleMouseUp = (evt: MouseEvent) => {
+      runner.sendMouseClick(evt.button, false);
+    } 
+
+    const onMouseMove = (evt: MouseEvent) => {
+      runner.sendMouseMovement(evt.movementX, evt.movementY);
+    }
+
+    const onPointerLockChange = () => {
+      if (hasPointerLock()) {
+        document.addEventListener('mousemove', onMouseMove, false);
+      } else {
+        document.removeEventListener('mousemove', onMouseMove, false);
+      }
+    }
+
+    document.addEventListener('pointerlockchange', onPointerLockChange, false);
+
+    canvasRef.current.addEventListener('mousedown', handleMouseDown, false);
+    canvasRef.current.addEventListener('mouseup', handleMouseUp, false);
 
     runner.start(
       {
@@ -199,8 +246,16 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
       observer.disconnect();
       soundServiceUnsubscribe();
 
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown, false);
+      document.removeEventListener('keyup', handleKeyUp, false);
+      document.removeEventListener('pointerlockchange', onPointerLockChange, false);
+
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('mousedown', handleMouseDown, false);
+        canvasRef.current.removeEventListener('mouseup', handleMouseUp, false);  
+      }
+      
+      document.removeEventListener('mousemove', onMouseMove, false);
     }
   }, []);
 
