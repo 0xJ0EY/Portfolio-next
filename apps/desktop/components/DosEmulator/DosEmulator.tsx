@@ -1,7 +1,8 @@
 import { CommandInterface, Emulators } from "emulators";
 import { EmulatorsUi } from "emulators-ui";
-import { Layers } from "emulators-ui/dist/types/dom/layers";
 import { useEffect, useRef } from "react";
+import { DosWebGLRenderer } from "./DosWebGLRenderer";
+import styles from './DosEmulator.module.css';
 
 declare const emulators: Emulators;
 declare const emulatorsUi: EmulatorsUi;
@@ -10,10 +11,8 @@ class Runner {
   private active: boolean = true;
   private audioHandler: ((volume: number) => void) | null = null;
   private ci: CommandInterface | null = null;
-  private requestAnimationFrameId: number | null = null;
 
-
-  private rgb: Uint8Array | null = null;
+  private renderer: DosWebGLRenderer | null = null;
 
   private changeVolume(volume: number): void {
     if (!this.audioHandler) { return; }
@@ -21,7 +20,14 @@ class Runner {
     this.audioHandler(volume);
   }
 
-  public async start(canvas: HTMLCanvasElement, gameLocation: string) {
+  public async start(
+    settings: {
+      canvas: HTMLCanvasElement,
+      width: number,
+      height: number
+    },
+    gameLocation: string
+  ) {
     this.active = true;
 
     const bundle = await emulatorsUi.network.resolveBundle(gameLocation);
@@ -29,87 +35,72 @@ class Runner {
 
     this.audioHandler = emulatorsUi.sound.audioNode(this.ci);
 
-    const rgba = new Uint8ClampedArray(320 * 200 * 4);
+    // TEMP: For debug :^)
+    this.changeVolume(0);
     
-    // This is a quite leaky abstraction, because we force as cast to layers
-    // This is due to me not wanting to implementing everything there is in the layers object
-    // and the webgl function only depending on a few items
-    // const layers = {
-    //   canvas,
-    //   width: canvas.clientWidth,
-    //   height: canvas.clientHeight,
-    //   addOnResize: (params: (w: number, h: number) => {}) => {},
-    //   removeOnResize: (params: (w: number, h: number) => {}) => {},
-    // } as Layers;
+    this.renderer = new DosWebGLRenderer(
+      settings.canvas,
+      this.ci,
+      settings.width,
+      settings.height,
+      () => this.active
+    );
+  }
 
-    // emulatorsUi.graphics.webGl(layers, this.ci);
-
-
-    // this.ci.events().onFrame(() => {
-    //   if (!this.active) { this.ci?.exit(); return; }
-    // });
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) { return; }
-
-    const renderFrame = () => {
-      if (!ctx) { return; }
-
-      console.log('render frame');
-
-      for (let frame = 0; frame < 320 * 200; ++frame) {
-        rgba[frame * 4 + 0] = this.rgb![frame * 3 + 0];
-        rgba[frame * 4 + 1] = this.rgb![frame * 3 + 1];
-        rgba[frame * 4 + 2] = this.rgb![frame * 3 + 2];
-        rgba[frame * 4 + 3] = 255;
-      }
-
-      ctx.putImageData(new ImageData(rgba, 320, 200), 0, 0);
-
-      this.requestAnimationFrameId = null;
-    }
-
-    this.ci.events().onFrame((rgb) => {
-      if (!this.active || !rgb) { this.ci?.exit(); return; }
-
-      this.rgb = rgb;
-
-
-
-      if (this.requestAnimationFrameId === null) {
-        this.requestAnimationFrameId = requestAnimationFrame(renderFrame);
-      }
-    });
+  public resize(width: number, height: number): void {
+    this.renderer?.resize(width, height);
   }
 
   public stop() {
+    this.active = false;
+
     this.changeVolume(0);
     this.ci?.exit();
-    this.active = false;
   }
 }
 
-export default function DosEmulator(props: { gameLocation: string }) { 
+export default function DosEmulator(props: { gameLocation: string }) {
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   useEffect(() => {
     emulators.pathPrefix = "/emulators/";
 
+    if (canvasContainerRef.current === null) { return; }
     if (canvasRef.current === null) { return; }
 
     const runner = new Runner();
-    
-    runner.start(canvasRef.current, props.gameLocation);
+    const observer = new ResizeObserver((target) => {
+      const width   = target[0].target.clientWidth;
+      const height  = target[0].target.clientHeight;
+
+      runner.resize(width, height);
+    });
+
+    const width   = canvasContainerRef.current.clientWidth;
+    const height  = canvasContainerRef.current.clientHeight;
+
+    runner.start(
+      {
+        canvas: canvasRef.current,
+        width, height
+      },
+      props.gameLocation
+    );
+
+    observer.observe(canvasContainerRef.current);
 
     return () => {
-      console.log('destroy');
       runner.stop();
+      observer.disconnect();
     }
   }, []);
 
   return (
     <>
-      <canvas ref={canvasRef}></canvas>
+      <div className={styles['emulator-container']} ref={canvasContainerRef}>
+        <canvas className={styles['emulator']} ref={canvasRef}></canvas>
+      </div>
     </>
   );
 }

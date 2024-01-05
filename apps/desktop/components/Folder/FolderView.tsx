@@ -849,7 +849,7 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
-    let observer = new ResizeObserver(updateDirectoryDimensions);
+    const observer = new ResizeObserver(updateDirectoryDimensions);
     observer.observe(ref.current);
 
     // Set the correct width / height of the just opened window
