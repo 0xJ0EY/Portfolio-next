@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ApplicationConfig, ApplicationManager, ApplicationManagerEvent } from '@/applications/ApplicationManager';
 import styles from './Dock.module.css';
 import { aboutConfig } from '@/applications/About/About';
@@ -54,8 +54,23 @@ function DockItemSeparator() {
 }
 
 function DockItemDirectory(item: DirectoryDockItem) {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) { return; }
+    const container = ref.current;
+
+    console.log(container);
+
+    container.addEventListener('click', () => { console.log('click')});
+
+    return () => {
+
+    }
+  }, []);
+
   return (<>
-    <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.title}>
+    <button ref={ref} className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.title}>
       <Image className={styles['dock-app-image']} src={item.icon.src} alt={item.icon.alt} width={64} height={64}></Image>
       <div className={styles.status}></div>
     </button>
@@ -73,7 +88,8 @@ function DockItemView(item: DockItem) {
 
 export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, windowCompositor: WindowCompositor }) {
   const { apis, manager, windowCompositor } = props;
-  const [dockItems, setDockItems] = useState<DockItem[]>([]);
+  const [dockItems, setDockItems] = useState<DockItem[]>(constructDock(manager, windowCompositor, apis.system.isDebug()));
+  const [directoryItems] = useState<DockItem[]>(constructDirectoryItems());
 
   function constructDock(manager: ApplicationManager, windowCompositor: WindowCompositor, debug: boolean): DockItem[] {
     let content: DockItem[] = [];
@@ -134,33 +150,37 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
       });
     }
 
-    {
-      function onClickDirectory(path: string) {
-        manager.open(`/Applications/Finder.app ${path}`);
-      }
+    return content;
+  }
 
-      content.push({
-        kind: 'directory',
-        title: 'Applications',
-        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
-        onClick: () => onClickDirectory('/Applications')
-      });
-      
-      content.push({
-        kind: 'directory',
-        title: 'Documents',
-        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
-        onClick: () => onClickDirectory('/Users/joey/Documents')
-      });
+  function constructDirectoryItems(): DockItem[] {
+    let content: DockItem[] = [];
 
-      content.push({
-        kind: 'directory',
-        title: 'Trash',
-        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
-        onClick: () => onClickDirectory('/Users/joey/Trash')
-      });
+    function onClickDirectory(path: string) {
+      manager.open(`/Applications/Finder.app ${path}`);
     }
 
+    content.push({
+      kind: 'directory',
+      title: 'Applications',
+      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      onClick: () => onClickDirectory('/Applications')
+    });
+    
+    content.push({
+      kind: 'directory',
+      title: 'Documents',
+      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      onClick: () => onClickDirectory('/Users/joey/Documents')
+    });
+
+    content.push({
+      kind: 'directory',
+      title: 'Trash',
+      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      onClick: () => onClickDirectory('/Users/joey/Trash')
+    });
+  
     return content;
   }
 
@@ -178,8 +198,6 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
     const applicationManagerUnsubscribe = manager.subscribe(handleApplicationManager);
     const windowCompositorUnsubscribe = windowCompositor.subscribe(handleWindowCompositor);
 
-    setDockItems(constructDock(manager, windowCompositor, apis.system.isDebug()));
-
     return () => {
       applicationManagerUnsubscribe();
       windowCompositorUnsubscribe();
@@ -190,6 +208,7 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
     <div className={styles.dock}>
       <div data-drop-point="true" className={styles.dockContainer}>
         { dockItems.map((item, i) => <React.Fragment key={i}>{DockItemView(item)}</React.Fragment>) }
+        { directoryItems.map((item, i) => <React.Fragment key={i}>{DockItemView(item)}</React.Fragment>) }
       </div>
     </div>
   </>
