@@ -530,10 +530,17 @@ export class FileSystem {
     if (this.lookupTable[path]) { delete this.lookupTable[path]; }
 
     this.removeNodeFromDirectory(node);
+
+    // Inform the old parent that the node has been removed
+    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
+
     const entry = this.addNodeToDirectory(directory, node);
 
     // Add new path to lookup table
     this.lookupTable[constructPath(node)] = node;
+
+    // Inform the new parent that a node has been added
+    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
 
     return Ok(entry);
   }
