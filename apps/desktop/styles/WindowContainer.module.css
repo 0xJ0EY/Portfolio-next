@@ -72,8 +72,7 @@
 .lines {
   flex-grow: 1000;
   margin: 3px 5px;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAAXNSR0IArs4c6QAAABFJREFUCJljYICC/wwMDAwMAAYJAQAxUlJAAAAAAElFTkSuQmCC);
-  image-rendering: pixelated;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAFCAYAAACEhIafAAAAAXNSR0IArs4c6QAAAA5JREFUCJljYEAG/xFMAAsOAQCWzQL5AAAAAElFTkSuQmCC);
   pointer-events: none;
 }
 
