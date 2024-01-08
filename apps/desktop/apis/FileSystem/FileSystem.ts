@@ -1,7 +1,7 @@
 import { Application, ApplicationConfig } from "@/applications/ApplicationManager";
 import { Action } from "../../components/util";
 import { Err, Ok, Result } from "result";
-import { infoConfig } from "@/applications/Info/InfoApplication";
+import { debugConfig } from "@/applications/Debug/DebugApplication";
 import { aboutConfig } from "@/applications/About/About";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/Finder";
@@ -230,15 +230,15 @@ export function createBaseFileSystem(): FileSystem {
 }
 
 export function addDebugAppToFileSystem(fs: FileSystem): void {
-  fs.addApplication(infoConfig);
+  fs.addApplication(debugConfig);
 }
 
 export function removeDebugAppFromFileSystem(fs: FileSystem): void {
-  const infoApplication = fs.getApplication('/Applications/Info.app');
+  const debugApplication = fs.getApplication('/Applications/Debug.app');
 
-  if (!infoApplication.ok) { return; }
+  if (!debugApplication.ok) { return; }
 
-  fs.removeNodeFromDirectory(infoApplication.value);
+  fs.removeNodeFromDirectory(debugApplication.value);
 }
 
 function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): number {

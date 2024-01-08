@@ -11,7 +11,7 @@ function getTargetUrl(time: number): string {
   }
 }
 
-export default function InfoApplicationView(props: WindowProps) {
+export default function DebugApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
   const [time, _] = useState(Date.now());
