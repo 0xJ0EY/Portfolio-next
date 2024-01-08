@@ -133,6 +133,13 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
       function onClickDirectory(path: string) {
         manager.open(`/Applications/Finder.app ${path}`);
       }
+
+      content.push({
+        kind: 'directory',
+        title: 'Applications',
+        icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+        onClick: () => onClickDirectory('/Applications')
+      });
       
       content.push({
         kind: 'directory',

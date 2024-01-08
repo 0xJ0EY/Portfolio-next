@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Script from 'next/script'
 import styles from '@/styles/Home.module.css'
 import { OperatingSystem } from '@/components/OperatingSystem'
 
@@ -27,6 +28,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <Script strategy="beforeInteractive" src="/emulators/emulators.js"/>
+        <Script strategy="beforeInteractive" src="/emulators-ui/emulators-ui.js"/>
+        
         <OperatingSystem/>
       </main>
     </>
