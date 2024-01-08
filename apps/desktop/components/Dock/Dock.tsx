@@ -8,10 +8,15 @@ import { Window, WindowCompositor } from '../WindowManagement/WindowCompositor';
 import { WindowEvent } from '../WindowManagement/WindowEvents';
 import Image from 'next/image';
 import { ApplicationIcon } from '@/apis/FileSystem/FileSystem';
+import { SystemAPIs } from '../OperatingSystem';
 
 const DockApplications = [
   finderConfig,
-  aboutConfig,
+  aboutConfig
+];
+
+const DebugDockApplications = [
+  ...DockApplications,
   infoConfig
 ];
 
@@ -66,15 +71,15 @@ function DockItemView(item: DockItem) {
   }
 }
 
-
-export function Dock(props: { manager: ApplicationManager, windowCompositor: WindowCompositor }) {
-  const { manager, windowCompositor } = props;
+export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, windowCompositor: WindowCompositor }) {
+  const { apis, manager, windowCompositor } = props;
   const [dockItems, setDockItems] = useState<DockItem[]>([]);
 
-  function constructDock(manager: ApplicationManager, windowCompositor: WindowCompositor): DockItem[] {
+  function constructDock(manager: ApplicationManager, windowCompositor: WindowCompositor, debug: boolean): DockItem[] {
     let content: DockItem[] = [];
 
-    const dockApplications    = DockApplications;
+    const dockApplications    = !debug ? DockApplications : DebugDockApplications;
+
     const activeApplications  = manager.listApplications().map(x => x.config());
     const minimizedWindows    = windowCompositor.listMinimizedWindows();
 
@@ -160,12 +165,12 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
   }
 
   function handleApplicationManager() {
-    setDockItems(constructDock(manager, windowCompositor));
+    setDockItems(constructDock(manager, windowCompositor, apis.system.isDebug()));
   }
 
   function handleWindowCompositor(windowEvent: WindowEvent) {
     if (windowEvent.event === 'minimize_window' || windowEvent.event === 'maximize_window') {
-      setDockItems(constructDock(manager, windowCompositor));
+      setDockItems(constructDock(manager, windowCompositor, apis.system.isDebug()));
     }
   }
 
@@ -173,7 +178,7 @@ export function Dock(props: { manager: ApplicationManager, windowCompositor: Win
     const applicationManagerUnsubscribe = manager.subscribe(handleApplicationManager);
     const windowCompositorUnsubscribe = windowCompositor.subscribe(handleWindowCompositor);
 
-    setDockItems(constructDock(manager, windowCompositor));
+    setDockItems(constructDock(manager, windowCompositor, apis.system.isDebug()));
 
     return () => {
       applicationManagerUnsubscribe();

@@ -5,6 +5,7 @@ import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { AssetKeys } from "./AssetKeys";
 import { isSafari } from "../renderer/util";
+import { useSearchParams } from 'next/navigation'
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";
@@ -60,11 +61,12 @@ const transformWebUrlToDesktop = (webUrl: string): string => {
   return 'https://' + parts.join('-');
 }
 
-const getTargetDomain = (): string => {
+
+const getTargetUrl = (): string => {
   const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
 
   if (env === 'production') {
-    return 'https://portfolio-next-web.vercel.app/';
+    return 'https://portfolio-next-web.vercel.app';
   }
 
   if (env === 'preview' || env === 'development') {
@@ -78,7 +80,15 @@ const getTargetDomain = (): string => {
   }
 }
 
-const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+const getTarget = (debug: boolean): string => {
+  const url = getTargetUrl();
+
+  if (!debug) { return url; }
+
+  return `${url}/?debug`;
+}
+
+const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes, debug: boolean): Promise<OptionalUpdateActions> => {
   const gltf = await loader.loadAsync("/assets/Monitor.gltf");
   gltf.scene.name = DisplayParentName;
 
@@ -127,7 +137,7 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes): Promis
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
 
-  iframe.src = getTargetDomain();
+  iframe.src = getTarget(debug);
 
   div.appendChild(iframe);
 
@@ -171,14 +181,14 @@ const createDesk = async (loader: GLTFLoader, scenes: RendererScenes): Promise<O
   return null;
 }
 
-export const loadRenderScenes = async (manager: LoadingManager | undefined): Promise<[RendererScenes, UpdateActions]> => {
+export const loadRenderScenes = async (manager: LoadingManager | undefined, debug: boolean): Promise<[RendererScenes, UpdateActions]> => {
   const rendererScenes = createRenderScenes();
   const gltfLoader = new GLTFLoader(manager);
 
   const actions = [
     createLights(rendererScenes),
     createFloors(rendererScenes),
-    createMonitor(gltfLoader, rendererScenes),
+    createMonitor(gltfLoader, rendererScenes, debug),
     createDesk(gltfLoader, rendererScenes),
   ];
 

@@ -1,7 +1,7 @@
 import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
-import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
+import { addDebugAppToFileSystem, createBaseFileSystem, removeDebugAppFromFileSystem } from "@/apis/FileSystem/FileSystem";
 import React, { MutableRefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
@@ -14,15 +14,24 @@ import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
 import { SoundService } from "@/apis/Sound/Sound";
+import { SystemService } from "@/apis/System/System";
 
 const NodeNameButton = 'BUTTON';
 
 const fileSystem = createBaseFileSystem();
+
 const dragAndDrop = new DragAndDropService();
 const sound = new SoundService();
+const system = new SystemService();
 
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem, sound: SoundService };
-const apis: SystemAPIs = { dragAndDrop, fileSystem, sound };
+export type SystemAPIs = {
+  dragAndDrop: DragAndDropService,
+  fileSystem: FileSystem,
+  sound: SoundService,
+  system: SystemService,
+};
+
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound, system };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
@@ -205,6 +214,10 @@ export const OperatingSystem = () => {
   }
 
   useEffect(() => {
+    system.init();
+
+    if (system.isDebug()) { addDebugAppToFileSystem(fileSystem); }
+
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
 
@@ -220,6 +233,8 @@ export const OperatingSystem = () => {
       applicationManager.reset();
       windowCompositor.reset();
 
+      if (system.isDebug()) { removeDebugAppFromFileSystem(fileSystem); }
+
       if (ref.current) {
         enableBrowserZoomTouchInteraction(ref.current);
       }
@@ -232,7 +247,7 @@ export const OperatingSystem = () => {
    <div ref={ref} className={styles.operatingSystem}>
       <MenuBar manager={applicationManager}/>
       <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
-      <Dock manager={applicationManager} windowCompositor={windowCompositor}></Dock>
+      <Dock apis={apis} manager={applicationManager} windowCompositor={windowCompositor}></Dock>
       <DragAndDropView apis={apis}/>
     </div>
   </>

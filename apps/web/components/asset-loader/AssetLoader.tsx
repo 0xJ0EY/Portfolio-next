@@ -10,9 +10,13 @@ export function AssetLoader() {
   const [actions, setActions] = useState<UpdateActions>([]);
   
   useEffect(() => {
+    const query = window.location.search;
+    const searchParams = new URLSearchParams(query);
+
     const manager = new LoadingManager();
     const fetchData = async () => {
-      const [rendererScenes, updateActions] = await loadRenderScenes(manager);
+      const debug = searchParams.has('debug');
+      const [rendererScenes, updateActions] = await loadRenderScenes(manager, debug);
 
       setActions(updateActions);
       setScenes(rendererScenes);

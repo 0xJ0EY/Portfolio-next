@@ -44,3 +44,11 @@ export function isPhoneSafari(): boolean {
   // iPhone:  Mozilla/5.0 (iPhone; CPU iPhone OS 17_0_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0.1 Mobile/15E148 Safari/604.1
   return navigator.userAgent.indexOf("Mobile") > 0;
 }
+
+
+export function isDebug(): boolean {
+  const query = window.location.search;
+  const searchParams = new URLSearchParams(query);
+
+  return searchParams.has('debug');
+}

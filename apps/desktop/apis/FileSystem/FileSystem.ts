@@ -201,7 +201,6 @@ export function createBaseFileSystem(): FileSystem {
 
   fileSystem.addApplication(finderConfig);
   fileSystem.addApplication(aboutConfig);
-  fileSystem.addApplication(infoConfig);
   fileSystem.addApplication(notesConfig);
   fileSystem.addApplication(doomConfig);
 
@@ -228,6 +227,18 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addTextFile(desktop, 'readme', text, true);
 
   return fileSystem;
+}
+
+export function addDebugAppToFileSystem(fs: FileSystem): void {
+  fs.addApplication(infoConfig);
+}
+
+export function removeDebugAppFromFileSystem(fs: FileSystem): void {
+  const infoApplication = fs.getApplication('/Applications/Info.app');
+
+  if (!infoApplication.ok) { return; }
+
+  fs.removeNodeFromDirectory(infoApplication.value);
 }
 
 function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): number {
