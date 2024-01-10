@@ -49,8 +49,8 @@ export class Window {
   public focused: boolean = true;
   public minimized: boolean = false;
 
-  public minimalWidth: number = 200;
-  public minimalHeight: number = 70;
+  public minimalWidth: number = 240;
+  public minimalHeight: number = 180;
 
   public action: WindowAction | null = null;
 
