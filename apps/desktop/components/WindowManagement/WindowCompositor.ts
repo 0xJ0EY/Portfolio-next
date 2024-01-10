@@ -34,7 +34,14 @@ export type WindowActionPrompt = {
   resolve: (value: string) => void,
   reject: (reason: string) => void
 };
-export type WindowActionAlert = { action: 'alert', resolve: () => void, reject: (reason: string) => void };
+
+export type WindowActionAlert = {
+  action: 'alert',
+  alert: string,
+  resolve: () => void,
+  reject: (reason: string) => void
+};
+
 export type WindowAction = WindowActionPrompt | WindowActionAlert;
 
 export class Window {
@@ -250,6 +257,37 @@ export class WindowCompositor {
       window.application.on(createAllWindowsClosedEvent());
       this.updateWindowOrder();
     }
+  }
+
+  public async alert(windowId: number, alert: string) {
+    const node = this.windowNodeLookup[windowId];
+    if (!node) { throw new Error("Window node not found"); }
+
+    const window = node.value;
+
+    const cleanup = () => {
+      window.action = null;
+      this.update(window);
+    }
+
+    return new Promise<void>((
+      resolve: () => void,
+      reject: (reason: string) => void
+    ) => {
+      window.action = {
+        action: 'alert',
+        alert,
+        resolve, reject
+      }
+
+      this.update(window);
+    }).then(() => {
+      cleanup();
+      return;
+    }).catch((reason) => {
+      cleanup();
+      throw reason;
+    });
   }
 
   public async prompt(windowId: number, prompt: string, defaultValue?: string): Promise<string> {

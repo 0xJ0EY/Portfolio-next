@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, RefObject, MutableRefObject, useReducer, FormEvent } from 'react';
-import { Window, WindowAction, WindowActionPrompt, WindowApplication, WindowCompositor, WindowContext } from "./WindowCompositor";
+import { Window, WindowAction, WindowActionAlert, WindowActionPrompt, WindowApplication, WindowCompositor, WindowContext } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
@@ -435,7 +435,6 @@ function HandleWindowActionPrompt(props: {prompt: WindowActionPrompt | null}) {
     evt.preventDefault();
     evt.stopPropagation();
 
-    console.log('on submit');
     if (!prompt) { return; }
     if (!inputRef.current) { return; }
     const value = inputRef.current.value;
@@ -473,10 +472,51 @@ function HandleWindowActionPrompt(props: {prompt: WindowActionPrompt | null}) {
   </>
 }
 
+function HandleWindowActionAlert(props: {alert: WindowActionAlert | null}) {
+  const alert = props.alert;
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+    // A hack to force a rerender when a "valid" prompt is used
+    const [onMountComponent, forceRerender] = useReducer((p) => !p, true);
+
+  function onOk() {
+    if (!alert) { return; }
+
+    alert.resolve();
+  }
+
+  useEffect(() => {
+    if (!alert) { return; }
+
+    forceRerender();
+  }, [alert]);
+
+  useEffect(() => {
+    if (!buttonRef.current) { return; }
+    buttonRef.current.focus();
+
+  }, [onMountComponent]);
+
+  if (!alert) { return <></> }
+
+  return <>
+    <div className={styles['action-overlay']}>
+      <div className={styles['action-container']}>
+        <span>{alert.alert}</span>
+        <div className={styles['action-buttons']}>
+          <button ref={buttonRef} className="system-button" type="submit" onClick={() => onOk()}>Ok</button>
+        </div>
+      </div>
+    </div>
+  </>
+}
+
 function HandleWindowAction(props: { action: WindowAction | null }) {
   const action = props.action;
+  
   return (<>
     <HandleWindowActionPrompt prompt={action?.action === 'prompt' ? action : null} />
+    <HandleWindowActionAlert alert={action?.action === 'alert' ? action : null} />
   </>)
 }
 

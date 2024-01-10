@@ -36,6 +36,10 @@ export class LocalWindowCompositor {
     delete this.instances[windowId];
   }
 
+  public async alert(windowId: number, alert: string): Promise<void> {
+    return await this.compositor.alert(windowId, alert);
+  }
+
   public async prompt(windowId: number, prompt: string, defaultValue?: string): Promise<string> {
     return await this.compositor.prompt(windowId, prompt, defaultValue);
   }

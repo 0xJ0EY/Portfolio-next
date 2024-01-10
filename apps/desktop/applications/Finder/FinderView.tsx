@@ -110,19 +110,20 @@ export default function FinderView(props: WindowProps) {
     const template = t('filesystem.new_directory');
     const name = generateUniqueNameForDirectory(dir.value, template);
 
-    application.compositor.prompt(windowContext.id, "Name of the directory", name)
+    const noop = () => {};
+
+    application.compositor.prompt(windowContext.id, t('finder.create_directory_instructions'), name)
       .then((name) => {
         console.log(name);
 
         if (fs.getDirectory(`${path}${name}`).ok) {
-          // TODO: Check if it is a duplicate
-          console.log('duplicate file');
+          application.compositor.alert(windowContext.id, t('finder.create_directory_duplicated_name')).catch(noop);
           return;
         }
         fs.addDirectory(dir.value, name, true, true);
         fs.propagateNodeEvent(dir.value, {kind: 'update'});
       })
-      .catch(() => { });
+      .catch(noop);
   }
 
   function updateWindowTitle(path: string) {

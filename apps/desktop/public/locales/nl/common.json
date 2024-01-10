@@ -11,6 +11,10 @@
     "english": "Engels",
     "dutch": "Nederlands"
   },
+  "finder": {
+    "create_directory_instructions": "Vul de naam in voor de nieuwe folder",
+    "create_directory_duplicated_name": "De gegeven naam bestaat al. Kies een andere naam"
+  },
   "date": {
     "weekdays": {
       "0": "zondag",

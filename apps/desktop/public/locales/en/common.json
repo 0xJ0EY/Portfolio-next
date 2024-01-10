@@ -11,6 +11,10 @@
     "english": "English",
     "dutch": "Dutch"
   },
+  "finder": {
+    "create_directory_instructions": "Enter the name of the new directory",
+    "create_directory_duplicated_name": "The given name is already taken. Please choose a different name"
+  },
   "date": {
     "weekdays": {
       "0": "sunday",
