@@ -100,7 +100,7 @@ export default function NotesApplicationView(props: WindowProps) {
         <button className="system-button" onClick={onSave}>Save</button>
       </div>
       <textarea
-        className={styles['textarea']}
+        className={['system-text-input', styles['textarea']].join(' ')}
         value={content}
         onChange={(evt) => { setContent(evt.target.value); }}
       />
