@@ -185,7 +185,7 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
     case 'hyperlink': return node.icon;
     case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
-    case "textfile": return { src: '/icons/folder-icon.png', alt: 'File icon' }
+    case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
   }
 }
 
