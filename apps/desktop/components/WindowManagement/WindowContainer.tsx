@@ -450,7 +450,7 @@ function HandleWindowActionPrompt(props: {prompt: WindowActionPrompt | null}) {
 
   useEffect(() => {
     if (!inputRef.current) { return; }
-    inputRef.current.focus();
+    inputRef.current.select();
 
   }, [onMountComponent]);
 
