@@ -15,6 +15,10 @@
     "create_directory_instructions": "Vul de naam in voor de nieuwe folder",
     "create_directory_duplicated_name": "De gegeven naam bestaat al. Kies een andere naam"
   },
+  "notes": {
+    "create_file_instructions": "Vul de naam in voor het nieuwe bestand",
+    "create_file_duplicated_name": "De gegeven naam bestaat al. Kies een andere naam"
+  },
   "date": {
     "weekdays": {
       "0": "zondag",

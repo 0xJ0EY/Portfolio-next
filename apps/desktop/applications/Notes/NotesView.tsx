@@ -28,15 +28,27 @@ export default function NotesApplicationView(props: WindowProps) {
   const path = args;
 
   function createOnSave() {
-    const documentsDirectory = fs.getDirectory('/Users/joey/Documents/');
+    const path = '/Users/joey/Documents/';
+
+    const documentsDirectory = fs.getDirectory(path);
     if (!documentsDirectory.ok) { return; }
 
     const template = t('filesystem.new_file');
     const title = generateUniqueNameForDirectory(documentsDirectory.value, template);
-    const textFile = fs.addTextFile(documentsDirectory.value, title, content, true);
 
-    textFileRef.current = textFile;
-    updateWindowTitle(textFile);
+    const noop = () => {};
+
+    application.compositor.prompt(windowContext.id, t('notes.create_file_instructions'), title)
+      .then((title) => {
+        if (fs.getNode(`${path}${title}.txt`).ok) {
+          application.compositor.alert(windowContext.id, t('notes.create_file_duplicated_name')).catch(noop);
+          return;
+        }
+
+        const textFile = fs.addTextFile(documentsDirectory.value, title, content, true);
+        textFileRef.current = textFile;
+        updateWindowTitle(textFile);
+      }).catch(noop);
   }
 
   function onSave() {

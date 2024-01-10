@@ -15,6 +15,10 @@
     "create_directory_instructions": "Enter the name of the new directory",
     "create_directory_duplicated_name": "The given name is already taken. Please choose a different name"
   },
+  "notes": {
+    "create_file_instructions": "Enter the name of the new text file",
+    "create_file_duplicated_name": "The given name is already taken. Please choose a different name"
+  },
   "date": {
     "weekdays": {
       "0": "sunday",

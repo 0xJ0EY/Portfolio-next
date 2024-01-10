@@ -70,7 +70,7 @@ function EditTitle(props: { entry: FolderIconEntry }) {
 
   return (
     <input
-      className={styles.editInput}
+      className={['system-text-input', styles.editInput].join(' ')}
       ref={ref}
       type='input'
       value={editText}

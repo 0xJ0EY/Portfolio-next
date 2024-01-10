@@ -120,10 +120,10 @@ export default function FinderView(props: WindowProps) {
           application.compositor.alert(windowContext.id, t('finder.create_directory_duplicated_name')).catch(noop);
           return;
         }
+        
         fs.addDirectory(dir.value, name, true, true);
         fs.propagateNodeEvent(dir.value, {kind: 'update'});
-      })
-      .catch(noop);
+      }).catch(noop);
   }
 
   function updateWindowTitle(path: string) {

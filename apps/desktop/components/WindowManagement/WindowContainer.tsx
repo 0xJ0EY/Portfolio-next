@@ -461,7 +461,7 @@ function HandleWindowActionPrompt(props: {prompt: WindowActionPrompt | null}) {
       <div className={styles['action-container']}>
         <span>{prompt.prompt}</span>
         <form onSubmit={onSubmit}>
-          <input ref={inputRef} type="text" defaultValue={prompt.defaultValue} required />
+          <input ref={inputRef} type="text" className='system-text-input' defaultValue={prompt.defaultValue} required />
           <div className={styles['action-buttons']}>
             <button className="system-button" type="button" onClick={() => onCancel()}>Cancel</button>
             <button className="system-button" type="submit">Ok</button>
