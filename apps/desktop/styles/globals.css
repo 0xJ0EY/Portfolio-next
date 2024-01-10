@@ -35,7 +35,7 @@ html, body {
 
 .system-text-input {
   outline: none;
-  padding: 3px;
+  padding: 5px;
   box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
   background-color: #fff;
 }
