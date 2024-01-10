@@ -27,6 +27,16 @@ export interface WindowConfig {
   readonly generator: WindowApplicationGenerator
 }
 
+export type WindowActionPrompt = {
+  action: 'prompt',
+  prompt: string,
+  defaultValue?: string,
+  resolve: (value: string) => void,
+  reject: (reason: string) => void
+};
+export type WindowActionAlert = { action: 'alert', resolve: () => void, reject: (reason: string) => void };
+export type WindowAction = WindowActionPrompt | WindowActionAlert;
+
 export class Window {
   public order: number = 0;
   public focused: boolean = true;
@@ -34,6 +44,8 @@ export class Window {
 
   public minimalWidth: number = 200;
   public minimalHeight: number = 70;
+
+  public action: WindowAction | null = null;
 
   constructor(
     public readonly id: number,
@@ -52,7 +64,7 @@ export class OrderedWindow {
   constructor(
     private window: Window,
     private order: number
-  ) {}
+  ) { }
 
   getWindow(): Window {
     return this.window;
@@ -145,11 +157,11 @@ export class WindowCompositor {
       const collidedWindow = windows.find(entry => entry.x === x && entry.y === y);
 
       if (collidedWindow) {
-        const widthFitsInView   = x + width + WindowCollisionMoveDistance <= this.viewWidth;
-        const heightFitsInView  = y + height + WindowCollisionMoveDistance <= this.viewHeight;
+        const widthFitsInView = x + width + WindowCollisionMoveDistance <= this.viewWidth;
+        const heightFitsInView = y + height + WindowCollisionMoveDistance <= this.viewHeight;
 
-        x = widthFitsInView   ? x + WindowCollisionMoveDistance : 0;
-        y = heightFitsInView  ? y + WindowCollisionMoveDistance : 0;
+        x = widthFitsInView ? x + WindowCollisionMoveDistance : 0;
+        y = heightFitsInView ? y + WindowCollisionMoveDistance : 0;
 
         collision = true;
       }
@@ -216,6 +228,10 @@ export class WindowCompositor {
 
     const window = node.value;
 
+    if (window.action) {
+      window.action.reject('Window has been closed by user');
+    }
+
     this.publish(DestroyWindowEvent(windowId));
     window.application.on(createWindowCloseEvent(windowId), { id: windowId });
 
@@ -234,6 +250,38 @@ export class WindowCompositor {
       window.application.on(createAllWindowsClosedEvent());
       this.updateWindowOrder();
     }
+  }
+
+  public async prompt(windowId: number, prompt: string, defaultValue?: string): Promise<string> {
+    const node = this.windowNodeLookup[windowId];
+    if (!node) { throw new Error("Window node not found"); }
+
+    const window = node.value;
+
+    const cleanup = () => {
+      window.action = null;
+      this.update(window);
+    }
+
+    return new Promise((
+      resolve: (value: string) => void,
+      reject: (reason: string) => void
+    ) => {
+      window.action = {
+        action: 'prompt',
+        prompt,
+        defaultValue,
+        resolve, reject
+      }
+
+      this.update(window);
+    }).then((value) => {
+      cleanup();
+      return value;
+    }).catch((reason) => {
+      cleanup();
+      throw reason;
+    });
   }
 
   public minimize(windowId: number): void {

@@ -8,7 +8,8 @@ import { Application } from "../ApplicationManager";
 import React from "react";
 import { Chain, Node } from "@/data/Chain";
 import { Err, Ok, Result } from "result";
-import { constructPath } from "@/apis/FileSystem/util";
+import { constructPath, generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
+import { useTranslation } from "react-i18next";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }
@@ -49,9 +50,11 @@ export default function FinderView(props: WindowProps) {
   const [ canEdit, setCanEdit ] = useState(false);
   const [ pathNodes, setPathNodes ] = useState<FileSystemDirectory[]>([]);
 
+  const { t } = useTranslation('common');
+  const fs = application.apis.fileSystem;
+
   const currentHistoryElement = useRef<Node<FileSystemDirectory> | null>(null);
   const history = useRef(new Chain<FileSystemDirectory>());
-  const folderViewRef = useRef<FolderViewHandles>(null);
 
   function recordHistory(directory: FileSystemDirectory) {
     if (currentHistoryElement.current) {
@@ -101,7 +104,25 @@ export default function FinderView(props: WindowProps) {
   function createDirectory() {
     if (!canEdit) { return; }
 
-    folderViewRef.current?.createNewDirectory();
+    const dir = fs.getDirectory(path);
+    if (!dir.ok) { return; }
+
+    const template = t('filesystem.new_directory');
+    const name = generateUniqueNameForDirectory(dir.value, template);
+
+    application.compositor.prompt(windowContext.id, "Name of the directory", name)
+      .then((name) => {
+        console.log(name);
+
+        if (fs.getDirectory(`${path}${name}`).ok) {
+          // TODO: Check if it is a duplicate
+          console.log('duplicate file');
+          return;
+        }
+        fs.addDirectory(dir.value, name, true, true);
+        fs.propagateNodeEvent(dir.value, {kind: 'update'});
+      })
+      .catch(() => { });
   }
 
   function updateWindowTitle(path: string) {
@@ -188,7 +209,7 @@ export default function FinderView(props: WindowProps) {
           </ul>
         </div>
         <div className={styles.folder}>
-          <FolderView ref={folderViewRef} directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
+          <FolderView directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
         </div>
       </div>
     </div>

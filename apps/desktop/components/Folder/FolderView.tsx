@@ -9,7 +9,6 @@ import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, Fil
 import { clamp } from '../util';
 import { Err, Ok, Result } from "result";
 import { SystemAPIs } from '../OperatingSystem';
-import { useTranslation } from 'next-i18next';
 import { constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/util';
 
 const FolderIcon = dynamic(() => import('../Icons/FolderIcon'));
@@ -44,10 +43,10 @@ type FolderViewProps = {
 }
 
 export type FolderViewHandles = {
-  createNewDirectory: () => void
+  getCurrentDirectory: () => void
 }
 
-const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function FolderView(props, forwardRef) {
+export function FolderView(props: FolderViewProps) {
   const { directory, apis, onFileOpen, localIconPosition, allowOverflow: propOverflow } = props;
   const fs = apis.fileSystem;
 
@@ -56,7 +55,6 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
 
   const [files, setFiles] = useState<FolderIconEntry[]>([]);
   const localFiles = useRef<Chain<FolderIconEntry>>(new Chain());
-  const { t } = useTranslation('common');
 
   function updateFiles(files: Chain<FolderIconEntry>) {
     localFiles.current = files;
@@ -807,22 +805,6 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
     }
   }
 
-  function createNewDirectory() {
-    if (!currentDirectory.current) { return; }
-    const dir = fs.getDirectory(currentDirectory.current);
-    if (!dir.ok) { return; }
-
-    const template = t('filesystem.new_directory');
-    const name = generateUniqueNameForDirectory(dir.value, template);
-
-    fs.addDirectory(dir.value, name, true, true);
-    fs.propagateNodeEvent(dir.value, {kind: 'update'});
-  }
-
-  useImperativeHandle(forwardRef, () => ({
-    createNewDirectory: () => createNewDirectory(),
-  }));
-
   function updateDirectoryDimensions() {
     if (useLocalIconPosition) { return; }
     if (!iconContainer.current) { return; }
@@ -895,6 +877,6 @@ const FolderView = forwardRef<FolderViewHandles, FolderViewProps>(function Folde
       </div>
     </div>
   </>
-});
+};
 
 export default FolderView;

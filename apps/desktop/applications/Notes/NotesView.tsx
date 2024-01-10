@@ -18,7 +18,7 @@ function getFileSystemTextNodeByPath(application: Application, path: string): Re
 
 export default function NotesApplicationView(props: WindowProps) {
   const { application, args, windowContext } = props;
-  const [ content, setContent ] = useState('');
+  const [content, setContent] = useState('');
 
   const fs = application.apis.fileSystem;
   const { t } = useTranslation('common');
@@ -29,7 +29,7 @@ export default function NotesApplicationView(props: WindowProps) {
 
   function createOnSave() {
     const documentsDirectory = fs.getDirectory('/Users/joey/Documents/');
-    if (!documentsDirectory.ok) { return;}
+    if (!documentsDirectory.ok) { return; }
 
     const template = t('filesystem.new_file');
     const title = generateUniqueNameForDirectory(documentsDirectory.value, template);
