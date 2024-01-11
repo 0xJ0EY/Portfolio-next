@@ -390,6 +390,7 @@ const WindowHeader = (
     if (!isDown.current) { return; }
 
     isMaximized.current = false;
+    resetDoubleClickOnHeader();
 
     const cursorRef = origin.current.cursor;
     const windowRef = origin.current.window;
