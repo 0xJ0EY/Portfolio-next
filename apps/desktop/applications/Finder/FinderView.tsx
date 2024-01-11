@@ -114,8 +114,6 @@ export default function FinderView(props: WindowProps) {
 
     application.compositor.prompt(windowContext.id, t('finder.create_directory_instructions'), name)
       .then((name) => {
-        console.log(name);
-
         if (fs.getDirectory(`${path}${name}`).ok) {
           application.compositor.alert(windowContext.id, t('finder.create_directory_duplicated_name')).catch(noop);
           return;

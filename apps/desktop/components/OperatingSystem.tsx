@@ -143,14 +143,10 @@ export const OperatingSystem = () => {
 
     const clampedZoomDistance = clamp(zoomDistance, min, max);
 
-    console.log(zoomOffset, clampedZoomDistance);
-
     return clampedZoomDistance;
   }
 
   function handleTouchMoveEvent(evt: TouchEvent) {
-    evt.preventDefault();
-
     const data = TouchData.fromTouchEvent('move', evt);
 
     // We provide our own zooming of the page, by zoom/move the camera instead of the page
@@ -182,8 +178,6 @@ export const OperatingSystem = () => {
   }
 
   function handleTouchEndEvent(evt: TouchEvent) {
-    evt.preventDefault();
-
     handlePhoneSafariButtonClickRelease(evt);
 
     if (evt.touches.length !== 0) { return; }

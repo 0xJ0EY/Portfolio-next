@@ -24,8 +24,6 @@ export class Camera {
     const verticalOffset = response.horizontal_offset;
     const maxVerticalOffset = response.horizontal_offset;
 
-    console.log(response);
-
     return new Camera(
       minZoom,
       maxZoom,
