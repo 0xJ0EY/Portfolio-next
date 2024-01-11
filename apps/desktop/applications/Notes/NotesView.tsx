@@ -75,7 +75,7 @@ export default function NotesApplicationView(props: WindowProps) {
 
     const path = constructPath(file);
 
-    window.title = `${path} - Notes`
+    window.title = `${path} - Notes`;
 
     application.compositor.update(window);
   }

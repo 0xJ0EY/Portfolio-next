@@ -9,7 +9,7 @@ import { WindowEvent } from '../WindowManagement/WindowEvents';
 import Image from 'next/image';
 import { ApplicationIcon, FileSystem } from '@/apis/FileSystem/FileSystem';
 import { SystemAPIs } from '../OperatingSystem';
-import { FileSystemItemDragDrop, FileSystemItemDragEvent } from '@/apis/DragAndDrop/DragAndDrop';
+import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
 
 const DockApplications = [
   finderConfig,
@@ -56,10 +56,20 @@ function DockItemSeparator() {
 
 function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
   const ref = useRef<HTMLButtonElement>(null);
+  const [hovered, setHovered] = useState<boolean>(false);
 
-  function onFileDrop(evt: FileSystemItemDragEvent) {
+  function onFileEnter(): void {
+    setHovered(true);
+  }
+
+  function onFileLeave(): void {
+    setHovered(false);
+  }
+
+  function onFileDrop(evt: FileSystemItemDragEvent): void {
+    setHovered(false);
+
     const nodes = evt.detail.nodes;
-    console.log(item.path);
 
     const parent = fileSystem.getDirectory(item.path);
     if (!parent.ok) { return; }
@@ -70,15 +80,27 @@ function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
   useEffect(() => {
     if (!ref.current) { return; }
     const container = ref.current;
+
+    container.addEventListener(FileSystemItemDragEnter, onFileEnter as EventListener);
+    container.addEventListener(FileSystemItemDragLeave, onFileLeave as EventListener);
     container.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
 
     return () => {
+      container.removeEventListener(FileSystemItemDragEnter, onFileEnter as EventListener);
+      container.removeEventListener(FileSystemItemDragLeave, onFileLeave as EventListener);
       container.removeEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     }
   }, []);
 
+  const buttonStyle = [styles['dock-application'], hovered ? styles['hovered'] : ''].join(' ');
+
   return (<>
-    <button ref={ref} data-drop-point="true" className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.title}>
+    <button
+      ref={ref}
+      data-drop-point="true"
+      className={buttonStyle}
+      onClick={() => item.onClick()}
+      data-tooltip={item.title}>
       <Image className={styles['dock-app-image']} src={item.icon.src} alt={item.icon.alt} width={64} height={64}></Image>
       <div className={styles.status}></div>
     </button>

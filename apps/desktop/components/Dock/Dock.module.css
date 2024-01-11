@@ -35,7 +35,8 @@
   margin: 0 4px;
 }
 
-.dock-application:hover::after {
+.dock-application:hover::after,
+.dock-application.hovered::after {
   position: absolute;
   top: -25px;
   left: 50%;
