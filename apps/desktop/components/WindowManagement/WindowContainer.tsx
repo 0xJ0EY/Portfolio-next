@@ -332,6 +332,10 @@ const WindowHeader = (
     isMaximized.current = !isMaximized.current;
   }
 
+  function resetDoubleClickOnHeader(): void {
+    lastTimeHeaderClicked.current = 0;
+  }
+
   function handleDoubleClickOnHeader(): void {
     if (lastTimeHeaderClicked.current === null) { return; }
 
@@ -341,14 +345,17 @@ const WindowHeader = (
     if (timeDifference < DoubleClickHeaderForMaximizingTimeInMs) {
       onClickMaximize();
 
-      lastTimeHeaderClicked.current = 0;
+      resetDoubleClickOnHeader();
     } else {
       lastTimeHeaderClicked.current = now;
     }
   }
 
   function onPointerDown(evt: PointerEvent) {
-    if (evt.target !== output.current) { return; }
+    if (evt.target !== output.current) {
+      resetDoubleClickOnHeader();
+      return;
+    }
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
