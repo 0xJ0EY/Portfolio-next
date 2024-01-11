@@ -74,7 +74,7 @@ function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
     const parent = fileSystem.getDirectory(item.path);
     if (!parent.ok) { return; }
 
-    fileSystem.moveNode(nodes[0].item, parent.value);
+    nodes.forEach(node => { fileSystem.moveNode(node.item, parent.value); });
   }
 
   useEffect(() => {
