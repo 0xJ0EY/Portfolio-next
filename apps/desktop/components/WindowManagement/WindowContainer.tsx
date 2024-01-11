@@ -3,6 +3,8 @@ import { Window, WindowAction, WindowActionAlert, WindowActionPrompt, WindowAppl
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
 
+const DoubleClickHeaderForMaximizingTimeInMs = 1000;
+
 const calculateWindowZIndex = (order: number): number => {
   return 1000 + order * 10;
 }
@@ -290,6 +292,7 @@ const WindowHeader = (
   const [dragging, setDragging] = useState(false);
 
   const output: RefObject<HTMLDivElement> = useRef(null);
+  const lastTimeHeaderClicked = useRef<number>(0);
   const isMaximized = maximized;
 
   const isDown = useRef(false);
@@ -329,18 +332,34 @@ const WindowHeader = (
     isMaximized.current = !isMaximized.current;
   }
 
+  function handleDoubleClickOnHeader(): void {
+    if (lastTimeHeaderClicked.current === null) { return; }
+
+    const now = Date.now();
+    const timeDifference = now - lastTimeHeaderClicked.current;
+
+    if (timeDifference < DoubleClickHeaderForMaximizingTimeInMs) {
+      onClickMaximize();
+
+      lastTimeHeaderClicked.current = 0;
+    } else {
+      lastTimeHeaderClicked.current = now;
+    }
+  }
+
   function onPointerDown(evt: PointerEvent) {
     if (evt.target !== output.current) { return; }
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
 
+    handleDoubleClickOnHeader();
+
     // I cannot put a ref on the root, due to rerenders so this is the solution :^)
     const windowRoot = output.current!.parentNode!.parentNode!.parentNode as HTMLDivElement;
 
     setDragging(true);
     isDown.current = true;
-    isMaximized.current = false;
 
     const headerBoundingClient = windowRoot.getBoundingClientRect();
     const offset = evt.clientY - headerBoundingClient.y;
@@ -362,6 +381,8 @@ const WindowHeader = (
 
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
+
+    isMaximized.current = false;
 
     const cursorRef = origin.current.cursor;
     const windowRef = origin.current.window;
