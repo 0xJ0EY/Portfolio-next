@@ -77,14 +77,24 @@ export class CameraController {
     this.dampingEnabled = false;
   }
 
+  public isCameraFollowEnabled(): boolean {
+    return this.cameraFollowEnabled;
+  }
+
   public enableCameraFollow(): void {
+    if (!this.isCameraFollowEnabled()) {
+      this.syncFollowPositionToTarget();
+    }
+
     this.cameraFollowEnabled = true;
-    this.syncFollowPositionToTarget();
   }
 
   public disableCameraFollow(): void {
+    if (this.cameraFollowEnabled) {
+      this.syncTargetToFollowPosition();
+    }
+
     this.cameraFollowEnabled = false;
-    this.syncTargetToFollowPosition();
   }
 
   public syncFollowPositionToTarget(): void {
