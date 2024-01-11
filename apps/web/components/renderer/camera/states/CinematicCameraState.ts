@@ -86,6 +86,6 @@ export class CinematicCameraState extends UpdatableCameraState {
   }
 
   private handleTouchEvent(data: TouchData) {
-    this.handleOverMonitor(data.pointerCoordinates());
+    this.manager.changeState(CameraHandlerState.MonitorView);
   }
 }
