@@ -104,7 +104,7 @@ export default function AboutApplicationView(props: WindowProps) {
   const [subView, setSubView] = useState<SubView>('home');
 
   return (
-    <div className="contentOuter">
+    <div className="content-outer">
       <div className="content">
         { RenderSubView(subView, { changeParent: setSubView }) }
       </div>

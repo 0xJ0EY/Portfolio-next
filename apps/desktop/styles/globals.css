@@ -87,7 +87,7 @@ html, body {
   overflow: auto;
 }
 
-.contentOuter {
+.content-outer {
   display: flex;
   flex: 1 1;
   margin: 0;
@@ -104,4 +104,33 @@ h5,
 h6 {
   margin: 0;
   padding: 0;
+}
+
+.spritesheet-btn {
+  width: 26px;
+  height: 26px;
+  
+  display: inline-flex;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0;
+  margin: 0;
+}
+
+.spritesheet-btn:disabled .spritesheet-btn-icon {
+  opacity: 0.4;
+}
+
+.spritesheet-btn-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  
+  image-rendering: pixelated;
+  background-size: 80px 16px;
+  background-repeat: no-repeat;
+  background-image: url('/icons/icon-spritesheet.png');
 }

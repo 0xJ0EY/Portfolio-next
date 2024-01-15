@@ -210,12 +210,10 @@ export default function FinderView(props: WindowProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles['navigation-actions']}>
-          <button className="system-button" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><img src="/icons/prev.png" alt="Previous directory icon"/></button>
-          <button className="system-button" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><img src="/icons/next.png" alt="Next directory icon" /></button>
-          <button className="system-button" disabled={!canEdit} onPointerDown={() => createDirectory()}>create directory</button>
-          <button className="system-button" disabled={!canEdit} onPointerDown={() => createTextFile()}>create text file</button>
-        </div>
+        <button className="system-button spritesheet-btn" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
+        <button className="system-button spritesheet-btn" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
+        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
+        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
       </div>
 
       <div className={styles.content}>

@@ -55,3 +55,20 @@
 .locations ul li {
  list-style: none;
 }
+
+.icon-prev {
+  background-position: 0px 0;
+}
+
+/* Not sure why the values have to be negative */
+.icon-next {
+  background-position: -16px 0;
+}
+
+.icon-create-file {
+  background-position: -48px 0;
+}
+
+.icon-create-directory {
+  background-position: -64px 0;
+}
