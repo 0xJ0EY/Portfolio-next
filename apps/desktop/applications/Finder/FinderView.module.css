@@ -17,7 +17,6 @@
   border: 1px solid black;
   padding: 3px;
   height: 35px;
-  line-height: 35px;
   margin: 3px;
 }
 
@@ -75,4 +74,14 @@
 
 .icon-create-directory {
   background-position: -64px 0;
+}
+
+.header-left {
+  margin: 1px auto;
+  float: left;
+}
+
+.header-right {
+  margin: 1px auto;
+  float: right;
 }
