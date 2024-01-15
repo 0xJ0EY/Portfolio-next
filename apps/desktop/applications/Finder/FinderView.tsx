@@ -124,6 +124,29 @@ export default function FinderView(props: WindowProps) {
       }).catch(noop);
   }
 
+  function createTextFile() {
+    if (!canEdit) { return; }
+
+    const dir = fs.getDirectory(path);
+    if (!dir.ok) { return; }
+
+    const template = t('filesystem.new_file');
+    const name = generateUniqueNameForDirectory(dir.value, template);
+
+    const noop = () => {};
+
+    application.compositor.prompt(windowContext.id, t('finder.create_text_file_instructions'), name)
+      .then((name) => {
+        if (fs.getNode(`${path}${name}.txt`).ok) {
+          application.compositor.alert(windowContext.id, t('finder.create_text_file_duplicated_name')).catch(noop);
+          return;
+        }
+        
+        fs.addTextFile(dir.value, name, "", true);
+        fs.propagateNodeEvent(dir.value, {kind: 'update'});
+      }).catch(noop);
+  }
+
   function updateWindowTitle(path: string) {
     const window = application.compositor.getById(windowContext.id);
     if (!window) { return; }
@@ -187,19 +210,17 @@ export default function FinderView(props: WindowProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.navigationActions}>
-          <button className="system-button" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}>prev</button>
-          <button className="system-button" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}>next</button>
-                  
+        <div className={styles['navigation-actions']}>
+          <button className="system-button" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><img src="/icons/prev.png" alt="Previous directory icon"/></button>
+          <button className="system-button" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><img src="/icons/next.png" alt="Next directory icon" /></button>
           <button className="system-button" disabled={!canEdit} onPointerDown={() => createDirectory()}>create directory</button>
-        </div>
-        <div className={styles.path}>
-          { locations }
+          <button className="system-button" disabled={!canEdit} onPointerDown={() => createTextFile()}>create text file</button>
         </div>
       </div>
 
       <div className={styles.content}>
         <div className={styles.locations}>
+          {t("finder.favorites")}
           <ul>
             <li><button className="system-button" onPointerDown={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
             <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
@@ -208,6 +229,9 @@ export default function FinderView(props: WindowProps) {
           </ul>
         </div>
         <div className={styles.folder}>
+          <div className={styles.path}>
+            { locations }
+          </div>
           <FolderView directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
         </div>
       </div>

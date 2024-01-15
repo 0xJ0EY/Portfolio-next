@@ -12,6 +12,9 @@
     "dutch": "Dutch"
   },
   "finder": {
+    "favorites": "Favorites",
+    "create_text_file_instructions": "Enter the name of the text file",
+    "create_text_file_duplicated_name": "The given name is already taken. Please choose a different name",
     "create_directory_instructions": "Enter the name of the new directory",
     "create_directory_duplicated_name": "The given name is already taken. Please choose a different name"
   },

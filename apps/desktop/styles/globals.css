@@ -33,6 +33,10 @@ html, body {
   cursor: pointer;
 }
 
+.system-button img {
+  height: 16px;
+}
+
 .system-text-input {
   outline: none;
   padding: 4px 5px;
@@ -68,6 +72,10 @@ html, body {
   text-shadow: 1px 1px 0 #fff;
   cursor: auto;
   color: grey;
+}
+
+.system-button:disabled img {
+  opacity: 0.6;
 }
 
 .content {
