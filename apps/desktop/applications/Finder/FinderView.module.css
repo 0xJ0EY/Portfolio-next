@@ -16,6 +16,8 @@
   width: auto;
   border: 1px solid black;
   padding: 3px;
+  height: 35px;
+  line-height: 35px;
   margin: 3px;
 }
 
@@ -26,8 +28,10 @@
 }
 
 .path {
-  height: 30px;
   width: 100%;
+  height: 35px;
+  padding: 3px;
+  margin-bottom: 3px;
   overflow-y: hidden;
   overflow-x: auto;
   display: flex;
@@ -60,7 +64,7 @@
   background-position: 0px 0;
 }
 
-/* Not sure why the values have to be negative */
+/* Not sure why the values have to be*/
 .icon-next {
   background-position: -16px 0;
 }

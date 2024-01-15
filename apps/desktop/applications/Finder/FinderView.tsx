@@ -209,15 +209,15 @@ export default function FinderView(props: WindowProps) {
  
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className="system-button spritesheet-btn" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
-      </div>
-
       <div className={styles.content}>
         <div className={styles.locations}>
+          <div className={styles.header}>
+            <button className="system-button spritesheet-btn" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
+            <button className="system-button spritesheet-btn" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
+            <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
+            <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
+          </div>
+
           {t("finder.favorites")}
           <ul>
             <li><button className="system-button" onPointerDown={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
