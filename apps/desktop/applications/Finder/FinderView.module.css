@@ -7,9 +7,8 @@
 
 .locations {
   width: 140px;
+  min-width: 140px;
   margin: 3px;
-  /* background: #fff; */
-  /* box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a; */
 }
 
 .header {
@@ -31,8 +30,7 @@
   height: 35px;
   padding: 3px;
   margin-bottom: 3px;
-  overflow-y: hidden;
-  overflow-x: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
   border-bottom: 1px solid #000;
@@ -52,7 +50,7 @@
 
 .locations ul {
   margin: 0;
-  padding: 0;;
+  padding: 0;
 }
 
 .locations ul li {
