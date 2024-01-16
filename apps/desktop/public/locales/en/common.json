@@ -11,6 +11,10 @@
     "english": "English",
     "dutch": "Dutch"
   },
+  "image": {
+    "no_image_to_load": "There is no image to load. Open the application by clicking on an image",
+    "loading": "Loading..."
+  },
   "finder": {
     "favorites": "Favorites",
     "create_text_file_instructions": "Enter the name of the text file",

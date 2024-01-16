@@ -12,6 +12,7 @@ import { Chain, Node } from "@/data/Chain";
 import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
+import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -32,7 +33,13 @@ export type DirectoryContent = {
   overflowBehavior: 'overflow' | 'overlay'
 }
 
-export type FileSystemNode = FileSystemDirectory | FileSystemTextFile | FileSystemApplication | FileSystemHyperLink;
+export type FileSystemNode = (
+  FileSystemDirectory |
+  FileSystemImage |
+  FileSystemTextFile |
+  FileSystemApplication |
+  FileSystemHyperLink
+);
 
 export type DirectoryEntry = {
   node: FileSystemNode,
@@ -73,6 +80,17 @@ export type FileSystemTextFile = {
   content: string,
   editable: boolean
 };
+
+export type FileSystemImageExtension = '.png' | '.jpg' | '.gif';
+export type FileSystemImage = {
+  id: number,
+  parent: FileSystemDirectory
+  kind: 'image',
+  filenameExtension: FileSystemImageExtension,
+  name: string,
+  source: string,
+  editable: boolean
+}
 
 export type FileSystemApplication = {
   id: number,
@@ -166,6 +184,18 @@ function createTextFile(id: number, parent: FileSystemDirectory, name: string, c
   }
 }
 
+function createImage(id: number, parent: FileSystemDirectory, name: string, filenameExtension: FileSystemImageExtension, source: string, editable: boolean): FileSystemImage {
+  return {
+    id,
+    parent,
+    kind: 'image',
+    name,
+    filenameExtension,
+    source,
+    editable
+  }
+}
+
 function createHyperLink(id: number, parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean): FileSystemHyperLink {
   return {
     id,
@@ -186,6 +216,7 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
     case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
     case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
+    case "image": return { src: '/icons/file-icon.png', alt: 'Image icon' }
   }
 }
 
@@ -203,6 +234,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
   fileSystem.addApplication(doomConfig);
+  fileSystem.addApplication(imageViewerConfig);
 
   // Create unix like /home folder (macOS also has one)
   fileSystem.addDirectory(root, 'home', false, false);
@@ -225,6 +257,7 @@ export function createBaseFileSystem(): FileSystem {
 =====`;
 
   fileSystem.addTextFile(desktop, 'readme', text, true);
+  fileSystem.addImage(desktop, 'cheems', '.png', '/images/temp.png', true);
 
   return fileSystem;
 }
@@ -585,6 +618,18 @@ export class FileSystem {
     return Ok(node.value);
   }
 
+  public getImage(path: string): Result<FileSystemImage, Error> {
+    const node = this.getNode(path);
+
+    if (!node.ok) { return node; }
+
+    if (node.value.kind !== 'image') {
+      return Err(Error("Node is not an image"))
+    }
+
+    return Ok(node.value);
+  }
+
   public addApplication(config: ApplicationConfig): Result<FileSystemApplication, Error> {
     const parent = this.lookupTable[config.path];
     if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
@@ -622,6 +667,18 @@ export class FileSystem {
     this.propagateNodeEvent(parent, { kind: 'update' });
 
     return textFile;
+  }
+
+  public addImage(parent: FileSystemDirectory, name: string, extension: FileSystemImageExtension, source: string, editable: boolean) {
+    const image = createImage(++this.id, parent, name, extension, source, editable);
+
+    this.addNodeToDirectory(parent, image);
+
+    this.lookupTable[constructPath(image)] = image;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
+    return image;
   }
 
   public addHyperLink(parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean) {
