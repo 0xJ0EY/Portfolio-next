@@ -399,6 +399,10 @@ function targetDirectoryAllowsModification(directory: FileSystemDirectory): bool
   return directory.editable || directory.stickyBit;
 }
 
+function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: FileSystemNode): boolean {
+  return targetDirectory.id === node.parent?.id;
+}
+
 export type NodeRefreshEvent = { kind: 'refresh' }
 export type NodeUpdateEvent = { kind: 'update' }
 export type NodeRenameEvent = { kind: 'rename', path: string }
@@ -525,6 +529,19 @@ export class FileSystem {
       return Err(Error("Target directory does not allow modification"));
     }
 
+    if (targetMovedInSameDirectory(directory, node)) {
+      // Match the directory based on their unique node id
+      const originalDirectoryEntry = directory.children
+        .iterFromTail() // Doesn't matter which one we take, as long as it is a iterator
+        .find((entry: DirectoryEntry) => { return entry.node.id === node.id; });
+
+      if (!originalDirectoryEntry) {
+        return Err(Error("Parent moved in the same directory, but cannot be found in the directory listing"));
+      }
+
+      return Ok(originalDirectoryEntry);
+    }
+
     // Remove old path from lookup table
     const path = constructPath(node);
     if (this.lookupTable[path]) { delete this.lookupTable[path]; }
@@ -538,9 +555,6 @@ export class FileSystem {
 
     // Add new path to lookup table
     this.lookupTable[constructPath(node)] = node;
-
-    // Inform the new parent that a node has been added
-    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
 
     return Ok(entry);
   }
