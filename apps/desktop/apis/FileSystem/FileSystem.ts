@@ -595,6 +595,8 @@ export class FileSystem {
 
     this.lookupTable[constructPath(application)] = application;
 
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
     return Ok(application);
   }
 
@@ -604,6 +606,8 @@ export class FileSystem {
     this.addNodeToDirectory(parent, directory);
 
     this.lookupTable[constructPath(directory)] = directory;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
 
     return directory;
   }
@@ -615,6 +619,8 @@ export class FileSystem {
 
     this.lookupTable[constructPath(textFile)] = textFile;
 
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
     return textFile;
   }
 
@@ -624,6 +630,8 @@ export class FileSystem {
     this.addNodeToDirectory(parent, hyperlink);
 
     this.lookupTable[constructPath(hyperlink)] = hyperlink;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
 
     return hyperlink;
   }
