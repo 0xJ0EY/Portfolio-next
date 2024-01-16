@@ -31,6 +31,7 @@ html, body {
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
   user-select: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .system-button img {
@@ -38,7 +39,9 @@ html, body {
 }
 
 .system-text-input {
+  -webkit-appearance: none;
   outline: none;
+  border-radius: 0;
   padding: 4px 5px;
   box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -1px -1px #dfdfdf,inset 1px 1px #0a0a0a;
   background-color: #fff;

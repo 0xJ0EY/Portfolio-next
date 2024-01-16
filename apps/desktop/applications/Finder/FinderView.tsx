@@ -205,25 +205,25 @@ export default function FinderView(props: WindowProps) {
     }
   }
   
-  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onPointerDown={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onClick={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
  
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className="system-button spritesheet-btn" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
-        <button className="system-button spritesheet-btn" disabled={!canEdit} onPointerDown={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
-      </div>
-
       <div className={styles.content}>
         <div className={styles.locations}>
+          <div className={styles.header}>
+            <button className={["system-button spritesheet-btn", styles['header-left']].join(' ')} disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-left']].join(' ')} disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-right']].join(' ')} disabled={!canEdit} onClick={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-right']].join(' ')} disabled={!canEdit} onClick={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
+          </div>
+
           {t("finder.favorites")}
           <ul>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
           </ul>
         </div>
         <div className={styles.folder}>
