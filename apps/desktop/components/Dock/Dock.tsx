@@ -33,9 +33,16 @@ type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDo
 function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
-      <Image className={styles['dock-app-image']} src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
+      <Image
+        className={styles['dock-app-image']}
+        src={item.config.appIcon.src}
+        alt={item.config.appIcon.alt}
+        width={64}
+        height={64}
+        draggable={false}
+      />
       <div className={[styles.status, item.active ? styles.active : styles.inactive].join(' ')}>
-        {item.active ? <img className={styles['dock-app-active-image']} src={ActiveIcon} /> : <></>}
+        {item.active ? <img draggable={false} className={styles['dock-app-active-image']} src={ActiveIcon} /> : <></>}
       </div>
     </button>
   </>)
@@ -44,7 +51,14 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
-      <Image className={styles['dock-app-image']} src={item.config.appIcon.src} alt={item.config.appIcon.alt} width={64} height={64}></Image>
+      <Image
+        className={styles['dock-app-image']}
+        src={item.config.appIcon.src}
+        alt={item.config.appIcon.alt}
+        width={64}
+        height={64}
+        draggable={false}
+      />
       <div className={[styles.status].join(' ')}></div>
     </button>
   </>)
@@ -101,7 +115,14 @@ function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
       className={buttonStyle}
       onClick={() => item.onClick()}
       data-tooltip={item.title}>
-      <Image className={styles['dock-app-image']} src={item.icon.src} alt={item.icon.alt} width={64} height={64}></Image>
+      <Image
+        className={styles['dock-app-image']}
+        src={item.icon.src}
+        alt={item.icon.alt}
+        width={64}
+        height={64}
+        draggable={false}
+      />
       <div className={styles.status}></div>
     </button>
   </>)
