@@ -89,6 +89,7 @@ export type FileSystemImage = {
   filenameExtension: FileSystemImageExtension,
   name: string,
   source: string,
+  description: string,
   editable: boolean
 }
 
@@ -184,7 +185,7 @@ function createTextFile(id: number, parent: FileSystemDirectory, name: string, c
   }
 }
 
-function createImage(id: number, parent: FileSystemDirectory, name: string, filenameExtension: FileSystemImageExtension, source: string, editable: boolean): FileSystemImage {
+function createImage(id: number, parent: FileSystemDirectory, name: string, filenameExtension: FileSystemImageExtension, source: string, description: string, editable: boolean): FileSystemImage {
   return {
     id,
     parent,
@@ -192,6 +193,7 @@ function createImage(id: number, parent: FileSystemDirectory, name: string, file
     name,
     filenameExtension,
     source,
+    description,
     editable
   }
 }
@@ -257,7 +259,7 @@ export function createBaseFileSystem(): FileSystem {
 =====`;
 
   fileSystem.addTextFile(desktop, 'readme', text, true);
-  fileSystem.addImage(desktop, 'cheems', '.png', '/images/temp.png', true);
+  fileSystem.addImage(desktop, 'cheems', '.png', '/images/temp.png', "A temporary image", true);
 
   return fileSystem;
 }
@@ -669,8 +671,8 @@ export class FileSystem {
     return textFile;
   }
 
-  public addImage(parent: FileSystemDirectory, name: string, extension: FileSystemImageExtension, source: string, editable: boolean) {
-    const image = createImage(++this.id, parent, name, extension, source, editable);
+  public addImage(parent: FileSystemDirectory, name: string, extension: FileSystemImageExtension, source: string, description: string, editable: boolean) {
+    const image = createImage(++this.id, parent, name, extension, source, description, editable);
 
     this.addNodeToDirectory(parent, image);
 

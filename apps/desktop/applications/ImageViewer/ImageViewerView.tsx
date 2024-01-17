@@ -66,7 +66,7 @@ export default function ImageViewerView(props: WindowProps) {
             style={{
               objectFit: 'contain',
             }}
-            alt={image.name}
+            alt={image.description}
           />
         </div>
       </div>
