@@ -13,6 +13,7 @@ import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
+import { contactConfig } from "@/applications/Contract/Contract";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -233,6 +234,7 @@ export function createBaseFileSystem(): FileSystem {
   const applications = fileSystem.addDirectory(root, 'Applications', false, false);
 
   fileSystem.addApplication(finderConfig);
+  fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
   fileSystem.addApplication(doomConfig);

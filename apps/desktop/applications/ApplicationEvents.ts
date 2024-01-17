@@ -31,6 +31,10 @@ export type FinderOpenFileEvent = {
   path: string
 }
 
+export type AboutOpenContactEvent = {
+  kind: 'about-open-contact-event',
+}
+
 export function createApplicationOpenEvent(isFirst: boolean, args: string): ApplicationOpenEvent {
   return { kind: 'application-open', isFirst, args };
 }
@@ -57,8 +61,9 @@ export function createAllWindowsClosedEvent(): AllWindowsClosedEvent {
 
 type BaseApplicationEvents = ApplicationOpenEvent | ApplicationQuitEvent | ApplicationKillEvent | WindowOpenEvent | WindowCloseEvent | AllWindowsClosedEvent;
 type FinderApplicationEvents = FinderOpenFileEvent;
+type AboutApplicationEvents = AboutOpenContactEvent;
 
-export type ApplicationEvent = BaseApplicationEvents | FinderApplicationEvents;
+export type ApplicationEvent = BaseApplicationEvents | FinderApplicationEvents | AboutApplicationEvents;
 
 export type ApplicationWindowMessage = {
   kind: 'message',

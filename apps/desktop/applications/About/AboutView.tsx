@@ -77,36 +77,35 @@ function ProjectsSubView(params: SubViewParams) {
   </>);
 }
 
-function ContactSubView(params: SubViewParams) {
-  return (<>
-    <div className='flex h-full'>
-      { SubViewNavigation(params) }
-      <div className='flex flex-auto p-6 flex-col'>
-        <h1 className={styles['page-h1']}>Contact</h1>
-      </div>
-    </div>
-  </>);
-}
-
 function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
   switch (view) {
     case 'home': return HomeSubView(params);
     case 'about': return AboutSubView(params);
     case 'experience': return ExperienceSubView(params);
     case 'projects': return ProjectsSubView(params);
-    case 'contact': return ContactSubView(params);
   }
+  
+  return <></>;
 }
 
 export default function AboutApplicationView(props: WindowProps) {
-  useEffect(() => { }, []);
+  const { application, windowContext } = props;
 
   const [subView, setSubView] = useState<SubView>('home');
+
+  function changeParent(view: SubView) {
+    if (view === 'contact') {
+      application.on({ kind: 'about-open-contact-event' }, windowContext);
+      return;
+    }
+
+    setSubView(view);
+  }
 
   return (
     <div className="content-outer">
       <div className="content">
-        { RenderSubView(subView, { changeParent: setSubView }) }
+        { RenderSubView(subView, { changeParent }) }
       </div>
     </div>
   )
