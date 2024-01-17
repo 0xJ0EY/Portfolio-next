@@ -15,6 +15,14 @@
     "no_image_to_load": "There is no image to load. Open the application by clicking on an image",
     "loading": "Loading..."
   },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "company_optional": "Company (optional)",
+    "message": "Message",
+    "send": "Send"
+  },
   "finder": {
     "favorites": "Favorites",
     "create_text_file_instructions": "Enter the name of the text file",

@@ -67,5 +67,9 @@ export class DoomApplication extends Application {
         this.focusWindow();
       }
     };
+
+    if (event.kind === 'application-quit') {
+      this.currentWindow = null;
+    }
   }
 }

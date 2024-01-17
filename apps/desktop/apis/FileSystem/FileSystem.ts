@@ -13,7 +13,7 @@ import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
-import { contactConfig } from "@/applications/Contract/Contract";
+import { contactConfig } from "@/applications/Contract/Contact";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,

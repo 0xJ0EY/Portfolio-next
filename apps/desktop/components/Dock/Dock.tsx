@@ -10,10 +10,12 @@ import Image from 'next/image';
 import { ApplicationIcon, FileSystem } from '@/apis/FileSystem/FileSystem';
 import { SystemAPIs } from '../OperatingSystem';
 import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
+import { contactConfig } from '@/applications/Contract/Contact';
 
 const DockApplications = [
   finderConfig,
-  aboutConfig
+  aboutConfig,
+  contactConfig,
 ];
 
 const DebugDockApplications = [

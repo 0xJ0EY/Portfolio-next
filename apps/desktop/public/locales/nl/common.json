@@ -15,6 +15,14 @@
     "no_image_to_load": "Er is geen afbeelding om te laden. Klik op een afbeelding om de applicatie te openen",
     "loading": "Laden..."
   },
+  "contact": {
+    "name": "Naam",
+    "email": "E-mail",
+    "company": "Bedrijf",
+    "company_optional": "Bedrijf (optioneel)",
+    "message": "Bericht",
+    "send": "Verzenden"
+  },
   "finder": {
     "favorites": "Favorieten",
     "create_directory_instructions": "Vul de naam in voor de nieuwe folder",
