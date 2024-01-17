@@ -230,7 +230,7 @@ export function createBaseFileSystem(): FileSystem {
   const root = rootEntry.value;
 
   // Create base file tree
-  fileSystem.addDirectory(root, 'Applications', false, false);
+  const applications = fileSystem.addDirectory(root, 'Applications', false, false);
 
   fileSystem.addApplication(finderConfig);
   fileSystem.addApplication(aboutConfig);
@@ -245,14 +245,13 @@ export function createBaseFileSystem(): FileSystem {
   const users = fileSystem.addDirectory(root, 'Users', false, false);
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
 
-  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
-  const trash = fileSystem.addDirectory(joey, 'Trash', false, true);
+  fileSystem.addDirectory(joey, 'Documents', false, true);
+  fileSystem.addDirectory(joey, 'Trash', false, true);
 
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
   const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
 
-  fileSystem.addHyperLink(desktop, documents, 'Documents', tempIcon, true);
-  fileSystem.addHyperLink(desktop, trash, 'Trash', tempIcon, true);
+  fileSystem.addHyperLink(desktop, applications, 'Applications', tempIcon, true);
 
   const text = `=====
 == README
