@@ -66,6 +66,7 @@ export default function ImageViewerView(props: WindowProps) {
             style={{
               objectFit: 'contain',
             }}
+            sizes="400px, 800px, 1024px"
             alt={image.description}
           />
         </div>
