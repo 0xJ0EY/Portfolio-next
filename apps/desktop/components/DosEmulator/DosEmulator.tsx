@@ -1,10 +1,12 @@
 import { CommandInterface, Emulators } from "emulators";
 import { EmulatorsUi } from "emulators-ui";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DosWebGLRenderer } from "./DosWebGLRenderer";
 import { SoundService } from "@/apis/Sound/Sound";
 import styles from './DosEmulator.module.css';
 import { isFirefox } from "../util";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 declare const emulators: Emulators;
 declare const emulatorsUi: EmulatorsUi;
@@ -156,9 +158,24 @@ class Runner {
   }
 }
 
+function LoadingScreen(t: TFunction) {
+  return (
+    <div className="content-outer">
+      <div className="content">
+        <div className={styles['center']}>
+          <span className={styles['loading-text']}>{t('dos_emulator.loading')}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DosEmulator(props: { gameLocation: string, soundService: SoundService }) {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const { t } = useTranslation('common');
+  const [isLoading, setIsLoading] = useState(true);
 
   function handleSound(isEnabled: boolean, runner: Runner): void {
     runner.changeVolume(isEnabled ? 0.6 : 0.0);
@@ -253,13 +270,15 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
     canvasRef.current.addEventListener('mousedown', handleMouseDown, false);
     canvasRef.current.addEventListener('mouseup', handleMouseUp, false);
 
+    setIsLoading(true);
+
     runner.start(
       {
         canvas: canvasRef.current,
         width, height
       },
       props.gameLocation
-    );
+    ).then(() => { setIsLoading(false) });
 
     observer.observe(canvasContainerRef.current);
 
@@ -279,6 +298,7 @@ export default function DosEmulator(props: { gameLocation: string, soundService:
   return (
     <>
       <div className={styles['emulator-container']} ref={canvasContainerRef}>
+        {isLoading && LoadingScreen(t)}
         <canvas ref={canvasRef}></canvas>
       </div>
     </>

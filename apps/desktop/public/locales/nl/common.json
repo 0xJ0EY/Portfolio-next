@@ -23,6 +23,9 @@
     "message": "Bericht",
     "send": "Verzenden"
   },
+  "dos_emulator": {
+    "loading": "Laden"
+  },
   "finder": {
     "favorites": "Favorieten",
     "create_directory_instructions": "Vul de naam in voor de nieuwe folder",

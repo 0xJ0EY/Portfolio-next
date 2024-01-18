@@ -23,6 +23,9 @@
     "message": "Message",
     "send": "Send"
   },
+  "dos_emulator": {
+    "loading": "Loading"
+  },
   "finder": {
     "favorites": "Favorites",
     "create_text_file_instructions": "Enter the name of the text file",
