@@ -41,6 +41,7 @@
 
 .form-row textarea {
   resize: vertical;
+  min-height: 40px;
 }
 
 .processed {
