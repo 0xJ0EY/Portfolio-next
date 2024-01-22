@@ -14,6 +14,7 @@ import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
 import { contactConfig } from "@/applications/Contract/Contact";
+import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -361,7 +362,7 @@ export function calculateNodePosition(
   content: DirectoryContent,
   others: Point[]
 ): { x: number, y: number } {
-  const nodeBoundingBox = { width: 120, height: 80 };
+  const nodeBoundingBox = { width: IconWidth, height: IconHeight };
 
   const positionRange = generatePositionRange(settings, content, nodeBoundingBox);
   const possiblePosition = positionRange.find(pos => entriesWithinSelection(others, pos.x, pos.y, nodeBoundingBox) === 0);

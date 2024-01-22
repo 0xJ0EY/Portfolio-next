@@ -4,7 +4,6 @@
   flex-direction: column;
   width: 120px;
   min-height: 80px;
-  justify-content: center;
 }
 
 .selected img {
@@ -41,4 +40,10 @@
 
 .editInput {
   width: 100%;
+}
+
+.textContainer {
+  display: block;
+  font-size: 14px;
+  line-height: 16px;
 }
