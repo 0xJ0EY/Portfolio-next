@@ -38,3 +38,9 @@
 .form-row textarea {
   resize: vertical;
 }
+
+.processed {
+  background: #0dff0d;
+  padding: 10px;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+}

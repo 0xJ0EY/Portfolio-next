@@ -21,7 +21,11 @@
     "company": "Bedrijf",
     "company_optional": "Bedrijf (optioneel)",
     "message": "Bericht",
-    "send": "Verzenden"
+    "send": "Verzenden",
+    "processed": "Er is een e-mail verstuurd naar mijn inbox!",
+    "error": {
+      "invalid-email": "Vul een geldig e-mailadres in."
+    }
   },
   "dos_emulator": {
     "loading": "Laden"

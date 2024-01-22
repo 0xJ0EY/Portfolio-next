@@ -47,6 +47,13 @@ html, body {
   background-color: #fff;
 }
 
+.system-text-input:disabled {
+  background-color: #dcdcdc;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: auto;
+  color: grey;
+}
+
 .header-button {
   line-height: 13px;
   padding: 3px 4px 3px;

@@ -21,7 +21,11 @@
     "company": "Company",
     "company_optional": "Company (optional)",
     "message": "Message",
-    "send": "Send"
+    "send": "Send",
+    "processed": "An email has been send to my inbox!",
+    "error": {
+      "invalid-email": "Please enter a valid email."
+    }
   },
   "dos_emulator": {
     "loading": "Loading"
