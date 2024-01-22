@@ -35,6 +35,10 @@
   width: 100%;
 }
 
+.form-row label {
+  font-weight: 600;
+}
+
 .form-row textarea {
   resize: vertical;
 }
@@ -43,4 +47,28 @@
   background: #0dff0d;
   padding: 10px;
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+}
+
+.instructions span {
+  display: block;
+}
+
+.instructions {
+  display: block;
+  float: right;
+  text-align: right;
+}
+
+.required {
+  color: red;
+  padding-right: 3px;
+  font-weight: normal;
+}
+
+.required-instructions {
+  font-size: 0.8rem;
+}
+
+.required-instructions span {
+  display: inline-block;
 }

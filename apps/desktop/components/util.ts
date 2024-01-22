@@ -53,6 +53,10 @@ export function isDebug(): boolean {
   return searchParams.has('debug');
 }
 
+export function isEmpty(value: string): boolean {
+  return value.length === 0;
+}
+
 export function isEmail(email: string): boolean {
   const re = /\S+@\S+\.\S+/;
   return re.test(email);

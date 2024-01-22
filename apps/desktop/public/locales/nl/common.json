@@ -23,6 +23,8 @@
     "message": "Bericht",
     "send": "Verzenden",
     "processed": "Er is een e-mail verstuurd naar mijn inbox!",
+    "message_forwarding_instructions": "Alle berichten zullen direct naar mijn inbox gestuurd worden",
+    "required": "Verplicht",
     "error": {
       "invalid-email": "Vul een geldig e-mailadres in."
     }

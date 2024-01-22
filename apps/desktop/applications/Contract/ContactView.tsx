@@ -2,7 +2,14 @@ import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useTranslation } from "react-i18next";
 import styles from './ContactView.module.css';
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { isEmail } from "@/components/util";
+import { isEmail, isEmpty } from "@/components/util";
+
+type ValidationError = (
+  'empty-name' |
+  'empty-email' |
+  'empty-message' |
+  'invalid-email'
+);
 
 export default function NotesApplicationView(props: WindowProps) {
   const { application, args, windowContext } = props;
@@ -17,9 +24,7 @@ export default function NotesApplicationView(props: WindowProps) {
     message: ""
   });
 
-  const [errors, setErrors] = useState({
-    email: false
-  });
+  const [errors, setErrors] = useState<Set<ValidationError>>(new Set());
 
   const [loading, setLoading] = useState(false);
   const [processed, setProcessed] = useState(false);
@@ -51,25 +56,45 @@ export default function NotesApplicationView(props: WindowProps) {
     }
   }
 
-  function validateForm(): boolean {
-    let valid = true;
+  function isFormValid(): boolean {
+    return validateForm().length === 0;
+  }
 
-    if (!isEmail(inputFields.email)) {
-      valid = false;
-      setErrors({...errors, ['email']: true});
-    }
+  function validateForm(): ValidationError[] {
+    let errors: ValidationError[] = [];
+
+    if (isEmpty(inputFields.name)) { errors.push('empty-name'); }
+    if (isEmpty(inputFields.email)) { errors.push('empty-email'); }
+    if (isEmpty(inputFields.message)) { errors.push('empty-message'); }
+
+    if (!isEmail(inputFields.email)) { errors.push('invalid-email'); }
     
-    return valid;
+    return errors;
+  }
+
+  function handleFromErrors() {
+    const errors = validateForm();
+
+    function setError(error: ValidationError) {
+      setErrors(errors => new Set(errors).add(error));
+    }
+
+    for (const error of errors) {
+      setError(error);
+    }
   }
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
 
-
     setLoading(true);
     setProcessed(false);
 
-    if (validateForm()) { sendEmail().then(() => resetInput()); }
+    if (isFormValid()) {
+      sendEmail().then(() => resetInput());
+    } else {
+      handleFromErrors();
+    }
   }
 
   useEffect(() => {
@@ -94,7 +119,7 @@ export default function NotesApplicationView(props: WindowProps) {
               }
               
               <div className={styles['form-row']}>
-                <label htmlFor="name">{t("contact.name")}:</label>
+                <label htmlFor="name"><span className={styles.required}>*</span>{t("contact.name")}:</label>
                 <input
                   className="system-text-input"
                   ref={nameRef}
@@ -110,7 +135,7 @@ export default function NotesApplicationView(props: WindowProps) {
               </div>
 
               <div className={styles['form-row']}>
-                <label htmlFor="email">{t("contact.email")}:</label>
+                <label htmlFor="email"><span className={styles.required}>*</span>{t("contact.email")}:</label>
                 <input
                   className="system-text-input"
                   id="email"
@@ -120,9 +145,8 @@ export default function NotesApplicationView(props: WindowProps) {
                   placeholder={t("contact.email")}
                   value={inputFields.email}
                   onChange={handleChange}
-                  required
                 />
-                { errors.email ? <span>{t('contact.error.invalid-email')}</span> : <></> }
+                { errors.has('invalid-email') ? <span>{t('contact.error.invalid-email')}</span> : <></> }
               </div>
 
               <div className={styles['form-row']}>
@@ -140,7 +164,7 @@ export default function NotesApplicationView(props: WindowProps) {
               </div>
 
               <div className={styles['form-row']}>
-                <label htmlFor="message">{t("contact.message")}:</label>
+                <label htmlFor="message"><span className={styles.required}>*</span>{t("contact.message")}:</label>
                 <textarea
                   className="system-text-input"
                   id="message"
@@ -154,7 +178,12 @@ export default function NotesApplicationView(props: WindowProps) {
               </div>
 
               <div className={styles['form-row']}>
-                <input type="submit" className="system-button" disabled={loading} value={t("contact.send")}/>
+                <input type="submit" className="system-button" disabled={!isFormValid() || loading} value={t("contact.send")}/>
+                
+                <div className={styles['instructions']}>
+                  <span>{t("contact.message_forwarding_instructions")}</span>
+                  <span className={styles['required-instructions']}><span className={styles.required}>*</span> = {t("contact.required")}</span>
+                </div>
               </div>
             </form>
           </div>

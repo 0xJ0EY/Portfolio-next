@@ -1,4 +1,3 @@
-import { ApplicationIcon } from "@/apis/FileSystem/FileSystem";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { LocalWindowCompositor } from "@/components/WindowManagement/LocalWindowCompositor";
 import { Application, ApplicationConfig, MenuEntry } from "../ApplicationManager";
@@ -40,9 +39,9 @@ export class ContactApplication extends Application {
   }
 
   private createNewWindow(event: ApplicationOpenEvent): Window {
-    const y       = 150;
+    const y       = 90;
     const width   = window.innerWidth * 0.6;
-    const height  = 500;
+    const height  = 600;
     const x       = (window.innerWidth - width) / 2;
 
     return this.compositor.open({
