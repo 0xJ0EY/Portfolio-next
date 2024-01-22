@@ -19,7 +19,15 @@
 }
 
 .navigation {
+  width: 12rem;
   min-width: 12rem;
+  padding: 1.5rem;
+}
+
+.navigation-button-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
 }
 
 .page-h1 {
@@ -38,4 +46,34 @@
 
 .home-page {
   display: flex;
+}
+
+.subpage {
+  display: flex;
+  height: 100%;
+}
+
+.subpage-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.subpage-home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.home-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.home-button {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }

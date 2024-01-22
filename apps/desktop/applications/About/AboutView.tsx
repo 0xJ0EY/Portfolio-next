@@ -10,15 +10,15 @@ type SubViewParams = {
 
 function HomeSubView(params: SubViewParams) {
   return (<>
-    <div className="flex flex-col h-full justify-center">
+    <div className={styles['subpage-home']}>
       <h1 className={styles['home-title']}>Joey de Ruiter</h1>
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
-      <div className='flex justify-center mt-3'>
-        <button className='mx-1 system-button' onClick={() => params.changeParent('about')}>About</button>
-        <button className='mx-1 system-button' onClick={() => params.changeParent('experience')}>Experience</button>
-        <button className='mx-1 system-button' onClick={() => params.changeParent('projects')}>Projects</button>
-        <button className='mx-1 system-button' onClick={() => params.changeParent('contact')}>Contact</button>
+      <div className={styles['home-button-container']}>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('about')}>About</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('experience')}>Experience</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('projects')}>Projects</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('contact')}>Contact</button>
       </div>
     </div>
   </>)
@@ -26,13 +26,13 @@ function HomeSubView(params: SubViewParams) {
 
 function SubViewNavigation(params: SubViewParams) {
   return (<>
-    <div className={`w-48 p-6 ${styles['navigation']}`}>
+    <div className={styles['navigation']}>
       <div>
         <span className={styles['logo-part']}>Joey</span>
         <span className={styles['logo-part']}>de Ruiter</span>
       </div>
 
-      <div className='flex flex-col mt-4'>
+      <div className={styles['navigation-button-container']}>
         <button className='system-button' onClick={() => params.changeParent('home')}>Home</button>
         <button className='system-button' onClick={() => params.changeParent('about')}>About</button>
         <button className='system-button' onClick={() => params.changeParent('experience')}>Experience</button>
@@ -45,9 +45,9 @@ function SubViewNavigation(params: SubViewParams) {
 
 function AboutSubView(params: SubViewParams) {
   return (<>
-    <div className='flex h-full'>
+    <div className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto p-6 flex-col'>
+      <div className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>About</h1>
       </div>
     </div>
@@ -56,9 +56,9 @@ function AboutSubView(params: SubViewParams) {
 
 function ExperienceSubView(params: SubViewParams) {
   return (<>
-    <div className='flex h-full'>
+    <div className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto p-6 flex-col'>
+      <div className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>Experience</h1>
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis voluptate deleniti nemo nam eum sunt repellat? Dolorum nemo qui sit eveniet officia voluptatem similique consequuntur deserunt, sint quis maxime. Doloribus?</p>
       </div>
@@ -68,9 +68,9 @@ function ExperienceSubView(params: SubViewParams) {
 
 function ProjectsSubView(params: SubViewParams) {
   return (<>
-    <div className='flex h-full'>
+    <div className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className='flex flex-auto p-6 flex-col'>
+      <div className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>Projects</h1>
       </div>
     </div>
