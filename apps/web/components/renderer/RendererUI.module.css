@@ -2,3 +2,31 @@
   position: relative;
   z-index: 1;
 }
+
+.cinematic {
+  display: block;
+}
+
+.cinematic-instructions {
+  position: fixed;
+  bottom: 25%;
+  font-size: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: black;
+  padding: 8px 20px;
+  color: #fff;
+  pointer-events: none;
+  transition: opacity 100ms ease-in;
+  opacity: 1;
+}
+
+.fade-out-anim {
+  opacity: 0;
+  /* animation: fade-out 100ms forwards; */
+}
+
+@keyframes fade-out {
+  0% { opacity: 1;}
+  100% { opacity: 0; }
+}
