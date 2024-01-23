@@ -1,50 +1,96 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CameraHandlerState } from "./camera/CameraHandler";
 import styles from "./RendererUI.module.css"
+import { sendMessageToChild } from "rpc";
+
+function useSoundManagement() {
+  const [isSoundEnabled, setSoundEnabled] = useState(true);
+
+  function toggleSound() {
+    if (isSoundEnabled) {
+      disableSound();
+    } else {
+      enableSound();
+    }
+  }
+
+  function sendSoundStateToChild(enabled: boolean) {
+    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
+  }
+
+  function enableSound() {
+    setSoundEnabled(true);
+    sendSoundStateToChild(true);
+  }
+
+  function disableSound() {
+    setSoundEnabled(false);
+    sendSoundStateToChild(false);
+  }
+
+  return {isSoundEnabled, toggleSound, enableSound, disableSound};
+}
 
 export type RendererUIProps = {
   cameraHandlerState: CameraHandlerState
 }
 
-function FreeRoamUI() {
-  useEffect(() => {
-    console.log('free roam ui');
-  }, []);
-  
-  return <>FreeRoam</>
+type SubViewSound = {
+  isSoundEnabled: boolean,
+  toggleSound: () => void
 }
 
-function MonitorViewUI() {
-  useEffect(() => {
-    console.log('monitor view ui');
-  }, []);
-
-  return <>Monitor</>
+type SubViewProps = {
+  sound: SubViewSound,
 }
 
-function CinematicUI() {
-  useEffect(() => {
-    console.log('cinematic ui');
-  }, []);
+function SoundManagementButton(props: { sound: SubViewSound }) {
+  const { isSoundEnabled, toggleSound } = props.sound;
 
-  return <>Cinematic</>
+  return <button className={styles['mute-button']} onClick={() => toggleSound()}>{isSoundEnabled ? 'Mute' : 'Unmute'}</button>
 }
 
-function DeskViewUI() {
-  return <>Deskview</>
+function FreeRoamUI(props: SubViewProps) {
+  return <>
+    FreeRoam
+    <SoundManagementButton sound={props.sound}/>
+  </>
+}
+
+function MonitorViewUI(props: SubViewProps) {
+  return <>
+    Monitor
+    <SoundManagementButton sound={props.sound}/>
+  </>
+}
+
+function CinematicUI(props: SubViewProps) {
+  return <>
+    Cinematic
+    <SoundManagementButton sound={props.sound}/>
+  </>
+}
+
+function DeskViewUI(props: SubViewProps) {
+  return <>
+    DeskView
+    <SoundManagementButton sound={props.sound}/>  
+  </>
 }
 
 export function RendererUI(props: RendererUIProps) {
   const { cameraHandlerState } = props;
+  const soundManagement = useSoundManagement();
 
   // A switch statement wrapped in a function breaks the rules of hooks, but this doesn't?
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
-      {cameraHandlerState === CameraHandlerState.FreeRoam && <FreeRoamUI/>}
-      {cameraHandlerState === CameraHandlerState.MonitorView && <MonitorViewUI/>}
-      {cameraHandlerState === CameraHandlerState.Cinematic && <CinematicUI/>}
-      {cameraHandlerState === CameraHandlerState.DeskView && <DeskViewUI/>}
+      {cameraHandlerState === CameraHandlerState.FreeRoam && <FreeRoamUI sound={soundManagement}/>}
+      {cameraHandlerState === CameraHandlerState.MonitorView && <MonitorViewUI sound={soundManagement}/>}
+      {cameraHandlerState === CameraHandlerState.Cinematic && <CinematicUI sound={soundManagement}/>}
+      {cameraHandlerState === CameraHandlerState.DeskView && <DeskViewUI sound={soundManagement}/>}
     </div>
   );
 }

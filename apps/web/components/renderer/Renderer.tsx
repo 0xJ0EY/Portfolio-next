@@ -22,35 +22,6 @@ export interface RendererScenes {
   cssScene: Scene
 };
 
-function useSoundManagement() {
-  const [isSoundEnabled, setSoundEnabled] = useState(true);
-
-  function toggleSound() {
-    if (isSoundEnabled) {
-      disableSound();
-    } else {
-      enableSound();
-    }
-  }
-
-  function sendSoundStateToChild(enabled: boolean) {
-    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
-    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
-  }
-
-  function enableSound() {
-    setSoundEnabled(true);
-    sendSoundStateToChild(true);
-  }
-
-  function disableSound() {
-    setSoundEnabled(false);
-    sendSoundStateToChild(false);
-  }
-
-  return {isSoundEnabled, toggleSound, enableSound, disableSound};
-}
-
 const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
   const camera = new PerspectiveCamera(fov, aspectRatio, 0.1, 1000);
 
@@ -195,7 +166,6 @@ export const Renderer = (props: RendererProps) => {
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
-  const { isSoundEnabled, toggleSound } = useSoundManagement();
 
   const touchEvents = createUIEventBus();
 
@@ -301,7 +271,6 @@ export const Renderer = (props: RendererProps) => {
   return (
     <div className={styles.renderer}>
       <RendererUI cameraHandlerState={cameraHandlerState} />
-      <button className={styles['mute-button']} onClick={() => toggleSound()}>{isSoundEnabled ? 'Mute' : 'Unmute'}</button>
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>
