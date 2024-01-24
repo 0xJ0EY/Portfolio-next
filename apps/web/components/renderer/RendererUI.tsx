@@ -114,15 +114,14 @@ function NameAndTime(props: ElementStateProps) {
     }
   }, [state])
 
-
   return (
     <div className={joinStyles([
       styles['name-container'],
-      !isActive ? styles['fade-out-anim'] : null
+      isActive ? styles['fade-in'] : null
     ])}>
-      <span>{name}</span>
-      <span>{title}</span>
-      <span>{time}</span>
+      <div>{name && <span>{name}</span>}</div>
+      <div>{title && <span>{title}</span>}</div>
+      <div>{time && <span>{time}</span>}</div>
     </div>
   );
 }
@@ -146,7 +145,7 @@ function CinematicInstructions(props: ElementStateProps) {
   return (
     <span className={joinStyles([
       styles['cinematic-instructions'],
-      !isActive ? styles['fade-out-anim'] : null,
+      !isActive ? styles['fade-out'] : null,
     ])}>{instructions}</span>
   );
 }

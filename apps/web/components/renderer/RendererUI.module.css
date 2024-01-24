@@ -7,13 +7,31 @@
   display: block;
 }
 
+.name-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-in;
+}
+
+.name-container span {
+  display: inline-block;
+  padding: 8px 20px;
+  margin: 3px 5px 1px;
+  background-color: #000;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
 .cinematic-instructions {
   position: fixed;
   bottom: 25%;
   font-size: 1.2rem;
   left: 50%;
   transform: translateX(-50%);
-  background-color: black;
+  background-color: #000;
   padding: 8px 20px;
   color: #fff;
   pointer-events: none;
@@ -21,12 +39,10 @@
   opacity: 1;
 }
 
-.fade-out-anim {
+.fade-out {
   opacity: 0;
-  /* animation: fade-out 100ms forwards; */
 }
 
-@keyframes fade-out {
-  0% { opacity: 1;}
-  100% { opacity: 0; }
+.fade-in {
+  opacity: 1;
 }
