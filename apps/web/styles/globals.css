@@ -7,6 +7,10 @@ html, body {
   overscroll-behavior: none;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 #__next {
   height: 100vh;
 }

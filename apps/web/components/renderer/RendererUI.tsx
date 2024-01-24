@@ -56,11 +56,15 @@ type SubViewProps = {
 function SoundManagementButton(props: { sound: SubViewSound }) {
   const { isSoundEnabled, toggleSound } = props.sound;
 
-  return <button className={styles['mute-button']} onClick={() => toggleSound()}>{isSoundEnabled ? 'Mute' : 'Unmute'}</button>
+  return (
+    <button className={styles['mute-button']} onClick={() => toggleSound()}>
+      <img src="/icons/mute-icon.svg" width={20} height={20}/>
+    </button>
+  )
 }
 
-function NameAndTime(props: ElementStateProps) {
-  const { state } = props;
+function NameAndTime(props: SubViewProps) {
+  const { state, sound } = props;
 
   const firstTime = useRef<boolean>(true);
   const [name, setName] = useState("");
@@ -121,7 +125,7 @@ function NameAndTime(props: ElementStateProps) {
     ])}>
       <div>{name && <span>{name}</span>}</div>
       <div>{title && <span>{title}</span>}</div>
-      <div>{time && <span>{time}</span>}</div>
+      <div>{time && <span>{time}</span>}<SoundManagementButton sound={sound}/></div>
     </div>
   );
 }
@@ -158,7 +162,8 @@ export function RendererUI(props: RendererUIProps) {
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
-      <NameAndTime state={cameraHandlerState} />
+      <SoundManagementButton sound={soundManagement}/>
+      <NameAndTime state={cameraHandlerState} sound={soundManagement} />
       <CinematicInstructions state={cameraHandlerState} />
     </div>
   );
