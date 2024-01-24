@@ -19,13 +19,14 @@
 }
 
 .name-container span {
-  display: inline-block;
+  display: block;
   padding: 8px 20px;
   margin: 3px 5px 1px;
   background-color: #000;
   color: #fff;
   font-size: 1.2rem;
   line-height: 1.2rem;
+float: left;
 }
 
 .cinematic-instructions {
@@ -53,17 +54,19 @@
 }
 
 .mute-button {
+  display: block;
   border: none;
   background-color: #000;
   pointer-events: all;
   padding: 0;
   margin: 3px 1px;
-  /* padding: 8px 20px; */
-  height: 19.8px;
+  line-height: 40px;
+  padding: 8px 10px;
   cursor: pointer;
 }
 
 .mute-button img {
+  display: block;
   padding: 0;
   margin: 0;
 }

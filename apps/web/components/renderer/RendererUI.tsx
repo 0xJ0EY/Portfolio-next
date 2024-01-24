@@ -58,7 +58,7 @@ function SoundManagementButton(props: { sound: SubViewSound }) {
 
   return (
     <button className={styles['mute-button']} onClick={() => toggleSound()}>
-      <img src="/icons/mute-icon.svg" width={20} height={20}/>
+      <img src="/icons/mute-icon.svg" width={25} height={20}/>
     </button>
   )
 }
@@ -162,7 +162,6 @@ export function RendererUI(props: RendererUIProps) {
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
-      <SoundManagementButton sound={soundManagement}/>
       <NameAndTime state={cameraHandlerState} sound={soundManagement} />
       <CinematicInstructions state={cameraHandlerState} />
     </div>
