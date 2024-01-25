@@ -1,6 +1,6 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { CameraState } from "../CameraState";
-import { calculateCameraPosition, constructIsOverDisplay, getDisplay } from "./util";
+import { calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, getDisplay } from "./util";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { Vector3 } from "three";
 
@@ -51,7 +51,9 @@ export class DeskViewCameraState extends CameraState {
     }
   }
 
-  private handleMouseUp(data: MouseData): void {
+  private handleMouseDown(data: MouseData): void {
+    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
+
     this.manager.changeState(CameraHandlerState.FreeRoam);
   }
 
@@ -103,7 +105,7 @@ export class DeskViewCameraState extends CameraState {
 
   handleMouseEvent(data: MouseData) {
     switch (data.source) {
-      case 'up': return this.handleMouseUp(data);
+      case 'down': return this.handleMouseDown(data);
       case 'move': return this.handleMouseMove(data);
     }
   }

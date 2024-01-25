@@ -75,7 +75,8 @@
 }
 
 .time-is-done {
-  width: 115px;
+  width: 110px;
+  text-align: center;
 }
 
 .sound-container {
