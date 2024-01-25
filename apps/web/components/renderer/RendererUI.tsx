@@ -129,7 +129,7 @@ function NameAndTime(props: SubViewProps) {
   return (
     <div className={joinStyles([
       styles['name-container'],
-      isActive ? styles['fade-in'] : null
+      isActive ? styles['fade-in'] : styles['fade-out']
     ])}>
       <div>{name && <span>{name}</span>}</div>
       <div>{title && <span>{title}</span>}</div>
@@ -159,7 +159,10 @@ function CinematicInstructions(props: SubViewProps) {
 
   return (
     <>
-    <div className={styles['sound-container']}><SoundManagementButton sound={sound}/></div>
+    <div className={joinStyles([
+      styles['sound-container'],
+      !isActive ? styles['fade-out'] : null
+    ])}><SoundManagementButton sound={sound}/></div>
     <div className={styles['cinematic-container']}>
       <span className={joinStyles([
         styles['cinematic-instructions'],

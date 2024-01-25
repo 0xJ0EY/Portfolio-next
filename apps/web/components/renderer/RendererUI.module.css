@@ -9,6 +9,8 @@
 
 .name-container {
   position: fixed;
+  top: 0px;
+  left: 0px;
   display: flex;
   flex-direction: column;
   opacity: 0;
@@ -25,7 +27,7 @@
   background-color: #000;
   color: #fff;
   font-size: 1.2rem;
-  line-height: 1.2rem;
+  line-height: 20px;
   float: left;
 }
 
@@ -49,11 +51,11 @@
 }
 
 .fade-out {
-  opacity: 0;
+  animation: fade-out 100ms forwards;
 }
 
 .fade-in {
-  opacity: 1;
+  animation: fade-in 100ms forwards;
 }
 
 .mute-button {
@@ -62,7 +64,7 @@
   background-color: #000;
   pointer-events: all;
   padding: 0;
-  margin: 3px 1px;
+  margin: 3px 5px 1px;
   line-height: 40px;
   padding: 8px 10px;
   cursor: pointer;
@@ -79,5 +81,20 @@
 }
 
 .sound-container {
-  margin: 5px;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; visibility: hidden; }
+  100% { opacity: 1; visibility: visible; }
 }
