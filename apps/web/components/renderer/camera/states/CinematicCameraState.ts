@@ -87,10 +87,16 @@ export class CinematicCameraState extends UpdatableCameraState {
     this.handleMouseClickEvent(data);
   }
 
-  private handleTouchEvent(data: TouchData) {
+  private handleTouchStartEvents(data: TouchData) {
     const coords = data.pointerCoordinates();
     if (clickedDOMButton(data.hasTouchesDown(1), coords.x, coords.y)) { return; }
 
     this.manager.changeState(CameraHandlerState.MonitorView);
+  }
+
+  private handleTouchEvent(data: TouchData) {
+    if (data.source === 'start') {
+      this.handleTouchStartEvents(data);
+    }
   }
 }

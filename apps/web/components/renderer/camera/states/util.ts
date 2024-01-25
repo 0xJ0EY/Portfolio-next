@@ -128,6 +128,8 @@ export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): 
   const elements = document.elementsFromPoint(x, y);
 
   for (const element of elements) {
+    console.log(element);
+
     if (element.tagName === "BUTTON") {
       return true;
     }
