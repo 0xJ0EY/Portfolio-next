@@ -31,6 +31,9 @@ export class MonitorViewCameraState extends CameraState {
 
       this.ctx.cameraController.setOriginBoundaryX(2.0);
       this.ctx.cameraController.setOriginBoundaryY(1.5);
+
+      const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+      iframe.focus();
     }
 
     this.ctx.cameraController.enableDamping();

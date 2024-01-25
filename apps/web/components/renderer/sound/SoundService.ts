@@ -1,29 +1,36 @@
-import { ObserverSubject } from "@/data/Observer";
+import { sendMessageToChild } from "rpc";
 
-export class SoundService extends ObserverSubject<boolean> {
-  private enabled = true;
+export type SoundServiceObserver = (enabled: boolean) => void;
+export type SoundServiceAction = () => void;
+
+export class SoundService {
+  private observers: (SoundServiceObserver)[] = [];
+  private enabled: boolean = false;
 
   private index = 0;
   private activeAudio: HTMLAudioElement[] = [];
 
-  public isEnabled(): boolean {
-    return this.enabled;
+  private notifyOtherWebpage(enabled: boolean) {
+    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
+  }
+
+  private notify(status: boolean): void {
+    for (const listener of this.observers) {
+      listener(status);
+    }
   }
 
   public enable(): void {
     this.enabled = true;
-    this.notifyEnabledStatus();
-    this.unmuteAll();
+    this.notify(this.enabled);
+    this.notifyOtherWebpage(this.enabled);
   }
 
   public disable(): void {
     this.enabled = false;
-    this.notifyEnabledStatus();
-    this.muteAll();
-  }
-
-  private notifyEnabledStatus(): void {
     this.notify(this.enabled);
+    this.notifyOtherWebpage(this.enabled);
   }
 
   public mute(index: number): void {
@@ -84,10 +91,9 @@ export class SoundService extends ObserverSubject<boolean> {
     const audio = new Audio(source);
     audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play().catch(() => { console.log('User has not interacted with the page yet'); });
+    audio.play();
 
     this.activeAudio[currentIndex] = audio;
-
     audio.addEventListener('ended', () => { delete this.activeAudio[currentIndex]; });
 
     return currentIndex;
@@ -99,12 +105,27 @@ export class SoundService extends ObserverSubject<boolean> {
     const audio = new Audio(source);
     audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play().catch(() => { console.log('User has not interacted with the page yet'); });
+    audio.play();
 
     this.activeAudio[currentIndex] = audio;
 
     audio.addEventListener('ended', () => { this.activeAudio[currentIndex]?.play(); });
 
     return currentIndex;
+  }
+
+  public subscribe(listener: SoundServiceObserver): SoundServiceAction {
+    this.observers.push(listener);
+
+    return () => { this.unsubscribe(listener); };
+  }
+
+  public unsubscribe(listener: SoundServiceObserver): void {
+    for (const [index, observer] of this.observers.entries()) {
+      if (observer === listener) {
+        this.observers.splice(index);
+        return;
+      }
+    }
   }
 }

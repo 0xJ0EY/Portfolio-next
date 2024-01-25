@@ -15,6 +15,8 @@ import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/even
 import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
+import { SoundService } from './sound/SoundService';
+import { BackgroundSounds } from './BackgroundSounds';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -161,8 +163,10 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
   }
 }
 
+
 export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
+  const soundService = useRef(new SoundService());
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -270,12 +274,14 @@ export const Renderer = (props: RendererProps) => {
   }, []);
   return (
     <div className={styles.renderer}>
-      <RendererUI cameraHandlerState={cameraHandlerState} />
+      <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>
       {mouseProgressCircle}
       {touchProgressCircle}
+
+      <BackgroundSounds cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
     </div>
   );
 };

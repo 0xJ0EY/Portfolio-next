@@ -15,6 +15,7 @@ import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
 import { SoundService } from "@/apis/Sound/Sound";
 import { SystemService } from "@/apis/System/System";
+import { PeripheralSounds } from "./PeripheralSounds/PeripheralSounds";
 
 const NodeNameButton = 'BUTTON';
 
@@ -243,6 +244,7 @@ export const OperatingSystem = () => {
       <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
       <Dock apis={apis} manager={applicationManager} windowCompositor={windowCompositor}></Dock>
       <DragAndDropView apis={apis}/>
+      <PeripheralSounds apis={apis}/>
     </div>
   </>
 }
