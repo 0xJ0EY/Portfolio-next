@@ -122,3 +122,18 @@ export const calculateCameraPosition = (display: Mesh, fov: number, zoomDistance
 export function easeInOutSine(x: number): number {
   return -(Math.cos(Math.PI * x) - 1) / 2;
 }
+
+export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): boolean {
+  if (!isPrimaryDown) { return false; }
+  const elements = document.elementsFromPoint(x, y);
+
+  for (const element of elements) {
+    console.log(element);
+
+    if (element.tagName === "BUTTON") {
+      return true;
+    }
+  }
+
+  return false;
+}

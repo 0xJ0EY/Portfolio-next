@@ -22,7 +22,7 @@
     "company_optional": "Company (optional)",
     "message": "Message",
     "send": "Send",
-    "processed": "An email has been send to my inbox!",
+    "processed": "An email has been sent to my inbox!",
     "message_forwarding_instructions": "All messages will be forwarded straight to my personal inbox",
     "required": "Required",
     "error": {

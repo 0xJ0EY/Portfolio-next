@@ -1,0 +1,96 @@
+.ui {
+  position: relative;
+  z-index: 1;
+}
+
+.cinematic {
+  display: block;
+}
+
+.name-container {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  font-family: 'Metropolis Medium';
+}
+
+.name-container span {
+  display: block;
+  padding: 10px 20px;
+  margin: 3px 5px 1px;
+  background-color: #000;
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 20px;
+  float: left;
+}
+
+.cinematic-container {
+  position: fixed;
+  bottom: 25%;
+  width: 100%;;
+  text-align: center;
+}
+
+.cinematic-instructions {
+  font-size: 1.2rem;
+  background-color: #000;
+  padding: 10px 20px;
+  color: #fff;
+  pointer-events: none;
+  opacity: 1;
+  font-family: 'Metropolis Medium';
+}
+
+.fade-out {
+  animation: fade-out 100ms forwards;
+}
+
+.fade-in {
+  animation: fade-in 100ms forwards;
+}
+
+.mute-button {
+  display: block;
+  border: none;
+  background-color: #000;
+  pointer-events: all;
+  padding: 0;
+  margin: 3px 5px 1px;
+  line-height: 40px;
+  padding: 10px 10px;
+  cursor: pointer;
+}
+
+.mute-button img {
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.time-is-done {
+  width: 110px;
+  text-align: center;
+}
+
+.sound-container {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+
+  opacity: 1;
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; visibility: hidden; }
+  100% { opacity: 1; visibility: visible; }
+}

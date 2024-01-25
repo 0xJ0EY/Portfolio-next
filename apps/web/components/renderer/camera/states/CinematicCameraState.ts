@@ -1,7 +1,7 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { UpdatableCameraState } from "../CameraState";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
-import { constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
+import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
 
@@ -77,6 +77,8 @@ export class CinematicCameraState extends UpdatableCameraState {
   private handleMouseClickEvent(data: MouseData): void {
     if (!data.isPrimaryDown()) { return; }
 
+    if (clickedDOMButton(true, data.x, data.y)) { return; }
+
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
@@ -85,7 +87,16 @@ export class CinematicCameraState extends UpdatableCameraState {
     this.handleMouseClickEvent(data);
   }
 
-  private handleTouchEvent(data: TouchData) {
+  private handleTouchStartEvents(data: TouchData) {
+    const coords = data.pointerCoordinates();
+    if (clickedDOMButton(data.hasTouchesDown(1), coords.x, coords.y)) { return; }
+
     this.manager.changeState(CameraHandlerState.MonitorView);
+  }
+
+  private handleTouchEvent(data: TouchData) {
+    if (data.source === 'start') {
+      this.handleTouchStartEvents(data);
+    }
   }
 }

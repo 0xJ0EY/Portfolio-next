@@ -50,23 +50,24 @@ export class CameraHandler {
   private ctx: CameraHandlerContext;
   private state: CameraState;
 
-  private eventBusUnsubscribeHandler: UnsubscribeHandler;
+  private userInteractionEventBusUnsubscribeHandler: UnsubscribeHandler;
 
   constructor(
     cameraController: CameraController,
     webglNode: HTMLElement,
-    private eventBus: UserInteractionEventBus
+    private userInteractionEventBus: UserInteractionEventBus,
+    private onChangeState?: (state: CameraHandlerState) => void
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
 
     this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
     this.state.transition();
 
-    this.eventBusUnsubscribeHandler = this.eventBus.subscribe(this.onUserInteractionEvent.bind(this));
+    this.userInteractionEventBusUnsubscribeHandler = this.userInteractionEventBus.subscribe(this.onUserInteractionEvent.bind(this));
   }
 
   public destroy() {
-    this.eventBusUnsubscribeHandler();
+    this.userInteractionEventBusUnsubscribeHandler();
   }
 
   private stateToInstance(state: CameraHandlerState): CameraState {
@@ -90,10 +91,12 @@ export class CameraHandler {
 
     this.state = this.stateToInstance(state);
     this.state.transition();
+
+    if (this.onChangeState) { this.onChangeState(state); }
   }
 
   public emitUserInteractionEvent(event: UserInteractionEvent) {
-    this.eventBus.emit(event);
+    this.userInteractionEventBus.emit(event);
   }
 
   public onUserInteractionEvent(event: UserInteractionEvent) {
