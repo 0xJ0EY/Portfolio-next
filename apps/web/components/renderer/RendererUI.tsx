@@ -56,9 +56,11 @@ type SubViewProps = {
 function SoundManagementButton(props: { sound: SubViewSound }) {
   const { isSoundEnabled, toggleSound } = props.sound;
 
+  const icon = isSoundEnabled ? "/icons/mute-icon.svg" : "/icons/unmute-icon.svg"
+
   return (
     <button className={styles['mute-button']} onClick={() => toggleSound()}>
-      <img src="/icons/mute-icon.svg" width={25} height={20}/>
+      <img src={icon} width={25} height={20}/>
     </button>
   )
 }
@@ -70,6 +72,8 @@ function NameAndTime(props: SubViewProps) {
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
   const [time, setTime] = useState("");
+
+  const [done, setDone] = useState(false);
 
   const isActive = (
     state === CameraHandlerState.DeskView ||
@@ -104,6 +108,10 @@ function NameAndTime(props: SubViewProps) {
     setTimeout(() => {
       setInterval(() => { setTime(formatTime(new Date())); }, 1000);
     }, totalWaitTime);
+
+    setTimeout(() => {
+      setDone(true);
+    }, totalWaitTime + MStoWriteChar);
   }
 
   useEffect(() => {
@@ -125,13 +133,16 @@ function NameAndTime(props: SubViewProps) {
     ])}>
       <div>{name && <span>{name}</span>}</div>
       <div>{title && <span>{title}</span>}</div>
-      <div>{time && <span>{time}</span>}<SoundManagementButton sound={sound}/></div>
+      <div>
+        {time && <span className={`${done ? styles['time-is-done'] : ''}`}>{time}</span>}
+        {done && <SoundManagementButton sound={sound}/>}
+      </div>
     </div>
   );
 }
 
-function CinematicInstructions(props: ElementStateProps) {
-  const { state } = props;
+function CinematicInstructions(props: SubViewProps) {
+  const { state, sound } = props;
 
   const [instructions, setInstructions] = useState("");
 
@@ -147,10 +158,15 @@ function CinematicInstructions(props: ElementStateProps) {
   }, [state]);
 
   return (
-    <span className={joinStyles([
-      styles['cinematic-instructions'],
-      !isActive ? styles['fade-out'] : null,
-    ])}>{instructions}</span>
+    <>
+    <div className={styles['sound-container']}><SoundManagementButton sound={sound}/></div>
+    <div className={styles['cinematic-container']}>
+      <span className={joinStyles([
+        styles['cinematic-instructions'],
+        !isActive ? styles['fade-out'] : null,
+      ])}>{instructions}</span>
+    </div>
+    </>
   );
 }
 
@@ -163,7 +179,7 @@ export function RendererUI(props: RendererUIProps) {
   return (
     <div className={styles['ui']}>
       <NameAndTime state={cameraHandlerState} sound={soundManagement} />
-      <CinematicInstructions state={cameraHandlerState} />
+      <CinematicInstructions state={cameraHandlerState} sound={soundManagement} />
     </div>
   );
 }
