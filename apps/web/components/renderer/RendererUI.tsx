@@ -118,8 +118,6 @@ function NameAndTime(props: SubViewProps) {
     if (!isActive) { return; }
     const isFirstTime = firstTime.current;
 
-    console.log(firstTime);
-
     if (isFirstTime) {
       writeOutContent();
       firstTime.current = false;
