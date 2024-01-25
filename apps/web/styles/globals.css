@@ -28,3 +28,10 @@ html, body {
   font-weight: normal;
   src: local('Galyon Bold'), url('/fonts/Galyon-Bold.woff') format('woff');
 }
+
+@font-face {
+  font-family: 'Metropolis Medium';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Metropolis Medium'), url('/fonts/Metropolis-Medium.otf') format('opentype');
+}
