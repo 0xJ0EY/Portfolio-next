@@ -133,3 +133,12 @@ export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): 
 
   return false;
 }
+
+export function focusDesktop(): void {
+  const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+  iframe.focus();
+}
+
+export function blurDesktop(): void {
+  (document.activeElement as HTMLElement | null)?.blur();
+}

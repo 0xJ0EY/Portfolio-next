@@ -1,6 +1,6 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { CameraState } from "../CameraState";
-import { calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, getDisplay } from "./util";
+import { blurDesktop, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, getDisplay } from "./util";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { Vector3 } from "three";
 
@@ -28,6 +28,7 @@ export class DeskViewCameraState extends CameraState {
 
     const callback = () => {
       this.ctx.cameraController.setCameraFollowMaxMovementSpeed(0.5);
+      blurDesktop();
     }
 
     this.ctx.cameraController.enableDamping();

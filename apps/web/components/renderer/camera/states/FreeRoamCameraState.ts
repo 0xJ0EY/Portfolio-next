@@ -1,7 +1,7 @@
 import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { PanOriginData, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
+import { PanOriginData, blurDesktop, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
 import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class FreeRoamCameraState extends CameraState {
@@ -42,6 +42,8 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.setOriginBoundaryZ(null);
 
     this.ctx.cameraController.transition(position, rotation, zoom, 500);
+
+    blurDesktop();
   }
 
   private handleDisplayClick(data: PointerCoordinates): void {
