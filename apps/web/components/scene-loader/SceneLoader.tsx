@@ -46,14 +46,8 @@ function ShowLoadingResources(loadingProgress: LoadingProgress) {
 
 function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
   const loadingProgress = props.loadingProgress;
-
-  const progress = loadingProgress.progress();
-
   const loadingResources = ShowLoadingResources(loadingProgress);
-
-  const resources = loadingProgress.listTotalProgressPerLoadedEntry();
-  const displayItems = resources.map(DisplayResource);
-
+  
   return <>
     {loadingResources}
   </>
