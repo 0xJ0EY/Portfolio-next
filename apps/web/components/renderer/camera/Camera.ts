@@ -1,4 +1,4 @@
-import { AssetKeys } from "@/components/asset-loader/AssetKeys";
+import { AssetKeys } from "@/components/scene-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 

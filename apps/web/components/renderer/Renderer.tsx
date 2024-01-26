@@ -5,7 +5,6 @@ import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, 
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
-import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
@@ -17,6 +16,7 @@ import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
+import { UpdateAction } from '../scene-loader/AssetManager';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -93,7 +93,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 
 interface RendererProps {
   scenes: RendererScenes,
-  actions: UpdateActions
+  actions: UpdateAction[]
 }
 
 function getBrowserDimensions(): [number, number] {

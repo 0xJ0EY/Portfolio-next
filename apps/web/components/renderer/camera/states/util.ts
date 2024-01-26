@@ -4,7 +4,7 @@ import { MouseData, PointerCoordinates, TouchData } from "@/events/UserInteracti
 import { CameraController } from "../Camera";
 import { degToRad } from "three/src/math/MathUtils";
 import { calculateAspectRatio } from "../../util";
-import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
+import { DisplayName, DisplayParentName } from "@/components/scene-loader/AssetLoaders";
 
 export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
   // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)

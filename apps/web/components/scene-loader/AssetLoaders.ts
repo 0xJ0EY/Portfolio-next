@@ -1,20 +1,15 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CurveUtils, DirectionalLight, Loader, LoadingManager, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, Scene, Vector3 } from "three";
+import { AmbientLight, Box3, BufferGeometry, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Scene } from "three";
+import { AssetManagerContext, OptionalUpdateAction, onProgress } from "./AssetManager";
+import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { isSafari } from "../renderer/util";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
-import { AssetKeys } from "./AssetKeys";
-import { isSafari } from "../renderer/util";
-import { useSearchParams } from 'next/navigation'
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";
 
-export type UpdateAction = ((deltaTime: number) => void);
-export type UpdateActions = UpdateAction[];
-export type OptionalUpdateActions = UpdateAction | UpdateActions | null;
-
-export const createRenderScenes = (): RendererScenes => {
+export function createRenderScenes(): RendererScenes {
   return {
     sourceScene: new Scene(),
     cutoutScene: new Scene(),
@@ -22,22 +17,24 @@ export const createRenderScenes = (): RendererScenes => {
   };
 }
 
-const createLights = async (scenes: RendererScenes): Promise<OptionalUpdateActions> => {
+export async function createLights(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const ambientLight = new AmbientLight(0x404040);
   ambientLight.intensity = .5;
-  scenes.sourceScene.add(ambientLight);
+  context.scenes.sourceScene.add(ambientLight);
+
+  onProgress(50);
 
   const directionalLight = new DirectionalLight(0xffffff, 1);
   directionalLight.position.x = .75;
   directionalLight.position.z = .9;
-  scenes.sourceScene.add(directionalLight);
+  context.scenes.sourceScene.add(directionalLight);
+
+  onProgress(100);
 
   return null;
-};
+}
 
-const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActions> => {
-
-  // Floor
+export async function createFloor(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const geo = new PlaneGeometry(100, 100);
   const mat = new MeshStandardMaterial({ color: 0xFFFFFF });
   const plane = new Mesh(geo, mat);
@@ -47,12 +44,12 @@ const createFloors = async (scenes: RendererScenes): Promise<OptionalUpdateActio
 
   plane.userData[AssetKeys.CameraCollidable] = true;
 
-  scenes.sourceScene.add(plane.clone());
+  context.scenes.sourceScene.add(plane.clone());
 
   return null;
 }
 
-const transformWebUrlToDesktop = (webUrl: string): string => {
+function transformWebUrlToDesktop(webUrl: string): string {
   const parts = webUrl.split('-');
 
   const index = parts.findIndex(x => x === 'web');
@@ -61,8 +58,7 @@ const transformWebUrlToDesktop = (webUrl: string): string => {
   return 'https://' + parts.join('-');
 }
 
-
-const getTargetUrl = (): string => {
+function getDesktopTargetUrl(): string {
   const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
 
   if (env === 'production') {
@@ -80,16 +76,19 @@ const getTargetUrl = (): string => {
   }
 }
 
-const getTarget = (debug: boolean): string => {
-  const url = getTargetUrl();
+function getDesktopTarget(debug: boolean): string {
+  const url = getDesktopTargetUrl();
 
   if (!debug) { return url; }
 
   return `${url}/?debug`;
 }
 
-const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes, debug: boolean): Promise<OptionalUpdateActions> => {
-  const gltf = await loader.loadAsync("/assets/Monitor.gltf");
+export async function createMonitor(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
+  const gltf = await context.gltfLoader.loadAsync("/assets/Monitor.gltf");
+
+  onProgress(50);
+
   gltf.scene.name = DisplayParentName;
 
   // Correct for desk hight
@@ -137,7 +136,7 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes, debug: 
   iframe.style.boxSizing = 'border-box';
   iframe.style.padding = '32px';
 
-  iframe.src = getTarget(debug);
+  iframe.src = getDesktopTarget(context.debug);
 
   div.appendChild(iframe);
 
@@ -160,15 +159,15 @@ const createMonitor = async (loader: GLTFLoader, scenes: RendererScenes, debug: 
   cssPage.scale.set(viewWidthScale, viewHeightScale, 1);
   cssPage.rotateX(Math.atan(height / depth) - degToRad(90));
 
-  scenes.cssScene.add(cssPage);
-  scenes.sourceScene.add(gltf.scene);
-  scenes.cutoutScene.add(cutoutDisplay);
+  context.scenes.cssScene.add(cssPage);
+  context.scenes.sourceScene.add(gltf.scene);
+  context.scenes.cutoutScene.add(cutoutDisplay);
 
   return null;
 }
 
-const createDesk = async (loader: GLTFLoader, scenes: RendererScenes): Promise<OptionalUpdateActions> => {
-  const gltf = await loader.loadAsync("/assets/Desk.gltf");
+export async function createDesk(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
+  const gltf = await context.gltfLoader.loadAsync("/assets/Desk.gltf");
 
   gltf.scene.position.y = -1.3;
 
@@ -176,36 +175,7 @@ const createDesk = async (loader: GLTFLoader, scenes: RendererScenes): Promise<O
     obj.userData[AssetKeys.CameraCollidable] = true;
   }
 
-  scenes.sourceScene.add(gltf.scene);
+  context.scenes.sourceScene.add(gltf.scene);
 
   return null;
 }
-
-export const loadRenderScenes = async (manager: LoadingManager | undefined, debug: boolean): Promise<[RendererScenes, UpdateActions]> => {
-  const rendererScenes = createRenderScenes();
-  const gltfLoader = new GLTFLoader(manager);
-
-  const actions = [
-    createLights(rendererScenes),
-    createFloors(rendererScenes),
-    createMonitor(gltfLoader, rendererScenes, debug),
-    createDesk(gltfLoader, rendererScenes),
-  ];
-
-  const result = await Promise.all(actions);
-
-  const updateActions: UpdateActions = result
-    .reduce((acc: UpdateActions, cur) => {
-      if (cur === null) return acc;
-
-      if (Array.isArray(cur)) {
-        acc.push(...cur);
-      } else {
-        acc.push(cur);
-      }
-
-      return acc;
-    }, []);
-
-  return [rendererScenes, updateActions];
-};
