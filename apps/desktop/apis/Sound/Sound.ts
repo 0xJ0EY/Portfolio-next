@@ -84,7 +84,7 @@ export class SoundService extends ObserverSubject<boolean> {
     const audio = new Audio(source);
     audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play().catch(() => { console.log('User has not interacted with the page yet'); });
+    audio.play().catch(() => { console.error('Cannot play audio'); });
 
     this.activeAudio[currentIndex] = audio;
 
@@ -99,7 +99,7 @@ export class SoundService extends ObserverSubject<boolean> {
     const audio = new Audio(source);
     audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play().catch(() => { console.log('User has not interacted with the page yet'); });
+    audio.play().catch(() => { console.error('Cannot play audio'); });
 
     this.activeAudio[currentIndex] = audio;
 
