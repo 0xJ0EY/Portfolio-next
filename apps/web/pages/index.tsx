@@ -1,7 +1,7 @@
-import { AssetLoader, Renderer } from "../components";
+import { SceneLoader, Renderer } from "../components";
 
 export default function Web() {
   return (
-    <AssetLoader />
+    <SceneLoader />
   );
 }

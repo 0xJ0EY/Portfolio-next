@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { CameraHandlerState } from "./camera/CameraHandler";
-import { sendMessageToChild } from "rpc";
 import { joinStyles, writeOutChars, writeOutCharsStreaming } from "./util";
 import styles from "./RendererUI.module.css"
+import { SoundService } from "./sound/SoundService";
 
 const MStoWriteChar = 35;
 
-function useSoundManagement() {
+function useSoundManagement(soundService: SoundService) {
   const [isSoundEnabled, setSoundEnabled] = useState(true);
 
   function toggleSound() {
@@ -17,26 +17,22 @@ function useSoundManagement() {
     }
   }
 
-  function sendSoundStateToChild(enabled: boolean) {
-    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
-    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
-  }
-
   function enableSound() {
     setSoundEnabled(true);
-    sendSoundStateToChild(true);
+    soundService.enable();
   }
 
   function disableSound() {
     setSoundEnabled(false);
-    sendSoundStateToChild(false);
+    soundService.disable(); 
   }
 
   return {isSoundEnabled, toggleSound, enableSound, disableSound};
 }
 
 export type RendererUIProps = {
-  cameraHandlerState: CameraHandlerState
+  cameraHandlerState: CameraHandlerState,
+  soundService: SoundService
 }
 
 type SubViewSound = {
@@ -139,8 +135,25 @@ function NameAndTime(props: SubViewProps) {
   );
 }
 
-function CinematicInstructions(props: SubViewProps) {
+function StandaloneMuteButton(props: SubViewProps) {
   const { state, sound } = props;
+
+  const isActive = (
+    state === CameraHandlerState.Cinematic ||
+    state === CameraHandlerState.MonitorView 
+  );
+
+  return (<>
+    <div className={joinStyles([
+        styles['sound-container'],
+        !isActive ? styles['fade-out'] : null
+      ])}><SoundManagementButton sound={sound}/>
+    </div>
+  </>);
+}
+
+function CinematicInstructions(props: SubViewProps) {
+  const { state } = props;
 
   const [instructions, setInstructions] = useState("");
 
@@ -155,30 +168,25 @@ function CinematicInstructions(props: SubViewProps) {
 
   }, [state]);
 
-  return (
-    <>
-    <div className={joinStyles([
-      styles['sound-container'],
-      !isActive ? styles['fade-out'] : null
-    ])}><SoundManagementButton sound={sound}/></div>
+  return (<>
     <div className={styles['cinematic-container']}>
       <span className={joinStyles([
         styles['cinematic-instructions'],
         !isActive ? styles['fade-out'] : null,
       ])}>{instructions}</span>
     </div>
-    </>
-  );
+  </>);
 }
 
 export function RendererUI(props: RendererUIProps) {
-  const { cameraHandlerState } = props;
-  const soundManagement = useSoundManagement();
+  const { cameraHandlerState, soundService } = props;
+  const soundManagement = useSoundManagement(soundService);
 
   // A switch statement wrapped in a function breaks the rules of hooks, but this doesn't?
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
+      <StandaloneMuteButton state={cameraHandlerState} sound={soundManagement} />
       <NameAndTime state={cameraHandlerState} sound={soundManagement} />
       <CinematicInstructions state={cameraHandlerState} sound={soundManagement} />
     </div>

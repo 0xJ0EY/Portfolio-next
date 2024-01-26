@@ -4,7 +4,7 @@ import { MouseData, PointerCoordinates, TouchData } from "@/events/UserInteracti
 import { CameraController } from "../Camera";
 import { degToRad } from "three/src/math/MathUtils";
 import { calculateAspectRatio } from "../../util";
-import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
+import { DisplayName, DisplayParentName } from "@/components/scene-loader/AssetLoaders";
 
 export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
   // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)
@@ -128,12 +128,17 @@ export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): 
   const elements = document.elementsFromPoint(x, y);
 
   for (const element of elements) {
-    console.log(element);
-
-    if (element.tagName === "BUTTON") {
-      return true;
-    }
+    if (element.tagName === "BUTTON") { return true; }
   }
 
   return false;
+}
+
+export function focusDesktop(): void {
+  const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+  iframe.focus();
+}
+
+export function blurDesktop(): void {
+  (document.activeElement as HTMLElement | null)?.blur();
 }

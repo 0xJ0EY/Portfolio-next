@@ -5,7 +5,6 @@ import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, 
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
-import { UpdateActions } from '../asset-loader/Loaders';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
@@ -15,6 +14,9 @@ import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/even
 import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
+import { SoundService } from './sound/SoundService';
+import { BackgroundSounds } from './BackgroundSounds';
+import { UpdateAction } from '../scene-loader/AssetManager';
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -91,7 +93,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 
 interface RendererProps {
   scenes: RendererScenes,
-  actions: UpdateActions
+  actions: UpdateAction[]
 }
 
 function getBrowserDimensions(): [number, number] {
@@ -161,8 +163,10 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
   }
 }
 
+
 export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
+  const soundService = useRef(new SoundService());
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -270,12 +274,14 @@ export const Renderer = (props: RendererProps) => {
   }, []);
   return (
     <div className={styles.renderer}>
-      <RendererUI cameraHandlerState={cameraHandlerState} />
+      <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>
       {mouseProgressCircle}
       {touchProgressCircle}
+
+      <BackgroundSounds cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
     </div>
   );
 };

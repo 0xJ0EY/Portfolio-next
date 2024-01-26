@@ -1,6 +1,6 @@
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { PanOriginData, calculateCameraPosition, constructIsOverDisplay, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom } from "./util";
+import { PanOriginData, calculateCameraPosition, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom } from "./util";
 import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
@@ -31,6 +31,8 @@ export class MonitorViewCameraState extends CameraState {
 
       this.ctx.cameraController.setOriginBoundaryX(2.0);
       this.ctx.cameraController.setOriginBoundaryY(1.5);
+
+      focusDesktop();
     }
 
     this.ctx.cameraController.enableDamping();
