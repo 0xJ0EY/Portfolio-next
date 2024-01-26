@@ -9,9 +9,9 @@ export type OptionalUpdateAction = UpdateAction[] | null;
 export type onProgress = (progress: number) => void;
 export type Loader = (context: AssetManagerContext, onProgress: onProgress) => Promise<OptionalUpdateAction>;
 
-type AssetManagerEntry = { key: string, loader: Loader, order: number, progress: number }
-type LoadingProgressEntry = { name: string, progress: number }
-type TotalProgressPerEntry = { entry: LoadingProgressEntry, total: number }
+export type AssetManagerEntry = { key: string, loader: Loader, order: number, progress: number }
+export type LoadingProgressEntry = { name: string, progress: number }
+export type TotalProgressPerEntry = { entry: LoadingProgressEntry, total: number }
 
 type LoadingResult = Promise<{rendererScenes: RendererScenes, updateActions: UpdateAction[]}>;
 
@@ -51,6 +51,10 @@ export class LoadingProgress {
         total: progressPerEntry * (index + 1)
       }
     });
+  }
+
+  public isDoneLoading(): boolean {
+    return this.listLoadedEntries().length === this.listAllEntries().length;
   }
 }
 
