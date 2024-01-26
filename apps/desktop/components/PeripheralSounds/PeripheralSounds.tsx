@@ -17,7 +17,7 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   }
 
   function onPointerDown() {
-    soundService.play('/sounds/meow.mp3', 1);
+    soundService.play('/sounds/keyboard1.mp3', 1);
   }
 
   useEffect(() => {
