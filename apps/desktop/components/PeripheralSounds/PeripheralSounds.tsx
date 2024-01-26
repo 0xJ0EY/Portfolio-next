@@ -50,7 +50,7 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
         audioFragment = onNormalKeyboardPress();
     }
 
-    soundService.play(audioFragment, 1);
+    soundService.play(audioFragment, 0.6);
   }
 
   function playLeftMouseClickSound() {
