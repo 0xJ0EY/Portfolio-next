@@ -16,11 +16,17 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
     soundService.play(randomAudioFragment, 1);
   }
 
+  function onPointerDown() {
+    soundService.play('/sounds/meow.mp3', 1);
+  }
+
   useEffect(() => {
     document.addEventListener('keydown', onKeyboardPress);
+    document.addEventListener('pointerdown', onPointerDown);
 
     return () => {
       document.removeEventListener('keydown', onKeyboardPress);
+      document.removeEventListener('pointerdown', onPointerDown);
     }
   }, []);
 
