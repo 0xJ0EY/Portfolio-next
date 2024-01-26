@@ -20,11 +20,8 @@ function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
 
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
-  // const scenes = useRef<RendererScenes>(createRenderScenes());
-  // const actions = useRef<UpdateAction[]>([]);
-
-  const [scenes, setScenes] = useState<RendererScenes>(createRenderScenes());
-  const [actions, setActions] = useState<UpdateAction[]>([]);
+  const scenes  = useRef<RendererScenes>(createRenderScenes());
+  const actions = useRef<UpdateAction[]>([]);
 
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
   
@@ -47,8 +44,8 @@ export function SceneLoader() {
         setLoadingProgress(manager.loadingProgress());
       });
 
-      setActions(updateActions);
-      setScenes(rendererScenes);
+      scenes.current = rendererScenes;
+      actions.current = updateActions;
 
       setLoading(false);
     }
@@ -61,7 +58,10 @@ export function SceneLoader() {
     return <>{loadingProgress && <DisplayLoadingProgress loadingProgress={loadingProgress}/>}</>
   } else {
     return (
-      <Renderer scenes={scenes} actions={actions} />
+      <Renderer
+        scenes={scenes.current}
+        actions={actions.current}
+      />
     )
   }
 };
