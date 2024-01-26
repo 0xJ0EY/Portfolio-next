@@ -135,8 +135,25 @@ function NameAndTime(props: SubViewProps) {
   );
 }
 
-function CinematicInstructions(props: SubViewProps) {
+function StandaloneMuteButton(props: SubViewProps) {
   const { state, sound } = props;
+
+  const isActive = (
+    state === CameraHandlerState.Cinematic ||
+    state === CameraHandlerState.MonitorView 
+  );
+
+  return (<>
+    <div className={joinStyles([
+        styles['sound-container'],
+        !isActive ? styles['fade-out'] : null
+      ])}><SoundManagementButton sound={sound}/>
+    </div>
+  </>);
+}
+
+function CinematicInstructions(props: SubViewProps) {
+  const { state } = props;
 
   const [instructions, setInstructions] = useState("");
 
@@ -151,20 +168,14 @@ function CinematicInstructions(props: SubViewProps) {
 
   }, [state]);
 
-  return (
-    <>
-    <div className={joinStyles([
-      styles['sound-container'],
-      !isActive ? styles['fade-out'] : null
-    ])}><SoundManagementButton sound={sound}/></div>
+  return (<>
     <div className={styles['cinematic-container']}>
       <span className={joinStyles([
         styles['cinematic-instructions'],
         !isActive ? styles['fade-out'] : null,
       ])}>{instructions}</span>
     </div>
-    </>
-  );
+  </>);
 }
 
 export function RendererUI(props: RendererUIProps) {
@@ -175,6 +186,7 @@ export function RendererUI(props: RendererUIProps) {
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
+      <StandaloneMuteButton state={cameraHandlerState} sound={soundManagement} />
       <NameAndTime state={cameraHandlerState} sound={soundManagement} />
       <CinematicInstructions state={cameraHandlerState} sound={soundManagement} />
     </div>
