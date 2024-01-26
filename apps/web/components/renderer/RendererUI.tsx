@@ -56,7 +56,7 @@ function SoundManagementButton(props: { sound: SubViewSound }) {
 
   return (
     <button className={styles['mute-button']} onClick={() => toggleSound()}>
-      <img src={icon} width={25} height={20}/>
+      <img draggable={false} src={icon} width={25} height={20}/>
     </button>
   )
 }
