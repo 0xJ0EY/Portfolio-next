@@ -175,6 +175,7 @@ export const Renderer = (props: RendererProps) => {
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
   const allowUserInput = useRef<boolean>(false);
+  const [showUI, setShowUI] = useState(false);
 
   const touchEvents = createUIEventBus();
 
@@ -279,12 +280,15 @@ export const Renderer = (props: RendererProps) => {
   }, []);
 
   useEffect(() => {
-    allowUserInput.current = !showMessage;
+    if (!showMessage) {
+      allowUserInput.current = true;
+      setShowUI(true);
+    }
   }, [showMessage])
 
   return (
     <div className={styles.renderer}>
-      <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
+      { showUI && <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} /> }
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>
