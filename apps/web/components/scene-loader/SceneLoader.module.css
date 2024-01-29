@@ -1,4 +1,4 @@
-.loaded-resources {
+.loading-progress {
   background-color: #000;
   width: 100%;
   height: 100%;
@@ -9,17 +9,32 @@
   padding: 10px;
 }
 
-.loaded-resources h3 {
+.loading-progress h3 {
   margin: 0;
   padding: 0;
 }
 
-.loaded-resources ul {
+.loading-progress ul {
   list-style: none;
 }
 
 .bold {
   font-weight: bold;
+}
+
+.error-container h3 {
+  color: red;
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+.error-container p {
+  padding: 0;
+  margin: 0;
+}
+
+.error {
+  color: red;
 }
 
 .user-message {

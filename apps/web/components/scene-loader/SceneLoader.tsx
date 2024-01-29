@@ -4,6 +4,7 @@ import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
 import { createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
+import { detectWebGL } from "./util";
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -45,9 +46,8 @@ function OperatingSystemStats() {
     <div>
       <span className={styles['bold']}>{company}</span>
       {createSpacer(company, spacer)}
-      <span>The Magi System</span>
+      <span>Magi (C)1998 Joeysoft, bv</span>
     </div>
-    <br/>
     <br/>
   </>)
 }
@@ -59,8 +59,7 @@ function ShowLoadingResources(loadingProgress: LoadingProgress) {
   const resourceListItems = resources.map(DisplayResource);
 
   return (<>
-    <div className={styles['loaded-resources']}>
-      <OperatingSystemStats/>
+    <div>
       {resourceLoadingItems}
       <ul>{resourceListItems}</ul>
     </div>
@@ -85,13 +84,49 @@ function ShowUserMessage(props: { onClick: () => void }) {
   </>);
 }
 
-function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
+function ShowBios() {
+  const magi1 = "Melchior-Magi 1";
+  const magi2 = "Balthasar-Magi 2";
+  const magi3 = "Casper-Magi 3";
+
+  const length = 30;
+
+
+  return (<>
+    <div>
+      <p>Magi, Joeysoft, bv - 1998-2024</p>
+      <h3>Components</h3>
+      <ul>
+        <li>{magi1}{createSpacer(magi1, length, '.')}Linked</li>
+        <li>{magi2}{createSpacer(magi2, length, '.')}Linked</li>
+        <li>{magi3}{createSpacer(magi3, length, '.')}Linked</li>
+      </ul>
+    </div>
+  </>);
+}
+
+function DisplayWebGLError() {
+  return (<div className={styles['error-container']}>
+      <h3>ERROR: No WebGL detected</h3>
+      <p>WebGL is required to run this site.</p>
+      <p>Please enable it or switch to a browser that supports WebGL</p>
+  </div> );
+}
+
+function DisplayLoadingProgress(props: { supportsWebGL: boolean | null, loadingProgress: LoadingProgress }) {
   const loadingProgress = props.loadingProgress;
+  const supportsWebGL = props.supportsWebGL ?? true;
+
   const loadingResources = ShowLoadingResources(loadingProgress);
 
-  return <>
-    {loadingResources}
-  </>
+  return (<>
+    <div className={styles['loading-progress']}>
+      <OperatingSystemStats/>
+      {supportsWebGL && <ShowBios/>}
+      {supportsWebGL && loadingResources}
+      {!supportsWebGL && <DisplayWebGLError/>}
+    </div>
+  </>)
 }
 
 export function SceneLoader() {
@@ -102,6 +137,7 @@ export function SceneLoader() {
   const actions = useRef<UpdateAction[]>([]);
 
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
+  const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
     const query = window.location.search;
@@ -110,12 +146,17 @@ export function SceneLoader() {
 
     const manager = new AssetManager(debug, new LoadingManager());
 
+    if (debug) {
+      setShowMessage(false);
+    }
+
     manager.add('Lights', createLights);
     manager.add('Floor', createFloor);
     manager.add('Monitor', createMonitor);
     manager.add('Desk', createDesk);
     
     setLoadingProgress(manager.loadingProgress());
+    setSupportsWebGL(detectWebGL());
 
     const fetchData = async () => {
       const { rendererScenes, updateActions } = await manager.load(() => {
@@ -137,8 +178,8 @@ export function SceneLoader() {
     }
   }, [loadingProgress]);
     
-  if (loading) {
-    return <>{loadingProgress && <DisplayLoadingProgress loadingProgress={loadingProgress}/>}</>
+  if (loading || !supportsWebGL) {
+    return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
   } else {
     return (<>
       { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
