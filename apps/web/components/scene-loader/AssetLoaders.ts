@@ -17,6 +17,10 @@ export function createRenderScenes(): RendererScenes {
   };
 }
 
+export async function NoopLoader(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
+  return null;
+}
+
 export async function createLights(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const ambientLight = new AmbientLight(0x404040);
   ambientLight.intensity = .5;

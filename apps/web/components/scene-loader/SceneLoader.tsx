@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
+import { NoopLoader, createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
 import { detectWebGL } from "./util";
 
@@ -26,7 +26,7 @@ function ResourceLoadingStatus(loadingProgress: LoadingProgress) {
 
 function DisplayResource(container: TotalProgressPerEntry) {
   const entry = container.entry;
-  const total = container.total;
+  const total = Math.floor(container.total);
   
   return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{total}%</li>
 }
@@ -53,7 +53,7 @@ function OperatingSystemStats() {
 }
 
 function ShowLoadingResources(loadingProgress: LoadingProgress) {
-  const resources = loadingProgress.listTotalProgressPerLoadedEntry();
+  const resources = loadingProgress.listTotalProgressPerLoadedEntry(5);
 
   const resourceLoadingItems = ResourceLoadingStatus(loadingProgress);
   const resourceListItems = resources.map(DisplayResource);
@@ -150,10 +150,13 @@ export function SceneLoader() {
       setShowMessage(false);
     }
 
-    manager.add('Lights', createLights);
-    manager.add('Floor', createFloor);
-    manager.add('Monitor', createMonitor);
-    manager.add('Desk', createDesk);
+    manager.add('Linked to Magi-1', NoopLoader);
+    manager.add('Linked to Magi-2', NoopLoader);
+    manager.add('Linked to Magi-3', NoopLoader);
+    manager.add('Added lights', createLights);
+    manager.add('Placed floor', createFloor);
+    manager.add('Placed monitor', createMonitor);
+    manager.add('Placed desk', createDesk);
     
     setLoadingProgress(manager.loadingProgress());
     setSupportsWebGL(detectWebGL());

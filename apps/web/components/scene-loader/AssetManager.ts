@@ -41,16 +41,25 @@ export class LoadingProgress {
     return this.entries.filter(x => x.progress === 100);
   }
 
-  public listTotalProgressPerLoadedEntry(): TotalProgressPerEntry[] {
+  public listTotalProgressPerLoadedEntry(limit?: number): TotalProgressPerEntry[] {
     const entries = this.listLoadedEntries();
     const progressPerEntry = 100 / this.entries.length;
 
-    return entries.map((entry, index) => {
+    const result = entries.map((entry, index) => {
       return {
         entry,
         total: progressPerEntry * (index + 1)
       }
     });
+
+    if (limit) {
+      const start = result.length - limit;
+      const end   = result.length;
+
+      return result.slice(start, end);
+    }
+
+    return result;
   }
 
   public isDoneLoading(): boolean {
