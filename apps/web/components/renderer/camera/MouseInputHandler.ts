@@ -1,5 +1,6 @@
 import { MouseData, toUserInteractionMouseEvent } from "@/events/UserInteractionEvents";
 import { CameraHandler } from "./CameraHandler";
+import { RefObject } from "react";
 
 export class MouseInputHandler {
   private onMouseDownListener: (evt: MouseEvent) => void;
@@ -9,7 +10,11 @@ export class MouseInputHandler {
   private onWheelListener: (evt: WheelEvent) => void;
   private onMouseLeaveListener: (evt: MouseEvent) => void;
 
-  constructor(private handler: CameraHandler) {
+  private allowInput(): boolean {
+    return this.allowInputRef.current ?? false;
+  }
+
+  constructor(private allowInputRef: RefObject<boolean>, private handler: CameraHandler) {
     this.onMouseDownListener    = this.onMouseDown.bind(this);
     this.onMouseUpListener      = this.onMouseUp.bind(this);
     this.onMouseMoveListener    = this.onMouseMove.bind(this);
@@ -38,39 +43,51 @@ export class MouseInputHandler {
     window.removeEventListener('wheel', this.onWheelListener);
   }
 
-  private onMouseDown(evt: MouseEvent) {
+  private onMouseDown(evt: MouseEvent): void {
+    if (!this.allowInput()) { return; }
+
     const data = MouseData.fromMouseEvent('down', evt);
     const event = toUserInteractionMouseEvent(data);
 
     this.handler.emitUserInteractionEvent(event);
   }
 
-  private onMouseUp(evt: MouseEvent) {
+  private onMouseUp(evt: MouseEvent): void {
+    if (!this.allowInput()) { return; }
+
     const data = MouseData.fromMouseEvent('up', evt);
     const event = toUserInteractionMouseEvent(data);
 
     this.handler.emitUserInteractionEvent(event);
   }
 
-  private onMouseMove(evt: MouseEvent) {
+  private onMouseMove(evt: MouseEvent): void {
+    if (!this.allowInput()) { return; }
+
     const data = MouseData.fromMouseEvent('move', evt);
     const event = toUserInteractionMouseEvent(data);
 
     this.handler.emitUserInteractionEvent(event);
   }
 
-  private onContextMenu(evt: MouseEvent) {
+  private onContextMenu(evt: MouseEvent): void {
+    if (!this.allowInput()) { return; }
+
     evt.preventDefault();
   }
 
-  private onWheel(evt: WheelEvent) {
+  private onWheel(evt: WheelEvent): void {
+    if (!this.allowInput()) { return; }
+
     const data = MouseData.fromWheelEvent('wheel', evt);
     const event = toUserInteractionMouseEvent(data);
 
     this.handler.emitUserInteractionEvent(event);
   }
 
-  private onMouseLeave(evt: MouseEvent) {
+  private onMouseLeave(evt: MouseEvent): void {
+    if (!this.allowInput()) { return; }
+
     const data = MouseData.fromMouseEvent('leave', evt);
     const event = toUserInteractionMouseEvent(data);
 

@@ -5,6 +5,14 @@ import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } fr
 import { createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
 
+function createSpacer(source: string, length: number, fill: string = '\xa0') {
+  let spacer = '\xa0';
+
+  for (let i = 0; i < length - 1 - source.length; i++) { spacer += fill; }
+
+  return spacer + '\xa0';
+}
+
 function ResourceLoadingStatus(loadingProgress: LoadingProgress) {
   const progress = loadingProgress.progress();
 
@@ -16,18 +24,32 @@ function ResourceLoadingStatus(loadingProgress: LoadingProgress) {
 }
 
 function DisplayResource(container: TotalProgressPerEntry) {
-  function createSpacer(source: string, length: number, fill: string = '\xa0') {
-    let spacer = '\xa0';
-
-    for (let i = 0; i < length - 1 - source.length; i++) { spacer += fill; }
-
-    return spacer + '\xa0';
-  }
-
   const entry = container.entry;
   const total = container.total;
   
   return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{total}%</li>
+}
+
+function OperatingSystemStats() {
+  const name = "Joey de Ruiter";
+  const company = "Joeysoft, bv.";
+
+  const spacer = 30;
+
+  return (<>
+    <div>
+      <span className={styles['bold']}>{name}</span>
+      {createSpacer(name, spacer)}
+      <span>Released: 7 april 1998</span>
+    </div>
+    <div>
+      <span className={styles['bold']}>{company}</span>
+      {createSpacer(company, spacer)}
+      <span>The Magi System</span>
+    </div>
+    <br/>
+    <br/>
+  </>)
 }
 
 function ShowLoadingResources(loadingProgress: LoadingProgress) {
@@ -38,8 +60,27 @@ function ShowLoadingResources(loadingProgress: LoadingProgress) {
 
   return (<>
     <div className={styles['loaded-resources']}>
+      <OperatingSystemStats/>
       {resourceLoadingItems}
       <ul>{resourceListItems}</ul>
+    </div>
+  </>);
+}
+
+function ShowUserMessage(props: { onClick: () => void }) {
+  const onClick = props.onClick;
+
+  return (<>
+    <div className={styles['user-message']}>
+      <div className={styles['user-message-position-container']}>
+        <div className={styles['user-message-container']}>
+          <h1>Portfolio of Joey de Ruiter</h1>
+          <span>Click continue to begin</span>
+          <div className={styles['button-center-container']}>
+            <button onClick={onClick}>Continue</button>
+          </div>
+        </div>
+      </div>
     </div>
   </>);
 }
@@ -47,7 +88,7 @@ function ShowLoadingResources(loadingProgress: LoadingProgress) {
 function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
   const loadingProgress = props.loadingProgress;
   const loadingResources = ShowLoadingResources(loadingProgress);
-  
+
   return <>
     {loadingResources}
   </>
@@ -55,7 +96,7 @@ function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
 
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
-  const [showMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(true);
 
   const scenes  = useRef<RendererScenes>(createRenderScenes());
   const actions = useRef<UpdateAction[]>([]);
@@ -99,11 +140,13 @@ export function SceneLoader() {
   if (loading) {
     return <>{loadingProgress && <DisplayLoadingProgress loadingProgress={loadingProgress}/>}</>
   } else {
-    return (
+    return (<>
+      { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
       <Renderer
+        showMessage={showMessage}
         scenes={scenes.current}
         actions={actions.current}
       />
-    )
+    </>)
   }
 };

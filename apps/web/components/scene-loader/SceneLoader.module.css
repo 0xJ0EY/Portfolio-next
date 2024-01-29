@@ -1,0 +1,83 @@
+.loaded-resources {
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-family: monospace;
+  user-select: none;
+  font-size: 1.2rem;
+  padding: 10px;
+}
+
+.loaded-resources h3 {
+  margin: 0;
+  padding: 0;
+}
+
+.loaded-resources ul {
+  list-style: none;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.user-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  background-color: #000;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  color: #fff;
+  font-family: monospace;
+}
+
+.user-message-position-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-message-container {
+  width: 100%;
+  max-width: 500px;
+  border: 10px solid #fff;
+  padding: 12px;
+}
+
+.user-message-container h1 {
+  padding: 0px;
+  margin: 0 0 10px;
+}
+
+.user-message-container span {
+  display: block;
+  margin: 0 0 20px;
+}
+
+.user-message-container button {
+  display: block;
+  border: 5px solid #fff;
+  padding: 8px;
+  background: #000;
+  color: #fff;
+  font-family: monospace;
+  cursor: pointer;
+}
+
+.user-message-container button:hover,
+.user-message-container button:focus {
+  background-color: #fff;
+  color: #000;
+}
+
+.button-center-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

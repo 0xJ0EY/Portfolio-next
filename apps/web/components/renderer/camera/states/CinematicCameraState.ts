@@ -8,7 +8,11 @@ import { Spherical, Vector3 } from "three";
 export class CinematicCameraState extends UpdatableCameraState {
 
   private cameraRotationSpeed = 7.5;
+
+  private hasBeenOverDisplay: boolean = false;
   private isOverDisplay: (data: PointerCoordinates) => boolean;
+  private wasOverDisplay: boolean = true;
+
   private progress: number = 0;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
@@ -66,12 +70,23 @@ export class CinematicCameraState extends UpdatableCameraState {
     }
   }
 
+  private toggleHasBeenOverDisplay(isOverDisplay: boolean) {
+    if (!isOverDisplay) { return; }
+    if (this.wasOverDisplay) { return; }
+
+    this.hasBeenOverDisplay = true;
+  }
+
   private handleOverMonitor(data: PointerCoordinates): void {
     const overDisplay = this.isOverDisplay(data);
 
-    if (overDisplay) {
+    this.toggleHasBeenOverDisplay(overDisplay);
+
+    if (overDisplay && this.hasBeenOverDisplay) {
       this.manager.changeState(CameraHandlerState.MonitorView);
     }
+
+    this.wasOverDisplay = overDisplay;
   }
 
   private handleMouseClickEvent(data: MouseData): void {

@@ -92,6 +92,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 }
 
 interface RendererProps {
+  showMessage: boolean, 
   scenes: RendererScenes,
   actions: UpdateAction[]
 }
@@ -168,8 +169,12 @@ export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
   const soundService = useRef(new SoundService());
 
+  const { showMessage, scenes, actions } = props;
+
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+
+  const allowUserInput = useRef<boolean>(false);
 
   const touchEvents = createUIEventBus();
 
@@ -192,7 +197,7 @@ export const Renderer = (props: RendererProps) => {
 
     const [width, height] = getBrowserDimensions();
 
-    const [scene, cutoutScene, cssScene] = [props.scenes.sourceScene, props.scenes.cutoutScene, props.scenes.cssScene];
+    const [scene, cutoutScene, cssScene] = [scenes.sourceScene, scenes.cutoutScene, scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
     const [renderer, cssRenderer] = createRenderers(width, height);
 
@@ -203,8 +208,8 @@ export const Renderer = (props: RendererProps) => {
 
     const cameraController  = new CameraController(camera, scene);
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents, handleCameraHandlerStateChange);
-    const mouseInputHandler = new MouseInputHandler(cameraHandler);
-    const touchInputHandler = new TouchInputHandler(cameraHandler);
+    const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
+    const touchInputHandler = new TouchInputHandler(allowUserInput, cameraHandler);
 
     const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
@@ -226,7 +231,7 @@ export const Renderer = (props: RendererProps) => {
 
       animationFrameId = requestAnimationFrame(animate);
 
-      for (const action of props.actions) {
+      for (const action of actions) {
         action(deltaTime);
       }
       
@@ -272,6 +277,11 @@ export const Renderer = (props: RendererProps) => {
 
     return () => onDestroy();
   }, []);
+
+  useEffect(() => {
+    allowUserInput.current = !showMessage;
+  }, [showMessage])
+
   return (
     <div className={styles.renderer}>
       <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} />
