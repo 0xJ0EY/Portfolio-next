@@ -1,6 +1,64 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { SystemAPIs } from "../OperatingSystem";
 
+type AudioFragment = {
+  onDown?: string,
+  onUp?: string,
+}
+
+const PointerPrimaryKey = "pointer_primary";
+const PointerSecondaryKey = "pointer_secondary";
+
+const LeftMouseButtonAudioFragments: AudioFragment[] = [
+  { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_up_1.mp3' },
+  { onDown: '/sounds/left_mouse_down_2.mp3', onUp: '/sounds/left_mouse_up_2.mp3' },
+  { onDown: '/sounds/left_mouse_down_3.mp3', onUp: '/sounds/left_mouse_up_3.mp3' },
+];
+
+const RightMouseButtonAudioFragments: AudioFragment[] = [
+  { onDown: '/sounds/right_mouse_down_1.mp3', onUp: '/sounds/right_mouse_up_1.mp3' },
+  { onDown: '/sounds/right_mouse_down_2.mp3', onUp: '/sounds/right_mouse_up_2.mp3' },
+  { onDown: '/sounds/right_mouse_down_3.mp3', onUp: '/sounds/right_mouse_up_3.mp3' },
+];
+
+function chooseRandomAudioFragment(fragments: AudioFragment[]): AudioFragment {
+  return fragments[Math.floor(Math.random() * fragments.length)];
+}
+
+export function PeripheralSounds(props: { apis: SystemAPIs }) {
+  const soundService = props.apis.sound;
+  const activeSounds = useRef<Record<string, AudioFragment>>({});
+
+  function onPointerDown(evt: PointerEvent) {
+    const key = evt.isPrimary ? PointerPrimaryKey : PointerSecondaryKey;
+    const fragments = evt.isPrimary ? LeftMouseButtonAudioFragments : RightMouseButtonAudioFragments;
+
+    activeSounds.current[key] = chooseRandomAudioFragment(fragments);
+    const audioFragment = activeSounds.current[key].onDown;
+    if (audioFragment) { soundService.play(audioFragment, 1.0); }
+  }
+
+  function onPointerUp(evt: PointerEvent) {
+    const key = evt.isPrimary ? PointerPrimaryKey : PointerSecondaryKey;
+
+    const audioFragment = activeSounds.current[key].onUp;
+    if (audioFragment) { soundService.play(audioFragment, 1.0); }
+  }
+
+  useEffect(() => {
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUp);
+    }
+  }, []);
+
+  return <></>
+}
+
+/*
 export function PeripheralSounds(props: { apis: SystemAPIs }) {
   const soundService = props.apis.sound;
 
@@ -82,15 +140,22 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
     }
   }
 
+  function onPointerUp(evt: PointerEvent) {
+
+  }
+
   useEffect(() => {
     document.addEventListener('keydown', onKeyboardPress);
     document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointerup', onPointerUp);
 
     return () => {
       document.removeEventListener('keydown', onKeyboardPress);
       document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('pointerup', onPointerUp);
     }
   }, []);
 
   return <></>
 }
+*/
