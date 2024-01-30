@@ -115,7 +115,7 @@
 
 .blinking-cursor {
   display: inline-block;
-  height: 1.2em;
+  height: 20px;
   width: 0.8em;
   position: relative;
   animation: blink 0.65s step-end infinite;

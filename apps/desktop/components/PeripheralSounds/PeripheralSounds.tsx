@@ -9,6 +9,8 @@ type AudioFragment = {
 const PointerPrimaryKey = "pointer_primary";
 const PointerSecondaryKey = "pointer_secondary";
 
+const PrimaryMouseButton = 0x00;
+
 const LeftMouseButtonAudioFragments: AudioFragment[] = [
   { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_up_1.mp3' },
   { onDown: '/sounds/left_mouse_down_2.mp3', onUp: '/sounds/left_mouse_up_2.mp3' },
@@ -30,16 +32,18 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   const activeSounds = useRef<Record<string, AudioFragment>>({});
 
   function onPointerDown(evt: PointerEvent) {
-    const key = evt.isPrimary ? PointerPrimaryKey : PointerSecondaryKey;
-    const fragments = evt.isPrimary ? LeftMouseButtonAudioFragments : RightMouseButtonAudioFragments;
+    const key = evt.button === PrimaryMouseButton ? PointerPrimaryKey : PointerSecondaryKey;
+    const fragments = evt.button === PrimaryMouseButton ? LeftMouseButtonAudioFragments : RightMouseButtonAudioFragments;
 
     activeSounds.current[key] = chooseRandomAudioFragment(fragments);
     const audioFragment = activeSounds.current[key].onDown;
+    
+
     if (audioFragment) { soundService.play(audioFragment, 1.0); }
   }
 
   function onPointerUp(evt: PointerEvent) {
-    const key = evt.isPrimary ? PointerPrimaryKey : PointerSecondaryKey;
+    const key = evt.button === PrimaryMouseButton ? PointerPrimaryKey : PointerSecondaryKey;
 
     const audioFragment = activeSounds.current[key].onUp;
     if (audioFragment) { soundService.play(audioFragment, 1.0); }
