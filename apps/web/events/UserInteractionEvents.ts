@@ -107,6 +107,11 @@ export class MouseData {
     return new MouseData(source, evt.clientX, evt.clientY, evt.deltaY, evt.buttons);
   }
 
+  isFromTouchEvent(): boolean {
+    // If a mouse event comes from a touch event, it has no buttons clicked
+    return this.buttons === 0;
+  }
+
   isPrimaryDown(): boolean {
     return (this.buttons & MouseEventButton.Primary) > 0;
   }

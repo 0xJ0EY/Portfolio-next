@@ -125,7 +125,7 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private handleMouseDown(data: MouseData): void {
-    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
+    if (clickedDOMButton(data.isPrimaryDown() || data.isFromTouchEvent(), data.x, data.y)) { return; }
 
     // Because we're changing the state anyway, always cancel the possible chance state event
     const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
@@ -146,6 +146,9 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private handleTouchOutsideDisplay(data: TouchData) {
+    const coords = data.pointerCoordinates();
+    if (clickedDOMButton(data.hasTouchesDown(1), coords.x,coords.y)) { return; }
+
     const onSuccess = () => {
       this.manager.changeState(CameraHandlerState.FreeRoam);
     };
