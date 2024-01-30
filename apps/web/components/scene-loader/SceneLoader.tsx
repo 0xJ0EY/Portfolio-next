@@ -74,7 +74,10 @@ function ShowUserMessage(props: { onClick: () => void }) {
       <div className={styles['user-message-position-container']}>
         <div className={styles['user-message-container']}>
           <h1>Portfolio of Joey de Ruiter</h1>
-          <span>Click continue to begin</span>
+          <p>
+            <span className={styles['continue-text']}>Click continue to begin</span>
+            <span className={styles['blinking-cursor']}></span>
+          </p>
           <div className={styles['button-center-container']}>
             <button onClick={onClick}>Continue</button>
           </div>
@@ -129,9 +132,18 @@ function DisplayLoadingProgress(props: { supportsWebGL: boolean | null, loadingP
   </>)
 }
 
+function LoadingUnderscore() {
+  return (<>
+    <div className={styles['loading-underscore']}>
+      <span className={styles['blinking-cursor']}></span>
+    </div>
+  </>);
+}
+
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(true);
+  const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
   const scenes  = useRef<RendererScenes>(createRenderScenes());
   const actions = useRef<UpdateAction[]>([]);
@@ -178,13 +190,17 @@ export function SceneLoader() {
 
     if (loadingProgress.isDoneLoading()) {
       setTimeout(() => { setLoading(false); }, 1000);
+      setTimeout(() => { setLoadingUnderscore(false); }, 1800);
     }
   }, [loadingProgress]);
+
     
   if (loading || !supportsWebGL) {
     return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
   } else {
     return (<>
+      { showLoadingUnderscore && <LoadingUnderscore/> }
+      {/* { true && <LoadingUnderscore/> } */}
       { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
       <Renderer
         showMessage={showMessage}
