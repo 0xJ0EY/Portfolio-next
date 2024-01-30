@@ -1,6 +1,6 @@
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { PanOriginData, calculateCameraPosition, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom } from "./util";
+import { PanOriginData, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom, overDOMButton } from "./util";
 import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
@@ -72,6 +72,11 @@ export class MonitorViewCameraState extends CameraState {
 
     const hasChangedOverDisplay = (): boolean => overDisplay !== this.wasOverDisplay;
 
+    if (overDOMButton(data.x, data.y)) {
+      const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+      this.manager.emitUserInteractionEvent(cancelEvent);
+    }
+
     if (overDisplay) {
       this.ctx.disableWebGLPointerEvents();
       this.ctx.setCursor('auto');
@@ -119,7 +124,13 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  private handleMouseUp(data: MouseData): void {
+  private handleMouseDown(data: MouseData): void {
+    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
+
+    // Because we're changing the state anyway, always cancel the possible chance state event
+    const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+    this.manager.emitUserInteractionEvent(cancelEvent);
+
     this.manager.changeState(CameraHandlerState.DeskView);
   }
 
@@ -129,7 +140,7 @@ export class MonitorViewCameraState extends CameraState {
 
   handleMouseEvent(data: MouseData) {
     switch (data.source) {
-      case 'up': return this.handleMouseUp(data);
+      case 'down': return this.handleMouseDown(data);
       case 'move': return this.handleMouseMove(data);
     }
   }

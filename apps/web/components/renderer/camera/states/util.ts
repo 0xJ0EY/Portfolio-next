@@ -123,15 +123,27 @@ export function easeInOutSine(x: number): number {
   return -(Math.cos(Math.PI * x) - 1) / 2;
 }
 
-export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): boolean {
-  if (!isPrimaryDown) { return false; }
-  const elements = document.elementsFromPoint(x, y);
+export function overDOMButton(x: number, y: number): boolean {
+  const maxDepth = 5;
 
-  for (const element of elements) {
-    if (element.tagName === "BUTTON") { return true; }
-  }
+  let currentDepth = 0;
+  let element: Element | null = document.elementFromPoint(x, y);
+
+  do {
+    if (!element) { return false; }
+    if (element.tagName === 'BUTTON') { return true; }
+
+    element = element.parentElement;
+
+  } while (currentDepth++ < maxDepth);
 
   return false;
+}
+
+export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): boolean {
+  if (!isPrimaryDown) { return false; }
+
+  return overDOMButton(x, y);
 }
 
 export function focusDesktop(): void {
