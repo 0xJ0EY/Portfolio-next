@@ -57,7 +57,7 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   function onKeyUp(evt: KeyboardEvent) {
     const code = evt.code;
 
-    const audioFragment = activeSounds.current[code].onDown;
+    const audioFragment = activeSounds.current[code].onUp;
     if (audioFragment) { soundService.play(audioFragment, 0.6); }
   }
 
