@@ -125,7 +125,8 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private handleMouseDown(data: MouseData): void {
-    if (clickedDOMButton(data.isPrimaryDown() || data.isFromTouchEvent(), data.x, data.y)) { return; }
+    if (data.isFromTouchEvent()) { return; }
+    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
 
     // Because we're changing the state anyway, always cancel the possible chance state event
     const cancelEvent = cancelUserInteractionMouseConfirmationEvent();

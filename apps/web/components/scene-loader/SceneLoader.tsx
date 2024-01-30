@@ -200,7 +200,6 @@ export function SceneLoader() {
   } else {
     return (<>
       { showLoadingUnderscore && <LoadingUnderscore/> }
-      {/* { true && <LoadingUnderscore/> } */}
       { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
       <Renderer
         showMessage={showMessage}
