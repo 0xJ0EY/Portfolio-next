@@ -21,7 +21,7 @@ export class MonitorViewCameraState extends CameraState {
     const display = getDisplay(this.ctx.scene);
     if (!display) { return; }
 
-    const zoomDistance = 2;
+    const zoomDistance = 2.4;
     const cameraFov = this.ctx.cameraController.getCamera().fov;
 
     const { spherical, position, distance } = calculateCameraPosition(display, cameraFov, zoomDistance);

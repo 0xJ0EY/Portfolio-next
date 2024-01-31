@@ -97,7 +97,7 @@ export const calculateCameraPosition = (display: Mesh, fov: number, zoomDistance
   position.add(centerPoint);
 
   const spherical = new Spherical();
-  spherical.phi = Math.atan2(height, depth) - 0.02;
+  spherical.phi = Math.atan2(height, depth);
 
   const rotation = new Vector3();
   rotation.setFromSpherical(spherical);
