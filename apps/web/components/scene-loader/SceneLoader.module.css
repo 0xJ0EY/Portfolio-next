@@ -7,6 +7,7 @@
   user-select: none;
   font-size: 1.2em;
   padding: 10px;
+  overflow: hidden;
 }
 
 .loading-underscore {
@@ -128,9 +129,9 @@
 }
 
 @media screen and (max-width: 500px) {
-  .loading-progress { font-size: 0.8em; }
+  .loading-progress { font-size: 0.6em; }
 }
 
 @media screen and (max-width: 800px) {
-  .loading-progress { font-size: 1em; }
+  .loading-progress { font-size: 0.9em; }
 }
