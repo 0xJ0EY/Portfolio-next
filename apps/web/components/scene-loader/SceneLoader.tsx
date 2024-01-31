@@ -68,12 +68,32 @@ function ShowLoadingResources(loadingProgress: LoadingProgress) {
 
 function ShowUserMessage(props: { onClick: () => void }) {
   const onClick = props.onClick;
+  const [smallWindow, setSmallWindow] = useState(false);
+
+  function windowTooSmall(): boolean {
+    return window.innerWidth < 500;
+  }
+
+  function onResize() {
+    setSmallWindow(windowTooSmall());
+  }
+
+  useEffect(() => {
+    onResize();
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    }
+  }, []);
 
   return (<>
     <div className={styles['user-message']}>
       <div className={styles['user-message-position-container']}>
         <div className={styles['user-message-container']}>
           <h1>Portfolio of Joey de Ruiter</h1>
+          {smallWindow && <p className={styles['warning']}>WARNING: This portfolio is best experienced on a desktop, laptop or a tablet computer</p>}
           <p>
             <span className={styles['continue-text']}>Click continue to begin</span>
             <span className={styles['blinking-cursor']}></span>

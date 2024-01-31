@@ -114,6 +114,11 @@
   width: 100%;
 }
 
+.warning {
+  color: yellow;
+  text-align: center;
+}
+
 .blinking-cursor {
   display: inline-block;
   height: 20px;
