@@ -35,6 +35,10 @@ function sendEmailToMe(request: SendEmailRequestData): Result<string, string> {
     }
   });
 
+  console.log("process env");
+  console.log(process.env.MAIL_SERVER);
+  console.log(process.env.MAIL_USER);
+
   transporter.verify().then(() => {
     const subject = `${request.name} <${request.email}> ${request.company ? `from ${request.company}` : ''}`;
 
