@@ -35,13 +35,14 @@ async function sendEmailToMe(request: SendEmailRequestData): Promise<void> {
     }
   });
 
-  console.log("process env");
-  console.log(process.env.MAIL_SERVER);
-  console.log(process.env.MAIL_USER);
-
   await transporter.verify();
 
   const subject = `${request.name} <${request.email}> ${request.company ? `from ${request.company}` : ''}`;
+
+  console.log('Email send from');
+  console.log(subject);
+  console.log('---------');
+  console.log(request.message);
 
   await transporter.sendMail({
     from: `"${request.email}" <contact@joeyderuiter.me>`,
@@ -49,8 +50,6 @@ async function sendEmailToMe(request: SendEmailRequestData): Promise<void> {
     subject,
     text: request.message
   });
-
-  console.log('send email');
 }
 
 export default async function handler(
