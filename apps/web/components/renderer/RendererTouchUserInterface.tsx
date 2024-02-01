@@ -42,8 +42,8 @@ const ProgressCircle = (data: ProgressCircleData) => {
   return <>
     <div style={localStyle}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={svgStyle}>
-        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#e0e0e0" strokeWidth={`${strokeWidth}px`}></circle>
-        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#60e6a8" strokeWidth={`${strokeWidth}px`} strokeDasharray={`${circumference}px`} strokeDashoffset={`${offset}px`}></circle>
+        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#ffffff" strokeWidth={`${strokeWidth}px`}></circle>
+        <circle r={radius} cx={width / 2} cy={height / 2} fill="transparent" stroke="#99e550" strokeWidth={`${strokeWidth}px`} strokeDasharray={`${circumference}px`} strokeDashoffset={`${offset}px`}></circle>
       </svg>
     </div>
   </>
