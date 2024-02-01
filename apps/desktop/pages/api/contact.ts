@@ -25,7 +25,7 @@ const contactSchema = z.object({
   message: z.string().min(1),
 });
 
-function sendEmailToMe(request: SendEmailRequestData): Result<string, string> {
+async function sendEmailToMe(request: SendEmailRequestData): Promise<void> {
   const transporter = nodemailer.createTransport({
     host: process.env.MAIL_SERVER,
     port: parseInt(process.env.MAIL_PORT ?? ""),
@@ -39,24 +39,21 @@ function sendEmailToMe(request: SendEmailRequestData): Result<string, string> {
   console.log(process.env.MAIL_SERVER);
   console.log(process.env.MAIL_USER);
 
-  transporter.verify().then(async () => {
-    const subject = `${request.name} <${request.email}> ${request.company ? `from ${request.company}` : ''}`;
+  await transporter.verify();
 
-    const result = await transporter.sendMail({
-      from: `"${request.email}" <contact@joeyderuiter.me>`,
-      to: `contact@joeyderuiter.me`,
-      subject,
-      text: request.message
-    });
+  const subject = `${request.name} <${request.email}> ${request.company ? `from ${request.company}` : ''}`;
 
-    console.log(subject);
-    console.log(result);
+  await transporter.sendMail({
+    from: `"${request.email}" <contact@joeyderuiter.me>`,
+    to: `contact@joeyderuiter.me`,
+    subject,
+    text: request.message
   });
 
-  return Ok("send email");
+  console.log('send email');
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData | ResponseError>
 ) {
@@ -64,9 +61,14 @@ export default function handler(
     const request = contactSchema.safeParse(req.body);
 
     if (request.success) {
-      sendEmailToMe(request.data);
+      try {
+        await sendEmailToMe(request.data);
+        return res.status(200).json({ message: "Message processed" });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Unable to send email" });
+      }
 
-      return res.status(200).json({ message: "Message processed" });
     } else {
       return res.status(503).json({ error: request.error.flatten().fieldErrors });
     }
