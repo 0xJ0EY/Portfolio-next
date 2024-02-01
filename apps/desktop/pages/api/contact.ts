@@ -39,15 +39,18 @@ function sendEmailToMe(request: SendEmailRequestData): Result<string, string> {
   console.log(process.env.MAIL_SERVER);
   console.log(process.env.MAIL_USER);
 
-  transporter.verify().then(() => {
+  transporter.verify().then(async () => {
     const subject = `${request.name} <${request.email}> ${request.company ? `from ${request.company}` : ''}`;
 
-    transporter.sendMail({
+    const result = await transporter.sendMail({
       from: `"${request.email}" <contact@joeyderuiter.me>`,
       to: `contact@joeyderuiter.me`,
       subject,
       text: request.message
     });
+
+    console.log(subject);
+    console.log(result);
   });
 
   return Ok("send email");
