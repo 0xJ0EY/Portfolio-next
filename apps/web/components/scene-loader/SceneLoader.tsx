@@ -4,7 +4,7 @@ import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
 import { NoopLoader, createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
-import { detectWebGL } from "./util";
+import { detectWebGL, isDebug } from "./util";
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -160,6 +160,7 @@ function LoadingUnderscore() {
   </>);
 }
 
+
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(true);
@@ -172,15 +173,10 @@ export function SceneLoader() {
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
-    const query = window.location.search;
-    const searchParams = new URLSearchParams(query);
-    const debug = searchParams.has('debug');
-
+    const debug = isDebug();
     const manager = new AssetManager(debug, new LoadingManager());
 
-    if (debug) {
-      setShowMessage(false);
-    }
+    if (debug) { setShowMessage(false); }
 
     manager.add('Linked to Magi-1', NoopLoader);
     manager.add('Linked to Magi-2', NoopLoader);
@@ -209,8 +205,13 @@ export function SceneLoader() {
     if (!loadingProgress) { return; }
 
     if (loadingProgress.isDoneLoading()) {
-      setTimeout(() => { setLoading(false); }, 1000);
-      setTimeout(() => { setLoadingUnderscore(false); }, 1800);
+      if (!isDebug()) {
+        setTimeout(() => { setLoading(false); }, 1000);
+        setTimeout(() => { setLoadingUnderscore(false); }, 1800);
+      } else {
+        setLoading(false);
+        setLoadingUnderscore(false);
+      }
     }
   }, [loadingProgress]);
 
