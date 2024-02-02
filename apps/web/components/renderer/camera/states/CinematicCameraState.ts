@@ -26,7 +26,7 @@ export class CinematicCameraState extends UpdatableCameraState {
     if (!display) { return; }
 
     const position = new Vector3();
-    position.y = 5.5;
+    position.y = 6.8;
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
