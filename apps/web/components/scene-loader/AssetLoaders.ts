@@ -44,8 +44,6 @@ export async function createFloor(context: AssetManagerContext, onProgress: onPr
   const plane = new Mesh(geo, mat);
   plane.rotateX(-Math.PI / 2);
 
-  plane.position.y = -1.5;
-
   plane.userData[AssetKeys.CameraCollidable] = true;
 
   context.scenes.sourceScene.add(plane.clone());
@@ -97,7 +95,7 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
 
   // Correct for desk hight
   for (const x of gltf.scene.children) {
-    x.position.y += 5.59;
+    x.position.y += 6.89;
   }
 
   const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
@@ -172,8 +170,6 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
 
 export async function createDesk(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const gltf = await context.gltfLoader.loadAsync("/assets/Desk.gltf");
-
-  gltf.scene.position.y = -1.3;
 
   for (const obj of gltf.scene.children) {
     obj.userData[AssetKeys.CameraCollidable] = true;

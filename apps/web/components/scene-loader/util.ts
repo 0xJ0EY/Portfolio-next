@@ -5,3 +5,10 @@ export function detectWebGL() {
 
   return gl && gl instanceof WebGLRenderingContext;
 }
+
+export function isDebug(): boolean {
+  const query = window.location.search;
+  const searchParams = new URLSearchParams(query);
+
+  return searchParams.has('debug');
+}

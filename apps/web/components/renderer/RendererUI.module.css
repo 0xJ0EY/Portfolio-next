@@ -73,7 +73,7 @@
 }
 
 .time-is-done {
-  width: 110px;
+  width: 120px;
   text-align: center;
 }
 
@@ -83,6 +83,20 @@
   left: 0px;
 
   opacity: 1;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  height: 0.2em;
+  width: 0.8em;
+  position: relative;
+  animation: blink 0.65s step-end infinite;
+  margin-left: 0.2em;
+}
+
+@keyframes blink {
+  0%, 100% { background-color: #fff; }
+  50% { background-color: transparent;}
 }
 
 @keyframes fade-out {

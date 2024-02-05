@@ -173,7 +173,7 @@ function CinematicInstructions(props: SubViewProps) {
       <span className={joinStyles([
         styles['cinematic-instructions'],
         !isActive ? styles['fade-out'] : null,
-      ])}>{instructions}</span>
+      ])}>{instructions}<span className={styles['blinking-cursor']}></span></span>
     </div>
   </>);
 }

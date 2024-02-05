@@ -21,7 +21,7 @@ export class MonitorViewCameraState extends CameraState {
     const display = getDisplay(this.ctx.scene);
     if (!display) { return; }
 
-    const zoomDistance = 2;
+    const zoomDistance = 2.4;
     const cameraFov = this.ctx.cameraController.getCamera().fov;
 
     const { spherical, position, distance } = calculateCameraPosition(display, cameraFov, zoomDistance);
@@ -125,7 +125,7 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private handleMouseDown(data: MouseData): void {
-    if (clickedDOMButton(data.isPrimaryDown() || data.isFromTouchEvent(), data.x, data.y)) { return; }
+    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
 
     // Because we're changing the state anyway, always cancel the possible chance state event
     const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
