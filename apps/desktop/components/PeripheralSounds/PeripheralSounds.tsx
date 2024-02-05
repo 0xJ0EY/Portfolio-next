@@ -12,11 +12,11 @@ const PointerSecondaryKey = "pointer_secondary";
 const PrimaryMouseButton = 0x00;
 
 const SpaceBarKeyAudioFragments: AudioFragment[] = [
-  { onDown: '/sounds/meow.mp3', onUp: '/sounds/meow.mp3' },
+  { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_down_1.mp3' },
 ];
 
 const RegularKeyAudioFragments: AudioFragment[] = [
-  { onDown: '/sounds/meow.mp3', onUp: '/sounds/meow.mp3' },
+  { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_down_1.mp3' },
 ];
 
 const LeftMouseButtonAudioFragments: AudioFragment[] = [
