@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { NoopLoader, createDesk, createFloor, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
+import { NoopLoader, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
 import { detectWebGL, isDebug } from "./util";
 
@@ -185,6 +185,7 @@ export function SceneLoader() {
     manager.add('Placed floor', createFloor);
     manager.add('Placed monitor', createMonitor);
     manager.add('Placed desk', createDesk);
+    manager.add('Placed keyboard', createKeyboard);
     
     setLoadingProgress(manager.loadingProgress());
     setSupportsWebGL(detectWebGL());

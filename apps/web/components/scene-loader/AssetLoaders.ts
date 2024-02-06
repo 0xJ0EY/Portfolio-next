@@ -31,6 +31,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
   const directionalLight = new DirectionalLight(0xffffff, 1);
   directionalLight.position.x = .75;
   directionalLight.position.z = .9;
+  directionalLight.position.y = 10;
   context.scenes.sourceScene.add(directionalLight);
 
   onProgress(100);
@@ -40,7 +41,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
 
 export async function createFloor(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const geo = new PlaneGeometry(100, 100);
-  const mat = new MeshStandardMaterial({ color: 0xFFFFFF });
+  const mat = new MeshStandardMaterial({ color: 0x808080 });
   const plane = new Mesh(geo, mat);
   plane.rotateX(-Math.PI / 2);
 
@@ -92,11 +93,6 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
   onProgress(50);
 
   gltf.scene.name = DisplayParentName;
-
-  // Correct for desk hight
-  for (const x of gltf.scene.children) {
-    x.position.y += 6.89;
-  }
 
   const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
@@ -167,6 +163,21 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
 
   return null;
 }
+
+export async function createKeyboard(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
+  const gltf = await context.gltfLoader.loadAsync("/assets/Keyboard.gltf");
+
+  for (const obj of gltf.scene.children) {
+    obj.userData[AssetKeys.CameraCollidable] = true;
+  }
+
+  // TODO: Cast a big rectangle over it, so we collide with that instead of the individual keys
+
+  context.scenes.sourceScene.add(gltf.scene);
+
+  return null;
+}
+
 
 export async function createDesk(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const gltf = await context.gltfLoader.loadAsync("/assets/Desk.gltf");
