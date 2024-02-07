@@ -15,7 +15,7 @@ const GLTF_SHADOWS_CAST     = 0x01;
 const GLTF_SHADOWS_RECEIVE  = 0x02;
 const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
 
-const mobileTextureMapDimensions = 2048;
+const mobileTextureMapDimensions = 4096;
 
 function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
   gltf.scene.traverse(node => {
@@ -95,7 +95,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
   directionalLight.shadow.mapSize.height  = shadowMapDimension;
 
   directionalLight.shadow.radius = 10;
-  directionalLight.shadow.bias = !isMobile ? -0.00075 : -0.005;
+  directionalLight.shadow.bias = !isMobile ? -0.00075 : -0.0025;
 
   context.scenes.sourceScene.add(directionalLight);
 
