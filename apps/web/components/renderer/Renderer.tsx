@@ -23,7 +23,6 @@ export interface ThreeRenderers {
   webgl: WebGLRenderer,
   css3d: CSS3DRenderer
 };
-
 export interface RendererScenes {
   sourceScene: Scene,
   cutoutScene: Scene,

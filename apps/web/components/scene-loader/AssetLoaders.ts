@@ -1,4 +1,4 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLRenderer } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLCapabilities, WebGLRenderer } from "three";
 import { AssetManagerContext, OptionalUpdateAction, onProgress } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes, ThreeRenderers } from "../renderer/Renderer";
@@ -15,9 +15,10 @@ const GLTF_SHADOWS_CAST     = 0x01;
 const GLTF_SHADOWS_RECEIVE  = 0x02;
 const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
 
+const mobileTextureMapDimensions = 2048;
+
 function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
   gltf.scene.traverse(node => {
-
     if (node instanceof Mesh) {
       node.castShadow     = (state & GLTF_SHADOWS_CAST) === GLTF_SHADOWS_CAST;
       node.receiveShadow  = (state & GLTF_SHADOWS_RECEIVE) === GLTF_SHADOWS_RECEIVE;
@@ -55,7 +56,14 @@ export async function NoopLoader(context: AssetManagerContext, onProgress: onPro
   return null;
 }
 
+function getTextureMapDimension(max: number, isMobile: boolean, capabilities: WebGLCapabilities): number {
+  let current = !isMobile ? max : mobileTextureMapDimensions;
+  return Math.min(current, capabilities.maxTextureSize);
+}
+
 export async function createLights(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
+
+  const isMobile = isMobileDevice();
   const ambientLight = new AmbientLight(0x404040);
   ambientLight.intensity = .5;
   context.scenes.sourceScene.add(ambientLight);
@@ -65,7 +73,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
   const directionalLight = new DirectionalLight(0xffffff, 1);
   directionalLight.position.x = 10;
   directionalLight.position.z = 10;
-  directionalLight.position.y = 40;
+  directionalLight.position.y = 20;
   directionalLight.castShadow = true;
 
   directionalLight.shadow.camera.left = -15;
@@ -75,42 +83,25 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
 
   directionalLight.shadow.blurSamples = 10;
   directionalLight.shadow.radius = 10;
-  // directionalLight.shadow.camera.near = 0.1;
-  // directionalLight.shadow.camera.far = 10;
 
-
+  directionalLight.shadow.camera.near = 15;
+  directionalLight.shadow.camera.far = 40;
 
   // Although my iPhone reports that it is capable of 16k texture maps, it crashes at 8
   // This is not a problem on my iPad that is actually capable of 8k texture maps
-  const shadowMapDimension = isMobileDevice() ? 4096 : 8192;
+  const shadowMapDimension = getTextureMapDimension(8192, isMobile, context.renderers.webgl.capabilities);
 
   directionalLight.shadow.mapSize.width   = shadowMapDimension;
   directionalLight.shadow.mapSize.height  = shadowMapDimension;
 
   directionalLight.shadow.radius = 10;
-  directionalLight.shadow.bias = -0.0005;
+  directionalLight.shadow.bias = !isMobile ? -0.001 : -0.005;
 
   context.scenes.sourceScene.add(directionalLight);
 
   onProgress(100);
 
-
-
   context.scenes.sourceScene.add(new CameraHelper(directionalLight.shadow.camera));
-
-
-  const geo = new BoxGeometry(1, 1);
-  const mat = new MeshStandardMaterial({ color: 0x808080 });
-  const plane = new Mesh(geo, mat);
-
-  plane.position.y = 1;
-
-  plane.castShadow = true;
-  plane.receiveShadow = true;
-
-  plane.userData[AssetKeys.CameraCollidable] = true;
-
-  // context.scenes.sourceScene.add(plane.clone());
 
   return null;
 }
@@ -148,8 +139,6 @@ function getDesktopTargetUrl(): string {
   }
 
   if (env === 'preview' || env === 'development') {
-    console.log(process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL);
-
     const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? window.location.host;
 
     return transformWebUrlToDesktop(vercelUrl);
@@ -172,6 +161,8 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
   onProgress(50);
 
   gltf.scene.name = DisplayParentName;
+
+  enableGLTFShadows(gltf);
 
   const display = gltf.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
   display.material = new MeshBasicMaterial({ color: 0x000000 });
@@ -231,7 +222,7 @@ export async function createMonitor(context: AssetManagerContext, onProgress: on
     display.position.z + localZ
   ];
 
-  cssPage.position.set(x, y, z);
+  cssPage.position.set(x, y, z)
 
   cssPage.scale.set(viewWidthScale, viewHeightScale, 1);
   cssPage.rotateX(Math.atan(height / depth) - degToRad(90));
@@ -259,7 +250,6 @@ export async function createKeyboard(context: AssetManagerContext, onProgress: o
   return null;
 }
 
-
 export async function createDesk(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   const gltf = await context.gltfLoader.loadAsync("/assets/Desk.gltf");
 
@@ -270,7 +260,5 @@ export async function createDesk(context: AssetManagerContext, onProgress: onPro
   enableGLTFShadows(gltf);
 
   context.scenes.sourceScene.add(gltf.scene);
-
-
   return null;
 }

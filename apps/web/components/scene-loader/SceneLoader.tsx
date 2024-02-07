@@ -207,11 +207,8 @@ export function SceneLoader() {
 
     return () => {
       if (!renderers.current) { return; }
-
-      const webgl = renderers.current.webgl;
-
-      webgl.dispose();
-      webgl.forceContextLoss();
+      
+      renderers.current = null;
     }
   }, []);
 
