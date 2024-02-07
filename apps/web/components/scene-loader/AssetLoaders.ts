@@ -101,7 +101,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
 
   onProgress(100);
 
-  context.scenes.sourceScene.add(new CameraHelper(directionalLight.shadow.camera));
+  // context.scenes.sourceScene.add(new CameraHelper(directionalLight.shadow.camera));
 
   return null;
 }
