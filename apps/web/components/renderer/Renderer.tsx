@@ -1,6 +1,6 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
-import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
+import { DepthTexture, LinearFilter, PCFSoftShadowMap, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
@@ -17,6 +17,12 @@ import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
 import { UpdateAction } from '../scene-loader/AssetManager';
+import { getBrowserDimensions } from '../scene-loader/util';
+
+export interface ThreeRenderers {
+  webgl: WebGLRenderer,
+  css3d: CSS3DRenderer
+};
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -35,18 +41,6 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 const resizeCamera = (camera: PerspectiveCamera, aspectRatio: number): void => {
   camera.aspect = aspectRatio;
   camera.updateProjectionMatrix();
-}
-
-const createRenderers = (width: number, height: number): [WebGLRenderer, CSS3DRenderer] => {
-  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
-  webglRenderer.capabilities.maxSamples = 32; // Set the gl.MAX_SAMPLES for smoother antialiasing, default is 4
-  
-  const cssRenderer = new CSS3DRenderer();
-
-  webglRenderer.setSize(width, height);
-  cssRenderer.setSize(width, height);
-
-  return [webglRenderer,  cssRenderer];
 }
 
 const resizeRenderers = (composer: EffectComposer, webGlRenderer: WebGLRenderer, cssRenderer: CSS3DRenderer, width: number, height: number): void => {
@@ -96,21 +90,8 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 interface RendererProps {
   showMessage: boolean, 
   scenes: RendererScenes,
-  actions: UpdateAction[]
-}
-
-function getBrowserDimensions(): [number, number] {
-  let width = window.innerWidth;
-  let height = window.innerHeight;
-
-  if (isSafari()) {
-    // Safari on iOS (tested on only the physical iPhone 11 pro, and 14 pro in the simulator) renders off-center when a width/height is given that is not even.
-    // Desktop Safari & iPad OS seems fine
-    if (width & 0x01) { width++; }
-    if (height & 0x01) { height++; }
-  }
-
-  return [width, height];
+  renderers: ThreeRenderers,
+  actions: UpdateAction[],
 }
 
 function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
@@ -171,7 +152,7 @@ export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
   const soundService = useRef(new SoundService());
 
-  const { showMessage, scenes, actions } = props;
+  const { showMessage, scenes, renderers, actions } = props;
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -202,7 +183,7 @@ export const Renderer = (props: RendererProps) => {
 
     const [scene, cutoutScene, cssScene] = [scenes.sourceScene, scenes.cutoutScene, scenes.cssScene];
     const camera = createCamera(75, calculateAspectRatio(width, height));
-    const [renderer, cssRenderer] = createRenderers(width, height);
+    const [renderer, cssRenderer] = [renderers.webgl, renderers.css3d];
 
     renderer.setPixelRatio(window.devicePixelRatio);
     
@@ -257,9 +238,6 @@ export const Renderer = (props: RendererProps) => {
 
       enableTouchInteraction(cssRenderNode);
       enableTouchInteraction(webglRenderNode);
-
-      renderer.dispose();
-      renderer.forceContextLoss();
 
       mouseInputHandler.destroy();
       touchInputHandler.destroy();

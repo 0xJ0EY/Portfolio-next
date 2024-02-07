@@ -1,13 +1,29 @@
-import { AmbientLight, Box3, BufferGeometry, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, Scene } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLRenderer } from "three";
 import { AssetManagerContext, OptionalUpdateAction, onProgress } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
-import { RendererScenes } from "../renderer/Renderer";
+import { RendererScenes, ThreeRenderers } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
-import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { isMobileDevice } from "./util";
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";
+
+const GLTF_SHADOWS_CAST     = 0x01;
+const GLTF_SHADOWS_RECEIVE  = 0x02;
+const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
+
+function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
+  gltf.scene.traverse(node => {
+
+    if (node instanceof Mesh) {
+      node.castShadow     = (state & GLTF_SHADOWS_CAST) === GLTF_SHADOWS_CAST;
+      node.receiveShadow  = (state & GLTF_SHADOWS_RECEIVE) === GLTF_SHADOWS_RECEIVE;
+    }
+  });
+}
 
 export function createRenderScenes(): RendererScenes {
   return {
@@ -15,6 +31,24 @@ export function createRenderScenes(): RendererScenes {
     cutoutScene: new Scene(),
     cssScene: new Scene()
   };
+}
+
+export function createRenderers(width: number, height: number): ThreeRenderers {
+  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
+
+  webglRenderer.capabilities.maxSamples = 32; // Set the gl.MAX_SAMPLES for smoother antialiasing, default is 4
+  webglRenderer.shadowMap.enabled = true;
+  webglRenderer.shadowMap.type = PCFSoftShadowMap;
+
+  const cssRenderer = new CSS3DRenderer();
+
+  webglRenderer.setSize(width, height);
+  cssRenderer.setSize(width, height);
+
+  return {
+    webgl: webglRenderer,
+    css3d: cssRenderer
+  }
 }
 
 export async function NoopLoader(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
@@ -29,12 +63,54 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
   onProgress(50);
 
   const directionalLight = new DirectionalLight(0xffffff, 1);
-  directionalLight.position.x = .75;
-  directionalLight.position.z = .9;
-  directionalLight.position.y = 10;
+  directionalLight.position.x = 10;
+  directionalLight.position.z = 10;
+  directionalLight.position.y = 40;
+  directionalLight.castShadow = true;
+
+  directionalLight.shadow.camera.left = -15;
+  directionalLight.shadow.camera.right = 15;
+  directionalLight.shadow.camera.top = 15;
+  directionalLight.shadow.camera.bottom = -15;
+
+  directionalLight.shadow.blurSamples = 10;
+  directionalLight.shadow.radius = 10;
+  // directionalLight.shadow.camera.near = 0.1;
+  // directionalLight.shadow.camera.far = 10;
+
+
+
+  // Although my iPhone reports that it is capable of 16k texture maps, it crashes at 8
+  // This is not a problem on my iPad that is actually capable of 8k texture maps
+  const shadowMapDimension = isMobileDevice() ? 4096 : 8192;
+
+  directionalLight.shadow.mapSize.width   = shadowMapDimension;
+  directionalLight.shadow.mapSize.height  = shadowMapDimension;
+
+  directionalLight.shadow.radius = 10;
+  directionalLight.shadow.bias = -0.0005;
+
   context.scenes.sourceScene.add(directionalLight);
 
   onProgress(100);
+
+
+
+  context.scenes.sourceScene.add(new CameraHelper(directionalLight.shadow.camera));
+
+
+  const geo = new BoxGeometry(1, 1);
+  const mat = new MeshStandardMaterial({ color: 0x808080 });
+  const plane = new Mesh(geo, mat);
+
+  plane.position.y = 1;
+
+  plane.castShadow = true;
+  plane.receiveShadow = true;
+
+  plane.userData[AssetKeys.CameraCollidable] = true;
+
+  // context.scenes.sourceScene.add(plane.clone());
 
   return null;
 }
@@ -44,6 +120,9 @@ export async function createFloor(context: AssetManagerContext, onProgress: onPr
   const mat = new MeshStandardMaterial({ color: 0x808080 });
   const plane = new Mesh(geo, mat);
   plane.rotateX(-Math.PI / 2);
+
+  plane.castShadow = true;
+  plane.receiveShadow = true;
 
   plane.userData[AssetKeys.CameraCollidable] = true;
 
@@ -173,6 +252,8 @@ export async function createKeyboard(context: AssetManagerContext, onProgress: o
 
   // TODO: Cast a big rectangle over it, so we collide with that instead of the individual keys
 
+  enableGLTFShadows(gltf);
+
   context.scenes.sourceScene.add(gltf.scene);
 
   return null;
@@ -186,7 +267,10 @@ export async function createDesk(context: AssetManagerContext, onProgress: onPro
     obj.userData[AssetKeys.CameraCollidable] = true;
   }
 
+  enableGLTFShadows(gltf);
+
   context.scenes.sourceScene.add(gltf.scene);
+
 
   return null;
 }
