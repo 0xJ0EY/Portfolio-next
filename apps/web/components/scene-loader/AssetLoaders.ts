@@ -95,7 +95,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
   directionalLight.shadow.mapSize.height  = shadowMapDimension;
 
   directionalLight.shadow.radius = 10;
-  directionalLight.shadow.bias = !isMobile ? -0.001 : -0.005;
+  directionalLight.shadow.bias = !isMobile ? -0.00075 : -0.005;
 
   context.scenes.sourceScene.add(directionalLight);
 
