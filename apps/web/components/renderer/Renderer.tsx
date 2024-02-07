@@ -39,6 +39,8 @@ const resizeCamera = (camera: PerspectiveCamera, aspectRatio: number): void => {
 
 const createRenderers = (width: number, height: number): [WebGLRenderer, CSS3DRenderer] => {
   const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
+  webglRenderer.capabilities.maxSamples = 32; // Set the gl.MAX_SAMPLES for smoother antialiasing, default is 4
+  
   const cssRenderer = new CSS3DRenderer();
 
   webglRenderer.setSize(width, height);
