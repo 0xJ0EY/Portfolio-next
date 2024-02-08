@@ -165,6 +165,8 @@ export function SceneLoader() {
   const scenes  = useRef<RendererScenes>(createRenderScenes());
   const actions = useRef<UpdateAction[]>([]);
 
+  const [doneLoading, setDoneLoading] = useState(false);
+
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   

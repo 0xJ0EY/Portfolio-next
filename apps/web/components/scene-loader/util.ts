@@ -32,3 +32,7 @@ export function getBrowserDimensions(): [number, number] {
 
   return [width, height];
 }
+
+export async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

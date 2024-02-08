@@ -2,6 +2,7 @@ import { LoadingManager, WebGLRenderer } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { RendererScenes } from "../renderer/Renderer";
 import { createRenderScenes } from "./AssetLoaders";
+import { sleep } from "./util";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type OptionalUpdateAction = UpdateAction[] | null;
@@ -31,6 +32,7 @@ export type AssetContext<T> = {
   name: string,
   assetLoader: AssetLoader<T>
   asset: T | null,
+  in_scene: boolean
   order: number,
   progress: number
 }
@@ -127,6 +129,7 @@ export class AssetManager {
       name,
       assetLoader: loader,
       asset: null,
+      in_scene: false,
       order: this.index++,
       progress: 0
     }
@@ -137,9 +140,9 @@ export class AssetManager {
   // }
 
   public loadingProgress(): LoadingProgress {
-    const entries = Object.values(this.entries)
+    const entries = Object.values(this.assets)
       .sort((a, b) => a.order - b.order)
-      .map((entry) => { return { name: entry.key, progress: entry.progress }});
+      .map((entry) => { return { name: entry.name, progress: entry.progress }});
 
     return new LoadingProgress(entries);
   }
@@ -156,7 +159,11 @@ export class AssetManager {
       return (async () => {
         const downloader = asset.assetLoader.downloader;
 
+        // No downloader, set the result to 50 no the less
         if (!downloader) { onProgress(asset, 50); return; }
+
+        // Already downloaded, set progress to 75
+        if (asset.asset) { onProgress(asset, 75); return; }
 
         asset.asset = await downloader(this.context);
 
@@ -166,25 +173,56 @@ export class AssetManager {
 
     await Promise.all(downloadActions);
 
-    Object.values(this.assets)
-      .sort((a, b) => a.order - b.order)
-      .map(asset => {
-        const builder = asset.assetLoader.builder;
+    const actions = Object.values(this.assets).sort((a, b) => a.order - b.order);
 
-        if (!builder) { onProgress(asset, 100); return; }
 
-        console.log(asset);
+    for (const asset of actions) {
+      const builder = asset.assetLoader.builder;
 
-        // setTimeout()
+      if (asset.in_scene) { continue; }
+      if (!builder) { onProgress(asset, 100); continue; }
 
-        const action = builder(this.context, asset.asset);
+      console.log(asset.name);
+      console.log(asset);
 
-        onProgress(asset, 100);
+      builder(this.context, asset.asset);
+      asset.in_scene = true;
 
-        return action;
-    });
+      onProgress(asset, 100);
 
-    console.log(this.context.scenes);
+      await sleep(1000);
+    }
+
+    console.log(this.context.scenes.sourceScene.children);
+    console.log(this.context.scenes.sourceScene.children.length);
+    // Object.values(this.assets)
+    //   .sort((a, b) => a.order - b.order)
+    //   .map(async (asset, index) => {
+    //     const builder = asset.assetLoader.builder;
+
+    //     if (!builder) { onProgress(asset, 100); return; }
+
+    //     console.log(asset);
+
+    //     // setTimeout()
+
+    //     // builder(this.context, asset.asset);
+    //     // await sleep(1000);
+
+
+    //     setTimeout(() => {
+    //       builder(this.context, asset.asset);
+
+    //     }, index * 500);
+
+    //     // const action = builder(this.context, asset.asset);
+
+    //     onProgress(asset, 100);
+
+    //     return null;
+    // });
+
+    // console.log(this.context.scenes);
     // const actions = Object.values(this.entries).map(entry => {
     //   const onProgress = (progress: number) => {
     //     entry.progress = progress;
