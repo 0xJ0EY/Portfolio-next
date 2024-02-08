@@ -89,6 +89,10 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
     if (parentNode.current) {
       const desktop = parentNode.current;
 
+      console.log('registered desktop');
+      console.log('width: ', desktop.clientWidth);
+      console.log('height: ', desktop.clientHeight)
+
       windowCompositor.setSize(
         desktop.clientWidth,
         desktop.clientHeight
