@@ -16,7 +16,8 @@ export type AssetBuilder<T> = (context: AssetManagerContext, asset: T | null) =>
 
 export type AssetLoader<T> = {
   downloader: AssetDownloader<T> | null,
-  builder: AssetBuilder<T> | null
+  builder: AssetBuilder<T> | null,
+  builderProcessTime: number
 }
 
 export type Loader = (context: AssetManagerContext, onProgress: onProgress) => Promise<OptionalUpdateAction>;
@@ -102,9 +103,8 @@ export class AssetManager {
   private entries: Record<string, AssetManagerEntry> = {};
   private assets: Record<string, AssetContext<GLTF>> = {}
 
-  constructor(debug: boolean, loadingManager?: LoadingManager) {
+  constructor(debug: boolean, rendererScenes: RendererScenes, loadingManager?: LoadingManager) {
     const gltfLoader = new GLTFLoader(loadingManager);
-    const rendererScenes = createRenderScenes();
     const renderer = new WebGLRenderer();
 
     this.context = new AssetManagerContext(
@@ -113,6 +113,10 @@ export class AssetManager {
       gltfLoader,
       rendererScenes
     );
+  }
+
+  public getRenderScenes(): RendererScenes {
+    return this.context.scenes;
   }
 
   // public loadAsset(name: string, assetLoader?: AssetLoader, builder?: AssetBuilder) {
@@ -185,12 +189,18 @@ export class AssetManager {
       console.log(asset.name);
       console.log(asset);
 
+      if (asset.assetLoader.builderProcessTime) {
+        await sleep(asset.assetLoader.builderProcessTime);
+      }
+
       builder(this.context, asset.asset);
       asset.in_scene = true;
 
       onProgress(asset, 100);
 
-      await sleep(1000);
+      // if (asset.assetLoader.builderProcessTime) {
+        // await sleep(asset.assetLoader.builderProcessTime);
+      // }
     }
 
     console.log(this.context.scenes.sourceScene.children);

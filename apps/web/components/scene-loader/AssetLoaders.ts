@@ -34,6 +34,12 @@ export function createRenderScenes(): RendererScenes {
   };
 }
 
+export function clearRenderScenes(scenes: RendererScenes): void {
+  scenes.sourceScene.clear();
+  scenes.cutoutScene.clear();
+  scenes.cssScene.clear();
+}
+
 export async function NoopLoader(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
   return null;
 }
@@ -368,7 +374,8 @@ export function LightsLoader(): AssetLoader<GLTF> {
 
   return {
     downloader: null,
-    builder
+    builder,
+    builderProcessTime: 0
   }
 }
 
@@ -392,7 +399,8 @@ export function FloorLoader(): AssetLoader<GLTF> {
 
   return {
     downloader: null,
-    builder
+    builder,
+    builderProcessTime: 0
   }
 }
 
@@ -417,7 +425,8 @@ export function DeskLoader(): AssetLoader<GLTF> {
 
   return {
     downloader,
-    builder
+    builder,
+    builderProcessTime: 0
   }
 }
 
@@ -505,7 +514,8 @@ export function MonitorLoader(): AssetLoader<GLTF> {
 
   return {
     downloader,
-    builder
+    builder,
+    builderProcessTime: 200
   }
 }
 
@@ -530,6 +540,7 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
 
   return {
     downloader,
-    builder
+    builder,
+    builderProcessTime: 0
   }
 }

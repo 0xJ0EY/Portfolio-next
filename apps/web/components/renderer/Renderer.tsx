@@ -166,6 +166,8 @@ export const Renderer = (props: RendererProps) => {
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
 
+  const cameraHandlerRef = useRef<CameraHandler | null>(null);
+
   const allowUserInput = useRef<boolean>(false);
   const [showUI, setShowUI] = useState(false);
 
@@ -203,6 +205,10 @@ export const Renderer = (props: RendererProps) => {
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents, handleCameraHandlerStateChange);
     const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
     const touchInputHandler = new TouchInputHandler(allowUserInput, cameraHandler);
+
+    cameraHandlerRef.current = cameraHandler;
+
+    
 
     const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
@@ -273,6 +279,11 @@ export const Renderer = (props: RendererProps) => {
 
   useEffect(() => {
     if (!showMessage) {
+      console.log('foobar');
+
+      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
+
+      
       allowUserInput.current = true;
       setShowUI(true);
     }

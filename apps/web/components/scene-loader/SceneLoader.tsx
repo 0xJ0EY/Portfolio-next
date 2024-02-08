@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, buildDesk, buildLights, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes, loadDesk } from "./AssetLoaders";
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, buildDesk, buildLights, clearRenderScenes, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes, loadDesk } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
 import { detectWebGL, getBrowserDimensions, isDebug, isMobileDevice } from "./util";
 
@@ -162,17 +162,20 @@ export function SceneLoader() {
   const [showMessage, setShowMessage] = useState(true);
   const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
+  // const [mounted, setMounted] = useState(false);
+
   const scenes  = useRef<RendererScenes>(createRenderScenes());
   const actions = useRef<UpdateAction[]>([]);
-
-  const [doneLoading, setDoneLoading] = useState(false);
 
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
     const debug = isDebug();
-    const manager = new AssetManager(debug, new LoadingManager());
+
+    clearRenderScenes(scenes.current);
+
+    const manager = new AssetManager(debug, scenes.current, new LoadingManager());
 
     if (debug) { setShowMessage(false); }
 
@@ -188,23 +191,23 @@ export function SceneLoader() {
 
     // manager.loadAsset('Added lights', undefined, buildLights);
 
-    manager.add('Added lights', LightsLoader());
-    manager.add('Placed floor', FloorLoader())
-    manager.add('Placed desk', DeskLoader());
-    manager.add('Placed keyboard', KeyboardLoader());
-    manager.add('Placed monitor', MonitorLoader());
-
-
+    manager.add('Loading monitor', MonitorLoader());
+    manager.add('Loading desk', DeskLoader());
+    manager.add('Loading lights', LightsLoader());
+    manager.add('Loading floor', FloorLoader())
+    manager.add('Loading keyboard', KeyboardLoader());
 
     setLoadingProgress(manager.loadingProgress());
     setSupportsWebGL(detectWebGL());
+
+    // setLoading(false);
+
 
     const fetchData = async () => {
       const { rendererScenes, updateActions } = await manager.load(() => {
         setLoadingProgress(manager.loadingProgress());
       });
 
-      scenes.current = rendererScenes;
       actions.current = updateActions;
     }
 
@@ -214,16 +217,31 @@ export function SceneLoader() {
   useEffect(() => {
     if (!loadingProgress) { return; }
 
+    console.log('loading process');
+
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {
         setTimeout(() => { setLoading(false); }, 1000);
         setTimeout(() => { setLoadingUnderscore(false); }, 1800);
+        setShowMessage(false);
       } else {
+        setShowMessage(false);
         setLoading(false);
         setLoadingUnderscore(false);
       }
     }
   }, [loadingProgress]);
+
+  return (<>
+    <Renderer 
+      showMessage={showMessage}
+      scenes={scenes.current}
+      actions={actions.current}
+    />
+  </>);
+
+
+  /*
     
   if (loading || !supportsWebGL) {
     return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
@@ -238,4 +256,5 @@ export function SceneLoader() {
       />
     </>)
   }
+  */
 };
