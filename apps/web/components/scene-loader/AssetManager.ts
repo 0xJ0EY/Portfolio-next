@@ -1,6 +1,6 @@
-import { LoadingManager } from "three";
+import { LoadingManager, WebGLRenderer } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { RendererScenes, ThreeRenderers } from "../renderer/Renderer";
+import { RendererScenes } from "../renderer/Renderer";
 import { createRenderScenes } from "./AssetLoaders";
 
 export type UpdateAction = ((deltaTime: number) => void);
@@ -18,8 +18,8 @@ type LoadingResult = Promise<{rendererScenes: RendererScenes, updateActions: Upd
 export class AssetManagerContext {
   constructor(
     public debug: boolean,
+    public renderer: WebGLRenderer,
     public gltfLoader: GLTFLoader,
-    public renderers: ThreeRenderers,
     public scenes: RendererScenes,
   ) {}
 }
@@ -74,14 +74,15 @@ export class AssetManager {
   private index = 0;
   private entries: Record<string, AssetManagerEntry> = {};
 
-  constructor(debug: boolean, renderers: ThreeRenderers, loadingManager?: LoadingManager) {
+  constructor(debug: boolean, loadingManager?: LoadingManager) {
     const gltfLoader = new GLTFLoader(loadingManager);
     const rendererScenes = createRenderScenes();
+    const renderer = new WebGLRenderer();
 
     this.context = new AssetManagerContext(
       debug,
+      renderer,
       gltfLoader,
-      renderers,
       rendererScenes
     );
   }

@@ -1,9 +1,9 @@
 import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLCapabilities, WebGLRenderer } from "three";
 import { AssetManagerContext, OptionalUpdateAction, onProgress } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
-import { RendererScenes, ThreeRenderers } from "../renderer/Renderer";
+import { RendererScenes } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
-import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { isMobileDevice } from "./util";
@@ -32,24 +32,6 @@ export function createRenderScenes(): RendererScenes {
     cutoutScene: new Scene(),
     cssScene: new Scene()
   };
-}
-
-export function createRenderers(width: number, height: number): ThreeRenderers {
-  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
-
-  webglRenderer.capabilities.maxSamples = 32; // Set the gl.MAX_SAMPLES for smoother antialiasing, default is 4
-  webglRenderer.shadowMap.enabled = true;
-  webglRenderer.shadowMap.type = PCFSoftShadowMap;
-
-  const cssRenderer = new CSS3DRenderer();
-
-  webglRenderer.setSize(width, height);
-  cssRenderer.setSize(width, height);
-
-  return {
-    webgl: webglRenderer,
-    css3d: cssRenderer
-  }
 }
 
 export async function NoopLoader(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
@@ -89,7 +71,7 @@ export async function createLights(context: AssetManagerContext, onProgress: onP
 
   // Although my iPhone reports that it is capable of 16k texture maps, it crashes at 8
   // This is not a problem on my iPad that is actually capable of 8k texture maps
-  const shadowMapDimension = getTextureMapDimension(8192, isMobile, context.renderers.webgl.capabilities);
+  const shadowMapDimension = getTextureMapDimension(8192, isMobile, context.renderer.capabilities);
 
   directionalLight.shadow.mapSize.width   = shadowMapDimension;
   directionalLight.shadow.mapSize.height  = shadowMapDimension;

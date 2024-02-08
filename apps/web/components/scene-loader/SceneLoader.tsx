@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
-import { Renderer, RendererScenes, ThreeRenderers } from "../renderer/Renderer";
+import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { NoopLoader, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes, createRenderers } from "./AssetLoaders";
+import { NoopLoader, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
 import { detectWebGL, getBrowserDimensions, isDebug } from "./util";
 
@@ -166,7 +166,6 @@ export function SceneLoader() {
   const [showMessage, setShowMessage] = useState(true);
   const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
-  const renderers = useRef<ThreeRenderers | null>(null);
   const scenes  = useRef<RendererScenes>(createRenderScenes());
   const actions = useRef<UpdateAction[]>([]);
 
@@ -174,11 +173,8 @@ export function SceneLoader() {
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
-    const [width, height] = getBrowserDimensions();
-    renderers.current = createRenderers(width, height);
-
     const debug = isDebug();
-    const manager = new AssetManager(debug, renderers.current, new LoadingManager());
+    const manager = new AssetManager(debug, new LoadingManager());
 
     if (debug) { setShowMessage(false); }
 
@@ -204,12 +200,6 @@ export function SceneLoader() {
     }
 
     fetchData();
-
-    return () => {
-      if (!renderers.current) { return; }
-      
-      renderers.current = null;
-    }
   }, []);
 
   useEffect(() => {
@@ -225,8 +215,6 @@ export function SceneLoader() {
       }
     }
   }, [loadingProgress]);
-
-  const isLoaded = () => { return renderers.current && scenes.current }
     
   if (loading || !supportsWebGL) {
     return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
@@ -234,14 +222,11 @@ export function SceneLoader() {
     return (<>
       { showLoadingUnderscore && <LoadingUnderscore/> }
       { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
-      { isLoaded() && 
-        <Renderer
-          showMessage={showMessage}
-          renderers={renderers.current!}
-          scenes={scenes.current}
-          actions={actions.current}
-        />
-      }
+      <Renderer
+        showMessage={showMessage}
+        scenes={scenes.current}
+        actions={actions.current}
+      />
     </>)
   }
 };
