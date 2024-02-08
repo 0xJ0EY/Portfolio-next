@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { NoopLoader, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, buildDesk, buildLights, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes, loadDesk } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
-import { detectWebGL, getBrowserDimensions, isDebug } from "./util";
+import { detectWebGL, getBrowserDimensions, isDebug, isMobileDevice } from "./util";
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -70,12 +70,8 @@ function ShowUserMessage(props: { onClick: () => void }) {
   const onClick = props.onClick;
   const [smallWindow, setSmallWindow] = useState(false);
 
-  function windowTooSmall(): boolean {
-    return window.innerWidth < 500;
-  }
-
   function onResize() {
-    setSmallWindow(windowTooSmall());
+    setSmallWindow(isMobileDevice());
   }
 
   useEffect(() => {
@@ -178,15 +174,26 @@ export function SceneLoader() {
 
     if (debug) { setShowMessage(false); }
 
-    manager.add('Linked to Magi-1', NoopLoader);
-    manager.add('Linked to Magi-2', NoopLoader);
-    manager.add('Linked to Magi-3', NoopLoader);
-    manager.add('Added lights', createLights);
-    manager.add('Placed floor', createFloor);
-    manager.add('Placed monitor', createMonitor);
-    manager.add('Placed desk', createDesk);
-    manager.add('Placed keyboard', createKeyboard);
-    
+    // manager.add('Linked to Magi-1', NoopLoader);
+    // manager.add('Linked to Magi-2', NoopLoader);
+    // manager.add('Linked to Magi-3', NoopLoader);
+    // manager.add('Added lights', createLights);
+    // manager.add('Placed floor', createFloor);
+    // manager.add('Placed keyboard', createKeyboard);
+
+    // manager.add('Placed monitor', createMonitor);
+    // manager.add('Placed desk', createDesk);
+
+    // manager.loadAsset('Added lights', undefined, buildLights);
+
+    manager.add('Added lights', LightsLoader());
+    manager.add('Placed floor', FloorLoader())
+    manager.add('Placed desk', DeskLoader());
+    manager.add('Placed keyboard', KeyboardLoader());
+    manager.add('Placed monitor', MonitorLoader());
+
+
+
     setLoadingProgress(manager.loadingProgress());
     setSupportsWebGL(detectWebGL());
 

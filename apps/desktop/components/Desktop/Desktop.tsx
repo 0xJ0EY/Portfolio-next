@@ -70,8 +70,6 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
 export const Desktop = (props: { windowCompositor: WindowCompositor, manager: ApplicationManager, apis: SystemAPIs }) => {
   const { windowCompositor, manager, apis } = props;
 
-  const [hasRendered, setRendered] = useState(false);
-
   const parentNode = useRef<HTMLDivElement>(null);
 
   const reducer = applicationReducer(windowCompositor);
@@ -88,18 +86,8 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
       dispatch(evt);
     });
 
-    setRendered(true);
-
-    return () => { unsubscribe(); }
-  }, []);
-
-  useEffect(() => {
     if (parentNode.current) {
       const desktop = parentNode.current;
-
-      console.log('registered desktop');
-      console.log('width: ', desktop.clientWidth);
-      console.log('height: ', desktop.clientHeight)
 
       windowCompositor.setSize(
         desktop.clientWidth,
@@ -107,7 +95,9 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
       )
     }
 
-  }, [hasRendered]);
+    return () => { unsubscribe(); }
+  }, []);
+
 
   const applications = applicationWindows.map(x => 
     <WindowContainer
@@ -121,13 +111,13 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
 
   return (
     <div className={styles.desktop}>
-      { hasRendered && <FolderView
+      <FolderView
         directory='/Users/joey/Desktop'
         apis={apis}
         onFileOpen={onFileOpen}
         localIconPosition={true}
         allowOverflow={false}
-      />}
+      />
 
       <div ref={parentNode} className={styles.applicationContainer}>{applications}</div>
   </div>
