@@ -70,6 +70,8 @@ const applicationReducer = (windowCompositor: WindowCompositor) => {
 export const Desktop = (props: { windowCompositor: WindowCompositor, manager: ApplicationManager, apis: SystemAPIs }) => {
   const { windowCompositor, manager, apis } = props;
 
+  const [hasRendered, setRendered] = useState(false);
+
   const parentNode = useRef<HTMLDivElement>(null);
 
   const reducer = applicationReducer(windowCompositor);
@@ -86,6 +88,12 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
       dispatch(evt);
     });
 
+    setRendered(true);
+
+    return () => { unsubscribe(); }
+  }, []);
+
+  useEffect(() => {
     if (parentNode.current) {
       const desktop = parentNode.current;
 
@@ -99,9 +107,7 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
       )
     }
 
-    return () => { unsubscribe(); }
-  }, []);
-
+  }, [hasRendered]);
 
   const applications = applicationWindows.map(x => 
     <WindowContainer
@@ -115,13 +121,13 @@ export const Desktop = (props: { windowCompositor: WindowCompositor, manager: Ap
 
   return (
     <div className={styles.desktop}>
-      <FolderView
+      { hasRendered && <FolderView
         directory='/Users/joey/Desktop'
         apis={apis}
         onFileOpen={onFileOpen}
         localIconPosition={true}
         allowOverflow={false}
-      />
+      />}
 
       <div ref={parentNode} className={styles.applicationContainer}>{applications}</div>
   </div>
