@@ -206,59 +206,7 @@ export class AssetManager {
       asset.in_scene = true;
 
       onProgress(asset, 100);
-
-      // if (asset.assetLoader.builderProcessTime) {
-        // await sleep(asset.assetLoader.builderProcessTime);
-      // }
     }
-
-    // Object.values(this.assets)
-    //   .sort((a, b) => a.order - b.order)
-    //   .map(async (asset, index) => {
-    //     const builder = asset.assetLoader.builder;
-
-    //     if (!builder) { onProgress(asset, 100); return; }
-
-    //     console.log(asset);
-
-    //     // setTimeout()
-
-    //     // builder(this.context, asset.asset);
-    //     // await sleep(1000);
-
-
-    //     setTimeout(() => {
-    //       builder(this.context, asset.asset);
-
-    //     }, index * 500);
-
-    //     // const action = builder(this.context, asset.asset);
-
-    //     onProgress(asset, 100);
-
-    //     return null;
-    // });
-
-    // console.log(this.context.scenes);
-    // const actions = Object.values(this.entries).map(entry => {
-    //   const onProgress = (progress: number) => {
-    //     entry.progress = progress;
-    //     if (onUpdate) { onUpdate(); }
-    //   }
-
-    //   const handle = async (): Promise<OptionalUpdateAction> => {
-    //     const actions = await entry.loader(this.context, onProgress);
-
-    //     // Always set progress to 100, even if it is not handled within the function
-    //     onProgress(100);
-
-    //     return actions;
-    //   }
-
-    //   return handle();
-    // })
-
-    // const results: OptionalUpdateAction[] = await Promise.all(actions);
 
     return { updateActions: [] }
   }

@@ -98,6 +98,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 }
 
 interface RendererProps {
+  loading: boolean,
   showMessage: boolean, 
   scenes: RendererScenes,
   actions: UpdateAction[],
@@ -161,7 +162,7 @@ export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
   const soundService = useRef(new SoundService());
 
-  const { showMessage, scenes, actions } = props;
+  const { loading, showMessage, scenes, actions } = props;
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
@@ -279,15 +280,16 @@ export const Renderer = (props: RendererProps) => {
 
   useEffect(() => {
     if (!showMessage) {
-      console.log('foobar');
-
-      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
-
-      
       allowUserInput.current = true;
       setShowUI(true);
     }
   }, [showMessage])
+
+  useEffect(() => {
+    if (!loading) {
+      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
+    }
+  }, [loading]);
 
   return (
     <div className={styles.renderer}>

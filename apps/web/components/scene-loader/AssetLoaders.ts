@@ -70,7 +70,7 @@ function getDesktopTargetUrl(): string {
 
     return transformWebUrlToDesktop(vercelUrl);
   } else {
-    return 'https://portfolio-next-desktop-git-feature-debug-firefox-0xj0ey.vercel.app/'
+    return 'http://192.168.178.134:3001/'
   }
 }
 

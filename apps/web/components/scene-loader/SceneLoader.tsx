@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { LoadingManager, WebGLRenderer } from "three";
+import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
 import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, clearRenderScenes, createRenderScenes } from "./AssetLoaders";
@@ -125,25 +125,28 @@ function ShowBios() {
 }
 
 function DisplayWebGLError() {
-  return (<div className={styles['error-container']}>
-      <h3>ERROR: No WebGL detected</h3>
-      <p>WebGL is required to run this site.</p>
-      <p>Please enable it or switch to a browser that supports WebGL</p>
-  </div> );
+  return (
+    <div className={styles['loading-progress']}>
+      <OperatingSystemStats/>
+      <div className={styles['error-container']}>
+        <h3>ERROR: No WebGL detected</h3>
+        <p>WebGL is required to run this site.</p>
+        <p>Please enable it or switch to a browser that supports WebGL</p>
+      </div> 
+    </div>
+  );
 }
 
-function DisplayLoadingProgress(props: { supportsWebGL: boolean | null, loadingProgress: LoadingProgress }) {
+function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
   const loadingProgress = props.loadingProgress;
-  const supportsWebGL = props.supportsWebGL ?? true;
 
   const loadingResources = ShowLoadingResources(loadingProgress);
 
   return (<>
     <div className={styles['loading-progress']}>
       <OperatingSystemStats/>
-      {supportsWebGL && <ShowBios/>}
-      {supportsWebGL && loadingResources}
-      {!supportsWebGL && <DisplayWebGLError/>}
+      <ShowBios/>
+      {loadingResources}
     </div>
   </>)
 }
@@ -159,6 +162,7 @@ function LoadingUnderscore() {
 
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
+  const [showProgress, setShowProgress] = useState(true);
   const [showMessage, setShowMessage] = useState(true);
   const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
@@ -177,7 +181,7 @@ export function SceneLoader() {
 
     manager.init(debug);
 
-    if (debug) { setShowMessage(false); }
+    // if (debug) { setShowMessage(false); }
 
     // manager.add('Linked to Magi-1', NoopLoader);
     // manager.add('Linked to Magi-2', NoopLoader);
@@ -206,6 +210,7 @@ export function SceneLoader() {
       });
 
       actions.current = updateActions;
+      setLoading(false);
     }
 
     fetchData();
@@ -218,40 +223,28 @@ export function SceneLoader() {
 
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {
-        setTimeout(() => { setLoading(false); }, 1000);
+        setTimeout(() => { setShowProgress(false); }, 1000);
         setTimeout(() => { setLoadingUnderscore(false); }, 1800);
-        setShowMessage(false);
       } else {
         setShowMessage(false);
-        setLoading(false);
+        setShowProgress(false);
         setLoadingUnderscore(false);
       }
     }
   }, [loadingProgress]);
 
+  if (supportsWebGL === false) { return DisplayWebGLError(); }
+
   return (<>
-    <Renderer 
+    { showProgress && loadingProgress && <DisplayLoadingProgress loadingProgress={loadingProgress}/> }
+    { showLoadingUnderscore && <LoadingUnderscore/> }
+    { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
+    <Renderer
+      loading={loading}
       showMessage={showMessage}
+      
       scenes={scenesRef.current}
       actions={actions.current}
     />
   </>);
-
-
-  /*
-    
-  if (loading || !supportsWebGL) {
-    return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
-  } else {
-    return (<>
-      { showLoadingUnderscore && <LoadingUnderscore/> }
-      { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
-      <Renderer
-        showMessage={showMessage}
-        scenes={scenes.current}
-        actions={actions.current}
-      />
-    </>)
-  }
-  */
 };
