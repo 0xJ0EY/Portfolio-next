@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
-import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { NoopLoader, createDesk, createFloor, createKeyboard, createLights, createMonitor, createRenderScenes } from "./AssetLoaders";
+import { AssetManager, LoadingProgress, LoadingProgressEntry, UpdateAction } from "./AssetManager";
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
-import { detectWebGL, getBrowserDimensions, isDebug } from "./util";
+import { detectWebGL, isDebug, isMobileDevice } from "./util";
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -24,11 +24,16 @@ function ResourceLoadingStatus(loadingProgress: LoadingProgress) {
   return (<h3>Loading resources ({progress.loaded}/{progress.total})</h3>);
 }
 
-function DisplayResource(container: TotalProgressPerEntry) {
-  const entry = container.entry;
-  const total = Math.floor(container.total);
-  
-  return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{total}%</li>
+function DisplayResource(entry: LoadingProgressEntry) {
+  const total = 2;
+  let state = 0;
+
+  state += Number(entry.downloaded);
+  state += Number(entry.processed);
+
+  const displayState = <>({state}/{total})</>
+
+  return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{displayState}</li>
 }
 
 function OperatingSystemStats() {
@@ -53,7 +58,7 @@ function OperatingSystemStats() {
 }
 
 function ShowLoadingResources(loadingProgress: LoadingProgress) {
-  const resources = loadingProgress.listTotalProgressPerLoadedEntry(5);
+  const resources = loadingProgress.listAllEntries();
 
   const resourceLoadingItems = ResourceLoadingStatus(loadingProgress);
   const resourceListItems = resources.map(DisplayResource);
@@ -70,12 +75,8 @@ function ShowUserMessage(props: { onClick: () => void }) {
   const onClick = props.onClick;
   const [smallWindow, setSmallWindow] = useState(false);
 
-  function windowTooSmall(): boolean {
-    return window.innerWidth < 500;
-  }
-
   function onResize() {
-    setSmallWindow(windowTooSmall());
+    setSmallWindow(isMobileDevice());
   }
 
   useEffect(() => {
@@ -129,25 +130,28 @@ function ShowBios() {
 }
 
 function DisplayWebGLError() {
-  return (<div className={styles['error-container']}>
-      <h3>ERROR: No WebGL detected</h3>
-      <p>WebGL is required to run this site.</p>
-      <p>Please enable it or switch to a browser that supports WebGL</p>
-  </div> );
+  return (
+    <div className={styles['loading-progress']}>
+      <OperatingSystemStats/>
+      <div className={styles['error-container']}>
+        <h3>ERROR: No WebGL detected</h3>
+        <p>WebGL is required to run this site.</p>
+        <p>Please enable it or switch to a browser that supports WebGL</p>
+      </div> 
+    </div>
+  );
 }
 
-function DisplayLoadingProgress(props: { supportsWebGL: boolean | null, loadingProgress: LoadingProgress }) {
+function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
   const loadingProgress = props.loadingProgress;
-  const supportsWebGL = props.supportsWebGL ?? true;
 
   const loadingResources = ShowLoadingResources(loadingProgress);
 
   return (<>
     <div className={styles['loading-progress']}>
       <OperatingSystemStats/>
-      {supportsWebGL && <ShowBios/>}
-      {supportsWebGL && loadingResources}
-      {!supportsWebGL && <DisplayWebGLError/>}
+      <ShowBios/>
+      {loadingResources}
     </div>
   </>)
 }
@@ -163,70 +167,84 @@ function LoadingUnderscore() {
 
 export function SceneLoader() {
   const [loading, setLoading] = useState(true);
+  const [showProgress, setShowProgress] = useState(true);
   const [showMessage, setShowMessage] = useState(true);
   const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
-  const scenes  = useRef<RendererScenes>(createRenderScenes());
-  const actions = useRef<UpdateAction[]>([]);
+  const scenesRef   = useRef<RendererScenes>(createRenderScenes());
+  const managerRef  = useRef<AssetManager>(new AssetManager(scenesRef.current, new LoadingManager()));
+  const actions     = useRef<UpdateAction[]>([]);
 
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
-    const debug = isDebug();
-    const manager = new AssetManager(debug, new LoadingManager());
+    const manager = managerRef.current;
 
-    if (debug) { setShowMessage(false); }
+    manager.init(isDebug());
+    manager.reset();
 
-    manager.add('Linked to Magi-1', NoopLoader);
-    manager.add('Linked to Magi-2', NoopLoader);
-    manager.add('Linked to Magi-3', NoopLoader);
-    manager.add('Added lights', createLights);
-    manager.add('Placed floor', createFloor);
-    manager.add('Placed monitor', createMonitor);
-    manager.add('Placed desk', createDesk);
-    manager.add('Placed keyboard', createKeyboard);
-    
-    setLoadingProgress(manager.loadingProgress());
+    manager.add('Linked to Magi-1', NoopLoader());
+    manager.add('Linked to Magi-2', NoopLoader());
+    manager.add('Linked to Magi-3', NoopLoader());
+    manager.add('Loading desk', DeskLoader());
+    manager.add('Loading lights', LightsLoader());
+    manager.add('Loading floor', FloorLoader())
+    manager.add('Loading keyboard', KeyboardLoader());
+    manager.add('Loading monitor', MonitorLoader());
+
+    setLoadingProgress(managerRef.current.loadingProgress());
     setSupportsWebGL(detectWebGL());
 
+    const abortController = new AbortController();
+
     const fetchData = async () => {
-      const { rendererScenes, updateActions } = await manager.load(() => {
+      const { updateActions } = await manager.load(abortController.signal, () => {
         setLoadingProgress(manager.loadingProgress());
       });
 
-      scenes.current = rendererScenes;
-      actions.current = updateActions;
+      if (!abortController.signal.aborted) {
+        actions.current = updateActions;
+        setLoading(false);
+      }
     }
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    }
   }, []);
 
   useEffect(() => {
     if (!loadingProgress) { return; }
 
+    console.log('loading process');
+
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {
-        setTimeout(() => { setLoading(false); }, 1000);
+        setTimeout(() => { setShowProgress(false); }, 1000);
         setTimeout(() => { setLoadingUnderscore(false); }, 1800);
       } else {
-        setLoading(false);
+        setShowMessage(false);
+        setShowProgress(false);
         setLoadingUnderscore(false);
       }
     }
   }, [loadingProgress]);
-    
-  if (loading || !supportsWebGL) {
-    return <>{loadingProgress && <DisplayLoadingProgress supportsWebGL={supportsWebGL} loadingProgress={loadingProgress}/>}</>
-  } else {
-    return (<>
-      { showLoadingUnderscore && <LoadingUnderscore/> }
-      { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
-      <Renderer
-        showMessage={showMessage}
-        scenes={scenes.current}
-        actions={actions.current}
-      />
-    </>)
-  }
+
+  if (supportsWebGL === false) { return DisplayWebGLError(); }
+
+  return (<>
+    { showProgress && loadingProgress && <DisplayLoadingProgress loadingProgress={loadingProgress}/> }
+    { showLoadingUnderscore && <LoadingUnderscore/> }
+    { showMessage && <ShowUserMessage onClick={() => setShowMessage(false)}/> }
+    <Renderer
+      loading={loading}
+      showMessage={showMessage}
+      
+      scenes={scenesRef.current}
+      actions={actions.current}
+    />
+  </>);
 };

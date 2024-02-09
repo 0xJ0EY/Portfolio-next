@@ -1,19 +1,36 @@
 import { LoadingManager, WebGLRenderer } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { RendererScenes } from "../renderer/Renderer";
-import { createRenderScenes } from "./AssetLoaders";
+import { sleep } from "./util";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type OptionalUpdateAction = UpdateAction[] | null;
 
-export type onProgress = (progress: number) => void;
-export type Loader = (context: AssetManagerContext, onProgress: onProgress) => Promise<OptionalUpdateAction>;
+export type AssetDownloader<T> = (context: AssetManagerContext) => Promise<T>;
+export type AssetBuilder<T> = (context: AssetManagerContext, asset: T | null) => OptionalUpdateAction;
 
-export type AssetManagerEntry = { key: string, loader: Loader, order: number, progress: number }
-export type LoadingProgressEntry = { name: string, progress: number }
+export type AssetLoader<T> = {
+  downloader: AssetDownloader<T> | null,
+  builder: AssetBuilder<T> | null,
+  builderProcessTime: number
+}
+
+export type AssetContext<T> = {
+  name: string,
+  assetLoader: AssetLoader<T>
+  asset: T | null,
+  inScene: boolean
+
+  order: number,
+
+  downloaded: boolean,
+  processed: boolean,
+}
+
+export type LoadingProgressEntry = { name: string, downloaded: boolean, processed: boolean }
 export type TotalProgressPerEntry = { entry: LoadingProgressEntry, total: number }
 
-type LoadingResult = Promise<{rendererScenes: RendererScenes, updateActions: UpdateAction[]}>;
+type LoadingResult = Promise<{updateActions: UpdateAction[]}>;
 
 export class AssetManagerContext {
   constructor(
@@ -39,7 +56,7 @@ export class LoadingProgress {
   }
 
   public listLoadedEntries(): LoadingProgressEntry[] {
-    return this.entries.filter(x => x.progress === 100);
+    return this.entries.filter(x => x.downloaded && x.processed);
   }
 
   public listTotalProgressPerLoadedEntry(limit?: number): TotalProgressPerEntry[] {
@@ -69,57 +86,118 @@ export class LoadingProgress {
 }
 
 export class AssetManager {
-  private context: AssetManagerContext;
+  private context: AssetManagerContext | null = null;
 
   private index = 0;
-  private entries: Record<string, AssetManagerEntry> = {};
+  private assets: Record<string, AssetContext<GLTF>> = {}
 
-  constructor(debug: boolean, loadingManager?: LoadingManager) {
-    const gltfLoader = new GLTFLoader(loadingManager);
-    const rendererScenes = createRenderScenes();
+  constructor(private rendererScenes: RendererScenes, private loadingManager?: LoadingManager) {}
+
+  public init(debug: boolean): void {
+    const gltfLoader = new GLTFLoader(this.loadingManager);
     const renderer = new WebGLRenderer();
 
     this.context = new AssetManagerContext(
       debug,
       renderer,
       gltfLoader,
-      rendererScenes
+      this.rendererScenes
     );
   }
 
-  public add(name: string, loader: Loader): void {
-    this.entries[name] = { key: name, loader, order: this.index++, progress: 0 };
+  public setDebug(enabled: boolean): void {
+    if (!this.context) { return; }
+
+    this.context.debug = enabled;
+  }
+
+  public getRenderScenes(): RendererScenes | null {
+    return this.context?.scenes ?? null;
+  }
+
+  public add(name: string, loader: AssetLoader<GLTF>): void {
+    const noDownloadNeeded = loader.downloader === null;
+    const noProcessNeeded = loader.builder === null;
+
+    this.assets[name] = {
+      name,
+      assetLoader: loader,
+      asset: null,
+      inScene: false,
+      order: this.index++,
+      downloaded: noDownloadNeeded,
+      processed: noProcessNeeded,
+    }
+  }
+
+  public reset(): void {
+    const scenes = this.rendererScenes;
+
+    this.index = 0;
+    this.assets = {};
+
+    scenes.sourceScene.clear();
+    scenes.cutoutScene.clear();
+    scenes.cssScene.clear();
   }
 
   public loadingProgress(): LoadingProgress {
-    const entries = Object.values(this.entries)
+    const entries: LoadingProgressEntry[] = Object.values(this.assets)
       .sort((a, b) => a.order - b.order)
-      .map((entry) => { return { name: entry.key, progress: entry.progress }});
+      .map((entry) => { return {
+        name: entry.name,
+        downloaded: entry.downloaded,
+        processed: entry.processed
+      }
+    });
 
     return new LoadingProgress(entries);
   }
 
-  public async load(onUpdate?: () => void): LoadingResult {
-    const actions = Object.values(this.entries).map(entry => {
-      const onProgress = (progress: number) => {
-        entry.progress = progress;
-        if (onUpdate) { onUpdate(); }
+  public async load(signal?: AbortSignal, onUpdate?: () => void): LoadingResult {
+    if (!this.context) { this.init(false); }
+
+
+    function update() {
+      if (onUpdate) { onUpdate(); }
+    }
+
+    const downloadActions = Object.values(this.assets).map(asset => {
+      return (async () => {
+        const downloader = asset.assetLoader.downloader;
+
+        if (!downloader) { return; }
+        if (asset.asset) { return; }
+
+        asset.asset = await downloader(this.context!);
+        asset.downloaded = true;
+
+        update();
+      })();
+    });
+
+    await Promise.all(downloadActions);
+
+    const actions = Object.values(this.assets).sort((a, b) => a.order - b.order);
+
+    for (const asset of actions) {
+      const builder = asset.assetLoader.builder;
+
+      if (asset.inScene) { continue; }
+      if (!builder) { continue; }
+
+      if (asset.assetLoader.builderProcessTime) {
+        await sleep(asset.assetLoader.builderProcessTime);
       }
 
-      const handle = async (): Promise<OptionalUpdateAction> => {
-        const actions = await entry.loader(this.context, onProgress);
+      if (signal && signal.aborted) { return { updateActions: [] }};
 
-        // Always set progress to 100, even if it is not handled within the function
-        onProgress(100);
+      builder(this.context!, asset.asset);
+      asset.processed = true;
 
-        return actions;
-      }
+      update();
+    }
 
-      return handle();
-    })
-
-    const results: OptionalUpdateAction[] = await Promise.all(actions);
-
-    return { rendererScenes: this.context.scenes, updateActions: [] }
+    return { updateActions: [] }
   }
 }

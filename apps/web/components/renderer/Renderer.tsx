@@ -98,6 +98,7 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 }
 
 interface RendererProps {
+  loading: boolean,
   showMessage: boolean, 
   scenes: RendererScenes,
   actions: UpdateAction[],
@@ -161,10 +162,12 @@ export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
   const soundService = useRef(new SoundService());
 
-  const { showMessage, scenes, actions } = props;
+  const { loading, showMessage, scenes, actions } = props;
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+
+  const cameraHandlerRef = useRef<CameraHandler | null>(null);
 
   const allowUserInput = useRef<boolean>(false);
   const [showUI, setShowUI] = useState(false);
@@ -203,6 +206,10 @@ export const Renderer = (props: RendererProps) => {
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents, handleCameraHandlerStateChange);
     const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
     const touchInputHandler = new TouchInputHandler(allowUserInput, cameraHandler);
+
+    cameraHandlerRef.current = cameraHandler;
+
+    
 
     const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
@@ -277,6 +284,12 @@ export const Renderer = (props: RendererProps) => {
       setShowUI(true);
     }
   }, [showMessage])
+
+  useEffect(() => {
+    if (!loading) {
+      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
+    }
+  }, [loading]);
 
   return (
     <div className={styles.renderer}>
