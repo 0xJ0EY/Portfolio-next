@@ -1,15 +1,12 @@
 import { LoadingManager, WebGLRenderer } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { RendererScenes } from "../renderer/Renderer";
-import { createRenderScenes } from "./AssetLoaders";
 import { sleep } from "./util";
 
 export type UpdateAction = ((deltaTime: number) => void);
 export type OptionalUpdateAction = UpdateAction[] | null;
 
 export type onProgress = (progress: number) => void;
-// export type AssetLoader = (context: AssetManagerContext) => Promise<GLTF>;
-// export type AssetBuilder = (context: AssetManagerContext, asset?: GLTF) => OptionalUpdateAction;
 
 export type AssetDownloader<T> = (context: AssetManagerContext) => Promise<T>;
 export type AssetBuilder<T> = (context: AssetManagerContext, asset: T | null) => OptionalUpdateAction;
@@ -33,7 +30,7 @@ export type AssetContext<T> = {
   name: string,
   assetLoader: AssetLoader<T>
   asset: T | null,
-  in_scene: boolean
+  inScene: boolean
   order: number,
   progress: number
 }
@@ -99,11 +96,7 @@ export class LoadingProgress {
 export class AssetManager {
   private context: AssetManagerContext | null = null;
 
-
-  private loading: boolean = false;
-
   private index = 0;
-  private entries: Record<string, AssetManagerEntry> = {};
   private assets: Record<string, AssetContext<GLTF>> = {}
 
   constructor(private rendererScenes: RendererScenes, private loadingManager?: LoadingManager) {}
@@ -130,29 +123,27 @@ export class AssetManager {
     return this.context?.scenes ?? null;
   }
 
-  // public loadAsset(name: string, assetLoader?: AssetLoader, builder?: AssetBuilder) {
-  //   this.assets[name] = {
-  //     assetLoader,
-  //     builder,
-  //     order: this.index,
-  //     progress: 0
-  //   }
-  // }
-
   public add(name: string, loader: AssetLoader<GLTF>): void {
     this.assets[name] = {
       name,
       assetLoader: loader,
       asset: null,
-      in_scene: false,
+      inScene: false,
       order: this.index++,
       progress: 0
     }
   }
 
-  // public add(name: string, loader: Loader): void {
-  //   this.entries[name] = { key: name, loader, order: this.index++, progress: 0 };
-  // }
+  public reset(): void {
+    const scenes = this.rendererScenes;
+
+    this.index = 0;
+    this.assets = {};
+
+    scenes.sourceScene.clear();
+    scenes.cutoutScene.clear();
+    scenes.cssScene.clear();
+  }
 
   public loadingProgress(): LoadingProgress {
     const entries = Object.values(this.assets)
@@ -162,7 +153,7 @@ export class AssetManager {
     return new LoadingProgress(entries);
   }
 
-  public async load(onUpdate?: () => void): LoadingResult {
+  public async load(signal?: AbortSignal, onUpdate?: () => void): LoadingResult {
     if (!this.context) { this.init(false); }
 
     function onProgress(asset: AssetContext<GLTF>, progress: number) {
@@ -191,19 +182,20 @@ export class AssetManager {
 
     const actions = Object.values(this.assets).sort((a, b) => a.order - b.order);
 
-
     for (const asset of actions) {
       const builder = asset.assetLoader.builder;
 
-      if (asset.in_scene) { continue; }
+      if (asset.inScene) { onProgress(asset, 100); continue; }
       if (!builder) { onProgress(asset, 100); continue; }
 
       if (asset.assetLoader.builderProcessTime) {
         await sleep(asset.assetLoader.builderProcessTime);
       }
 
+      if (signal && signal.aborted) { return { updateActions: [] }};
+
       builder(this.context!, asset.asset);
-      asset.in_scene = true;
+      asset.inScene = true;
 
       onProgress(asset, 100);
     }

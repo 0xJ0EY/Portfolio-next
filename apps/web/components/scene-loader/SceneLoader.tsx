@@ -175,11 +175,11 @@ export function SceneLoader() {
   
   useEffect(() => {
     const manager = managerRef.current;
-    const debug = isDebug();
 
     clearRenderScenes(scenesRef.current);
 
-    manager.init(debug);
+    manager.init(isDebug());
+    manager.reset();
 
     // if (debug) { setShowMessage(false); }
 
@@ -195,25 +195,33 @@ export function SceneLoader() {
 
     // manager.loadAsset('Added lights', undefined, buildLights);
 
-    manager.add('Loading monitor', MonitorLoader());
     manager.add('Loading desk', DeskLoader());
     manager.add('Loading lights', LightsLoader());
     manager.add('Loading floor', FloorLoader())
+    manager.add('Loading monitor', MonitorLoader());
     manager.add('Loading keyboard', KeyboardLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
     setSupportsWebGL(detectWebGL());
 
+    const abortController = new AbortController();
+
     const fetchData = async () => {
-      const { updateActions } = await manager.load(() => {
+      const { updateActions } = await manager.load(abortController.signal, () => {
         setLoadingProgress(manager.loadingProgress());
       });
 
-      actions.current = updateActions;
-      setLoading(false);
+      if (!abortController.signal.aborted) {
+        actions.current = updateActions;
+        setLoading(false);
+      }
     }
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    }
   }, []);
 
   useEffect(() => {
