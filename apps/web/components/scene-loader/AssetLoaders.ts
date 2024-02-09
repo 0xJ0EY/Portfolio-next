@@ -1,5 +1,5 @@
 import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLCapabilities, WebGLRenderer } from "three";
-import { AssetLoader, AssetManagerContext, OptionalUpdateAction, onProgress } from "./AssetManager";
+import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
@@ -32,16 +32,6 @@ export function createRenderScenes(): RendererScenes {
     cutoutScene: new Scene(),
     cssScene: new Scene()
   };
-}
-
-export function clearRenderScenes(scenes: RendererScenes): void {
-  scenes.sourceScene.clear();
-  scenes.cutoutScene.clear();
-  scenes.cssScene.clear();
-}
-
-export async function NoopLoader(context: AssetManagerContext, onProgress: onProgress): Promise<OptionalUpdateAction> {
-  return null;
 }
 
 function getTextureMapDimension(max: number, isMobile: boolean, capabilities: WebGLCapabilities): number {
@@ -80,6 +70,14 @@ function getDesktopTarget(debug: boolean): string {
   if (!debug) { return url; }
 
   return `${url}/?debug`;
+}
+
+export function NoopLoader(): AssetLoader<GLTF> {
+  return {
+    downloader: null,
+    builder: null,
+    builderProcessTime: 0
+  }
 }
 
 export function LightsLoader(): AssetLoader<GLTF> {

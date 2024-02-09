@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
-import { AssetManager, LoadingProgress, TotalProgressPerEntry, UpdateAction } from "./AssetManager";
-import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, clearRenderScenes, createRenderScenes } from "./AssetLoaders";
+import { AssetManager, LoadingProgress, LoadingProgressEntry, UpdateAction } from "./AssetManager";
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
 import styles from './SceneLoader.module.css';
-import { detectWebGL, getBrowserDimensions, isDebug, isMobileDevice } from "./util";
+import { detectWebGL, isDebug, isMobileDevice } from "./util";
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -24,11 +24,16 @@ function ResourceLoadingStatus(loadingProgress: LoadingProgress) {
   return (<h3>Loading resources ({progress.loaded}/{progress.total})</h3>);
 }
 
-function DisplayResource(container: TotalProgressPerEntry) {
-  const entry = container.entry;
-  const total = Math.floor(container.total);
-  
-  return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{total}%</li>
+function DisplayResource(entry: LoadingProgressEntry) {
+  const total = 2;
+  let state = 0;
+
+  state += Number(entry.downloaded);
+  state += Number(entry.processed);
+
+  const displayState = <>({state}/{total})</>
+
+  return <li style={{ fontFamily: 'monospace' }} key={entry.name}>{entry.name}{createSpacer(entry.name, 30, '.')}{displayState}</li>
 }
 
 function OperatingSystemStats() {
@@ -53,7 +58,7 @@ function OperatingSystemStats() {
 }
 
 function ShowLoadingResources(loadingProgress: LoadingProgress) {
-  const resources = loadingProgress.listTotalProgressPerLoadedEntry(5);
+  const resources = loadingProgress.listAllEntries();
 
   const resourceLoadingItems = ResourceLoadingStatus(loadingProgress);
   const resourceListItems = resources.map(DisplayResource);
@@ -176,30 +181,17 @@ export function SceneLoader() {
   useEffect(() => {
     const manager = managerRef.current;
 
-    clearRenderScenes(scenesRef.current);
-
     manager.init(isDebug());
     manager.reset();
 
-    // if (debug) { setShowMessage(false); }
-
-    // manager.add('Linked to Magi-1', NoopLoader);
-    // manager.add('Linked to Magi-2', NoopLoader);
-    // manager.add('Linked to Magi-3', NoopLoader);
-    // manager.add('Added lights', createLights);
-    // manager.add('Placed floor', createFloor);
-    // manager.add('Placed keyboard', createKeyboard);
-
-    // manager.add('Placed monitor', createMonitor);
-    // manager.add('Placed desk', createDesk);
-
-    // manager.loadAsset('Added lights', undefined, buildLights);
-
+    manager.add('Linked to Magi-1', NoopLoader());
+    manager.add('Linked to Magi-2', NoopLoader());
+    manager.add('Linked to Magi-3', NoopLoader());
     manager.add('Loading desk', DeskLoader());
     manager.add('Loading lights', LightsLoader());
     manager.add('Loading floor', FloorLoader())
-    manager.add('Loading monitor', MonitorLoader());
     manager.add('Loading keyboard', KeyboardLoader());
+    manager.add('Loading monitor', MonitorLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
     setSupportsWebGL(detectWebGL());

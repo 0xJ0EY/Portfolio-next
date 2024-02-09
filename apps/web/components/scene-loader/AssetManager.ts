@@ -6,8 +6,6 @@ import { sleep } from "./util";
 export type UpdateAction = ((deltaTime: number) => void);
 export type OptionalUpdateAction = UpdateAction[] | null;
 
-export type onProgress = (progress: number) => void;
-
 export type AssetDownloader<T> = (context: AssetManagerContext) => Promise<T>;
 export type AssetBuilder<T> = (context: AssetManagerContext, asset: T | null) => OptionalUpdateAction;
 
@@ -17,25 +15,19 @@ export type AssetLoader<T> = {
   builderProcessTime: number
 }
 
-export type Loader = (context: AssetManagerContext, onProgress: onProgress) => Promise<OptionalUpdateAction>;
-
-export type AssetManagerEntry = {
-  key: string,
-  loader: Loader,
-  order: number,
-  progress: number
-}
-
 export type AssetContext<T> = {
   name: string,
   assetLoader: AssetLoader<T>
   asset: T | null,
   inScene: boolean
+
   order: number,
-  progress: number
+
+  downloaded: boolean,
+  processed: boolean,
 }
 
-export type LoadingProgressEntry = { name: string, progress: number }
+export type LoadingProgressEntry = { name: string, downloaded: boolean, processed: boolean }
 export type TotalProgressPerEntry = { entry: LoadingProgressEntry, total: number }
 
 type LoadingResult = Promise<{updateActions: UpdateAction[]}>;
@@ -64,7 +56,7 @@ export class LoadingProgress {
   }
 
   public listLoadedEntries(): LoadingProgressEntry[] {
-    return this.entries.filter(x => x.progress === 100);
+    return this.entries.filter(x => x.downloaded && x.processed);
   }
 
   public listTotalProgressPerLoadedEntry(limit?: number): TotalProgressPerEntry[] {
@@ -124,13 +116,17 @@ export class AssetManager {
   }
 
   public add(name: string, loader: AssetLoader<GLTF>): void {
+    const noDownloadNeeded = loader.downloader === null;
+    const noProcessNeeded = loader.builder === null;
+
     this.assets[name] = {
       name,
       assetLoader: loader,
       asset: null,
       inScene: false,
       order: this.index++,
-      progress: 0
+      downloaded: noDownloadNeeded,
+      processed: noProcessNeeded,
     }
   }
 
@@ -146,9 +142,14 @@ export class AssetManager {
   }
 
   public loadingProgress(): LoadingProgress {
-    const entries = Object.values(this.assets)
+    const entries: LoadingProgressEntry[] = Object.values(this.assets)
       .sort((a, b) => a.order - b.order)
-      .map((entry) => { return { name: entry.name, progress: entry.progress }});
+      .map((entry) => { return {
+        name: entry.name,
+        downloaded: entry.downloaded,
+        processed: entry.processed
+      }
+    });
 
     return new LoadingProgress(entries);
   }
@@ -156,9 +157,8 @@ export class AssetManager {
   public async load(signal?: AbortSignal, onUpdate?: () => void): LoadingResult {
     if (!this.context) { this.init(false); }
 
-    function onProgress(asset: AssetContext<GLTF>, progress: number) {
-      asset.progress = progress;
 
+    function update() {
       if (onUpdate) { onUpdate(); }
     }
 
@@ -166,15 +166,13 @@ export class AssetManager {
       return (async () => {
         const downloader = asset.assetLoader.downloader;
 
-        // No downloader, set the result to 50 no the less
-        if (!downloader) { onProgress(asset, 50); return; }
-
-        // Already downloaded, set progress to 75
-        if (asset.asset) { onProgress(asset, 75); return; }
+        if (!downloader) { return; }
+        if (asset.asset) { return; }
 
         asset.asset = await downloader(this.context!);
+        asset.downloaded = true;
 
-        onProgress(asset, 75);
+        update();
       })();
     });
 
@@ -185,8 +183,8 @@ export class AssetManager {
     for (const asset of actions) {
       const builder = asset.assetLoader.builder;
 
-      if (asset.inScene) { onProgress(asset, 100); continue; }
-      if (!builder) { onProgress(asset, 100); continue; }
+      if (asset.inScene) { continue; }
+      if (!builder) { continue; }
 
       if (asset.assetLoader.builderProcessTime) {
         await sleep(asset.assetLoader.builderProcessTime);
@@ -195,9 +193,9 @@ export class AssetManager {
       if (signal && signal.aborted) { return { updateActions: [] }};
 
       builder(this.context!, asset.asset);
-      asset.inScene = true;
+      asset.processed = true;
 
-      onProgress(asset, 100);
+      update();
     }
 
     return { updateActions: [] }
