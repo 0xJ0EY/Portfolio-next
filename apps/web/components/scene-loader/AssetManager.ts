@@ -41,7 +41,7 @@ export type AssetContext<T> = {
 export type LoadingProgressEntry = { name: string, progress: number }
 export type TotalProgressPerEntry = { entry: LoadingProgressEntry, total: number }
 
-type LoadingResult = Promise<{rendererScenes: RendererScenes, updateActions: UpdateAction[]}>;
+type LoadingResult = Promise<{updateActions: UpdateAction[]}>;
 
 export class AssetManagerContext {
   constructor(
@@ -97,26 +97,37 @@ export class LoadingProgress {
 }
 
 export class AssetManager {
-  private context: AssetManagerContext;
+  private context: AssetManagerContext | null = null;
+
+
+  private loading: boolean = false;
 
   private index = 0;
   private entries: Record<string, AssetManagerEntry> = {};
   private assets: Record<string, AssetContext<GLTF>> = {}
 
-  constructor(debug: boolean, rendererScenes: RendererScenes, loadingManager?: LoadingManager) {
-    const gltfLoader = new GLTFLoader(loadingManager);
+  constructor(private rendererScenes: RendererScenes, private loadingManager?: LoadingManager) {}
+
+  public init(debug: boolean): void {
+    const gltfLoader = new GLTFLoader(this.loadingManager);
     const renderer = new WebGLRenderer();
 
     this.context = new AssetManagerContext(
       debug,
       renderer,
       gltfLoader,
-      rendererScenes
+      this.rendererScenes
     );
   }
 
-  public getRenderScenes(): RendererScenes {
-    return this.context.scenes;
+  public setDebug(enabled: boolean): void {
+    if (!this.context) { return; }
+
+    this.context.debug = enabled;
+  }
+
+  public getRenderScenes(): RendererScenes | null {
+    return this.context?.scenes ?? null;
   }
 
   // public loadAsset(name: string, assetLoader?: AssetLoader, builder?: AssetBuilder) {
@@ -152,6 +163,7 @@ export class AssetManager {
   }
 
   public async load(onUpdate?: () => void): LoadingResult {
+    if (!this.context) { this.init(false); }
 
     function onProgress(asset: AssetContext<GLTF>, progress: number) {
       asset.progress = progress;
@@ -169,7 +181,7 @@ export class AssetManager {
         // Already downloaded, set progress to 75
         if (asset.asset) { onProgress(asset, 75); return; }
 
-        asset.asset = await downloader(this.context);
+        asset.asset = await downloader(this.context!);
 
         onProgress(asset, 75);
       })();
@@ -186,14 +198,11 @@ export class AssetManager {
       if (asset.in_scene) { continue; }
       if (!builder) { onProgress(asset, 100); continue; }
 
-      console.log(asset.name);
-      console.log(asset);
-
       if (asset.assetLoader.builderProcessTime) {
         await sleep(asset.assetLoader.builderProcessTime);
       }
 
-      builder(this.context, asset.asset);
+      builder(this.context!, asset.asset);
       asset.in_scene = true;
 
       onProgress(asset, 100);
@@ -203,8 +212,6 @@ export class AssetManager {
       // }
     }
 
-    console.log(this.context.scenes.sourceScene.children);
-    console.log(this.context.scenes.sourceScene.children.length);
     // Object.values(this.assets)
     //   .sort((a, b) => a.order - b.order)
     //   .map(async (asset, index) => {
@@ -253,6 +260,6 @@ export class AssetManager {
 
     // const results: OptionalUpdateAction[] = await Promise.all(actions);
 
-    return { rendererScenes: this.context.scenes, updateActions: [] }
+    return { updateActions: [] }
   }
 }

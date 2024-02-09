@@ -2,7 +2,7 @@ const { config } = require('process')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
   transpilePackages: ['rpc'],
   webpack: (config) => {
     config.module.rules.push({
