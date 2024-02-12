@@ -17,7 +17,9 @@ import { SoundService } from "@/apis/Sound/Sound";
 import { SystemService } from "@/apis/System/System";
 import { PeripheralSounds } from "./PeripheralSounds/PeripheralSounds";
 
-const NodeNameButton = 'BUTTON';
+const NodeNameButton    = 'BUTTON';
+const NodeNameInput     = 'INPUT';
+const NodeNameTextArea  = 'TEXTAREA';
 
 const fileSystem = createBaseFileSystem();
 
@@ -63,18 +65,22 @@ function handleParentResponsesClosure(
   }
 }
 
-function findButtonNodeInDOM(value: HTMLElement): HTMLElement | null {
-  let element: HTMLElement | null = value;
+function findFirstElementNodeInDom(parent: HTMLElement, nodes: string[]): HTMLElement | null {
+  let element: HTMLElement | null = parent;
+
+  if (nodes.length === 0) { return null; }
 
   while (element !== null) {
-    if (element.nodeName === NodeNameButton) {
-      return element;
-    }
+    if (nodes.includes(element.nodeName)) { return element; }
 
     element = element.parentElement;
   }
 
   return null;
+}
+
+function findInteractiveNodeInDOM(value: HTMLElement): HTMLElement | null {
+  return findFirstElementNodeInDom(value, [NodeNameButton, NodeNameInput, NodeNameTextArea]);
 }
 
 export const OperatingSystem = () => {
@@ -94,15 +100,22 @@ export const OperatingSystem = () => {
     // If it is the first touch, record the node if it is a button
     if (evt.touches.length !== 1) { return; }
 
-    targetedButton.current = findButtonNodeInDOM(evt.target as HTMLElement);
+    targetedButton.current = findInteractiveNodeInDOM(evt.target as HTMLElement);
   }
 
   function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
     if (!isPhoneSafari()) { return; }
     if (evt.target === null) { return; }
-    if (findButtonNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
+    if (!targetedButton.current || findInteractiveNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
 
-    evt.target.dispatchEvent(new Event('click', { bubbles: true }));
+    const target = targetedButton.current;
+    const isFocusableInput = [NodeNameInput, NodeNameTextArea].includes(target.nodeName);
+
+    if (isFocusableInput) {
+      target.focus();
+    } else {
+      target.dispatchEvent(new Event('click', { bubbles: true }));
+    }
   }
 
   function handleGestureStart(evt: Event): void {
