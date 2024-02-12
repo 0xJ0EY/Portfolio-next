@@ -40,7 +40,7 @@ function OperatingSystemStats() {
   const name = "Joey de Ruiter";
   const company = "Joeysoft, bv.";
 
-  const spacer = 30;
+  const spacer = 16;
 
   return (<>
     <div>
