@@ -19,6 +19,7 @@ import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
 import { UpdateAction } from '../scene-loader/AssetManager';
 import { getBrowserDimensions } from '../scene-loader/util';
+import Stats from "three/examples/jsm/libs/stats.module";
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -36,7 +37,7 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 
 function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
   const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
-  
+
   webglRenderer.shadowMap.enabled = true;
   webglRenderer.shadowMap.type = VSMShadowMap;
 
@@ -191,6 +192,7 @@ export const Renderer = (props: RendererProps) => {
 
     let animationFrameId: number | null = null;
 
+    const stats = new Stats();
     const [width, height] = getBrowserDimensions();
 
     const [scene, cutoutScene, cssScene] = [scenes.sourceScene, scenes.cutoutScene, scenes.cssScene];
@@ -209,8 +211,6 @@ export const Renderer = (props: RendererProps) => {
 
     cameraHandlerRef.current = cameraHandler;
 
-    
-
     const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
     const composer = createComposer(renderer, width, height);
@@ -218,11 +218,22 @@ export const Renderer = (props: RendererProps) => {
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
     composer.addPass(cutoutShaderPass);
 
+    const saoPass = new SAOPass(scene, camera);
+    saoPass.resolution.set(128, 128);
+    saoPass.params.saoBias = 100;
+    saoPass.params.saoIntensity = 0.0002;
+    saoPass.params.saoScale = 2;
+    saoPass.params.saoKernelRadius = 50;
+    saoPass.params.saoBlur = false;
+
+    composer.addPass(saoPass);
+
     const fxaaPass = new FXAAShaderPass(width, height);
     composer.addPass(fxaaPass);
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
+    webglRenderNode.appendChild(stats.dom);
     
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
@@ -230,6 +241,8 @@ export const Renderer = (props: RendererProps) => {
       then.current = now;
 
       animationFrameId = requestAnimationFrame(animate);
+      
+      stats.begin();
 
       for (const action of actions) {
         action(deltaTime);
@@ -240,6 +253,8 @@ export const Renderer = (props: RendererProps) => {
 
       cameraController.update(deltaTime);
       cameraHandler.update(deltaTime);
+
+      stats.end();
     }
     
     const onWindowResize = function() {
