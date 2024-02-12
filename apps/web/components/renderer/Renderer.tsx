@@ -18,7 +18,7 @@ import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
 import { UpdateAction } from '../scene-loader/AssetManager';
-import { getBrowserDimensions } from '../scene-loader/util';
+import { getBrowserDimensions, isDebug } from '../scene-loader/util';
 import Stats from "three/examples/jsm/libs/stats.module";
 
 export interface RendererScenes {
@@ -187,6 +187,8 @@ export const Renderer = (props: RendererProps) => {
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
+
+    const debug = isDebug();
     
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
@@ -230,7 +232,10 @@ export const Renderer = (props: RendererProps) => {
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
-    webglRenderNode.appendChild(stats.dom);
+
+    if (debug) {
+      webglRenderNode.appendChild(stats.dom);
+    }
     
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
@@ -239,7 +244,7 @@ export const Renderer = (props: RendererProps) => {
 
       animationFrameId = requestAnimationFrame(animate);
       
-      stats.begin();
+      if (debug) { stats.begin(); }
 
       for (const action of actions) {
         action(deltaTime);
@@ -251,7 +256,7 @@ export const Renderer = (props: RendererProps) => {
       cameraController.update(deltaTime);
       cameraHandler.update(deltaTime);
 
-      stats.end();
+      if (debug) { stats.end(); }
     }
     
     const onWindowResize = function() {
