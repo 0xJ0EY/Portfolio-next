@@ -221,11 +221,8 @@ export const Renderer = (props: RendererProps) => {
     const saoPass = new SAOPass(scene, camera);
     saoPass.resolution.set(128, 128);
     saoPass.params.saoBias = 100;
-    saoPass.params.saoIntensity = 0.0002;
-    saoPass.params.saoScale = 2;
-    saoPass.params.saoKernelRadius = 50;
+    saoPass.params.saoIntensity = 0.0003;
     saoPass.params.saoBlur = false;
-
     composer.addPass(saoPass);
 
     const fxaaPass = new FXAAShaderPass(width, height);
