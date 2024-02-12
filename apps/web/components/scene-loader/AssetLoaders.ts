@@ -194,7 +194,7 @@ export function MonitorLoader(): AssetLoader<GLTF> {
     display.material.transparent = true;
 
     const cutoutDisplay = display.clone();
-    display.position.z -= 0.0001;
+    display.position.z -= 0.1;
 
     const box = display.geometry.boundingBox ?? new Box3();
 
