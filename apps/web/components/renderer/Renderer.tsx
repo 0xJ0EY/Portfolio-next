@@ -1,9 +1,10 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
-import { DepthTexture, LinearFilter, PCFSoftShadowMap, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
+import { DepthTexture, LinearFilter, PCFShadowMap, PCFSoftShadowMap, PerspectiveCamera, RGBAFormat, Scene, Vector2, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
@@ -35,10 +36,9 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 
 function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
   const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
-
-  webglRenderer.capabilities.maxSamples = 32; // Set the gl.MAX_SAMPLES for smoother antialiasing, default is 4
+  
   webglRenderer.shadowMap.enabled = true;
-  webglRenderer.shadowMap.type = PCFSoftShadowMap;
+  webglRenderer.shadowMap.type = VSMShadowMap;
 
   const cssRenderer = new CSS3DRenderer();
 

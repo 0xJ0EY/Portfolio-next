@@ -1,4 +1,4 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, Scene, WebGLCapabilities, WebGLRenderer } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, Scene, Vector3, WebGLCapabilities, WebGLRenderer } from "three";
 import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
@@ -34,9 +34,8 @@ export function createRenderScenes(): RendererScenes {
   };
 }
 
-function getTextureMapDimension(max: number, isMobile: boolean, capabilities: WebGLCapabilities): number {
-  let current = !isMobile ? max : mobileTextureMapDimensions;
-  return Math.min(current, capabilities.maxTextureSize);
+function getTextureMapDimension(requested: number, capabilities: WebGLCapabilities): number {
+  return Math.min(requested, capabilities.maxTextureSize);
 }
 
 function transformWebUrlToDesktop(webUrl: string): string {
@@ -99,25 +98,23 @@ export function LightsLoader(): AssetLoader<GLTF> {
     directionalLight.shadow.camera.top = 15;
     directionalLight.shadow.camera.bottom = -15;
 
-    directionalLight.shadow.blurSamples = 10;
-    directionalLight.shadow.radius = 10;
+    directionalLight.shadow.blurSamples = 8;
+    directionalLight.shadow.radius = 2;
 
-    directionalLight.shadow.camera.near = 15;
-    directionalLight.shadow.camera.far = 40;
+    directionalLight.shadow.camera.near = 14;
+    directionalLight.shadow.camera.far = 35;
 
     // Although my iPhone reports that it is capable of 16k texture maps, it crashes at 8
     // This is not a problem on my iPad that is actually capable of 8k texture maps
-    const shadowMapDimension = getTextureMapDimension(8192, isMobile, context.renderer.capabilities);
+    const shadowMapDimension = getTextureMapDimension(isMobile ? 1024 : 2048, context.renderer.capabilities);
 
     directionalLight.shadow.mapSize.width   = shadowMapDimension;
     directionalLight.shadow.mapSize.height  = shadowMapDimension;
 
-    directionalLight.shadow.radius = 10;
     directionalLight.shadow.bias = !isMobile ? -0.00075 : -0.0025;
 
     context.scenes.sourceScene.add(directionalLight);
 
-    // context.scenes.sourceScene.add(new CameraHelper(directionalLight.shadow.camera));
     return null;
   }
 
@@ -195,10 +192,10 @@ export function MonitorLoader(): AssetLoader<GLTF> {
     display.material = new MeshBasicMaterial({ color: 0x000000 });
     display.material.stencilWrite = true;
     display.material.transparent = true;
-    display.material.opacity = 1;
+    // display.material.opacity = 1;
 
     const cutoutDisplay = display.clone();
-    display.visible = false;
+    // display.visible = false;
 
     const box = display.geometry.boundingBox ?? new Box3();
 
@@ -289,6 +286,34 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
 
   return {
     downloader,
+    builder,
+    builderProcessTime: 0
+  }
+}
+
+export function DebugCubeLoader(): AssetLoader<GLTF> {
+
+  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+    const geo = new BoxGeometry(1, 1);
+    const mat = new MeshStandardMaterial({ color: 0x00FF00 });
+    const cube = new Mesh(geo, mat);
+
+    cube.position.y = 5.85;
+    cube.position.x = 4;
+    cube.position.z = 1;
+
+    cube.castShadow = true;
+    cube.receiveShadow = true;
+
+    cube.userData[AssetKeys.CameraCollidable] = true;
+
+    context.scenes.sourceScene.add(cube.clone());
+
+    return null;
+  }
+
+  return {
+    downloader: null,
     builder,
     builderProcessTime: 0
   }
