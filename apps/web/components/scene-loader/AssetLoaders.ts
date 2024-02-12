@@ -192,10 +192,9 @@ export function MonitorLoader(): AssetLoader<GLTF> {
     display.material = new MeshBasicMaterial({ color: 0x000000 });
     display.material.stencilWrite = true;
     display.material.transparent = true;
-    // display.material.opacity = 1;
 
     const cutoutDisplay = display.clone();
-    // display.visible = false;
+    display.position.z -= 0.0001;
 
     const box = display.geometry.boundingBox ?? new Box3();
 
@@ -241,9 +240,9 @@ export function MonitorLoader(): AssetLoader<GLTF> {
     ];
 
     const [x, y, z] = [
-      display.position.x + localX,
-      display.position.y + localY,
-      display.position.z + localZ
+      cutoutDisplay.position.x + localX,
+      cutoutDisplay.position.y + localY,
+      cutoutDisplay.position.z + localZ
     ];
 
     cssPage.position.set(x, y, z)
