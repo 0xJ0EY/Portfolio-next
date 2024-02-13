@@ -1,4 +1,4 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, Scene, Vector3, WebGLCapabilities, WebGLRenderer } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, Color, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, Scene, Vector3, WebGLCapabilities, WebGLRenderer } from "three";
 import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
@@ -27,8 +27,11 @@ function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
 }
 
 export function createRenderScenes(): RendererScenes {
+  const sourceScene = new Scene();
+  sourceScene.background = new Color(0x0000FF);
+
   return {
-    sourceScene: new Scene(),
+    sourceScene,
     cutoutScene: new Scene(),
     cssScene: new Scene()
   };
@@ -285,34 +288,6 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
 
   return {
     downloader,
-    builder,
-    builderProcessTime: 0
-  }
-}
-
-export function DebugCubeLoader(): AssetLoader<GLTF> {
-
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
-    const geo = new BoxGeometry(1, 1);
-    const mat = new MeshStandardMaterial({ color: 0x00FF00 });
-    const cube = new Mesh(geo, mat);
-
-    cube.position.y = 5.85;
-    cube.position.x = 4;
-    cube.position.z = 1;
-
-    cube.castShadow = true;
-    cube.receiveShadow = true;
-
-    cube.userData[AssetKeys.CameraCollidable] = true;
-
-    context.scenes.sourceScene.add(cube.clone());
-
-    return null;
-  }
-
-  return {
-    downloader: null,
     builder,
     builderProcessTime: 0
   }

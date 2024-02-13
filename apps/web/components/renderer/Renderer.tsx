@@ -1,6 +1,6 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
-import { DepthTexture, LinearFilter, PCFShadowMap, PCFSoftShadowMap, PerspectiveCamera, RGBAFormat, Scene, Vector2, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
+import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";

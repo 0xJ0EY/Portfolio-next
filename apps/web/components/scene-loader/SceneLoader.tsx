@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, LoadingProgressEntry, UpdateAction } from "./AssetManager";
-import { DebugCubeLoader, DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
-import styles from './SceneLoader.module.css';
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
 import { detectWebGL, isDebug, isMobileDevice } from "./util";
+import styles from './SceneLoader.module.css';
 
 function createSpacer(source: string, length: number, fill: string = '\xa0') {
   let spacer = '\xa0';
@@ -192,7 +192,6 @@ export function SceneLoader() {
     manager.add('Loading floor', FloorLoader())
     manager.add('Loading keyboard', KeyboardLoader());
     manager.add('Loading monitor', MonitorLoader());
-    manager.add('Loading debug cube', DebugCubeLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
     setSupportsWebGL(detectWebGL());
