@@ -266,8 +266,8 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   const resizableStyle = buildResizableStyle(cursor);
 
   return <>
-    <div ref={output} className={styles.resizable} style={resizableStyle}></div>
-    {resizing && <div className={styles.resizingMask} style={resizableStyle}></div>}
+    <div ref={output} data-interactive-window className={styles.resizable} style={resizableStyle}></div>
+    {resizing && <div data-interactive-window className={styles.resizingMask} style={resizableStyle}></div>}
   </>;
 }
 
@@ -434,7 +434,7 @@ const WindowHeader = (
   }, []);
 
   return <>
-    <div ref={output} className={classes.join(' ')}>
+    <div ref={output} data-interactive-window className={classes.join(' ')}>
       <span className={styles.headerTitle}>{windowData.title}</span>
       <div className={styles.lines}></div>
       <div className={styles['header-buttons']}>

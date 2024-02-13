@@ -79,8 +79,8 @@ function findFirstElementNodeInDom(parent: HTMLElement, nodes: string[]): HTMLEl
   return null;
 }
 
-function findInteractiveNodeInDOM(value: HTMLElement): HTMLElement | null {
-  return findFirstElementNodeInDom(value, [NodeNameButton, NodeNameInput, NodeNameTextArea]);
+function clickedInteractiveWindowElement(element: HTMLElement): boolean {
+  return element.hasAttribute('data-interactive-window');
 }
 
 export const OperatingSystem = () => {
@@ -90,44 +90,17 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  const targetedButton = useRef<HTMLElement | null>(null);
-
-  function handlePhoneSafariButtonClickStart(evt: TouchEvent) {
-    if (!isPhoneSafari()) { return; }
-    // Always reset the targeted button
-    targetedButton.current = null;
-
-    // If it is the first touch, record the node if it is a button
-    if (evt.touches.length !== 1) { return; }
-
-    targetedButton.current = findInteractiveNodeInDOM(evt.target as HTMLElement);
-  }
-
-  function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
-    if (!isPhoneSafari()) { return; }
-    if (evt.target === null) { return; }
-    if (!targetedButton.current || findInteractiveNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
-
-    const target = targetedButton.current;
-    const isFocusableInput = [NodeNameInput, NodeNameTextArea].includes(target.nodeName);
-
-    if (isFocusableInput) {
-      target.focus();
-    } else {
-      target.dispatchEvent(new Event('click', { bubbles: true }));
-    }
-  }
-
   function handleGestureStart(evt: Event): void {
     evt.preventDefault();
   }
 
   function handleTouchStartEvent(evt: TouchEvent) {
-    if (isPhoneSafari()) { evt.preventDefault(); }
+    if (isPhoneSafari()) {
+      let target = clickedInteractiveWindowElement(evt.target as HTMLElement);
+      if (target) { evt.preventDefault(); }
+    }
 
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
-
-    handlePhoneSafariButtonClickStart(evt);
 
     if (evt.touches.length === 2) {
       touchOrigin.current = TouchData.fromTouchEvent('start', evt);
@@ -192,8 +165,6 @@ export const OperatingSystem = () => {
   }
 
   function handleTouchEndEvent(evt: TouchEvent) {
-    handlePhoneSafariButtonClickRelease(evt);
-
     if (evt.touches.length !== 0) { return; }
     if (camera.current === null) { return; }
 
