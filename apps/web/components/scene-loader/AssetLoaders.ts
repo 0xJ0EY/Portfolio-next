@@ -28,7 +28,8 @@ function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
 
 export function createRenderScenes(): RendererScenes {
   const sourceScene = new Scene();
-  sourceScene.background = new Color(0x0000FF);
+
+  sourceScene.background = new Color(0xFFFFFF);
 
   return {
     sourceScene,
