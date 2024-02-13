@@ -15,8 +15,6 @@ const GLTF_SHADOWS_CAST     = 0x01;
 const GLTF_SHADOWS_RECEIVE  = 0x02;
 const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
 
-const mobileTextureMapDimensions = 4096;
-
 function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
   gltf.scene.traverse(node => {
     if (node instanceof Mesh) {
