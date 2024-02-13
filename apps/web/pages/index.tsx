@@ -34,6 +34,8 @@ export default function Web() {
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/assets/thumbnail.png" />
         <meta property="og:url" content="https://joeyderuiter.me/" />
+
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
       </Head>
       <SceneLoader />
     </>
