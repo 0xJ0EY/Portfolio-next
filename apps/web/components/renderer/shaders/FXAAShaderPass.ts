@@ -3,11 +3,9 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 
 export class FXAAShaderPass extends ShaderPass {
-
-
   private updateUniformResolution(width: number, height: number) {
     const pixelRatio = window.devicePixelRatio;
-    
+
     this.material.uniforms['resolution'].value.x = 1 / (width * pixelRatio);
     this.material.uniforms['resolution'].value.y = 1 / (height * pixelRatio);
   }

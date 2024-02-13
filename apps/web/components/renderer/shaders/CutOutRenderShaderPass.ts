@@ -52,12 +52,12 @@ export class CutOutRenderShaderPass extends Pass {
       // 4. Do normal composition
       this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
       this.sourceTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true, 
+        depthBuffer: true,
         samples: RENDER_SAMPLES
       });
 
       this.firefoxTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true, 
+        depthBuffer: true,
         depthTexture: this.sourceDepthTexture,
         samples: 0
       });
@@ -77,7 +77,7 @@ export class CutOutRenderShaderPass extends Pass {
       this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
       this.sourceTarget = new WebGLRenderTarget(width, height, {
         depthBuffer: true,
-        depthTexture: this.sourceDepthTexture, 
+        depthTexture: this.sourceDepthTexture,
         samples: RENDER_SAMPLES
       });
 
@@ -88,7 +88,7 @@ export class CutOutRenderShaderPass extends Pass {
         samples: RENDER_SAMPLES
       });
     }
-    
+
     this.uniforms = UniformsUtils.clone(shader.uniforms);
 
     this.material = new ShaderMaterial( {
@@ -115,14 +115,14 @@ export class CutOutRenderShaderPass extends Pass {
     // Render the cutout output to the cutoutTarget buffer
     renderer.setRenderTarget(this.cutoutTarget);
     renderer.render(this.cutoutScene, this.camera);
-    
+
     // Bind the render outputs to each other
     this.uniforms['sourceTexture'].value  = this.sourceTarget.texture;
     this.uniforms['sourceDepthMap'].value = this.sourceDepthTexture;
     this.uniforms['cutoutDepthMap'].value = this.cutoutDepthTexture;
 
     this.fsQuad.material = this.material;
-    
+
     if (this.renderToScreen) {
       renderer.setRenderTarget(null);
 

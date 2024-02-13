@@ -238,7 +238,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
-  fileSystem.addApplication(doomConfig);
+  const doom = fileSystem.addApplication(doomConfig);
   fileSystem.addApplication(imageViewerConfig);
 
   // Create unix like /home folder (macOS also has one)
@@ -255,6 +255,7 @@ export function createBaseFileSystem(): FileSystem {
   const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
 
   fileSystem.addHyperLink(desktop, applications, 'Applications', tempIcon, true);
+  if (doom.ok) { fileSystem.addHyperLink(desktop, doom.value, 'Doom', tempIcon, true); }
 
   const text = `=====
 == README

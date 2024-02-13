@@ -11,7 +11,9 @@ void main() {
     float sourceDepth = 1.0 - texture2D(sourceDepthMap, texCoord).r;
     float cutoutDepth = 1.0 - texture2D(cutoutDepthMap, texCoord).r;
 
-    if (sourceDepth > cutoutDepth) {
+    bool isCutout = sourceDepth >= cutoutDepth;
+
+    if (isCutout) {
         diffuseColor = texture2D(sourceTexture, texCoord);
     } else {
         diffuseColor = vec4(.0, .0, .0, .0);

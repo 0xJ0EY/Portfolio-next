@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { SystemAPIs } from "../OperatingSystem";
+import { isSafari } from "../util";
 
 type AudioFragment = {
   onDown?: string,
@@ -80,6 +81,10 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   }
 
   useEffect(() => {
+    // Safari audio is very delayed compared to other browsers, I don't know why (possibly a browser implementation)
+    // So for this reason I will disable it by default
+    if (isSafari()) { return; }
+
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 

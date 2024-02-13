@@ -1,4 +1,8 @@
 .loading-progress {
+  position: absolute;
+  z-index: 120;
+  top: 0;
+  left: 0;
   background-color: #000;
   width: 100%;
   height: 100%;
@@ -13,6 +17,8 @@
 .loading-underscore {
   position: absolute;
   z-index: 110;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   color: #fff;
@@ -51,13 +57,13 @@
 
 .user-message {
   position: absolute;
+  z-index: 100;
   top: 0;
   left: 0;
   display: block;
   background-color: #000;
   width: 100vw;
   height: 100vh;
-  z-index: 100;
   color: #fff;
   font-family: monospace;
 }

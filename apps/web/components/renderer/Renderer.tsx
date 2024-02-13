@@ -1,22 +1,25 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
-import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
+import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
 import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler, CameraHandlerState } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
-import { TouchData, createUIEventBus, toUserInteractionTouchEvent } from '@/events/UserInteractionEvents';
+import { createUIEventBus } from '@/events/UserInteractionEvents';
 import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
 import { UpdateAction } from '../scene-loader/AssetManager';
+import { getBrowserDimensions, isDebug } from '../scene-loader/util';
+import Stats from "three/examples/jsm/libs/stats.module";
 
 export interface RendererScenes {
   sourceScene: Scene,
@@ -32,19 +35,23 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
   return camera;
 }
 
-const resizeCamera = (camera: PerspectiveCamera, aspectRatio: number): void => {
-  camera.aspect = aspectRatio;
-  camera.updateProjectionMatrix();
-}
-
-const createRenderers = (width: number, height: number): [WebGLRenderer, CSS3DRenderer] => {
+function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
   const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
+
+  webglRenderer.shadowMap.enabled = true;
+  webglRenderer.shadowMap.type = VSMShadowMap;
+
   const cssRenderer = new CSS3DRenderer();
 
   webglRenderer.setSize(width, height);
   cssRenderer.setSize(width, height);
 
-  return [webglRenderer,  cssRenderer];
+  return [webglRenderer, cssRenderer];
+}
+
+const resizeCamera = (camera: PerspectiveCamera, aspectRatio: number): void => {
+  camera.aspect = aspectRatio;
+  camera.updateProjectionMatrix();
 }
 
 const resizeRenderers = (composer: EffectComposer, webGlRenderer: WebGLRenderer, cssRenderer: CSS3DRenderer, width: number, height: number): void => {
@@ -92,23 +99,10 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
 }
 
 interface RendererProps {
+  loading: boolean,
   showMessage: boolean, 
   scenes: RendererScenes,
-  actions: UpdateAction[]
-}
-
-function getBrowserDimensions(): [number, number] {
-  let width = window.innerWidth;
-  let height = window.innerHeight;
-
-  if (isSafari()) {
-    // Safari on iOS (tested on only the physical iPhone 11 pro, and 14 pro in the simulator) renders off-center when a width/height is given that is not even.
-    // Desktop Safari & iPad OS seems fine
-    if (width & 0x01) { width++; }
-    if (height & 0x01) { height++; }
-  }
-
-  return [width, height];
+  actions: UpdateAction[],
 }
 
 function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
@@ -169,10 +163,12 @@ export const Renderer = (props: RendererProps) => {
   const [cameraHandlerState, setCameraHandlerState] = useState<CameraHandlerState>(CameraHandlerState.Cinematic);
   const soundService = useRef(new SoundService());
 
-  const { showMessage, scenes, actions } = props;
+  const { loading, showMessage, scenes, actions } = props;
 
   const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
   const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+
+  const cameraHandlerRef = useRef<CameraHandler | null>(null);
 
   const allowUserInput = useRef<boolean>(false);
   const [showUI, setShowUI] = useState(false);
@@ -191,11 +187,14 @@ export const Renderer = (props: RendererProps) => {
   useEffect(() => {
     const cssRenderNode = cssOutputRef.current;
     const webglRenderNode = webglOutputRef.current;
+
+    const debug = isDebug();
     
     if (cssRenderNode == null || webglRenderNode == null) { return; }
 
     let animationFrameId: number | null = null;
 
+    const stats = new Stats();
     const [width, height] = getBrowserDimensions();
 
     const [scene, cutoutScene, cssScene] = [scenes.sourceScene, scenes.cutoutScene, scenes.cssScene];
@@ -212,6 +211,8 @@ export const Renderer = (props: RendererProps) => {
     const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
     const touchInputHandler = new TouchInputHandler(allowUserInput, cameraHandler);
 
+    cameraHandlerRef.current = cameraHandler;
+
     const handleDesktopEvent = handleDesktopRequestsClosure(cameraHandler);
 
     const composer = createComposer(renderer, width, height);
@@ -219,11 +220,22 @@ export const Renderer = (props: RendererProps) => {
     const cutoutShaderPass = new CutOutRenderShaderPass(scene, cutoutScene, camera, width, height);
     composer.addPass(cutoutShaderPass);
 
+    const saoPass = new SAOPass(scene, camera);
+    saoPass.resolution.set(128, 128);
+    saoPass.params.saoBias = 100;
+    saoPass.params.saoIntensity = 0.0003;
+    saoPass.params.saoBlur = false;
+    composer.addPass(saoPass);
+
     const fxaaPass = new FXAAShaderPass(width, height);
     composer.addPass(fxaaPass);
 
     cssRenderNode.appendChild(cssRenderer.domElement);
     webglRenderNode.appendChild(renderer.domElement);
+
+    if (debug) {
+      webglRenderNode.appendChild(stats.dom);
+    }
     
     const animate = function(now: number) {
       if (then.current == null) { then.current = now; }
@@ -231,6 +243,8 @@ export const Renderer = (props: RendererProps) => {
       then.current = now;
 
       animationFrameId = requestAnimationFrame(animate);
+      
+      if (debug) { stats.begin(); }
 
       for (const action of actions) {
         action(deltaTime);
@@ -241,6 +255,8 @@ export const Renderer = (props: RendererProps) => {
 
       cameraController.update(deltaTime);
       cameraHandler.update(deltaTime);
+
+      if (debug) { stats.end(); }
     }
     
     const onWindowResize = function() {
@@ -285,6 +301,12 @@ export const Renderer = (props: RendererProps) => {
       setShowUI(true);
     }
   }, [showMessage])
+
+  useEffect(() => {
+    if (!loading) {
+      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
+    }
+  }, [loading]);
 
   return (
     <div className={styles.renderer}>
