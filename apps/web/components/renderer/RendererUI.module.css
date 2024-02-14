@@ -34,6 +34,7 @@
   bottom: 25%;
   width: 100%;
   text-align: center;
+  pointer-events: none;
 }
 
 .cinematic-instructions {
