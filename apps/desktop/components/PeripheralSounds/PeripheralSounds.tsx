@@ -45,21 +45,41 @@ function chooseRandomKeyboardAudioFragment(code: string): AudioFragment {
 
 export function PeripheralSounds(props: { apis: SystemAPIs }) {
   const soundService = props.apis.sound;
+
+  const audioCache = useRef<Record<string, HTMLAudioElement>>({});
   const activeSounds = useRef<Record<string, AudioFragment>>({});
+
+  function fetchAudioFragmentFromCacheOrCreate(source: string): HTMLAudioElement {
+    const cacheEntry = audioCache.current[source];
+    if (cacheEntry) { return cacheEntry; }
+
+    const audioFragment = new Audio(source);
+    audioCache.current[source] = audioFragment;
+
+    return audioFragment;
+  }
 
   function onKeyDown(evt: KeyboardEvent) {
     const code = evt.code;
     activeSounds.current[code] = chooseRandomKeyboardAudioFragment(code);
 
-    const audioFragment = activeSounds.current[code].onDown;
-    if (audioFragment) { soundService.play(audioFragment, 0.6); }
+    const audioSource = activeSounds.current[code].onDown;
+
+    if (audioSource) {
+      const audioFragment = fetchAudioFragmentFromCacheOrCreate(audioSource);
+      soundService.playAudioFragment(audioFragment, 0.6);
+    }
   }
 
   function onKeyUp(evt: KeyboardEvent) {
     const code = evt.code;
 
-    const audioFragment = activeSounds.current[code].onUp;
-    if (audioFragment) { soundService.play(audioFragment, 0.6); }
+    const audioSource = activeSounds.current[code].onUp;
+
+    if (audioSource) {
+      const audioFragment = fetchAudioFragmentFromCacheOrCreate(audioSource);
+      soundService.playAudioFragment(audioFragment, 0.6);
+    }
   }
 
   function onPointerDown(evt: PointerEvent) {
@@ -67,17 +87,22 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
     const fragments = evt.button === PrimaryMouseButton ? LeftMouseButtonAudioFragments : RightMouseButtonAudioFragments;
 
     activeSounds.current[key] = chooseRandomAudioFragment(fragments);
-    const audioFragment = activeSounds.current[key].onDown;
-    
+    const audioSource = activeSounds.current[key].onDown;
 
-    if (audioFragment) { soundService.play(audioFragment, 1.0); }
+    if (audioSource) {
+      const audioFragment = fetchAudioFragmentFromCacheOrCreate(audioSource);
+      soundService.playAudioFragment(audioFragment, 1.0);
+    }
   }
 
   function onPointerUp(evt: PointerEvent) {
     const key = evt.button === PrimaryMouseButton ? PointerPrimaryKey : PointerSecondaryKey;
 
-    const audioFragment = activeSounds.current[key].onUp;
-    if (audioFragment) { soundService.play(audioFragment, 1.0); }
+    const audioSource = activeSounds.current[key].onUp;
+    if (audioSource) {
+      const audioFragment = fetchAudioFragmentFromCacheOrCreate(audioSource);
+      soundService.playAudioFragment(audioFragment, 1.0);
+    }
   }
 
   useEffect(() => {

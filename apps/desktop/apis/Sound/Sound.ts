@@ -93,6 +93,21 @@ export class SoundService extends ObserverSubject<boolean> {
     return currentIndex;
   }
 
+  public playAudioFragment(audio: HTMLAudioElement, volume: number = 1.0): number {
+    const currentIndex = this.index++;
+
+    audio.volume = volume;
+    audio.muted = !this.enabled;
+
+    audio.play().catch(() => { console.error('Cannot play audio'); });
+
+    this.activeAudio[currentIndex] = audio;
+
+    audio.addEventListener('ended', () => { delete this.activeAudio[currentIndex]; });
+
+    return currentIndex;
+  }
+
   public playOnRepeat(source: string, volume: number = 1.0): number {
     const currentIndex = this.index++;
 
