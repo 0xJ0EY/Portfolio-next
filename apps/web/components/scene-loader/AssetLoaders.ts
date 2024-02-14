@@ -27,7 +27,9 @@ function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
 export function createRenderScenes(): RendererScenes {
   const sourceScene = new Scene();
 
-  sourceScene.background = new Color(0xFFFFFF);
+  // The SAOPass doesn't work if the background is 0xFFFFFF, so we opt for 0xFEFEFE instead
+  // I thought it came due to the cutout shader, but it doesn't seem to have any effect on it.
+  sourceScene.background = new Color(0xFEFEFE);
 
   return {
     sourceScene,

@@ -223,7 +223,7 @@ export const Renderer = (props: RendererProps) => {
     const saoPass = new SAOPass(scene, camera);
     saoPass.resolution.set(128, 128);
     saoPass.params.saoBias = 100;
-    saoPass.params.saoIntensity = 0.0003;
+    saoPass.params.saoIntensity = 0.0006;
     saoPass.params.saoBlur = false;
     composer.addPass(saoPass);
 
