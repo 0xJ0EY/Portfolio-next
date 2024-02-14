@@ -13,7 +13,7 @@ export class DoomConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Doom.app';
-  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Doom application' };
+  public readonly appIcon = { src: '/icons/doom-icon.png', alt: 'Doom application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,

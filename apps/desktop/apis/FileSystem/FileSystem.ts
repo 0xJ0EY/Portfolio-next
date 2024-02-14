@@ -255,7 +255,11 @@ export function createBaseFileSystem(): FileSystem {
   const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
 
   fileSystem.addHyperLink(desktop, applications, 'Applications', tempIcon, true);
-  if (doom.ok) { fileSystem.addHyperLink(desktop, doom.value, 'Doom', tempIcon, true); }
+
+  if (doom.ok) {
+    const doomShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Play Doom' };
+    fileSystem.addHyperLink(desktop, doom.value, 'Doom', doomShortcutIcon, true);
+  }
 
   const text = `=====
 == README
