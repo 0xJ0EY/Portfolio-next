@@ -261,9 +261,12 @@ export function createBaseFileSystem(): FileSystem {
     fileSystem.addHyperLink(desktop, doom.value, 'Doom', doomShortcutIcon, true);
   }
 
-  const text = `=====
-== README
-=====`;
+  const text = `Hey, welcome to my portfolio website!
+
+This website is meant as an interactive showcase of my work as software developer for the last few years.
+
+Please enjoy, and explore as much as you would like.
+`;
 
   fileSystem.addTextFile(desktop, 'readme', text, true);
   fileSystem.addImage(desktop, 'cheems', '.png', '/images/temp.png', "A temporary image", true);
