@@ -297,7 +297,7 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
 
 export function MuttadilesLoader(): AssetLoader<GLTF> {
   async function downloader(context: AssetManagerContext): Promise<GLTF> {
-    return context.gltfLoader.loadAsync('/assets/SmallMuttadile.gltf');
+    return context.gltfLoader.loadAsync('/assets/Muttadiles.gltf');
   }
 
   function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
