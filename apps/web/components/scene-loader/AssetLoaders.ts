@@ -293,3 +293,41 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
     builderProcessTime: 0
   }
 }
+
+
+export function MuttadilesLoader(): AssetLoader<GLTF> {
+  async function downloader(context: AssetManagerContext): Promise<GLTF> {
+    return context.gltfLoader.loadAsync('/assets/SmallMuttadile.gltf');
+  }
+
+  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+    if (!asset) { return null; }
+
+    // for (const obj of asset.scene.children) {
+      // obj.userData[AssetKeys.CameraCollidable] = true;
+    // }
+
+    enableGLTFShadows(asset);
+
+    // context.scenes.sourceScene.add(asset.scene);
+
+    asset.scene.traverse(node => {
+      if (node instanceof Mesh) {
+        node.material.side = 0;
+      }
+    })
+
+    // asset.scene.position.x += 10;
+
+    context.scenes.sourceScene.add(asset.scene);
+
+
+    return null;
+  }
+
+  return {
+    downloader,
+    builder,
+    builderProcessTime: 0
+  }
+}

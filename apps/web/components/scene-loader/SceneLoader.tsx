@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, LoadingProgressEntry, UpdateAction } from "./AssetManager";
-import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
+import { DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, MuttadilesLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
 import { detectWebGL, isDebug, isMobileDevice } from "./util";
 import styles from './SceneLoader.module.css';
 
@@ -191,6 +191,7 @@ export function SceneLoader() {
     manager.add('Loading lights', LightsLoader());
     manager.add('Loading floor', FloorLoader())
     manager.add('Loading keyboard', KeyboardLoader());
+    manager.add('Loading muttadiles', MuttadilesLoader());
     manager.add('Loading monitor', MonitorLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
