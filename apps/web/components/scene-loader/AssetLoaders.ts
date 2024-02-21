@@ -12,6 +12,7 @@ export const DisplayName = "Display";
 const MonitorName = "Monitor";
 const ComputerName = "Computer";
 const DeskName = "Desk";
+const FloorName = "Floor";
 
 const GLTF_SHADOWS_CAST     = 0x01;
 const GLTF_SHADOWS_RECEIVE  = 0x02;
@@ -27,6 +28,12 @@ async function loadTexture(context: AssetManagerContext, asset: string): Promise
 
 async function loadModel(context: AssetManagerContext, asset: string): Promise<GLTF> {
   return await context.gltfLoader.loadAsync(asset);
+}
+
+function enableCameraCollision(asset: GLTF): void {
+  for (const obj of asset.scene.children) {
+    obj.userData[AssetKeys.CameraCollidable] = true;
+  }
 }
 
 function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
@@ -110,34 +117,49 @@ export function LightsLoader(): AssetLoader {
 }
 
 export function FloorLoader(): AssetLoader {
+  let asset: GLTF | null = null;
+  let texture: Texture | null = null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Floor.png'); }
+    const assetLoader   = async () => { asset = await loadModel(context, '/assets/Floor.glb'); }
+
+    await Promise.all([textureLoader(), assetLoader()]);
+  }
+
   function builder(context: AssetManagerContext): OptionalUpdateAction {
-    const geo = new PlaneGeometry(100, 100);
-    const mat = new MeshStandardMaterial({ color: 0x808080 });
-    const plane = new Mesh(geo, mat);
-    plane.rotateX(-Math.PI / 2);
+    if (!texture) { return null; }
+    if (!asset) { return null; }
 
-    plane.castShadow = true;
-    plane.receiveShadow = true;
+    enableCameraCollision(asset);
 
-    plane.userData[AssetKeys.CameraCollidable] = true;
+    context.scenes.sourceScene.add(asset.scene);
 
-    context.scenes.sourceScene.add(plane.clone());
+    const material = new MeshStandardMaterial({ map: texture });
+    asset.scene.traverse((node) => {
+      if (!(node instanceof Mesh)) { return; }
+
+      if (node.name === FloorName) {
+        node.material = material;
+      }
+    });
+
 
     return null;
   }
 
   return {
-    downloader: null,
+    downloader,
     builder,
     builderProcessTime: 0
   }
 }
 
 export function DeskLoader(): AssetLoader {
-  let asset: GLTF | null;
+  let asset: GLTF | null = null;
   let texture: Texture | null = null;
 
-  async function downloader(context: AssetManagerContext): Promise<void> {;
+  async function downloader(context: AssetManagerContext): Promise<void> {
     const textureLoader = async () => { texture = await loadTexture(context, '/assets/DeskTexture.png'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
 
