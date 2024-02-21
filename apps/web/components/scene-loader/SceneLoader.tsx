@@ -191,7 +191,6 @@ export function SceneLoader() {
     manager.add('Loading lights', LightsLoader());
     manager.add('Loading floor', FloorLoader())
     manager.add('Loading keyboard', KeyboardLoader());
-    manager.add('Loading muttadiles', MuttadilesLoader());
     manager.add('Loading monitor', MonitorLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
@@ -219,8 +218,6 @@ export function SceneLoader() {
 
   useEffect(() => {
     if (!loadingProgress) { return; }
-
-    console.log('loading process');
 
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {

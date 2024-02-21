@@ -1,4 +1,4 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, Color, DirectionalLight, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, Scene, Vector3, WebGLCapabilities, WebGLRenderer } from "three";
+import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, Color, DirectionalLight, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLCapabilities, WebGLRenderer, sRGBEncoding } from "three";
 import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
@@ -6,14 +6,28 @@ import { isSafari } from "../renderer/util";
 import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { degToRad } from "three/src/math/MathUtils";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
-import { isMobileDevice } from "./util";
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";
+const MonitorName = "Monitor";
+const ComputerName = "Computer";
+const DeskName = "Desk";
 
 const GLTF_SHADOWS_CAST     = 0x01;
 const GLTF_SHADOWS_RECEIVE  = 0x02;
 const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
+
+async function loadTexture(context: AssetManagerContext, asset: string): Promise<Texture> {
+  const texture = await context.textureLoader.loadAsync(asset);
+
+  texture.flipY = false;
+
+  return texture;
+}
+
+async function loadModel(context: AssetManagerContext, asset: string): Promise<GLTF> {
+  return await context.gltfLoader.loadAsync(asset);
+}
 
 function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
   gltf.scene.traverse(node => {
@@ -36,10 +50,6 @@ export function createRenderScenes(): RendererScenes {
     cutoutScene: new Scene(),
     cssScene: new Scene()
   };
-}
-
-function getTextureMapDimension(requested: number, capabilities: WebGLCapabilities): number {
-  return Math.min(requested, capabilities.maxTextureSize);
 }
 
 function transformWebUrlToDesktop(webUrl: string): string {
@@ -75,7 +85,7 @@ function getDesktopTarget(debug: boolean): string {
   return `${url}/?debug`;
 }
 
-export function NoopLoader(): AssetLoader<GLTF> {
+export function NoopLoader(): AssetLoader {
   return {
     downloader: null,
     builder: null,
@@ -83,41 +93,11 @@ export function NoopLoader(): AssetLoader<GLTF> {
   }
 }
 
-export function LightsLoader(): AssetLoader<GLTF> {
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
-
-    const isMobile = isMobileDevice();
+export function LightsLoader(): AssetLoader {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
     const ambientLight = new AmbientLight(0x404040);
-    ambientLight.intensity = .5;
+    ambientLight.intensity = 4;
     context.scenes.sourceScene.add(ambientLight);
-
-    const directionalLight = new DirectionalLight(0xffffff, 1);
-    directionalLight.position.x = 10;
-    directionalLight.position.z = 10;
-    directionalLight.position.y = 20;
-    directionalLight.castShadow = true;
-
-    directionalLight.shadow.camera.left = -15;
-    directionalLight.shadow.camera.right = 15;
-    directionalLight.shadow.camera.top = 15;
-    directionalLight.shadow.camera.bottom = -15;
-
-    directionalLight.shadow.blurSamples = 8;
-    directionalLight.shadow.radius = 2;
-
-    directionalLight.shadow.camera.near = 14;
-    directionalLight.shadow.camera.far = 35;
-
-    // Although my iPhone reports that it is capable of 16k texture maps, it crashes at 8
-    // This is not a problem on my iPad that is actually capable of 8k texture maps
-    const shadowMapDimension = getTextureMapDimension(isMobile ? 1024 : 2048, context.renderer.capabilities);
-
-    directionalLight.shadow.mapSize.width   = shadowMapDimension;
-    directionalLight.shadow.mapSize.height  = shadowMapDimension;
-
-    directionalLight.shadow.bias = !isMobile ? -0.00075 : -0.0025;
-
-    context.scenes.sourceScene.add(directionalLight);
 
     return null;
   }
@@ -129,9 +109,8 @@ export function LightsLoader(): AssetLoader<GLTF> {
   }
 }
 
-export function FloorLoader(): AssetLoader<GLTF> {
-
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+export function FloorLoader(): AssetLoader {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
     const geo = new PlaneGeometry(100, 100);
     const mat = new MeshStandardMaterial({ color: 0x808080 });
     const plane = new Mesh(geo, mat);
@@ -154,19 +133,33 @@ export function FloorLoader(): AssetLoader<GLTF> {
   }
 }
 
-export function DeskLoader(): AssetLoader<GLTF> {
-  async function downloader(context: AssetManagerContext): Promise<GLTF> {
-    return context.gltfLoader.loadAsync('/assets/Desk.gltf');
+export function DeskLoader(): AssetLoader {
+  let asset: GLTF | null;
+  let texture: Texture | null = null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {;
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/DeskTexture.png'); }
+    const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
+
+    await Promise.all([textureLoader(), assetLoader()]);
   }
 
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
+    if (!texture) { return null; }
     if (!asset) { return null; }
 
     for (const obj of asset.scene.children) {
       obj.userData[AssetKeys.CameraCollidable] = true;
     }
 
-    enableGLTFShadows(asset);
+    const material = new MeshStandardMaterial({ map: texture });
+    asset.scene.traverse((node) => {
+      if (!(node instanceof Mesh)) { return; }
+
+      if (node.name === DeskName) {
+        node.material = material;
+      }
+    });
 
     context.scenes.sourceScene.add(asset.scene);
 
@@ -180,17 +173,46 @@ export function DeskLoader(): AssetLoader<GLTF> {
   }
 }
 
-export function MonitorLoader(): AssetLoader<GLTF> {
-  async function downloader(context: AssetManagerContext): Promise<GLTF> {
-    return context.gltfLoader.loadAsync('/assets/Monitor.gltf');
+export function MonitorLoader(): AssetLoader {
+  let monitorTexture: Texture | null = null;
+  let computerTexture: Texture | null = null;
+
+  let asset: GLTF | null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    const monitorLoader   = async () => { monitorTexture = await loadTexture(context, '/assets/Monitor.png'); }
+    const computerLoader  = async () => { computerTexture = await loadTexture(context, '/assets/Computer.png'); }
+    const assetLoader     = async () => { asset = await loadModel(context, '/assets/Monitor.glb'); }
+
+    await Promise.all([monitorLoader(), computerLoader(), assetLoader()]);
   }
 
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
+    if (!monitorTexture || !computerTexture) { return null; }
 
     asset.scene.name = DisplayParentName;
 
-    enableGLTFShadows(asset);
+    const displayMaterial = new MeshBasicMaterial({ color: 0x000000 });
+    displayMaterial.stencilWrite = true;
+    displayMaterial.transparent = true;
+
+    const monitorMaterial   = new MeshStandardMaterial({ map: monitorTexture });
+    const computerMaterial  = new MeshStandardMaterial({ map: computerTexture });
+
+    asset.scene.traverse((node) => {
+      if (!(node instanceof Mesh)) { return; }
+
+      if (node.name === DisplayName) {
+        node.material = displayMaterial;
+
+      } else if (node.name === MonitorName) {
+        node.material = monitorMaterial;
+
+      } else if (node.name === ComputerName) {
+        node.material = computerMaterial;
+      }
+    });
 
     const display = asset.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
     display.material = new MeshBasicMaterial({ color: 0x000000 });
@@ -264,16 +286,18 @@ export function MonitorLoader(): AssetLoader<GLTF> {
   return {
     downloader,
     builder,
-    builderProcessTime: 200
+    builderProcessTime: 250
   }
 }
 
-export function KeyboardLoader(): AssetLoader<GLTF> {
-  async function downloader(context: AssetManagerContext): Promise<GLTF> {
-    return context.gltfLoader.loadAsync('/assets/Keyboard.gltf');
+export function KeyboardLoader(): AssetLoader {
+  let asset: GLTF | null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    asset = await loadModel(context, '/assets/Keyboard.gltf');
   }
 
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
 
     for (const obj of asset.scene.children) {
@@ -295,21 +319,17 @@ export function KeyboardLoader(): AssetLoader<GLTF> {
 }
 
 
-export function MuttadilesLoader(): AssetLoader<GLTF> {
-  async function downloader(context: AssetManagerContext): Promise<GLTF> {
-    return context.gltfLoader.loadAsync('/assets/Muttadiles.gltf');
+export function MuttadilesLoader(): AssetLoader {
+  let asset: GLTF | null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    asset = await loadModel(context, '/assets/Muttadiles.gltf');
   }
 
-  function builder(context: AssetManagerContext, asset: GLTF | null): OptionalUpdateAction {
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
 
-    // for (const obj of asset.scene.children) {
-      // obj.userData[AssetKeys.CameraCollidable] = true;
-    // }
-
     enableGLTFShadows(asset);
-
-    // context.scenes.sourceScene.add(asset.scene);
 
     asset.scene.traverse(node => {
       if (node instanceof Mesh) {
@@ -317,10 +337,7 @@ export function MuttadilesLoader(): AssetLoader<GLTF> {
       }
     })
 
-    // asset.scene.position.x += 10;
-
     context.scenes.sourceScene.add(asset.scene);
-
 
     return null;
   }

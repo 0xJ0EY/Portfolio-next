@@ -37,7 +37,7 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 }
 
 function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
-  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: false });
+  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
 
   webglRenderer.shadowMap.enabled = true;
   webglRenderer.shadowMap.type = VSMShadowMap;
