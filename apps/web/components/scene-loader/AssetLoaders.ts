@@ -1,5 +1,5 @@
 import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, Color, DirectionalLight, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLCapabilities, WebGLRenderer, sRGBEncoding } from "three";
-import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
+import { AssetLoader, AssetManager, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
@@ -411,6 +411,70 @@ export function KeyboardLoader(): AssetLoader {
   }
 }
 
+export function MouseLoader(): AssetLoader {
+  let texture: Texture | null = null;
+  let asset: GLTF | null = null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Mouse.png'); }
+    const assetLoader = async () => { asset = await loadModel(context, '/assets/Mouse.glb'); }
+
+    await Promise.all([textureLoader(), assetLoader()]);
+  }
+
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
+    if (!asset) { return null; }
+    if (!texture) { return null; }
+
+    const material = new MeshBasicMaterial({ map: texture });
+
+    asset.scene.traverse(node => {
+      if (!(node instanceof Mesh)) { return; }
+
+      node.material = material;
+    });
+
+    context.scenes.sourceScene.add(asset.scene);
+
+    return null;
+  }
+
+  return {
+    downloader,
+    builder,
+    builderProcessTime: 0
+  }
+}
+
+export function CablesLoader(): AssetLoader {
+  let asset: GLTF | null = null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    asset = await loadModel(context, '/assets/Cables.gltf');
+  }
+
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
+    if (!asset) { return null; }
+
+    const material = new MeshBasicMaterial({ color: 0x303030 });
+
+    asset.scene.traverse(node => {
+      if (!(node instanceof Mesh)) { return; }
+
+      node.material = material;
+    });
+
+    context.scenes.sourceScene.add(asset.scene);
+
+    return null;
+  }
+
+  return {
+    downloader,
+    builder,
+    builderProcessTime: 0
+  }
+}
 
 export function MuttadilesLoader(): AssetLoader {
   let asset: GLTF | null;
