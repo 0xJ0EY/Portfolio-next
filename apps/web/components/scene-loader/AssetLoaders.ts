@@ -126,11 +126,8 @@ export function FloorLoader(): AssetLoader {
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
-      // if (node.name === FloorName) {
-        node.material = material;
-      // }
+      node.material = material;
     });
-
 
     return null;
   }
@@ -147,7 +144,7 @@ export function DeskLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/DeskTexture.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk.png'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
