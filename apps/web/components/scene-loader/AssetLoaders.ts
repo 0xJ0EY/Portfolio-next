@@ -108,8 +108,8 @@ export function FloorLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Floor.png'); }
-    const assetLoader   = async () => { asset = await loadModel(context, '/assets/Floor.glb'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/SmoothFloor.png'); }
+    const assetLoader   = async () => { asset = await loadModel(context, '/assets/SmoothFloor.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
   }
@@ -126,9 +126,9 @@ export function FloorLoader(): AssetLoader {
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
-      if (node.name === FloorName) {
+      // if (node.name === FloorName) {
         node.material = material;
-      }
+      // }
     });
 
 
