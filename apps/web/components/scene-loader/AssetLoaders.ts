@@ -14,10 +14,6 @@ const ComputerName = "Computer";
 const DeskName = "Desk";
 const FloorName = "Floor";
 
-const GLTF_SHADOWS_CAST     = 0x01;
-const GLTF_SHADOWS_RECEIVE  = 0x02;
-const GLTF_SHADOWS_ALL      = GLTF_SHADOWS_CAST | GLTF_SHADOWS_RECEIVE;
-
 async function loadTexture(context: AssetManagerContext, asset: string): Promise<Texture> {
   const texture = await context.textureLoader.loadAsync(asset);
 
@@ -34,15 +30,6 @@ function enableCameraCollision(asset: GLTF): void {
   for (const obj of asset.scene.children) {
     obj.userData[AssetKeys.CameraCollidable] = true;
   }
-}
-
-function enableGLTFShadows(gltf: GLTF, state: number = GLTF_SHADOWS_ALL) {
-  gltf.scene.traverse(node => {
-    if (node instanceof Mesh) {
-      node.castShadow     = (state & GLTF_SHADOWS_CAST) === GLTF_SHADOWS_CAST;
-      node.receiveShadow  = (state & GLTF_SHADOWS_RECEIVE) === GLTF_SHADOWS_RECEIVE;
-    }
-  });
 }
 
 export function createRenderScenes(): RendererScenes {
@@ -423,23 +410,27 @@ export function CablesLoader(): AssetLoader {
   }
 }
 
-export function MuttadilesLoader(): AssetLoader {
-  let asset: GLTF | null;
+export function HydraLoader(): AssetLoader {
+  let asset: GLTF | null = null;
+  let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    asset = await loadModel(context, '/assets/Muttadiles.gltf');
+    const assetLoader = async () => { asset = await loadModel(context, '/assets/Hydra.glb'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Hydra.png'); }
+
+    await Promise.all([assetLoader(), textureLoader()]);
   }
 
   function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
 
-    // enableGLTFShadows(asset);
+    let material = new MeshBasicMaterial({ map: texture });
 
-    // asset.scene.traverse(node => {
-    //   if (node instanceof Mesh) {
-    //     node.material.side = 0;
-    //   }
-    // })
+    asset.scene.traverse(node => {
+      if (!(node instanceof Mesh)) { return; }
+
+      node.material = material;
+    });
 
     context.scenes.sourceScene.add(asset.scene);
 
