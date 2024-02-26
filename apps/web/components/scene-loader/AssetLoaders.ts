@@ -309,95 +309,42 @@ export function MonitorLoader(): AssetLoader {
 }
 
 export function KeyboardLoader(): AssetLoader {
-
   let caseTexture: Texture | null = null;
-  let redKeycapTexture: Texture | null = null;
-  let greenKeycapTexture: Texture | null = null;
-  let grayKeycapTexture: Texture | null = null;
-  let whiteKeycapTexture: Texture | null = null;
+  let keyCapTexture: Texture | null = null;
 
   let asset: GLTF | null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const caseTextureLoader         = async () => { caseTexture = await loadTexture(context, '/assets/KeyboardCase.png'); }
-    const redKeycapTextureLoader    = async () => { redKeycapTexture = await loadTexture(context, '/assets/KeyboardRedKeycaps.png'); }
-    const greenKeycapTextureLoader  = async () => { greenKeycapTexture = await loadTexture(context, '/assets/KeyboardGreenKeycaps.png'); }
-    const grayKeycapTextureLoader   = async () => { grayKeycapTexture = await loadTexture(context, '/assets/KeyboardGrayKeycaps.png'); }
-    const whiteKeycapTextureLoader  = async () => { whiteKeycapTexture = await loadTexture(context, '/assets/KeyboardWhiteKeycaps.png'); }
+    const caseTextureLoader   = async () => { caseTexture = await loadTexture(context, '/assets/KeyboardCase.png'); }
+    const keyCapTextureLoader = async () => { keyCapTexture = await loadTexture(context, '/assets/KeyboardKeyCaps.png'); }
 
     const assetLoader = async () => { asset = await loadModel(context, '/assets/Keyboard.glb'); }
 
     await Promise.all([
       caseTextureLoader(),
-      redKeycapTextureLoader(),
-      greenKeycapTextureLoader(),
-      grayKeycapTextureLoader(),
-      whiteKeycapTextureLoader(),
+      keyCapTextureLoader(),
       assetLoader()
     ]);
   }
 
   function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
-    if (!caseTexture || !redKeycapTexture || !greenKeycapTexture || !grayKeycapTexture || !whiteKeycapTexture) { return null; }
+    if (!caseTexture || !keyCapTexture) { return null; }
 
     enableCameraCollision(asset);
-    // enableGLTFShadows(asset);
 
-    const caseMaterial          = new MeshStandardMaterial({ map: caseTexture });
-    const redKeycapMaterial     = new MeshStandardMaterial({ map: redKeycapTexture });
-    const greenKeycapMaterial   = new MeshStandardMaterial({ map: greenKeycapTexture });
-    const grayKeycapMaterial    = new MeshStandardMaterial({ map: grayKeycapTexture });
-    const whiteKeycapMaterial   = new MeshStandardMaterial({ map: whiteKeycapTexture });
-
-    let specialKeys: Record<string, Material> = {
-      "keycap_esc": redKeycapMaterial,
-      "keycap_f5": grayKeycapMaterial,
-      "keycap_f6": grayKeycapMaterial,
-      "keycap_f7": grayKeycapMaterial,
-      "keycap_f8": grayKeycapMaterial,
-      "keycap_print_screen": grayKeycapMaterial,
-      "keycap_insert": grayKeycapMaterial,
-      "keycap_home": grayKeycapMaterial,
-      "keycap_backspace": grayKeycapMaterial,
-      "keycap_end": grayKeycapMaterial,
-      "keycap_tab": grayKeycapMaterial,
-      "keycap_page_up": grayKeycapMaterial,
-      "keycap_caps_lock": grayKeycapMaterial,
-      "keycap_page_down": grayKeycapMaterial,
-      "keycap_left_shift": grayKeycapMaterial,
-      "keycap_right_shift": grayKeycapMaterial,
-      "keycap_app": grayKeycapMaterial,
-      "keycap_control": grayKeycapMaterial,
-      "keycap_right_control": grayKeycapMaterial,
-      "keycap_meta": grayKeycapMaterial,
-      "keycap_alt": grayKeycapMaterial,
-      "keycap_right_alt": grayKeycapMaterial,
-      "keycap_fn": grayKeycapMaterial,
-      "keycap_arrow_up": grayKeycapMaterial,
-      "keycap_arrow_down": grayKeycapMaterial,
-      "keycap_arrow_left": grayKeycapMaterial,
-      "keycap_arrow_right": grayKeycapMaterial,
-      "keycap_space": greenKeycapMaterial,
-      "keycap_enter": greenKeycapMaterial,
-    }
+    const caseMaterial    = new MeshStandardMaterial({ map: caseTexture });
+    const keyCapMaterial  = new MeshStandardMaterial({ map: keyCapTexture });
 
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
       if (node.name === "Case") {
         node.material = caseMaterial;
-        return;
-      }
-
-      if (node.name in specialKeys) {
-        node.material = specialKeys[node.name];
-
       } else {
-        node.material = whiteKeycapMaterial;
+        node.material = keyCapMaterial;
       }
     })
-
 
     context.scenes.sourceScene.add(asset.scene);
 
@@ -486,13 +433,13 @@ export function MuttadilesLoader(): AssetLoader {
   function builder(context: AssetManagerContext): OptionalUpdateAction {
     if (!asset) { return null; }
 
-    enableGLTFShadows(asset);
+    // enableGLTFShadows(asset);
 
-    asset.scene.traverse(node => {
-      if (node instanceof Mesh) {
-        node.material.side = 0;
-      }
-    })
+    // asset.scene.traverse(node => {
+    //   if (node instanceof Mesh) {
+    //     node.material.side = 0;
+    //   }
+    // })
 
     context.scenes.sourceScene.add(asset.scene);
 
