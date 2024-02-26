@@ -427,6 +427,7 @@ export function HydraLoader(): AssetLoader {
       if (!(node instanceof Mesh)) { return; }
 
       node.material = material;
+      node.material.side = DoubleSide; // We need to do this, otherwise the ears are transparent
     });
 
     context.scenes.sourceScene.add(asset.scene);
