@@ -108,7 +108,7 @@ export function FloorLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/SmoothFloor.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/SmoothFloor.jpg'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/SmoothFloor.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
@@ -144,7 +144,7 @@ export function DeskLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk.jpg'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
@@ -186,8 +186,8 @@ export function MonitorLoader(): AssetLoader {
   let asset: GLTF | null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const monitorLoader   = async () => { monitorTexture = await loadTexture(context, '/assets/Monitor.png'); }
-    const computerLoader  = async () => { computerTexture = await loadTexture(context, '/assets/Computer.png'); }
+    const monitorLoader   = async () => { monitorTexture = await loadTexture(context, '/assets/Monitor.jpg'); }
+    const computerLoader  = async () => { computerTexture = await loadTexture(context, '/assets/Computer.jpg'); }
     const assetLoader     = async () => { asset = await loadModel(context, '/assets/Monitor.glb'); }
 
     await Promise.all([monitorLoader(), computerLoader(), assetLoader()]);
@@ -299,8 +299,8 @@ export function KeyboardLoader(): AssetLoader {
   let asset: GLTF | null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const caseTextureLoader   = async () => { caseTexture = await loadTexture(context, '/assets/KeyboardCase.png'); }
-    const keyCapTextureLoader = async () => { keyCapTexture = await loadTexture(context, '/assets/KeyboardKeyCaps.png'); }
+    const caseTextureLoader   = async () => { caseTexture = await loadTexture(context, '/assets/KeyboardCase.jpg'); }
+    const keyCapTextureLoader = async () => { keyCapTexture = await loadTexture(context, '/assets/KeyboardKeyCaps.jpg'); }
 
     const assetLoader = async () => { asset = await loadModel(context, '/assets/Keyboard.glb'); }
 
@@ -347,7 +347,7 @@ export function MouseLoader(): AssetLoader {
   let asset: GLTF | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Mouse.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Mouse.jpg'); }
     const assetLoader = async () => { asset = await loadModel(context, '/assets/Mouse.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
@@ -413,7 +413,7 @@ export function HydraLoader(): AssetLoader {
 
   async function downloader(context: AssetManagerContext): Promise<void> {
     const assetLoader = async () => { asset = await loadModel(context, '/assets/Hydra.glb'); }
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Hydra.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Hydra.jpg'); }
 
     await Promise.all([assetLoader(), textureLoader()]);
   }
@@ -448,7 +448,7 @@ export function PlantLoader(): AssetLoader {
 
   async function downloader(context: AssetManagerContext): Promise<void> {
     const assetLoader = async () => { asset = await loadModel(context, '/assets/Plant.glb'); }
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Plant.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Plant.jpg'); }
 
     await Promise.all([assetLoader(), textureLoader()]);
   }
