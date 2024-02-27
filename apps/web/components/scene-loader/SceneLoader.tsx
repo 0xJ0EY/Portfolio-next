@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { LoadingManager } from "three";
 import { Renderer, RendererScenes } from "../renderer/Renderer";
 import { AssetManager, LoadingProgress, LoadingProgressEntry, UpdateAction } from "./AssetManager";
-import { CablesLoader, DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, MouseLoader, HydraLoader, NoopLoader, createRenderScenes } from "./AssetLoaders";
+import { CablesLoader, DeskLoader, FloorLoader, KeyboardLoader, LightsLoader, MonitorLoader, MouseLoader, HydraLoader, NoopLoader, createRenderScenes, PlantLoader } from "./AssetLoaders";
 import { detectWebGL, isDebug, isMobileDevice } from "./util";
 import styles from './SceneLoader.module.css';
 
@@ -192,6 +192,7 @@ export function SceneLoader() {
     manager.add('Loading mouse', MouseLoader());
     manager.add('Loading lights', LightsLoader());
     manager.add('Loading floor', FloorLoader());
+    manager.add('Loading plant', PlantLoader());
     manager.add('Loading Alchemical Hydra', HydraLoader());
     manager.add('Loading keyboard', KeyboardLoader());
     manager.add('Loading monitor', MonitorLoader());

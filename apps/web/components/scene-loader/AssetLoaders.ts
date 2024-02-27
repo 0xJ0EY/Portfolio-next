@@ -441,3 +441,37 @@ export function HydraLoader(): AssetLoader {
     builderProcessTime: 0
   }
 }
+
+export function PlantLoader(): AssetLoader {
+  let asset: GLTF | null = null;
+  let texture: Texture | null = null;
+
+  async function downloader(context: AssetManagerContext): Promise<void> {
+    const assetLoader = async () => { asset = await loadModel(context, '/assets/Plant.glb'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Plant.png'); }
+
+    await Promise.all([assetLoader(), textureLoader()]);
+  }
+
+  function builder(context: AssetManagerContext): OptionalUpdateAction {
+    if (!asset) { return null; }
+
+    let material = new MeshBasicMaterial({ map: texture });
+
+    asset.scene.traverse(node => {
+      if (!(node instanceof Mesh)) { return; }
+
+      node.material = material;
+    });
+
+    context.scenes.sourceScene.add(asset.scene);
+
+    return null;
+  }
+
+  return {
+    downloader,
+    builder,
+    builderProcessTime: 0
+  }
+}
