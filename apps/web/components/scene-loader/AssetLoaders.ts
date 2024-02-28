@@ -1,5 +1,5 @@
-import { AmbientLight, Box3, BoxGeometry, BufferGeometry, CameraHelper, Color, DirectionalLight, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PlaneGeometry, PointLight, RepeatWrapping, Scene, Texture, TextureLoader, Vector3, WebGLCapabilities, WebGLRenderer, sRGBEncoding } from "three";
-import { AssetLoader, AssetManager, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
+import { AmbientLight, Box3, BufferGeometry, Color, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Scene, Texture } from "three";
+import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
