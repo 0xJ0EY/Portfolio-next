@@ -1,4 +1,4 @@
-import { LoadingManager, WebGLRenderer } from "three";
+import { LoadingManager, TextureLoader, WebGLRenderer } from "three";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { RendererScenes } from "../renderer/Renderer";
 import { sleep } from "./util";
@@ -6,20 +6,19 @@ import { sleep } from "./util";
 export type UpdateAction = ((deltaTime: number) => void);
 export type OptionalUpdateAction = UpdateAction[] | null;
 
-export type AssetDownloader<T> = (context: AssetManagerContext) => Promise<T>;
-export type AssetBuilder<T> = (context: AssetManagerContext, asset: T | null) => OptionalUpdateAction;
+export type AssetDownloader = (context: AssetManagerContext) => Promise<void>;
+export type AssetBuilder = (context: AssetManagerContext) => OptionalUpdateAction;
 
-export type AssetLoader<T> = {
-  downloader: AssetDownloader<T> | null,
-  builder: AssetBuilder<T> | null,
+export type AssetLoader = {
+  downloader: AssetDownloader | null,
+  builder: AssetBuilder | null,
   builderProcessTime: number
 }
 
-export type AssetContext<T> = {
+export type AssetContext = {
   name: string,
-  assetLoader: AssetLoader<T>
-  asset: T | null,
-  inScene: boolean
+  assetLoader: AssetLoader,
+  inScene: boolean,
 
   order: number,
 
@@ -36,6 +35,7 @@ export class AssetManagerContext {
   constructor(
     public debug: boolean,
     public renderer: WebGLRenderer,
+    public textureLoader: TextureLoader,
     public gltfLoader: GLTFLoader,
     public scenes: RendererScenes,
   ) {}
@@ -89,17 +89,19 @@ export class AssetManager {
   private context: AssetManagerContext | null = null;
 
   private index = 0;
-  private assets: Record<string, AssetContext<GLTF>> = {}
+  private assets: Record<string, AssetContext> = {}
 
   constructor(private rendererScenes: RendererScenes, private loadingManager?: LoadingManager) {}
 
   public init(debug: boolean): void {
+    const textureLoader = new TextureLoader(this.loadingManager);
     const gltfLoader = new GLTFLoader(this.loadingManager);
     const renderer = new WebGLRenderer();
 
     this.context = new AssetManagerContext(
       debug,
       renderer,
+      textureLoader,
       gltfLoader,
       this.rendererScenes
     );
@@ -115,14 +117,13 @@ export class AssetManager {
     return this.context?.scenes ?? null;
   }
 
-  public add(name: string, loader: AssetLoader<GLTF>): void {
+  public add(name: string, loader: AssetLoader): void {
     const noDownloadNeeded = loader.downloader === null;
     const noProcessNeeded = loader.builder === null;
 
     this.assets[name] = {
       name,
       assetLoader: loader,
-      asset: null,
       inScene: false,
       order: this.index++,
       downloaded: noDownloadNeeded,
@@ -157,6 +158,7 @@ export class AssetManager {
   public async load(signal?: AbortSignal, onUpdate?: () => void): LoadingResult {
     if (!this.context) { this.init(false); }
 
+    let allUpdateActions: UpdateAction[] = [];
 
     function update() {
       if (onUpdate) { onUpdate(); }
@@ -167,9 +169,9 @@ export class AssetManager {
         const downloader = asset.assetLoader.downloader;
 
         if (!downloader) { return; }
-        if (asset.asset) { return; }
+        if (asset.downloaded) { return; }
 
-        asset.asset = await downloader(this.context!);
+        await downloader(this.context!);
         asset.downloaded = true;
 
         update();
@@ -192,12 +194,18 @@ export class AssetManager {
 
       if (signal && signal.aborted) { return { updateActions: [] }};
 
-      builder(this.context!, asset.asset);
+      const updateActions = builder(this.context!);
       asset.processed = true;
+
+      if (updateActions) {
+        for (const updateAction of updateActions) {
+          allUpdateActions.push(updateAction);
+        }
+      }
 
       update();
     }
 
-    return { updateActions: [] }
+    return { updateActions: allUpdateActions }
   }
 }

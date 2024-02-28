@@ -4,6 +4,7 @@ import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMSh
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
@@ -36,7 +37,7 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 }
 
 function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
-  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: true });
+  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
 
   webglRenderer.shadowMap.enabled = true;
   webglRenderer.shadowMap.type = VSMShadowMap;
@@ -223,7 +224,7 @@ export const Renderer = (props: RendererProps) => {
     const saoPass = new SAOPass(scene, camera);
     saoPass.resolution.set(128, 128);
     saoPass.params.saoBias = 100;
-    saoPass.params.saoIntensity = 0.0006;
+    saoPass.params.saoIntensity = 0.0003;
     saoPass.params.saoBlur = false;
     composer.addPass(saoPass);
 
