@@ -97,6 +97,9 @@ export class DeskViewCameraState extends CameraState {
 
     this.ctx.cameraController.setPanOffsetX(x);
     this.ctx.cameraController.setPanOffsetY(y);
+
+    this.ctx.cameraController.setOriginBoundaryX(40.0);
+    this.ctx.cameraController.setOriginBoundaryY(40.0);
   }
 
   private handleMouseMove(data: MouseData): void {

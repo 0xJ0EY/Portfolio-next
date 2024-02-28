@@ -37,8 +37,8 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.setMinZoom(2.0);
     this.ctx.cameraController.setMaxZoom(15.0);
 
-    this.ctx.cameraController.setOriginBoundaryX(null);
-    this.ctx.cameraController.setOriginBoundaryY(null);
+    this.ctx.cameraController.setOriginBoundaryX(40.0);
+    this.ctx.cameraController.setOriginBoundaryY(40.0);
     this.ctx.cameraController.setOriginBoundaryZ(null);
 
     this.ctx.cameraController.transition(position, rotation, zoom, 500);
