@@ -18,7 +18,7 @@ export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: Point
     const camera = ctx.cameraController.getCamera();
     raycaster.setFromCamera(point, camera);
 
-    const intersects = raycaster.intersectObjects(ctx.cameraController.getScene().children);
+    const intersects = raycaster.intersectObjects(ctx.cameraController.getCutoutScene().children);
     const first = intersects[0] ?? null;
 
     if (first === null) { return false; }

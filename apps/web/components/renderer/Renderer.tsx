@@ -207,7 +207,7 @@ export const Renderer = (props: RendererProps) => {
     disableTouchInteraction(cssRenderNode);
     disableTouchInteraction(webglRenderNode);
 
-    const cameraController  = new CameraController(camera, scene);
+    const cameraController  = new CameraController(camera, scene, cutoutScene);
     const cameraHandler     = new CameraHandler(cameraController, webglRenderNode, touchEvents, handleCameraHandlerStateChange);
     const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
     const touchInputHandler = new TouchInputHandler(allowUserInput, cameraHandler);

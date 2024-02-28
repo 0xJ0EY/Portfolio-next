@@ -222,7 +222,7 @@ export function MonitorLoader(): AssetLoader {
 
     const display = asset.scene.children.find((x) => x.name === DisplayName) as Mesh<BufferGeometry, Material>;
     const cutoutDisplay = display.clone();
-    display.position.z -= 0.1;
+    display.visible = false;
 
     const box = display.geometry.boundingBox ?? new Box3();
 

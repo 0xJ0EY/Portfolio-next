@@ -26,9 +26,6 @@ export class CameraController {
   private cameraFollowPosition: Vector3 = new Vector3(0, 0, 0);
   private cameraPosition: Vector3 = new Vector3(0, 0, 0);
 
-  private horizontalBound: number | null = null;
-  private verticalBound: number | null = null;
-
   private dampingEnabled: boolean = false;
   private dampingFactor: number = 0.225;
 
@@ -54,7 +51,11 @@ export class CameraController {
   private maxZoomDistance = 15.0;
   private currentZoomDistance = 10;
 
-  constructor(private camera: PerspectiveCamera, private scene: Scene) {}
+  constructor(
+    private camera: PerspectiveCamera,
+    private scene: Scene,
+    private cutoutScene: Scene
+  ) {}
 
   public getTarget(): Vector3 {
     return this.target;
@@ -70,6 +71,10 @@ export class CameraController {
 
   public getScene(): Scene {
     return this.scene;
+  }
+
+  public getCutoutScene(): Scene {
+    return this.cutoutScene;
   }
 
   public enableDamping(): void {
