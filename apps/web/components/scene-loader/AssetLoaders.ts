@@ -12,6 +12,7 @@ export const DisplayName = "Display";
 const MonitorName = "Monitor";
 const ComputerName = "Computer";
 const DeskName = "Desk";
+const NamePlateName = "NamePlate";
 const FloorName = "Floor";
 
 async function loadTexture(context: AssetManagerContext, asset: string): Promise<Texture> {
@@ -144,7 +145,7 @@ export function DeskLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk.jpg'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk-light.png'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);
@@ -182,15 +183,17 @@ export function DeskLoader(): AssetLoader {
 export function MonitorLoader(): AssetLoader {
   let monitorTexture: Texture | null = null;
   let computerTexture: Texture | null = null;
+  let namePlateTexture: Texture | null = null;
 
   let asset: GLTF | null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
     const monitorLoader   = async () => { monitorTexture = await loadTexture(context, '/assets/Monitor.jpg'); }
     const computerLoader  = async () => { computerTexture = await loadTexture(context, '/assets/Computer.jpg'); }
+    const namePlateLoader = async () => { namePlateTexture = await loadTexture(context, '/assets/NamePlate.jpg'); }
     const assetLoader     = async () => { asset = await loadModel(context, '/assets/Monitor.glb'); }
 
-    await Promise.all([monitorLoader(), computerLoader(), assetLoader()]);
+    await Promise.all([monitorLoader(), computerLoader(), namePlateLoader(), assetLoader()]);
   }
 
   function builder(context: AssetManagerContext): OptionalUpdateAction {
@@ -205,18 +208,24 @@ export function MonitorLoader(): AssetLoader {
 
     const monitorMaterial   = new MeshStandardMaterial({ map: monitorTexture });
     const computerMaterial  = new MeshStandardMaterial({ map: computerTexture });
+    const nameplateMaterial = new MeshStandardMaterial({ map: namePlateTexture });
 
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
-      if (node.name === DisplayName) {
-        node.material = displayMaterial;
-
-      } else if (node.name === MonitorName) {
-        node.material = monitorMaterial;
-
-      } else if (node.name === ComputerName) {
-        node.material = computerMaterial;
+      switch (node.name) {
+        case DisplayName:
+          node.material = displayMaterial;
+          break;
+        case MonitorName:
+          node.material = monitorMaterial;
+          break;
+        case ComputerName:
+          node.material = computerMaterial;
+          break;
+        case NamePlateName:
+          node.material = nameplateMaterial;
+          break;
       }
     });
 
