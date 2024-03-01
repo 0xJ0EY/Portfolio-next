@@ -145,7 +145,7 @@ export function DeskLoader(): AssetLoader {
   let texture: Texture | null = null;
 
   async function downloader(context: AssetManagerContext): Promise<void> {
-    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk-light.png'); }
+    const textureLoader = async () => { texture = await loadTexture(context, '/assets/Desk.jpg'); }
     const assetLoader   = async () => { asset = await loadModel(context, '/assets/Desk.glb'); }
 
     await Promise.all([textureLoader(), assetLoader()]);

@@ -98,6 +98,8 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   function onPointerUp(evt: PointerEvent) {
     const key = evt.button === PrimaryMouseButton ? PointerPrimaryKey : PointerSecondaryKey;
 
+    if (!activeSounds.current[key]) { return; }
+
     const audioSource = activeSounds.current[key].onUp;
     if (audioSource) {
       const audioFragment = fetchAudioFragmentFromCacheOrCreate(audioSource);
