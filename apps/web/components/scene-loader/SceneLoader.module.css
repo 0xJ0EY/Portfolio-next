@@ -93,7 +93,7 @@
   margin: 0 0 10px;
 }
 
-
+.error-container p a,
 .user-message-container p a {
   color: lightblue;
 }

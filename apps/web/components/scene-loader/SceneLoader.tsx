@@ -139,7 +139,8 @@ function DisplayWebGLError() {
         <h3>ERROR: No WebGL detected</h3>
         <p>WebGL is required to run this site.</p>
         <p>Please enable it or switch to a browser that supports WebGL</p>
-      </div> 
+        <p>Or if you only want to download my CV, you can do so from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
+      </div>
     </div>
   );
 }
@@ -174,13 +175,18 @@ export function SceneLoader() {
   const [showLoadingUnderscore, setLoadingUnderscore] = useState(true);
 
   const scenesRef   = useRef<RendererScenes>(createRenderScenes());
-  const managerRef  = useRef<AssetManager>(new AssetManager(scenesRef.current, new LoadingManager()));
+  const managerRef  = useRef<AssetManager | null>(null);
   const actions     = useRef<UpdateAction[]>([]);
 
   const [loadingProgress, setLoadingProgress] = useState<LoadingProgress | null>(null);
   const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
   
   useEffect(() => {
+    const hasWebGL = detectWebGL();
+    setSupportsWebGL(hasWebGL);
+    if (!hasWebGL) { return; }
+
+    managerRef.current = new AssetManager(scenesRef.current, new LoadingManager())
     const manager = managerRef.current;
 
     manager.init(isDebug());
@@ -200,7 +206,6 @@ export function SceneLoader() {
     manager.add('Loading monitor', MonitorLoader());
 
     setLoadingProgress(managerRef.current.loadingProgress());
-    setSupportsWebGL(detectWebGL());
 
     const abortController = new AbortController();
 
@@ -237,6 +242,7 @@ export function SceneLoader() {
     }
   }, [loadingProgress]);
 
+  if (supportsWebGL === null) { return <></>; }
   if (supportsWebGL === false) { return DisplayWebGLError(); }
 
   return (<>
