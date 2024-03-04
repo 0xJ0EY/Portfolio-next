@@ -58,6 +58,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   padding: 1.5rem;
+  overflow: auto;
 }
 
 .subpage-home {
