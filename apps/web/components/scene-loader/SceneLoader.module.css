@@ -90,6 +90,15 @@
 
 .user-message-container p {
   display: block;
+  margin: 0 0 10px;
+}
+
+
+.user-message-container p a {
+  color: lightblue;
+}
+
+.user-message-container p:last-of-type {
   margin: 0 0 20px;
 }
 
