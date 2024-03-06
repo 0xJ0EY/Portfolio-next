@@ -1,10 +1,12 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useState } from 'react';
 import styles from './AboutView.module.css';
+import { BaseApplicationManager } from '../ApplicationManager';
 
 type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
 
 type SubViewParams = {
+  manager: BaseApplicationManager,
   changeParent: (view: SubView) => void
 }
 
@@ -44,6 +46,10 @@ function SubViewNavigation(params: SubViewParams) {
 }
 
 function AboutSubView(params: SubViewParams) {
+  function openContactApp() {
+    params.manager.open('/Applications/Contact.app');
+  }
+
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
@@ -53,12 +59,10 @@ function AboutSubView(params: SubViewParams) {
           I’m Joey de Ruiter, a software developer living in the Netherlands.
         </p>
 
-        <p>Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the “contact application” (click to open it) or shoot me an email at contact@joeyderuiter.me</p>
+        <p>Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the <a onClick={() => openContactApp()} href='#contact'>contact application</a> or shoot me an email at <a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
 
         <p>
-          <hr />
           download cv
-          <hr />
         </p>
 
         <h2>About me</h2>
@@ -128,6 +132,8 @@ export default function AboutApplicationView(props: WindowProps) {
 
   const [subView, setSubView] = useState<SubView>('home');
 
+  
+
   function changeParent(view: SubView) {
     if (view === 'contact') {
       application.on({ kind: 'about-open-contact-event' }, windowContext);
@@ -140,7 +146,7 @@ export default function AboutApplicationView(props: WindowProps) {
   return (
     <div className="content-outer">
       <div className="content">
-        { RenderSubView(subView, { changeParent }) }
+        { RenderSubView(subView, { manager: application.manager, changeParent }) }
       </div>
     </div>
   )
