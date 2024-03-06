@@ -74,6 +74,8 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   function onKeyUp(evt: KeyboardEvent) {
     const code = evt.code;
 
+    if (!activeSounds.current[code]) { return; }
+
     const audioSource = activeSounds.current[code].onUp;
 
     if (audioSource) {
