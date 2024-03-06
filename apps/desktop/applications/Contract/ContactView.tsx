@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import styles from './ContactView.module.css';
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { isEmail, isEmpty } from "@/components/util";
+import Image from 'next/image';
 
 type ValidationError = (
   'empty-name' |
@@ -11,7 +12,7 @@ type ValidationError = (
   'invalid-email'
 );
 
-export default function NotesApplicationView(props: WindowProps) {
+export default function ContactApplicationView(props: WindowProps) {
   const { application, args, windowContext } = props;
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -108,9 +109,18 @@ export default function NotesApplicationView(props: WindowProps) {
       <div className="content">
         <div className={styles['center']}>
           <div className={styles['center-content']}>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae quo voluptate vitae est voluptatibus quod architecto qui tenetur vel, velit, molestias deleniti itaque consequuntur reprehenderit maxime et magni laudantium sed!
+            <div className={styles['contact-header']}>
+              <h1>Contact</h1>
+              <div className={styles['contact-socials']}>
+                <a rel="noreferrer" target="_blank" href="https://github.com/0xJ0EY"><Image src="icons/github-icon.svg" alt="Github" width={22} height={22}/></a>
+                <a rel="noreferrer" target="_blank" href="https://www.linkedin.com/in/j-de-ruiter/"><Image src="icons/linkedin-icon.svg" alt="Linkedin" width={22} height={22}/></a>
+                <a rel="noreferrer" target="_blank" href="https://twitter.com/0xJ0EY"><Image src="icons/x-icon.svg" alt="X" width={22} height={22}/></a>
+              </div>
+            </div>
+            <p className={styles['contact-info']}>
+              I am currently not contracted, so if you have any opportunities feel free to reach out! You can reach me via my personal email, or fill out the form below!
             </p>
+            <p><b>Email:&nbsp;</b><a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
             <form onSubmit={onSubmit}>
               { processed ?
                 <div className={[styles['form-row'], styles['processed']].join(' ')}>

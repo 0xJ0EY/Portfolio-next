@@ -53,10 +53,7 @@ function AboutSubView(params: SubViewParams) {
           I’m Joey de Ruiter, a software developer living in the Netherlands.
         </p>
 
-        <p>
-
-Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the “contact application” (click to open it) or shoot me an email at contact@joeyderuiter.me
-        </p>
+        <p>Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the “contact application” (click to open it) or shoot me an email at contact@joeyderuiter.me</p>
 
         <p>
           <hr />
