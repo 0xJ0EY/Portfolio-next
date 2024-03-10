@@ -95,7 +95,7 @@ function ShowUserMessage(props: { onClick: () => void }) {
         <div className={styles['user-message-container']}>
           <h1>Portfolio of Joey de Ruiter</h1>
           {smallWindow && <p className={styles['warning']}>WARNING: This portfolio is best experienced on a desktop, laptop or a tablet computer</p>}  
-          <p>If you're interested, you can download my CV from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
+          <p>If you&apos;re interested, you can download my CV from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
           
           <p>            
             <span className={styles['continue-text']}>Click continue to begin</span>
