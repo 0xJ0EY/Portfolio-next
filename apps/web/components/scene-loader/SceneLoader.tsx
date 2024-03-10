@@ -95,7 +95,7 @@ function ShowUserMessage(props: { onClick: () => void }) {
         <div className={styles['user-message-container']}>
           <h1>Portfolio of Joey de Ruiter</h1>
           {smallWindow && <p className={styles['warning']}>WARNING: This portfolio is best experienced on a desktop, laptop or a tablet computer</p>}  
-          <p>I would recommend to experience the showcase, but if you just wanted to download my CV, you can do so <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
+          <p>If you're interested, you can download my CV from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
           
           <p>            
             <span className={styles['continue-text']}>Click continue to begin</span>
@@ -139,7 +139,7 @@ function DisplayWebGLError() {
         <h3>ERROR: No WebGL detected</h3>
         <p>WebGL is required to run this site.</p>
         <p>Please enable it or switch to a browser that supports WebGL</p>
-        <p>Or if you only want to download my CV, you can do so from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
+        <p>Or if you want to download my CV, you can do so from <a href="/assets/cv/CV_Joey_de_Ruiter_en.pdf" target="_blank">here</a>.</p>
       </div>
     </div>
   );
