@@ -43,6 +43,15 @@
     "create_file_instructions": "Enter the name of the new text file",
     "create_file_duplicated_name": "The given name is already taken. Please choose a different name"
   },
+  "about": {
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "experience": "Experience",
+      "projects": "Projects",
+      "contact": "Contact"
+    }
+  },
   "date": {
     "weekdays": {
       "0": "sunday",

@@ -1,32 +1,48 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styles from './AboutView.module.css';
 import { BaseApplicationManager } from '../ApplicationManager';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
+import { ProjectPortfolio } from './Projects';
 
-type SubView = 'home' | 'about' | 'experience' | 'projects' | 'contact';
+type SubView = (
+  'home' |
+  'about' |
+  'experience' |
+  'projects' |
+  'project-portfolio-2024' |
+  'contact'
+);
 
-type SubViewParams = {
+export type SubViewParams = {
   manager: BaseApplicationManager,
-  changeParent: (view: SubView) => void
+  changeParent: (view: SubView) => void,
+  translate: TFunction,
+  language: string
 }
 
 function HomeSubView(params: SubViewParams) {
+  const t = params.translate;
+
   return (<>
     <div className={styles['subpage-home']}>
       <h1 className={styles['home-title']}>Joey de Ruiter</h1>
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
       <div className={styles['home-button-container']}>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('about')}>About</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('experience')}>Experience</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('projects')}>Projects</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('contact')}>Contact</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('about')}>{t("about.navigation.about")}</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('experience')}>{t("about.navigation.experience")}</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('projects')}>{t("about.navigation.projects")}</button>
+        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('contact')}>{t("about.navigation.contact")}</button>
       </div>
     </div>
   </>)
 }
 
-function SubViewNavigation(params: SubViewParams) {
+export function SubViewNavigation(params: SubViewParams) {
+  const t = params.translate;
+
   return (<>
     <div className={styles['navigation']}>
       <div>
@@ -35,11 +51,11 @@ function SubViewNavigation(params: SubViewParams) {
       </div>
 
       <div className={styles['navigation-button-container']}>
-        <button className='system-button' onClick={() => params.changeParent('home')}>Home</button>
-        <button className='system-button' onClick={() => params.changeParent('about')}>About</button>
-        <button className='system-button' onClick={() => params.changeParent('experience')}>Experience</button>
-        <button className='system-button' onClick={() => params.changeParent('projects')}>Projects</button>
-        <button className='system-button' onClick={() => params.changeParent('contact')}>Contact</button>
+        <button className='system-button' onClick={() => params.changeParent('home')}>{t("about.navigation.home")}</button>
+        <button className='system-button' onClick={() => params.changeParent('about')}>{t("about.navigation.about")}</button>
+        <button className='system-button' onClick={() => params.changeParent('experience')}>{t("about.navigation.experience")}</button>
+        <button className='system-button' onClick={() => params.changeParent('projects')}>{t("about.navigation.projects")}</button>
+        <button className='system-button' onClick={() => params.changeParent('contact')}>{t("about.navigation.contact")}</button>
       </div>
     </div>
   </>)
@@ -50,11 +66,15 @@ function AboutSubView(params: SubViewParams) {
     params.manager.open('/Applications/Contact.app');
   }
 
-  return (<>
-    <div className={styles['subpage']}>
-      { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+  function RenderDutchContent() {
+    return (<>Dutch content</>);
+  }
+
+  function RenderEnglishContent() {
+    return (
+      <>
         <h1 className={styles['page-h1']}>Welcome</h1>
+
         <p>
           I’m Joey de Ruiter, a software developer living in the Netherlands.
         </p>
@@ -88,6 +108,15 @@ function AboutSubView(params: SubViewParams) {
         <p>A lot of my hobbies are focused around computers, but not all of them. I like to tour around on my racing bike every Sunday morning, with a small club of friends and my dad. But other then that I like to write small programs, to explore new technologies and try to solve interesting problems.</p>
 
         <p>But I also like to build my own small form factor (SFF) pc’s, custom keyboards and of course play games. :^)</p>
+      </>
+    );
+  }
+
+  return (<>
+    <div className={styles['subpage']}>
+      { SubViewNavigation(params) }
+      <div className={styles['subpage-content']}>
+        { params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent() }
       </div>
     </div>
   </>);
@@ -109,8 +138,28 @@ function ProjectsSubView(params: SubViewParams) {
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+      <div className={[styles['subpage-content'], styles['projects-subview']].join(' ')}>
         <h1 className={styles['page-h1']}>Projects</h1>
+
+        <h2>2024</h2>
+        <ul>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-portfolio-2024') }>Portfolio 2024</button></li>
+        </ul>
+
+        <h2>2023</h2>
+        <ul>
+          <li><a>J-Script</a></li>
+        </ul>
+
+        <h2>2022</h2>
+        <ul>
+          <li><a>Advent of Code</a></li>
+        </ul>
+
+        <h2>2021</h2>
+        <ul>
+          <li><a>Portfolio 2021</a></li>
+        </ul>
       </div>
     </div>
   </>);
@@ -122,6 +171,7 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
     case 'about': return AboutSubView(params);
     case 'experience': return ExperienceSubView(params);
     case 'projects': return ProjectsSubView(params);
+    case 'project-portfolio-2024': return ProjectPortfolio(params);
   }
   
   return <></>;
@@ -131,8 +181,7 @@ export default function AboutApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
   const [subView, setSubView] = useState<SubView>('home');
-
-  
+  const { t, i18n } = useTranslation("common");
 
   function changeParent(view: SubView) {
     if (view === 'contact') {
@@ -146,7 +195,14 @@ export default function AboutApplicationView(props: WindowProps) {
   return (
     <div className="content-outer">
       <div className="content">
-        { RenderSubView(subView, { manager: application.manager, changeParent }) }
+        { RenderSubView(subView, 
+          {
+            manager: application.manager,
+            changeParent,
+            translate: t,
+            language: i18n.language
+          }
+        ) }
       </div>
     </div>
   )
