@@ -4,7 +4,7 @@ import styles from './AboutView.module.css';
 import { BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { ProjectPortfolio } from './Projects';
+import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
 
 type SubView = (
   'home' |
@@ -12,6 +12,14 @@ type SubView = (
   'experience' |
   'projects' |
   'project-portfolio-2024' |
+  'project-j-script' |
+  'project-advent-of-code' |
+  'project-portfolio-2021' |
+  'project-t-bot' |
+  'project-youi' |
+  'project-pcparts' |
+  'project-albert' |
+  'project-paintboy' |
   'contact'
 );
 
@@ -123,11 +131,13 @@ function AboutSubView(params: SubViewParams) {
 }
 
 function ExperienceSubView(params: SubViewParams) {
+  const t = params.translate;
+
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
       <div className={styles['subpage-content']}>
-        <h1 className={styles['page-h1']}>Experience</h1>
+        <h1 className={styles['page-h1']}>{t("about.navigation.experience")}</h1>
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis voluptate deleniti nemo nam eum sunt repellat? Dolorum nemo qui sit eveniet officia voluptatem similique consequuntur deserunt, sint quis maxime. Doloribus?</p>
       </div>
     </div>
@@ -135,11 +145,13 @@ function ExperienceSubView(params: SubViewParams) {
 }
 
 function ProjectsSubView(params: SubViewParams) {
+  const t = params.translate;
+
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
       <div className={[styles['subpage-content'], styles['projects-subview']].join(' ')}>
-        <h1 className={styles['page-h1']}>Projects</h1>
+        <h1 className={styles['page-h1']}>{t("about.navigation.projects")}</h1>
 
         <h2>2024</h2>
         <ul>
@@ -148,18 +160,36 @@ function ProjectsSubView(params: SubViewParams) {
 
         <h2>2023</h2>
         <ul>
-          <li><a>J-Script</a></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-j-script') }>J-Script</button></li>
         </ul>
 
         <h2>2022</h2>
         <ul>
-          <li><a>Advent of Code</a></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-advent-of-code') }>Advent of Code</button></li>
         </ul>
 
         <h2>2021</h2>
         <ul>
-          <li><a>Portfolio 2021</a></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-portfolio-2021') }>Portfolio 2021</button></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-t-bot') }>T-Bot</button></li>
         </ul>
+
+        <h2>2020</h2>
+        <ul>
+        <li><button className={styles['project-button']} onClick={() => params.changeParent('project-youi') }>Youi</button></li>
+        </ul>
+
+        <h2>2019</h2>
+        <ul>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-pcparts') }>PCParts</button></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-albert') }>Albert</button></li>
+        </ul>
+
+        <h2>2016</h2>
+        <ul>
+        <li><button className={styles['project-button']} onClick={() => params.changeParent('project-paintboy') }>Paintboy</button></li>
+        </ul>
+
       </div>
     </div>
   </>);
@@ -171,7 +201,15 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
     case 'about': return AboutSubView(params);
     case 'experience': return ExperienceSubView(params);
     case 'projects': return ProjectsSubView(params);
-    case 'project-portfolio-2024': return ProjectPortfolio(params);
+    case 'project-portfolio-2024': return ProjectPortfolio2024(params);
+    case 'project-j-script': return ProjectJScript(params);
+    case 'project-advent-of-code': return ProjectAdventOfCode(params);
+    case 'project-portfolio-2021': return ProjectPortfolio2021(params);
+    case 'project-t-bot': return ProjectTBot(params);
+    case 'project-youi': return ProjectYoui(params);
+    case 'project-pcparts': return ProjectPCParts(params);
+    case 'project-albert': return ProjectAlbert(params);
+    case 'project-paintboy': return ProjectPaintboy(params);
   }
   
   return <></>;
