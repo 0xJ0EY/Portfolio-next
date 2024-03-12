@@ -79,16 +79,15 @@
   margin-right: 0.25rem;
 }
 
-.projects-subview h2 {
+.subpage-content h2 {
   margin-top: 1rem;
 }
 
-.projects-subview ul {
+.subpage-content ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 
 .project-button {
   border-radius: 0;

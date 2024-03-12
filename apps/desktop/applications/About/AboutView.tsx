@@ -133,12 +133,79 @@ function AboutSubView(params: SubViewParams) {
 function ExperienceSubView(params: SubViewParams) {
   const t = params.translate;
 
+  function dutchContent() {
+    const bpi = (<></>);
+
+    const ing = (<></>);
+
+    const floro = (<></>);
+
+    return { bpi, ing, floro }
+  }
+
+  function englishContent() {
+    const bpi = (<>
+      <p>When I first joined BPI services as an intern, I was placed on the ID Flow team. The then objective was to make the product more suitable for different kind of customer processes. This was done by making the process flow configurable, here me and colleague designed, developed and implemented the Flow Manager. A drag and drop implementation to configure the process flow to model the business process.</p>
+
+      <p>After my internship had ended, I joined the company and was put onto the iMatch team. With the task to improve the iOS support for the iMatch. There was a very bare bones implementation of a Swift SDK when I inherited it. Only capable of reading very basic travel documents. For this project I had to dive deep into the ICAO specification around reading machine readable travel documents (MRTDs) to get some domain knowledge.</p>
+
+      <p>At the end I improved a lot of parts of the iMatch. There was an big improvement in stability, we went from failing around 1 in 10 fingerprint captures to at least 100 continuously, without any error. There was a big improvement in supported MRTDs. We went from only being able to read and verify some passports to being able to read and verify all the passports, we came across.</p>
+
+      <p>For new features I implemented PACE for authentication and creating a secure communication channel. Chip Authentication for verification if it is a real document. And Passive Authentication, for validating the data coming of the document. I also build some more miscellaneous features like being able to update the firmware of the iMatch.</p>
+
+      <p>In my last few weeks at BPI I build a completely new product, to improve the flashing, testing and verification of the iMatch PCBs. The reason why this product was hard to develop was due to the unique use of a single USB-C connector to flash the two chips inside with our firmware. The upper data lines where linked to one chip, and the bottom ones to the other. My idea was to build a custom dongle to split these data lines to their own USB port.</p>
+
+      <p>After getting an go ahead from the CEO for this solution, I went and gathered more requirements from the PO and eventual users. And went to work, within a few weeks there was a ready to use product, that solved a big issue regarding production of the iMatch.</p>
+
+      <h3>Technologies</h3>
+      <p>
+        <b>IDFlow</b>: C# with .NET Framework and a Vue 2 frontend<br/>
+        <b>iMatch</b>: Swift, Python, C and C++
+      </p>
+    </>);
+
+    const ing = (<>
+      <p>At ING I worked together with another intern from my university on a internal tool for detecting and fixing data differences between micro services. I was primarily working on the backend of this tool, but was also responsible for the maintaining the CI/CD pipelines and virtual environments the tool was running on.</p>
+
+      <p>The team consisted of two interns, two internal ING developers and one chapter lead.</p>
+
+      <p>My work was primarily focused around gathering the correct functional and technical requirements for the requested features, design and development of the API of the new features. And getting access to the correct services for our API.</p>
+
+      <p>During this internship I learned a lot about how software is managed within big organisations. I also learned that software in banks need to deal a lot with compliance, even for such a small app as ours.</p>
+
+      <h3>Technologies</h3>
+      <p>
+        Java Spring boot on the backend and a Lit frontend.<br/>
+        For managing the machines a lot of different tooling was used: RHEL, GitLab CI/CD, Password vaults, Jenkins and Ansible.
+      </p>
+    </>);
+
+    const floro = (<>
+      <p>At Floro, I worked as a full-stack developer on a few different CRM and CMS systems, all written in PHP and jQuery. Here I learned the basics of full-stack web development, and how to collaborate within a software engineering team.</p>
+
+      <h3>Technologies</h3>
+      <p>PHP and jQuery, Git</p>
+    </>);
+
+    return { bpi, ing, floro }
+  }
+
+  const content = params.language === 'nl' ? dutchContent() : englishContent();
+
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
       <div className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.experience")}</h1>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis voluptate deleniti nemo nam eum sunt repellat? Dolorum nemo qui sit eveniet officia voluptatem similique consequuntur deserunt, sint quis maxime. Doloribus?</p>
+        
+        <h2>2021 - 2023 - BPI services b.v.</h2>
+        { content.bpi }
+        
+        <h2>2020 - 2021 - ING</h2>
+        { content.ing }
+
+        <h2>2015 - 2017 - Floro</h2>
+        { content.floro }
       </div>
     </div>
   </>);
@@ -150,7 +217,7 @@ function ProjectsSubView(params: SubViewParams) {
   return (<>
     <div className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={[styles['subpage-content'], styles['projects-subview']].join(' ')}>
+      <div className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.projects")}</h1>
 
         <h2>2024</h2>
