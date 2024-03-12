@@ -238,16 +238,16 @@ function ProjectsSubView(params: SubViewParams) {
         <h2>2021</h2>
         <ul>
           <li><button className={styles['project-button']} onClick={() => params.changeParent('project-portfolio-2021') }>Portfolio 2021</button></li>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-t-bot') }>T-Bot</button></li>
         </ul>
 
         <h2>2020</h2>
         <ul>
-        <li><button className={styles['project-button']} onClick={() => params.changeParent('project-youi') }>Youi</button></li>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-t-bot') }>T-Bot</button></li>
         </ul>
 
         <h2>2019</h2>
         <ul>
+          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-youi') }>Youi</button></li>
           <li><button className={styles['project-button']} onClick={() => params.changeParent('project-pcparts') }>PCParts</button></li>
           <li><button className={styles['project-button']} onClick={() => params.changeParent('project-albert') }>Albert</button></li>
         </ul>
