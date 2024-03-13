@@ -1,5 +1,5 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import styles from './AboutView.module.css';
 import { BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
@@ -121,9 +121,9 @@ function AboutSubView(params: SubViewParams) {
   }
 
   return (<>
-    <div className={styles['subpage']}>
+    <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+      <div data-subpage-content className={styles['subpage-content']}>
         { params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent() }
       </div>
     </div>
@@ -193,9 +193,9 @@ function ExperienceSubView(params: SubViewParams) {
   const content = params.language === 'nl' ? dutchContent() : englishContent();
 
   return (<>
-    <div className={styles['subpage']}>
+    <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+      <div data-subpage-content className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.experience")}</h1>
         
         <h2>2021 - 2023 - BPI services b.v.</h2>
@@ -215,9 +215,9 @@ function ProjectsSubView(params: SubViewParams) {
   const t = params.translate;
 
   return (<>
-    <div className={styles['subpage']}>
+    <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+      <div data-subpage-content className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.projects")}</h1>
 
         <h2>2024</h2>
@@ -288,6 +288,29 @@ export default function AboutApplicationView(props: WindowProps) {
   const [subView, setSubView] = useState<SubView>('home');
   const { t, i18n } = useTranslation("common");
 
+  const contentParent = useRef<HTMLDivElement>(null);
+
+  function resetSubPageScroll() {
+    if (!contentParent.current) { return; }
+
+    const subViewParent = contentParent.current;
+    const subViewParentChildren = Array.from(subViewParent.children);
+
+    const subView = subViewParentChildren.find(x => x.hasAttribute('data-subpage'));
+    if (!subView) { return; }
+
+    const subViewChildren = Array.from(subView.children);
+
+    const contentView = subViewChildren.find(x => x.hasAttribute('data-subpage-content'));
+
+    if (!contentView) { return; }
+    contentView.scrollTop = 0;
+  }
+
+  useEffect(() => {
+    resetSubPageScroll();
+  }, [subView]);
+
   function changeParent(view: SubView) {
     if (view === 'contact') {
       application.on({ kind: 'about-open-contact-event' }, windowContext);
@@ -299,7 +322,7 @@ export default function AboutApplicationView(props: WindowProps) {
 
   return (
     <div className="content-outer">
-      <div className="content">
+      <div ref={contentParent} className="content">
         { RenderSubView(subView, 
           {
             manager: application.manager,

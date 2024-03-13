@@ -27,9 +27,9 @@ function ProjectPage(props: { title: string, params: SubViewParams, content: JSX
   const content = params.language === 'nl' ? dutchContent() : englishContent();
 
   return (<>
-    <div className={styles['subpage']}>
+    <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
-      <div className={styles['subpage-content']}>
+      <div data-subpage-content className={styles['subpage-content']}>
         <h1>{props.title}</h1>
         <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>Back to projects</button>
         { props.content }
