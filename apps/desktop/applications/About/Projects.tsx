@@ -31,10 +31,13 @@ function ProjectPage(props: { title: string, params: SubViewParams, content: JSX
       { SubViewNavigation(params) }
       <div className={styles['subpage-content']}>
         <h1>{props.title}</h1>
+        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>Back to projects</button>
         { props.content }
 
         <h3>Contact</h3>
         { content.contact }
+
+        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>Back to projects</button>
       </div>
     </div>
   </>);
@@ -152,19 +155,19 @@ export function ProjectTBot(params: SubViewParams) {
       <h3>Technology</h3>
       <p>The robot works as follows. The robot will drive around until it finds a tennis ball via image recognition. If the robot finds a tennis ball, he will drive towards it and collect it. After that it will calculate a route to the chosen collection point to drop off the tennisball.</p>
 
-      <p>The technology used for this project is as follows. We used an already on the market Arduino shield, named the Zumo. This gave us a good fundamental to continue working on. The only change we made to the Zumo is adding a 3D printed fork, to move around the balls. For the rest of the Robot we used an Raspberry Pi and a Google Coral. This device is connected to the Zumo with a serial connection. And functions as the brain behind the robot. This means that the it runs the web GUI and does most of the calculations.</p>
+      <video src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
+
+      <p>We used an already on the market Arduino shield, named the Zumo. This gave us a good fundamental to continue working on. The only change we made to the Zumo is adding a 3D printed fork, to move around the balls. For the rest of the Robot we used an Raspberry Pi and a Google Coral. This device is connected to the Zumo with a serial connection. And functions as the brain behind the robot. This means that the it runs the web GUI and does most of the calculations.</p>
 
       <p>To detect the current location of the robot, we used a few Bluetooth beacons. The robot knows the location of the beacons and uses RSSI to calculate the distance between each other.</p>
 
       <p>Almost all the software is written in C or in Python. All the software on the embedded devices (Arduino and Beacons) is written in C and the software on the Raspberry Pi is written in Python.</p>
 
       <h3>Team</h3>
-      <p>
-        <ul>
-          <li>- Sergi Philipsens</li>
-          <li>- Joey de Ruiter</li>
-        </ul>
-      </p>
+      <ul>
+        <li>- Sergi Philipsens</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
     </>);
   }
 
@@ -182,6 +185,8 @@ export function ProjectYoui(params: SubViewParams) {
     return (<>
       <p>For the last group project of my second year of university (2019) I worked on a prototype Android dating app called Youi. One of the must-haves was that the app should contain the functionality to video call your dating partner. This functionality was eventually implemented with a from scratch peer-to-peer WebRTC solution.</p>
 
+      <video src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
+
       <h3>Technology</h3>
       <p>
         Kotlin for the Android based on a MVVM structure.<br/>
@@ -190,16 +195,14 @@ export function ProjectYoui(params: SubViewParams) {
       </p>
 
       <h3>Team</h3>
-      <p>
-        <ul>
-          <li>- Ewout Millink</li>
-          <li>- Omid Wiar</li>
-          <li>- Wim de Groot</li>
-          <li>- Vincent Nuis</li>
-          <li>- Rutger Uijtendaal</li>
-          <li>- Joey de Ruiter</li>
-        </ul>
-      </p>
+      <ul>
+        <li>- Ewout Millink</li>
+        <li>- Omid Wiar</li>
+        <li>- Wim de Groot</li>
+        <li>- Vincent Nuis</li>
+        <li>- Rutger Uijtendaal</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
     </>);
   }
 
@@ -216,6 +219,8 @@ export function ProjectPCParts(params: SubViewParams) {
   function RenderEnglishContent() {
     return (<>
       <p>PCParts is a webshop that I build in the third period of my second year of university (2019). In this period there was a class where you had to build your own webshop based on the technologies Angular 7 & Dropwizard.</p>
+
+      <video src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
     </>);
   }
 
@@ -235,19 +240,19 @@ export function ProjectAlbert(params: SubViewParams) {
 
       <p>This project was made by a group of 5 students, of which I was mostly involved in setting up the CI & CD pipeline. For the rest of the project I build a table class (a bit ORM like) that had the possibility of lazy loading and inline editing of the data.</p>
 
+      <video src="/videos/albert.mp4" autoPlay muted loop disablePictureInPicture></video>
+
       <h3>Technology</h3>
       <p>Angular 7, PostgresSQL, Dropwizard and TravisCI</p>
 
       <h3>Team</h3>
-      <p>
-        <ul>
-          <li>- Alexander van Dam</li>
-          <li>- Bashar Farah</li>
-          <li>- Maarten Berden</li>
-          <li>- Sander Frentz</li>
-          <li>- Joey de Ruiter</li>
-        </ul>
-      </p>
+      <ul>
+        <li>- Alexander van Dam</li>
+        <li>- Bashar Farah</li>
+        <li>- Maarten Berden</li>
+        <li>- Sander Frentz</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
     </>);
   }
 
@@ -264,6 +269,8 @@ export function ProjectPaintboy(params: SubViewParams) {
   function RenderEnglishContent() {
     return (<>
       <p>Paintboy is a game that was meant to promote my previous school the Grafisch Lyceum Rotterdam. (2016) This project was build by a team of 6. Whereof 2 programmers and 4 game artists. This game was build using Unity 5 and C#.</p>
+
+      <video src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
 
       <p>My main work on this game was the movement of the player, the shooting mechanics and the camera shake implementation.</p>
 
