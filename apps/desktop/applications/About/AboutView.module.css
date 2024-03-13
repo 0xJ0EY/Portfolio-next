@@ -91,7 +91,6 @@
 
 .project-button {
   border-radius: 0;
-  line-height: 22px;
   margin-top: 0.5rem;
   padding: 10px 15px;
   border: none;
@@ -103,6 +102,25 @@
   cursor: pointer;
   white-space: nowrap;
   font-family: 'Noto Serif Toto', sans-serif;
+  display: flex;
+  align-items: stretch;
+
+}
+
+.project-button div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 5px;
+}
+
+.project-button span {
+  line-height: 32px;
+  display: block;
+}
+
+.project-button img {
+  image-rendering: pixelated;
 }
 
 .project-button:hover {

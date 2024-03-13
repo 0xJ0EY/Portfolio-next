@@ -214,6 +214,17 @@ function ExperienceSubView(params: SubViewParams) {
 function ProjectsSubView(params: SubViewParams) {
   const t = params.translate;
 
+  function ProjectButton(name: string, target: SubView, imageUrl: string) {
+    return (<>
+      <button className={styles['project-button']} onClick={() => params.changeParent(target) }>
+        <div>
+          <img src={imageUrl} alt={`${target} thumbnail`} width={25} height={25} />
+        </div>
+        <span>{name}</span>
+      </button>
+    </>);
+  }
+
   return (<>
     <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
@@ -222,41 +233,40 @@ function ProjectsSubView(params: SubViewParams) {
 
         <h2>2024</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-portfolio-2024') }>Portfolio 2024</button></li>
+          <li>{ProjectButton('Portfolio 2024', 'project-portfolio-2024', '/icons/project-portfolio-2024.png')}</li>
         </ul>
 
         <h2>2023</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-j-script') }>J-Script</button></li>
+          <li>{ProjectButton('J-Script', 'project-j-script', '/icons/project-j-script.png')}</li>
         </ul>
 
         <h2>2022</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-advent-of-code') }>Advent of Code</button></li>
+          <li>{ProjectButton('Advent of Code', 'project-advent-of-code', '/icons/project-advent-of-code.png')}</li>
         </ul>
 
         <h2>2021</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-portfolio-2021') }>Portfolio 2021</button></li>
+          <li>{ProjectButton('Portfolio 2021', 'project-portfolio-2021', '/icons/project-portfolio-2021.png')}</li>
         </ul>
 
         <h2>2020</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-t-bot') }>T-Bot</button></li>
+          <li>{ProjectButton('T-Bot', 'project-t-bot', '/icons/project-t-bot.png')}</li>
         </ul>
 
         <h2>2019</h2>
         <ul>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-youi') }>Youi</button></li>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-pcparts') }>PCParts</button></li>
-          <li><button className={styles['project-button']} onClick={() => params.changeParent('project-albert') }>Albert</button></li>
+          <li>{ProjectButton('Youi', 'project-youi', '/icons/project-youi.png')}</li>
+          <li>{ProjectButton('PCParts', 'project-pcparts', '/icons/project-youi.png')}</li>
+          <li>{ProjectButton('Albert', 'project-albert', '/icons/project-albert.png')}</li>
         </ul>
 
         <h2>2016</h2>
         <ul>
-        <li><button className={styles['project-button']} onClick={() => params.changeParent('project-paintboy') }>Paintboy</button></li>
+          <li>{ProjectButton('Paintboy', 'project-paintboy', '/icons/project-paintboy.png')}</li>
         </ul>
-
       </div>
     </div>
   </>);
