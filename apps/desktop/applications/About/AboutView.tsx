@@ -259,7 +259,7 @@ function ProjectsSubView(params: SubViewParams) {
         <h2>2019</h2>
         <ul>
           <li>{ProjectButton('Youi', 'project-youi', '/icons/project-youi.png')}</li>
-          <li>{ProjectButton('PCParts', 'project-pcparts', '/icons/project-youi.png')}</li>
+          <li>{ProjectButton('PCParts', 'project-pcparts', '/icons/project-pcparts.png')}</li>
           <li>{ProjectButton('Albert', 'project-albert', '/icons/project-albert.png')}</li>
         </ul>
 
