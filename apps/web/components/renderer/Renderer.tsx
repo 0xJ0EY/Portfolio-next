@@ -311,7 +311,7 @@ export const Renderer = (props: RendererProps) => {
 
   return (
     <div className={styles.renderer}>
-      { showUI && <RendererUI cameraHandlerState={cameraHandlerState} soundService={soundService.current} /> }
+      { showUI && <RendererUI cameraHandlerState={cameraHandlerState} cameraHandler={cameraHandlerRef} soundService={soundService.current} /> }
 
       <div className={styles['css-output']} ref={cssOutputRef}></div>
       <div className={styles['webgl-output']} ref={webglOutputRef}></div>

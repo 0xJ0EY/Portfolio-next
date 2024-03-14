@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { CameraHandlerState } from "./camera/CameraHandler";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { CameraHandler, CameraHandlerState } from "./camera/CameraHandler";
 import { joinStyles, writeOutChars, writeOutCharsStreaming } from "./util";
 import styles from "./RendererUI.module.css"
 import { SoundService } from "./sound/SoundService";
@@ -32,6 +32,7 @@ function useSoundManagement(soundService: SoundService) {
 
 export type RendererUIProps = {
   cameraHandlerState: CameraHandlerState,
+  cameraHandler: RefObject<CameraHandler | null>,
   soundService: SoundService
 }
 
@@ -49,6 +50,8 @@ type SubViewProps = {
   sound: SubViewSound,
 }
 
+
+
 function SoundManagementButton(props: { sound: SubViewSound }) {
   const { isSoundEnabled, toggleSound } = props.sound;
 
@@ -61,8 +64,29 @@ function SoundManagementButton(props: { sound: SubViewSound }) {
   )
 }
 
-function NameAndTime(props: SubViewProps) {
-  const { state, sound } = props;
+function ChangeSceneButton(props: { targetState: CameraHandlerState, cameraHandler: RefObject<CameraHandler | null> }) {
+  const icon = "/icons/camera.svg";
+
+  const { targetState, cameraHandler } = props;
+
+  function changeScene() {
+    if (!cameraHandler.current) { return; }
+    cameraHandler.current.changeState(targetState);
+  }
+
+  return (
+    <button className={styles['camera-button']} onClick={() => changeScene()}>
+      <img draggable={false} src={icon} width={25} height={20}/>
+    </button>
+  );
+}
+
+function NameAndTime(props: {
+  state: CameraHandlerState,
+  cameraHandler: RefObject<CameraHandler | null>,
+  sound: SubViewSound,
+}) {
+  const { state, cameraHandler, sound } = props;
 
   const firstTime = useRef<boolean>(true);
   const [name, setName] = useState("");
@@ -130,13 +154,18 @@ function NameAndTime(props: SubViewProps) {
       <div>
         {time && <span className={`${done ? styles['time-is-done'] : ''}`}>{time}</span>}
         {done && <SoundManagementButton sound={sound}/>}
+        {done && <ChangeSceneButton targetState={CameraHandlerState.MonitorView} cameraHandler={cameraHandler}/>}
       </div>
     </div>
   );
 }
 
-function StandaloneMuteButton(props: SubViewProps) {
-  const { state, sound } = props;
+function UserInteractionButtons(props: {
+  state: CameraHandlerState,
+  cameraHandler: RefObject<CameraHandler | null>,
+  sound: SubViewSound,
+}) {
+  const { state, cameraHandler, sound } = props;
 
   const isActive = (
     state === CameraHandlerState.Cinematic ||
@@ -147,7 +176,9 @@ function StandaloneMuteButton(props: SubViewProps) {
     <div className={joinStyles([
         styles['sound-container'],
         !isActive ? styles['fade-out'] : null
-      ])}><SoundManagementButton sound={sound}/>
+      ])}>
+        <SoundManagementButton sound={sound}/>
+        <ChangeSceneButton targetState={state === CameraHandlerState.Cinematic ? CameraHandlerState.MonitorView : CameraHandlerState.FreeRoam} cameraHandler={cameraHandler}/>
     </div>
   </>);
 }
@@ -179,15 +210,15 @@ function CinematicInstructions(props: SubViewProps) {
 }
 
 export function RendererUI(props: RendererUIProps) {
-  const { cameraHandlerState, soundService } = props;
+  const { cameraHandlerState, cameraHandler, soundService } = props;
   const soundManagement = useSoundManagement(soundService);
 
   // A switch statement wrapped in a function breaks the rules of hooks, but this doesn't?
   // Just looks ugly, but it works
   return (
     <div className={styles['ui']}>
-      <StandaloneMuteButton state={cameraHandlerState} sound={soundManagement} />
-      <NameAndTime state={cameraHandlerState} sound={soundManagement} />
+      <UserInteractionButtons state={cameraHandlerState} cameraHandler={cameraHandler} sound={soundManagement} />
+      <NameAndTime state={cameraHandlerState} cameraHandler={cameraHandler} sound={soundManagement} />
       <CinematicInstructions state={cameraHandlerState} sound={soundManagement} />
     </div>
   );
