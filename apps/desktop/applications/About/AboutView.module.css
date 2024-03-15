@@ -146,3 +146,24 @@
 .button-link:hover {
   text-decoration: underline;
 }
+
+.download-cv hr {
+  display: block;
+  width: 100%;
+}
+
+.download-content {
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.download-content img {
+  user-select: none;
+  margin-right: 10px;
+  image-rendering: pixelated;
+}
+
+.download-content h2 {
+  margin: 0;
+}

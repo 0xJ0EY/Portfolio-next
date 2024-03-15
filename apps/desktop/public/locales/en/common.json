@@ -50,6 +50,11 @@
       "experience": "Experience",
       "projects": "Projects",
       "contact": "Contact"
+    },
+    "download_cv": {
+      "title": "Looking for my resume?",
+      "instruction": "Click here to download it!",
+      "download_link": "/cv/CV_Joey_de_Ruiter_en.pdf"
     }
   },
   "date": {

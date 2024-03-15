@@ -74,6 +74,24 @@ function AboutSubView(params: SubViewParams) {
     params.manager.open('/Applications/Contact.app');
   }
 
+  function DownloadCv() {
+    const t = params.translate;
+
+    return (<>
+      <div className={styles['download-cv']}>
+        <hr className={styles['about-hr']}/>
+        <div className={styles['download-content']}>
+          <img src="/icons/printer.png" alt="Printer" draggable={false} />
+          <div>
+            <h2>{t("about.download_cv.title")}</h2>
+            <a target='_blank' href={t("about.download_cv.download_link")}>{t("about.download_cv.instruction")}</a>
+          </div>
+        </div>
+        <hr className={styles['about-hr']}/>
+      </div>
+    </>);
+  }
+
   function RenderDutchContent() {
     return (<>Dutch content</>);
   }
@@ -89,9 +107,7 @@ function AboutSubView(params: SubViewParams) {
 
         <p>Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the <a onClick={() => openContactApp()} href='#contact'>contact application</a> or shoot me an email at <a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
 
-        <p>
-          download cv
-        </p>
+        <DownloadCv/>
 
         <h2>About me</h2>
 
