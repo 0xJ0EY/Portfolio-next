@@ -68,7 +68,26 @@ export function ProjectPortfolio2024(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return (<>Dutch content</>);
+    return (<>
+      <p>Ergens in 2023 besloot ik dat het tijd was voor een nieuwe portfolio website, aangezien het een lange tijd gelden was dat ik mijn originele had gebouwd.</p>
+
+      <p>Na een tijdje rond te zoeken naar portfolio’s van andere developers was ik erg geïnspireerd door Henry Heffernan’s showcase (<a rel="noreferrer" target="_blank" href="https://henryheffernan.com/">https://henryheffernan.com/</a>). En besloot iets vergelijkbaars te bouwen, enkel wouw ik meer een Unix geïnspireerd systeem ontwikkelen.</p>
+
+      <p>Dus besloot ik te werken aan een eerste prototype, het doel van dit prototype was om te testen of het mogelijk zou zijn om de scene te renderen doormiddel van een “cutout" shader. Zodat het de content op de monitor zou tonen in de 3D scene. Na een succesvolle prototype ging ik te werk aan de uiteindelijke versie.</p>
+
+      <p>Nu kwam ik aan bij het bouwen van de portfolio website, dit is altijd een goeie mogelijkheid om nieuwe technologieën uit te proberen. Dus voor dit project besloot ik om React uit te proberen binnen het NextJS framework. En nu dat het project is afgerond, ben ik blij met de keuze die ik heb gemaakt. Aan het begin had ik wat kleine problemen met hoe React omgaat met data en hooks, maar aan het einde was ik er erg comfortabel mee.</p>
+
+      <p>Een ding die ik erg graag wouw bouwen was een virtuele file system, waarbij de gebruikers ook daadwerkelijk bestanden kunnen drag en droppen net zoals een operating systeem.</p>
+
+      <p>Een ander ding waar ik erg veel tijd aan heb besteed was browser support en mobiele support. Doordat mijn portfolio website een beetje buiten de scope valt van een normale website was niet iedere browser even blij met de implementatie. Dit leidde tot enkele browser specifieke implementaties voor het afhandelen van enkele features. Mobiele support was ook lastig om te doen, aangezien ik een eigen implementatie voor het in en uit zoemen van de website moest maken. Door enkele technische problemen heeft het zoomen een uitgesteld effect.</p>
+
+      <p>Dit project was erg leuk om te bouwen, alleen nam veel meer tijd in dat origineel geanticipeerd. Grappig genoeg kwam dit niet door het programmeren, maar voornamelijk doordat ik niet had verwacht dat het grafisch ontwerp en 3D modelling zo tijd intensief zou zijn.</p>
+
+      <h3>Technologie</h3>
+      <p>
+        React, NextJS, TypeScript en webgl
+      </p>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -87,14 +106,26 @@ export function ProjectJScript(params: SubViewParams) {
 
       <h3>Technology</h3>
       <p>
-        Rust, and the ECMAScript documentation<br/>
+        Rust and the ECMAScript documentation<br/>
         <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> to the project.
       </p>
     </>);
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>J(oey)-Script is een klein half afgemaakte runtime die ik heb gemaakt aan het einde van 2022. De redenen waarom ik dit project heb gemaakt was omdat ik een betere greep wouw krijgen op hoe programma’s daadwerkelijk worden geparset en uitgevoerd. Dit project was ook een goeie mogelijkheid om mijn Rust skills te verbeteren. De runtime is debaser dop mijn eigen interpretatie van de JavaScript standaard zonder een grote focus op de details. Intern wordt er een Esprima geïnspireerde abstract syntax tree gebruikt om het programma te parsen.</p>
+
+      <p>Binnen dit project besloot ik veel unit testen te schrijven, om zoveel mogelijk unexpected behaviour af te vangen. En ik moet zeggen, deze workflow was erg fijn om mee te werken.</p>
+
+      <p>Dit project is niet compleet door de grote hoeveelheid werk die daadwerkelijk in een programmeertaal gaat zitten, en ik die content ben met de kennis die ik bij dit project heb opgedaan.</p>
+
+      <h3>Technologie</h3>
+      <p>
+        Rust en de ECMAScript documentatie<br/>
+        <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> naar het project.
+      </p>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -109,11 +140,16 @@ export function ProjectAdventOfCode(params: SubViewParams) {
 
       <h3>Technology</h3>
       <p>Rust</p>
-    </>)
+    </>);
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>In December van 2022 besloot ik mee te doen aan de Advent of Code challenges, doordat ik tijd vrij had vanwege mijn vakantie. En ik dacht dat dit een goede mogelijkheid was om mijn kennis over Rust en software engineering problemen in het algemeen te vergroten. Ik kwam bij dag 16 tot dat ik een dag hoofdpijn kreeg en de motivatie verloor om AoC af te maken.</p>
+
+      <h3>Technologie</h3>
+      <p>Rust</p>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -137,7 +173,17 @@ export function ProjectPortfolio2021(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>Voor mijn opleiding moest ik twee stage plekken regelen om mijn CV uit te laten blinken besloot ik om een eye-catching portfolio te maken.</p>
+
+      <p>Toen der tijd was ik erg bezorgd over de bundle grote van een webgl library, dus besloot ik mijn eigen webgl implementatie te maken om de video op de balk te renderen. Van dit project heb ik veel geleerd en waarom mijn huidige portfolio Three gebruikt.</p>
+
+      <h3>Technologie</h3>
+      <p>
+        TypeScript, Angular en webgl<br/>
+        De website is hier te zien <a rel="noreferrer" target="_blank" href="https://old.joeyderuiter.me">here</a>.
+      </p>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -146,8 +192,6 @@ export function ProjectPortfolio2021(params: SubViewParams) {
 }
 
 export function ProjectTBot(params: SubViewParams) {
-  /* TODO: Add video */
-
   function RenderEnglishContent() {
     return (<>
       <p>For the final project of the robotics minor (2020) the students had to come up with their own project, and build them. We stumbled onto the idea to build a robot that would collect tennis balls of the field. Because what is more annoying then fetching the balls on the ground after a good exercise.</p>
@@ -172,7 +216,26 @@ export function ProjectTBot(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>Tijdens het eindproject van de minor Robotica (2020) was het de bedoeling om zelf een project te verzinnen en deze uit te werken. Wij kwamen op het idee om samen een robot te maken om tennisballen op te ruimen. Want wat is er nou vervelender dan al de ronddwalende ballen op te ruimen na een fijn uurtje tennis.</p>
+
+      <h3>Technologie</h3>
+      <p>De werking is als volgt. De robot rijdt rondjes totdat hij een tennisbal detecteert doormiddel van een machine learning algoritme. Zodra hij er eentje heeft gevonden, rijdt hij er op af en neem hem mee. Vervolgens wordt het pad naar de gekozen verzamelhoek berekend en rijdt de robot er op af met de tennisbal.</p>
+
+      <video src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
+
+      <p>De technologie die hier voor is toegepast is als volgt. We hebben gebruik gemaakt van al een bestaand Arduino shield, genaamd de Zumo. Dit gaf ons een goed carrosserie om op verder te bouwen. De enigste aanpassing die wij aan de Zumo hebben toegepast is het toevoegen van een vork, om de tennisballen in mee te slepen. Voor de rest van de robot hebben we gebruik gemaakt van een Raspberry Pi met een Google Coral. Deze is gekoppeld aan de Arduino doormiddel van een seriële verbinding. En dient als het brein achter de robot, hier draait onder andere de web gui en worden de meeste berekening uitgevoerd.</p>
+
+      <p>Voor het detecteren van de huidige locatie wordt er gebruik gemaakt van een stel Bluetooth beacons. De robot weet de locatie van de beacons, en gebruikt de RSSI naar de beacon om de afstand te gokken.</p>
+
+      <p>Bijna alle software is geschreven in C of in Python. Alle software op de embedded devices (de Arduino en Beacons) zijn geschreven in C, en het de software die op de Raspberry Pi draait is volledig geschreven in Python.</p>
+
+      <h3>Team</h3>
+      <ul>
+        <li>- Sergi Philipsens</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -207,7 +270,28 @@ export function ProjectYoui(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>Tijdens het laatste groepsproject van het tweede jaar (2019) heb ik gewerkt binnen een team om een prototypen van een Android dating app te ontwikkelen. Deze app moest de functionaliteit bezitten om met je dating partner te kunnen videobellen. Om dit mogelijk te maken heb ik er voor gekozen voor een peer-to-peer oplossing doormiddel van WebRTC.</p>
+
+      <video src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
+
+      <h3>Technologie</h3>
+      <p>
+        Kotlin voor de Android app met een MVVM structuur.<br/>
+        NodeJS voor de Firebase cloud functions.<br/>
+        WebRTC het peer to peer videobellen.
+      </p>
+
+      <h3>Team</h3>
+      <ul>
+        <li>- Ewout Millink</li>
+        <li>- Omid Wiar</li>
+        <li>- Wim de Groot</li>
+        <li>- Vincent Nuis</li>
+        <li>- Rutger Uijtendaal</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -225,7 +309,11 @@ export function ProjectPCParts(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>PCParts is een webshop die ik heb gemaakt tijdens de derde periode van het tweede jaar (2019). Tijdens deze periode werd er een module gegeven waarbij je een webshop moest realiseren doormiddel Angular 7 en Dropwizard.</p>
+
+      <video src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
+    </>)
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -257,7 +345,23 @@ export function ProjectAlbert(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>Albert is een simpel boekhoud programma gericht op MKB bedrijven. Het doel van dit project was om een legacy programma van de opdrachtgever om te zetten naar een modern web gebaseerd project.</p>
+
+      <p>Dit project is gemaakt door een groep van 5 studenten, waarvan ik voornamelijk betrokken was met het opzetten van een CI & CD straat. Verder heb ik tijdens dit project gewerkt aan een tabel opzet structuur waarmee het mogelijk was om data via lazy loading in te laden.</p>
+
+      <h3>Technologie</h3>
+      <p>Angular 7, PostgresSQL, Dropwizard en TravisCI</p>
+
+      <h3>Team</h3>
+      <ul>
+        <li>- Alexander van Dam</li>
+        <li>- Bashar Farah</li>
+        <li>- Maarten Berden</li>
+        <li>- Sander Frentz</li>
+        <li>- Joey de Ruiter</li>
+      </ul>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
@@ -280,7 +384,16 @@ export function ProjectPaintboy(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return <>Dutch content</>
+    return (<>
+      <p>Paintboy is een game die was bedoeld om het Grafisch Lyceum Rotterdam te promoten. (2016) Dit project is gemaakt met een team van 6 personen waaronder 2 programmeurs & 4 game artists. De game is gemaakt in Unity 5 en de code is geschreven in C#.</p>
+
+      <video src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
+
+      <p>Het meeste van mijn tijd ging in de movement van de speler zitten, de schiet mechanics en de camera shake implementatie.</p>
+
+      <h3>Technologie</h3>
+      <p>Unity 5 en C#</p>
+    </>);
   }
 
   let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
