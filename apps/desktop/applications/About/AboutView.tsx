@@ -3,8 +3,9 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import styles from './AboutView.module.css';
 import { ApplicationManager, BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
-import { TFunction } from 'i18next';
+import { TFunction, loadLanguages } from 'i18next';
 import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
+import Image from 'next/image';
 
 type SubView = (
   'home' |
@@ -46,7 +47,7 @@ function Contact(props: { manager: BaseApplicationManager, language: string }) {
       <p>Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
     </>);
   }
-  
+
   return props.language === 'nl' ? dutchContent() : englishContent();
 }
 
@@ -112,46 +113,63 @@ function AboutSubView(params: SubViewParams) {
     params.manager.open('/Applications/Contact.app');
   }
 
+  function ImageOfMyself(props: { language: string }) {
+    const text = props.language === 'nl' ? 'Ikzelf, maart 2023' : 'Me, March 2023';
+
+    return (<>
+      <div className={styles['image-container']}>
+        
+        <Image src='/images/me.png' alt='Image of myself' sizes="25vw" width={0} height={0} style={{ width: '100%', height: 'auto'}}/>
+        
+        <span>{text}</span>
+      </div>
+    </>);
+  }
+
 
   function RenderDutchContent() {
-    return (<>
-      <h1 className={styles['page-h1']}>Welkom</h1>
+    return (
+      <div>
+        <h1 className={styles['page-h1']}>Welkom</h1>
 
-      <p>
-        Ik ben Joey de Ruiter, een software ontwikkelaar in Nederland.
-      </p>
+        <p>
+          Ik ben Joey de Ruiter, een software ontwikkelaar in Nederland.
+        </p>
 
-      <p>Bedankt om tijd vrij te maken voor het bekijken van mijn portfolio website. Ik hoop dat je er even veel plezier van hebt, als ik had tijdens het ontwikkelen. Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
+        <p>Bedankt om tijd vrij te maken voor het bekijken van mijn portfolio website. Ik hoop dat je er even veel plezier van hebt, als ik had tijdens het ontwikkelen. Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
+        
+        <DownloadCv translate={params.translate}/>
+
+        <h2>Over mij</h2>
+
+        <ImageOfMyself language='nl'/>
+
+        <p>Vanaf een jonge leeftijd had ik al affiniteit met computers, voornamelijk games. Ik had altijd een nieuwsgierigheid hoe computers altijd de “plaatjes" op het scherm toverde. Deze interesse vertaalde uiteindelijk in grote interesse in game development vanaf een jonge leeftijd. Op de middelbare begon ik te spelen met technologie om simpele games te maken.</p>
+
+        <p>Na de middelbare besloot ik om aan het Grafisch Lyceum Rotterdam te gaan studeren voor mediatechnologie. Tijdens deze opleiding leerde ik de basis van web en game development. Maar belangrijker ik kwam daadwerkelijk in aanraking met programmeren en het oplossen van problemen met creatieve oplossingen.</p>
+
+        <p>Drie jaar later had ik mijn diploma, maar besloot toch verder te studeren. Dus melde ik mij aan bij de lokale hogeschool, Hogeschool Leiden. Voor hun informatica programma. Een programma die uiteindelijk zou specialiseren in software engineering. Tijdens deze opleiding leerde ik veel over software, hoe computers daadwerkelijk werken en software ontwikkel concepten zoals software testen en hoe je “clean" onder houdbare code kan schrijven. Daarnaast heb ik ook mijn minor in  Robotica behaald aan deze school.</p>
+
+        <p>Het meest educatieve deel van deze opleiding waren de groep projecten. Iedere periode sinds begin van het tweede jaar had een groep project met een andere studenten. Deze projecten hadden altijd een ander soort opdracht, en daarnaast moesten we verschillende project management technieken toepassen. Enkele van deze projecten zijn zichtbaar op deze website.</p>
+
+        <p>Een onderdeel van mijn opleiding was, twee stages zoeken een regulieren stage en een afstudeerstage. Mijn reguliere stage heb ik bij ING gedaan, en de afstudeerstage bij BPI Services. Bij ING werkte ik aan een interne app voor het vinden en fixen van data discrepanties tussen microservices.</p>
+
+        <p>Bij de BPI afstudeerstage werkt ik aan ID Flow een webapplicatie origineel ontworpen voor het aanmelden en registeren van bezoekers aan een bedrijventerrein. Het doel van de stage was het ontwerpen, ontwikkelen en implementeren van de Flow Manager. Een oplossing waarmee we de procesflow van IDFlow beter konden configureren en aanpassen op de wensen van de klant. Het resultaat van deze stage is uiteindelijk opgenomen in het daadwerkelijke product.</p>
+
+        <p>Nadat ik mijn stages en opleiding had afgerond besloot ik bij BPI te blijven werken. Ik was op het iMatch team geplaatst. Dit team was verantwoordelijk voor het bouwen en ontwikkelen van de software en hardware oplossing van de iMatch. Een apparaat gebruikt voor het verifiëren van reisdocumenten en opnemen van vingerafdrukken.</p>
       
-      <DownloadCv translate={params.translate}/>
+        <h2>Hobbies</h2>
 
-      <h2>Over mij</h2>
+        <p>Veel van mijn hobbies zijn gecentreerd rondom de computer, maar niet allemaal. Iedere zondag doe ik een rondje op de racefiets met een klein groepje vrienden en mijn vader. Daarnaast vind ik het leuk om kleine programma’s te schrijven om nieuwe technologieën uit te proberen.</p>
 
-      <p>Vanaf een jonge leeftijd had ik al affiniteit met computers, voornamelijk games. Ik had altijd een nieuwsgierigheid hoe computers altijd de “plaatjes" op het scherm toverde. Deze interesse vertaalde uiteindelijk in grote interesse in game development vanaf een jonge leeftijd. Op de middelbare begon ik te spelen met technologie om simpele games te maken.</p>
-
-      <p>Na de middelbare besloot ik om aan het Grafisch Lyceum Rotterdam te gaan studeren voor mediatechnologie. Tijdens deze opleiding leerde ik de basis van web en game development. Maar belangrijker ik kwam daadwerkelijk in aanraking met programmeren en het oplossen van problemen met creatieve oplossingen.</p>
-
-      <p>Drie jaar later had ik mijn diploma, maar besloot toch verder te studeren. Dus melde ik mij aan bij de lokale hogeschool, Hogeschool Leiden. Voor hun informatica programma. Een programma die uiteindelijk zou specialiseren in software engineering. Tijdens deze opleiding leerde ik veel over software, hoe computers daadwerkelijk werken en software ontwikkel concepten zoals software testen en hoe je “clean" onder houdbare code kan schrijven. Daarnaast heb ik ook mijn minor in  Robotica behaald aan deze school.</p>
-
-      <p>Het meest educatieve deel van deze opleiding waren de groep projecten. Iedere periode sinds begin van het tweede jaar had een groep project met een andere studenten. Deze projecten hadden altijd een ander soort opdracht, en daarnaast moesten we verschillende project management technieken toepassen. Enkele van deze projecten zijn zichtbaar op deze website.</p>
-
-      <p>Een onderdeel van mijn opleiding was, twee stages zoeken een regulieren stage en een afstudeerstage. Mijn reguliere stage heb ik bij ING gedaan, en de afstudeerstage bij BPI Services. Bij ING werkte ik aan een interne app voor het vinden en fixen van data discrepanties tussen microservices.</p>
-
-      <p>Bij de BPI afstudeerstage werkt ik aan ID Flow een webapplicatie origineel ontworpen voor het aanmelden en registeren van bezoekers aan een bedrijventerrein. Het doel van de stage was het ontwerpen, ontwikkelen en implementeren van de Flow Manager. Een oplossing waarmee we de procesflow van IDFlow beter konden configureren en aanpassen op de wensen van de klant. Het resultaat van deze stage is uiteindelijk opgenomen in het daadwerkelijke product.</p>
-
-      <p>Nadat ik mijn stages en opleiding had afgerond besloot ik bij BPI te blijven werken. Ik was op het iMatch team geplaatst. Dit team was verantwoordelijk voor het bouwen en ontwikkelen van de software en hardware oplossing van de iMatch. Een apparaat gebruikt voor het verifiëren van reisdocumenten en opnemen van vingerafdrukken.</p>
-    
-      <h2>Hobbies</h2>
-
-      <p>Veel van mijn hobbies zijn gecentreerd rondom de computer, maar niet allemaal. Iedere zondag doe ik een rondje op de racefiets met een klein groepje vrienden en mijn vader. Daarnaast vind ik het leuk om kleine programma’s te schrijven om nieuwe technologieën uit te proberen.</p>
-
-      <p>Ik heb ook een interesse in small form factor (SFF) pc’s, custom keyboards en het spelen van games. :ˆ)</p>
-    </>);
+        <p>Ik heb ook een interesse in small form factor (SFF) pc’s, custom keyboards en het spelen van games. :ˆ)</p>
+      </div>
+    );
   }
 
   function RenderEnglishContent() {
     return (
-      <>
+      <div>
         <h1 className={styles['page-h1']}>Welcome</h1>
 
         <p>
@@ -163,6 +181,8 @@ function AboutSubView(params: SubViewParams) {
         <DownloadCv translate={params.translate}/>
 
         <h2>About me</h2>
+
+        <ImageOfMyself language='en'/>
 
         <p>From a young age I was keen on computers, especially games. I had a curiosity on how the magic box in front of me worked, and how it was able to display those images at real time. This translated into a interest into game development from a young age. In middle school, I started to play around with basic technologies to make games.</p>
 
@@ -185,7 +205,7 @@ function AboutSubView(params: SubViewParams) {
         <p>A lot of my hobbies are focused around computers, but not all of them. I like to tour around on my racing bike every Sunday morning, with a small club of friends and my dad. But other then that I like to write small programs, to explore new technologies and try to solve interesting problems.</p>
 
         <p>But I also like to build my own small form factor (SFF) pc’s, custom keyboards and of course play games. :^)</p>
-      </>
+      </div>
     );
   }
 
