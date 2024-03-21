@@ -1,7 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import styles from './AboutView.module.css';
-import { BaseApplicationManager } from '../ApplicationManager';
+import { ApplicationManager, BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
@@ -28,6 +28,44 @@ export type SubViewParams = {
   changeParent: (view: SubView) => void,
   translate: TFunction,
   language: string
+}
+
+function Contact(props: { manager: BaseApplicationManager, language: string }) {
+  function openContactApp() {
+    props.manager.open('/Applications/Contact.app');
+  }
+
+  function englishContent() {
+    return (<>
+      <p>If you have any questions or comments, please contact me via the <a onClick={() => openContactApp()} href='#contact'>contact application</a> or shoot me an email at <a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
+    </>);
+  }
+
+  function dutchContent() {
+    return (<>
+      <p>Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
+    </>);
+  }
+  
+  return props.language === 'nl' ? dutchContent() : englishContent();
+}
+
+function DownloadCv(props: { translate: TFunction }) {
+  const t = props.translate;
+
+  return (<>
+    <div className={styles['download-cv']}>
+      <hr className={styles['about-hr']}/>
+      <div className={styles['download-content']}>
+        <img src="/icons/printer.png" alt="Printer" draggable={false} />
+        <div>
+          <h2>{t("about.download_cv.title")}</h2>
+          <a target='_blank' href={t("about.download_cv.download_link")}>{t("about.download_cv.instruction")}</a>
+        </div>
+      </div>
+      <hr className={styles['about-hr']}/>
+    </div>
+  </>);
 }
 
 function HomeSubView(params: SubViewParams) {
@@ -74,23 +112,6 @@ function AboutSubView(params: SubViewParams) {
     params.manager.open('/Applications/Contact.app');
   }
 
-  function DownloadCv() {
-    const t = params.translate;
-
-    return (<>
-      <div className={styles['download-cv']}>
-        <hr className={styles['about-hr']}/>
-        <div className={styles['download-content']}>
-          <img src="/icons/printer.png" alt="Printer" draggable={false} />
-          <div>
-            <h2>{t("about.download_cv.title")}</h2>
-            <a target='_blank' href={t("about.download_cv.download_link")}>{t("about.download_cv.instruction")}</a>
-          </div>
-        </div>
-        <hr className={styles['about-hr']}/>
-      </div>
-    </>);
-  }
 
   function RenderDutchContent() {
     return (<>
@@ -100,9 +121,9 @@ function AboutSubView(params: SubViewParams) {
         Ik ben Joey de Ruiter, een software ontwikkelaar in Nederland.
       </p>
 
-      <p>Bedankt om tijd vrij te maken voor het bekijken van mijn portfolio website. Ik hoop dat je er even veel plezier van hebt, als ik had tijdens het ontwikkelen. Als je opmerkingen of vraag hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
+      <p>Bedankt om tijd vrij te maken voor het bekijken van mijn portfolio website. Ik hoop dat je er even veel plezier van hebt, als ik had tijdens het ontwikkelen. Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
       
-      <DownloadCv/>
+      <DownloadCv translate={params.translate}/>
 
       <h2>Over mij</h2>
 
@@ -124,7 +145,7 @@ function AboutSubView(params: SubViewParams) {
 
       <p>Veel van mijn hobbies zijn gecentreerd rondom de computer, maar niet allemaal. Iedere zondag doe ik een rondje op de racefiets met een klein groepje vrienden en mijn vader. Daarnaast vind ik het leuk om kleine programma’s te schrijven om nieuwe technologieën uit te proberen.</p>
 
-      <p>Ik heb ook een interesse in small form factor (SFF) pc’s, custom keyboards en het spelen van games. :ˆ))</p>
+      <p>Ik heb ook een interesse in small form factor (SFF) pc’s, custom keyboards en het spelen van games. :ˆ)</p>
     </>);
   }
 
@@ -139,7 +160,7 @@ function AboutSubView(params: SubViewParams) {
 
         <p>Thanks for taking the time to explore my portfolio. I hope you enjoy it as much I did enjoy developing it. If you have any questions or comments, please contact me via the <a onClick={() => openContactApp()} href='#contact'>contact application</a> or shoot me an email at <a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
 
-        <DownloadCv/>
+        <DownloadCv translate={params.translate}/>
 
         <h2>About me</h2>
 
@@ -291,6 +312,10 @@ function ExperienceSubView(params: SubViewParams) {
 
         <h2>2015 - 2017 - Floro</h2>
         { content.floro }
+        
+        <DownloadCv translate={params.translate}/>
+
+        <Contact manager={params.manager} language={params.language} />
       </div>
     </div>
   </>);
@@ -321,13 +346,9 @@ function ProjectsSubView(params: SubViewParams) {
           <li>{ProjectButton('Portfolio 2024', 'project-portfolio-2024', '/icons/project-portfolio-2024.png')}</li>
         </ul>
 
-        <h2>2023</h2>
-        <ul>
-          <li>{ProjectButton('J-Script', 'project-j-script', '/icons/project-j-script.png')}</li>
-        </ul>
-
         <h2>2022</h2>
         <ul>
+          <li>{ProjectButton('J-Script', 'project-j-script', '/icons/project-j-script.png')}</li>
           <li>{ProjectButton('Advent of Code', 'project-advent-of-code', '/icons/project-advent-of-code.png')}</li>
         </ul>
 

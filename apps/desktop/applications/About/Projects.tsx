@@ -18,7 +18,7 @@ function ProjectPage(props: { title: string, params: SubViewParams, content: JSX
 
   function dutchContent() {
     const contact = (<>
-      <p></p>
+      <p>Als je opmerkingen of vragen hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
     </>);
 
     return { contact };
@@ -79,7 +79,7 @@ export function ProjectPortfolio2024(params: SubViewParams) {
 export function ProjectJScript(params: SubViewParams) {
   function RenderEnglishContent() {
     return (<>
-      <p>J(oey)-Script is a small half complete runtime I wrote at the end of 2023 in Rust. The reason why I build this, was to get a better grasp on how programs are actually parsed and executed, I also used this program as an opportunity to improve my Rust skills. The runtime is based on my own interpretation of the JavaScript standard without focusing too much on the details. It uses an Esprima inspired abstract syntax tree as an internal data structure to parse the program.</p>
+      <p>J(oey)-Script is a small half complete runtime I wrote at the end of 2022 in Rust. The reason why I build this, was to get a better grasp on how programs are actually parsed and executed, I also used this program as an opportunity to improve my Rust skills. The runtime is based on my own interpretation of the JavaScript standard without focusing too much on the details. It uses an Esprima inspired abstract syntax tree as an internal data structure to parse the program.</p>
 
       <p>Within this project, I decided to write a lot of unit tests. To capture as much unexpected behavior changes as possible, and I must say. I liked the whole experience.</p>
 
