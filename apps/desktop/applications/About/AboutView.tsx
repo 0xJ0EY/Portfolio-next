@@ -93,7 +93,39 @@ function AboutSubView(params: SubViewParams) {
   }
 
   function RenderDutchContent() {
-    return (<>Dutch content</>);
+    return (<>
+      <h1 className={styles['page-h1']}>Welkom</h1>
+
+      <p>
+        Ik ben Joey de Ruiter, een software ontwikkelaar in Nederland.
+      </p>
+
+      <p>Bedankt om tijd vrij te maken voor het bekijken van mijn portfolio website. Ik hoop dat je er even veel plezier van hebt, als ik had tijdens het ontwikkelen. Als je opmerkingen of vraag hebt, neem contact met mij op via de <a onClick={() => openContactApp()} href='#contact'>contact applicatie</a> of schiet een mailtje naar met via <a href='mailto:contact@joeyderuiter.me'>contact@joeyderuiter.me</a></p>
+      
+      <DownloadCv/>
+
+      <h2>Over mij</h2>
+
+      <p>Vanaf een jonge leeftijd had ik al affiniteit met computers, voornamelijk games. Ik had altijd een nieuwsgierigheid hoe computers altijd de “plaatjes" op het scherm toverde. Deze interesse vertaalde uiteindelijk in grote interesse in game development vanaf een jonge leeftijd. Op de middelbare begon ik te spelen met technologie om simpele games te maken.</p>
+
+      <p>Na de middelbare besloot ik om aan het Grafisch Lyceum Rotterdam te gaan studeren voor mediatechnologie. Tijdens deze opleiding leerde ik de basis van web en game development. Maar belangrijker ik kwam daadwerkelijk in aanraking met programmeren en het oplossen van problemen met creatieve oplossingen.</p>
+
+      <p>Drie jaar later had ik mijn diploma, maar besloot toch verder te studeren. Dus melde ik mij aan bij de lokale hogeschool, Hogeschool Leiden. Voor hun informatica programma. Een programma die uiteindelijk zou specialiseren in software engineering. Tijdens deze opleiding leerde ik veel over software, hoe computers daadwerkelijk werken en software ontwikkel concepten zoals software testen en hoe je “clean" onder houdbare code kan schrijven. Daarnaast heb ik ook mijn minor in  Robotica behaald aan deze school.</p>
+
+      <p>Het meest educatieve deel van deze opleiding waren de groep projecten. Iedere periode sinds begin van het tweede jaar had een groep project met een andere studenten. Deze projecten hadden altijd een ander soort opdracht, en daarnaast moesten we verschillende project management technieken toepassen. Enkele van deze projecten zijn zichtbaar op deze website.</p>
+
+      <p>Een onderdeel van mijn opleiding was, twee stages zoeken een regulieren stage en een afstudeerstage. Mijn reguliere stage heb ik bij ING gedaan, en de afstudeerstage bij BPI Services. Bij ING werkte ik aan een interne app voor het vinden en fixen van data discrepanties tussen microservices.</p>
+
+      <p>Bij de BPI afstudeerstage werkt ik aan ID Flow een webapplicatie origineel ontworpen voor het aanmelden en registeren van bezoekers aan een bedrijventerrein. Het doel van de stage was het ontwerpen, ontwikkelen en implementeren van de Flow Manager. Een oplossing waarmee we de procesflow van IDFlow beter konden configureren en aanpassen op de wensen van de klant. Het resultaat van deze stage is uiteindelijk opgenomen in het daadwerkelijke product.</p>
+
+      <p>Nadat ik mijn stages en opleiding had afgerond besloot ik bij BPI te blijven werken. Ik was op het iMatch team geplaatst. Dit team was verantwoordelijk voor het bouwen en ontwikkelen van de software en hardware oplossing van de iMatch. Een apparaat gebruikt voor het verifiëren van reisdocumenten en opnemen van vingerafdrukken.</p>
+    
+      <h2>Hobbies</h2>
+
+      <p>Veel van mijn hobbies zijn gecentreerd rondom de computer, maar niet allemaal. Iedere zondag doe ik een rondje op de racefiets met een klein groepje vrienden en mijn vader. Daarnaast vind ik het leuk om kleine programma’s te schrijven om nieuwe technologieën uit te proberen.</p>
+
+      <p>Ik heb ook een interesse in small form factor (SFF) pc’s, custom keyboards en het spelen van games. :ˆ))</p>
+    </>);
   }
 
   function RenderEnglishContent() {
@@ -150,11 +182,48 @@ function ExperienceSubView(params: SubViewParams) {
   const t = params.translate;
 
   function dutchContent() {
-    const bpi = (<></>);
+    const bpi = (<>
+      <p>Toen ik voor het eerst als stagiair bij BPI kwam, werd ik op het ID Flow team geplaatst. Het toenmalig doel was om het product beter toepasbaar te maken op verschillende soorten klant processen. Dit was gedaan door de statische proces flow van de applicatie configureerbaar te maken. Hiervoor hebben een collega en ik samen de Flow Manager ontworpen, ontwikkeld en geïmplementeerd. De Flow Manager is een drag and drop implementatie voor het configureren van de proces flow aan het gewenste business proces.</p>
 
-    const ing = (<></>);
+      <p>Nadat mijn stage was afgerond, ging ik in dienst bij het bedrijf en werd op het iMatch team geplaatst. Met de taak om de iOS support voor de iMatch te verbeteren. Er was een zeer bare bones implementatie van een Swift SDK die ik overnam. Die enkel de mogelijkheid had om erg basis reisdocumenten uit te lezen. Voor dit project moest ik mij verdiepen in de ICAO specificatie rondom machine readable travel documents (MRTDs) om wat domeinkennis op te doen.</p>
 
-    const floro = (<></>);
+      <p>Aan het einde van het project waren er veel delen van de iMatch door mij verbeterd. Er was een grote verbetering in stabiliteit, we gingen van ongeveer 1 in 10 gefaalde vingerprint scans naar minimaal 100 achter elkaar zonder error. Er was een grote verbetering in ondersteunde MRTDs. Aan het begin was het enkel mogelijk om enkele paspoorten uit te lezen en te verifiëren, maar aan het einde konden we ieder document uitlezen die we tegenkwamen.</p>
+
+      <p>Voor nieuwe features heb ik PACE geïmplementeerd voor authenticatie en het opzetten van een beveiligd communicatie kanaal. Chip Authentication voor het verifiëren of het document daadwerkelijk uitgegeven is door een erkende overheid. En Passive Authentication voor het verifiëren van de data die van de kaart af kwam. Daarnaast heb ik ook enkele andere features ontwikkeld, zoals het updaten van de iMatch firmware.</p>
+
+      <p>In de laatste paar weken dat ik voor BPI te werk was had ik de mogelijkheid om het flash, test en verificatie proces te verbeteren. De redenen waarom dit proces zo lastig was te verbeteren kwam door het unieke gebruik van de USB-C connector om beide chips te flashen. De bovenste data lijnen van de connector gingen naar de eerste chip, en de onderste naar de andere. Het was mijn idee om een custom dongel te maken die de data lijnen zou splitsen naar twee verschillende USB poorten.</p>
+
+      <p>Nadat ik een go-ahead kreeg van de CEO voor deze oplossing, ging ik nog meer requirements halen bij de PO en uiteindelijke gebruikers. Nadat ik deze requirements had verzameld ging ik te werk. Binnen enkele weken was het product klaar om te gebruiken, en hiermee was een groot productie proces flink verbeterd.</p>
+
+      <h3>Technologie gebruikt</h3>
+      <p>
+        <b>IDFlow</b>: C# met .NET Framework en een Vue 2 frontend<br/>
+        <b>iMatch</b>: Swift, Python, C en C++
+      </p>
+    </>);
+
+    const ing = (<>
+      <p>Bij ING werkte ik samen met een andere stagiair van mijn hogeschool aan een interne tool voor het detecteren en repareren van data discrepanties tussen microservices. Ik werkte voornamelijk aan de backend van deze tool, maar was ook verantwoordelijk voor het onderhouden van de CI/CD pipelines en de omgevingen waarop de tool draaide.</p>
+    
+      <p>Het team bestond uit twee stagiairs, twee interne ING developers en een chapter lead.</p>
+
+      <p>Een groot deel van het werk was het vastleggen van de functionele en technische requirements van de nieuwe features. Hieronder viel het design en development van deze features, maar ook access aanvragen bij andere teams voor de services die gebruikt worden door de API.</p>
+
+      <p>Tijdens deze stage heb ik veel geleerd van hoe software wordt gemanaged binnen grote organisaties. Ook heb ik geleerd dat software binnen banken veel aandacht moeten besteden aan het naleven van de regels gesteld door de Nederlandse Bank. Zelfs voor een kleine app zoals die van ons.</p>
+
+      <h3>Technologie gebruikt</h3>
+      <p>
+        Java Sprint Boot op de backend en een Lit frontend.<br/>
+        Voor het managen van de machines werd er veel verschillende tooling gebruikt: RHEL, GitLab CI/CD, Password vaults, Jenkins en Ansible.
+      </p>
+    </>);
+
+    const floro = (<>
+      <p>Bij Floro werkte ik als een full-stack developer aan een paar verschillende CRM en CMS systemen, allemaal geschreven in PHP en jQuery. Hier leerde ik de basis van full-stack web development en hoe ik efficient in een software ontwikkel team werk.</p>
+
+      <h3>Technologie gebruikt</h3>
+      <p>PHP, jQuery en Git</p>
+    </>);
 
     return { bpi, ing, floro }
   }
@@ -185,7 +254,7 @@ function ExperienceSubView(params: SubViewParams) {
 
       <p>The team consisted of two interns, two internal ING developers and one chapter lead.</p>
 
-      <p>My work was primarily focused around gathering the correct functional and technical requirements for the requested features, design and development of the API of the new features. And getting access to the correct services for our API.</p>
+      <p>A large part of my work was focused around gathering the correct functional and technical requirements for the requested features. Design and development of the API of the new these features. And getting access to the correct services for our API.</p>
 
       <p>During this internship I learned a lot about how software is managed within big organisations. I also learned that software in banks need to deal a lot with compliance, even for such a small app as ours.</p>
 
@@ -200,7 +269,7 @@ function ExperienceSubView(params: SubViewParams) {
       <p>At Floro, I worked as a full-stack developer on a few different CRM and CMS systems, all written in PHP and jQuery. Here I learned the basics of full-stack web development, and how to collaborate within a software engineering team.</p>
 
       <h3>Technologies</h3>
-      <p>PHP and jQuery, Git</p>
+      <p>PHP, jQuery and git</p>
     </>);
 
     return { bpi, ing, floro }
