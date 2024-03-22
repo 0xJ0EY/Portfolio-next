@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Script from 'next/script'
 import styles from '@/styles/Home.module.css'
+import { Analytics } from '@vercel/analytics/react';
 import { OperatingSystem } from '@/components/OperatingSystem'
 
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -32,6 +33,8 @@ export default function Home() {
         <Script strategy="beforeInteractive" src="/emulators-ui/emulators-ui.js"/>
         
         <OperatingSystem/>
+
+        <Analytics/>
       </main>
     </>
   )

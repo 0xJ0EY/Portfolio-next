@@ -13,6 +13,7 @@
     "@types/react": "18.2.24"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.2.2",
     "emulators": "^0.80.22"
   }
 }
