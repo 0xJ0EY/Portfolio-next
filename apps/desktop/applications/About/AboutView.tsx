@@ -118,9 +118,7 @@ function AboutSubView(params: SubViewParams) {
 
     return (<>
       <div className={styles['image-container']}>
-        
-        <Image src='/images/me.png' alt='Image of myself' sizes="25vw" width={0} height={0} style={{ width: '100%', height: 'auto'}}/>
-        
+        <img draggable={false} src="/images/me.jpg" alt="Image of myself" />
         <span>{text}</span>
       </div>
     </>);
