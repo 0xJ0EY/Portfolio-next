@@ -232,8 +232,8 @@ export function SceneLoader() {
 
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {
-        setTimeout(() => { setShowProgress(false); }, 1000);
-        setTimeout(() => { setLoadingUnderscore(false); }, 1800);
+        setTimeout(() => { setShowProgress(false); }, 100);
+        setTimeout(() => { setLoadingUnderscore(false); }, 700);
       } else {
         setShowMessage(false);
         setShowProgress(false);
