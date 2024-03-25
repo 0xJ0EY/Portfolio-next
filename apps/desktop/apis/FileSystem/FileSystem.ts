@@ -248,7 +248,7 @@ export function createBaseFileSystem(): FileSystem {
   const users = fileSystem.addDirectory(root, 'Users', false, false);
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
 
-  fileSystem.addDirectory(joey, 'Documents', false, true);
+  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
   fileSystem.addDirectory(joey, 'Trash', false, true);
 
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
@@ -261,15 +261,22 @@ export function createBaseFileSystem(): FileSystem {
     fileSystem.addHyperLink(desktop, doom.value, 'Doom', doomShortcutIcon, true);
   }
 
-  const text = `Hey, welcome to my portfolio website!
+  const readmeText = `Hey, welcome to my portfolio website!
 
 This website is meant as an interactive showcase of my work as software developer for the last few years.
 
 Please enjoy, and explore as much as you would like.
 `;
 
-  fileSystem.addTextFile(desktop, 'readme', text, true);
-  fileSystem.addImage(desktop, 'cheems', '.png', '/images/temp.png', "A temporary image", true);
+  const librariesText = `For this portfolio I used some libraries, so to give some credit:
+Three - https://threejs.org/ Awesome library for 3D web stuff.
+Nextjs - https://nextjs.org/ Great framework to build your React app in.
+Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and great integration with Vercel.
+`;
+
+  fileSystem.addTextFile(desktop, 'readme', readmeText, true);
+  fileSystem.addTextFile(documents, 'libraries', librariesText, true);
+  fileSystem.addImage(documents, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
 
   return fileSystem;
 }
