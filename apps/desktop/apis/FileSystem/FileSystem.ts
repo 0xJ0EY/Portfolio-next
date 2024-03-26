@@ -258,11 +258,10 @@ export function createBaseFileSystem(): FileSystem {
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
   const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
   const trashCanIcon = { src: '/icons/trash-icon.png', alt: 'Trash can icon' };
-  fileSystem.addDirectory(joey, 'Trash', false, true, trashCanIcon);
+  const trash = fileSystem.addDirectory(joey, 'Trash', false, true, trashCanIcon);
 
-  const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
-
-  fileSystem.addHyperLink(desktop, applications, 'Applications', tempIcon, true);
+  const applicationShortcutIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
+  fileSystem.addHyperLink(desktop, applications, 'Applications', applicationShortcutIcon, true);
 
   if (doom.ok) {
     const doomShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Play Doom' };
@@ -284,7 +283,9 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
 
   fileSystem.addTextFile(desktop, 'readme', readmeText, true);
   fileSystem.addTextFile(documents, 'libraries', librariesText, true);
-  fileSystem.addImage(documents, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
+
+  // We keep Cheems in the trash can :ˆ)
+  fileSystem.addImage(trash, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
 
   return fileSystem;
 }
