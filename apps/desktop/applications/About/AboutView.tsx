@@ -113,7 +113,7 @@ function AboutSubView(params: SubViewParams) {
   }
 
   function ImageOfMyself(props: { language: string }) {
-    const text = props.language === 'nl' ? 'Ikzelf, maart 2023' : 'Me, March 2023';
+    const text = props.language === 'nl' ? 'Ikzelf, maart 2024' : 'Me, March 2024';
 
     return (<>
       <div className={styles['image-container']}>
