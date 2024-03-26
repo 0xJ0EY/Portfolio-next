@@ -1,11 +1,10 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './AboutView.module.css';
-import { ApplicationManager, BaseApplicationManager } from '../ApplicationManager';
+import { BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
-import { TFunction, loadLanguages } from 'i18next';
+import { TFunction } from 'i18next';
 import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
-import Image from 'next/image';
 
 type SubView = (
   'home' |
@@ -289,7 +288,7 @@ function ExperienceSubView(params: SubViewParams) {
     </>);
 
     const ing = (<>
-      <p>At ING I worked together with another intern from my university on a internal tool for detecting and fixing data differences between micro services. I was primarily working on the backend of this tool, but was also responsible for the maintaining the CI/CD pipelines and virtual environments the tool was running on.</p>
+      <p>At ING I worked together with another intern from my university on a internal tool for detecting and fixing data differences between microservices. I was primarily working on the backend of this tool, but was also responsible for the maintaining the CI/CD pipelines and virtual environments the tool was running on.</p>
 
       <p>The team consisted of two interns, two internal ING developers and one chapter lead.</p>
 
