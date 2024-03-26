@@ -233,9 +233,9 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
 
     content.push({
       kind: 'directory',
-      title: 'Trash',
+      title: 'Bin',
       path: '/Users/joey/Trash',
-      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      icon:  { src: '/icons/trash-icon.png', alt: 'Trash can' },
       onClick: () => onClickDirectory('/Users/joey/Trash'),
     });
   

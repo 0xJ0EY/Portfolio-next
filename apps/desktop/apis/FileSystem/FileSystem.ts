@@ -55,6 +55,7 @@ export type FileSystemDirectory = {
   kind: 'directory',
   name: string,
   filenameExtension: '',
+  icon?: ApplicationIcon,
   settings: DirectorySettings,
   content: DirectoryContent,
   children: Chain<DirectoryEntry>
@@ -150,7 +151,7 @@ function createRootNode(): FileSystemDirectory {
   }
 }
 
-function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean, icon?: ApplicationIcon): FileSystemDirectory {
   return {
     id,
     parent,
@@ -167,6 +168,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
       height: 800,
       overflowBehavior: 'overflow',
     },
+    icon,
     name,
     filenameExtension: '',
     editable,
@@ -217,7 +219,12 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
   switch (node.kind) {
     case 'application':
     case 'hyperlink': return node.icon;
-    case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    case "directory": {
+      console.log(node.icon);
+
+      if (node.icon) { return node.icon; }
+      return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    }
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
     case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
     case "image": return { src: '/icons/file-icon.png', alt: 'Image icon' }
@@ -248,10 +255,11 @@ export function createBaseFileSystem(): FileSystem {
   const users = fileSystem.addDirectory(root, 'Users', false, false);
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
 
-  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
-  fileSystem.addDirectory(joey, 'Trash', false, true);
-
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
+  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
+  const trashCanIcon = { src: '/icons/trash-icon.png', alt: 'Trash can icon' };
+  fileSystem.addDirectory(joey, 'Trash', false, true, trashCanIcon);
+
   const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
 
   fileSystem.addHyperLink(desktop, applications, 'Applications', tempIcon, true);
@@ -664,8 +672,8 @@ export class FileSystem {
     return Ok(application);
   }
 
-  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean): FileSystemDirectory {
-    const directory = createDirectory(++this.id, parent, name, editable, editableContent);
+  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {
+    const directory = createDirectory(++this.id, parent, name, editable, editableContent, icon);
 
     this.addNodeToDirectory(parent, directory);
 
