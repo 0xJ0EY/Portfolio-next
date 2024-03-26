@@ -220,8 +220,6 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
     case 'application':
     case 'hyperlink': return node.icon;
     case "directory": {
-      console.log(node.icon);
-
       if (node.icon) { return node.icon; }
       return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
     }
