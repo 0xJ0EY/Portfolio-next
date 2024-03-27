@@ -187,3 +187,16 @@
   text-align: center;
   display: block;
 }
+
+.project-image-container {
+  position: relative;
+  height: 300px;
+  display: block;
+}
+
+.project-image-label {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 5px;
+}
