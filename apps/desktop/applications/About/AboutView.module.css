@@ -191,6 +191,7 @@
 .project-image-container {
   position: relative;
   height: 300px;
+  min-width: 300px;
   display: block;
 }
 
@@ -199,4 +200,9 @@
   width: 100%;
   text-align: center;
   margin-top: 5px;
+}
+
+.project-video {
+  min-width: 300px;
+  width: 100%;
 }

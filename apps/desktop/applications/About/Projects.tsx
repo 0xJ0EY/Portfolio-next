@@ -252,7 +252,7 @@ export function ProjectTBot(params: SubViewParams) {
         <h3>Technology</h3>
         <p>The robot works as follows. The robot will drive around until it finds a tennis ball via image recognition. If the robot finds a tennis ball, he will drive towards it and collect it. After that it will calculate a route to the chosen collection point to drop off the tennisball.</p>
 
-        <video src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <p>We used an already on the market Arduino shield, named the Zumo. This gave us a good fundamental to continue working on. The only change we made to the Zumo is adding a 3D printed fork, to move around the balls. For the rest of the Robot we used an Raspberry Pi and a Google Coral. This device is connected to the Zumo with a serial connection. And functions as the brain behind the robot. This means that the it runs the web GUI and does most of the calculations.</p>
 
@@ -277,7 +277,7 @@ export function ProjectTBot(params: SubViewParams) {
         <h3>Technologie</h3>
         <p>De werking is als volgt. De robot rijdt rondjes totdat hij een tennisbal detecteert doormiddel van een machine learning algoritme. Zodra hij er eentje heeft gevonden, rijdt hij er op af en neem hem mee. Vervolgens wordt het pad naar de gekozen verzamelhoek berekend en rijdt de robot er op af met de tennisbal.</p>
 
-        <video src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/tennisbot.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <p>De technologie die hier voor is toegepast is als volgt. We hebben gebruik gemaakt van al een bestaand Arduino shield, genaamd de Zumo. Dit gaf ons een goed carrosserie om op verder te bouwen. De enigste aanpassing die wij aan de Zumo hebben toegepast is het toevoegen van een vork, om de tennisballen in mee te slepen. Voor de rest van de robot hebben we gebruik gemaakt van een Raspberry Pi met een Google Coral. Deze is gekoppeld aan de Arduino doormiddel van een seriële verbinding. En dient als het brein achter de robot, hier draait onder andere de web gui en worden de meeste berekening uitgevoerd.</p>
 
@@ -305,7 +305,7 @@ export function ProjectYoui(params: SubViewParams) {
       <div>
         <p>For the last group project of my second year of university (2019) I worked on a prototype Android dating app called Youi. One of the must-haves was that the app should contain the functionality to video call your dating partner. This functionality was eventually implemented with a from scratch peer-to-peer WebRTC solution.</p>
 
-        <video src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <h3>Technology</h3>
         <p>
@@ -332,7 +332,7 @@ export function ProjectYoui(params: SubViewParams) {
       <div>
         <p>Tijdens het laatste groepsproject van het tweede jaar (2019) heb ik gewerkt binnen een team om een prototypen van een Android dating app te ontwikkelen. Deze app moest de functionaliteit bezitten om met je dating partner te kunnen videobellen. Om dit mogelijk te maken heb ik er voor gekozen voor een peer-to-peer oplossing doormiddel van WebRTC.</p>
 
-        <video src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/youi.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <h3>Technologie</h3>
         <p>
@@ -365,7 +365,7 @@ export function ProjectPCParts(params: SubViewParams) {
       <div>
         <p>PCParts is a webshop that I build in the third period of my second year of university (2019). In this period there was a class where you had to build your own webshop based on the technologies Angular 7 & Dropwizard.</p>
 
-        <video src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
       </div>
     );
   }
@@ -375,7 +375,7 @@ export function ProjectPCParts(params: SubViewParams) {
       <div>
         <p>PCParts is een webshop die ik heb gemaakt tijdens de derde periode van het tweede jaar (2019). Tijdens deze periode werd er een module gegeven waarbij je een webshop moest realiseren doormiddel Angular 7 en Dropwizard.</p>
 
-        <video src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/pcparts.mp4" autoPlay muted loop disablePictureInPicture></video>
       </div>
     )
   }
@@ -393,7 +393,7 @@ export function ProjectAlbert(params: SubViewParams) {
 
         <p>This project was made by a group of 5 students, of which I was mostly involved in setting up the CI & CD pipeline. For the rest of the project I build a table class (a bit ORM like) that had the possibility of lazy loading and inline editing of the data.</p>
 
-        <video src="/videos/albert.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/albert.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <h3>Technology</h3>
         <p>Angular 7, PostgresSQL, Dropwizard and TravisCI</p>
@@ -416,6 +416,8 @@ export function ProjectAlbert(params: SubViewParams) {
         <p>Albert is een simpel boekhoud programma gericht op MKB bedrijven. Het doel van dit project was om een legacy programma van de opdrachtgever om te zetten naar een modern web gebaseerd project.</p>
 
         <p>Dit project is gemaakt door een groep van 5 studenten, waarvan ik voornamelijk betrokken was met het opzetten van een CI & CD straat. Verder heb ik tijdens dit project gewerkt aan een tabel opzet structuur waarmee het mogelijk was om data via lazy loading in te laden.</p>
+
+        <video className={styles['project-video']} src="/videos/albert.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <h3>Technologie</h3>
         <p>Angular 7, PostgresSQL, Dropwizard en TravisCI</p>
