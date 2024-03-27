@@ -60,7 +60,7 @@ function getDesktopTargetUrl(): string {
   const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'local';
 
   if (env === 'production') {
-    return 'https://portfolio-next-web.vercel.app';
+    return 'https://portfolio-next-desktop.vercel.app/';
   }
 
   if (env === 'preview' || env === 'development') {
