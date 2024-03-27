@@ -36,6 +36,7 @@ function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
       <Image
+        quality={100}
         className={styles['dock-app-image']}
         src={item.config.appIcon.src}
         alt={item.config.appIcon.alt}
@@ -54,6 +55,7 @@ function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
       <Image
+        quality={100}
         className={styles['dock-app-image']}
         src={item.config.appIcon.src}
         alt={item.config.appIcon.alt}
@@ -118,6 +120,7 @@ function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
       onClick={() => item.onClick()}
       data-tooltip={item.title}>
       <Image
+        quality={100}
         className={styles['dock-app-image']}
         src={item.icon.src}
         alt={item.icon.alt}

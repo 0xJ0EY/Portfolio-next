@@ -14,7 +14,7 @@ export class ImageViewerConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Image.app';
-  public readonly appIcon = { src: '/icons/file-icon.png', alt: 'Image' };
+  public readonly appIcon = { src: '/icons/image-icon.png', alt: 'Image application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,

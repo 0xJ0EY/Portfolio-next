@@ -187,6 +187,7 @@ export default function FolderIcon(props: { folderIconEntry: FolderIconEntry, in
       <div className={styles.imageContainer}>
         <div className={styles.imageContainerInner}>
           <Image
+            quality={100}
             draggable="false"
             className={styles.image}
             src={icon.src}
