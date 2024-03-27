@@ -13,11 +13,18 @@ const PointerSecondaryKey = "pointer_secondary";
 const PrimaryMouseButton = 0x00;
 
 const SpaceBarKeyAudioFragments: AudioFragment[] = [
-  { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_down_1.mp3' },
+  { onDown: '/sounds/space_down_1.mp3', onUp: '/sounds/space_up_1.mp3' },
+  { onDown: '/sounds/space_down_2.mp3', onUp: '/sounds/space_up_2.mp3' },
+  { onDown: '/sounds/space_down_3.mp3', onUp: '/sounds/space_up_3.mp3' },
+];
+
+const ShiftKeyAudioFragments: AudioFragment[] = [
+  { onDown: '/sounds/shift_down.mp3', onUp: '/sounds/shift_up.mp3' },
 ];
 
 const RegularKeyAudioFragments: AudioFragment[] = [
-  { onDown: '/sounds/left_mouse_down_1.mp3', onUp: '/sounds/left_mouse_down_1.mp3' },
+  { onDown: '/sounds/key_down_1.mp3' },
+  { onDown: '/sounds/key_down_2.mp3' },
 ];
 
 const LeftMouseButtonAudioFragments: AudioFragment[] = [
@@ -39,6 +46,9 @@ function chooseRandomAudioFragment(fragments: AudioFragment[]): AudioFragment {
 function chooseRandomKeyboardAudioFragment(code: string): AudioFragment {
   switch (code) {
     case "Space": return chooseRandomAudioFragment(SpaceBarKeyAudioFragments);
+    case "ShiftLeft":
+    case "ShiftRight":
+      return chooseRandomAudioFragment(ShiftKeyAudioFragments);
     default: return chooseRandomAudioFragment(RegularKeyAudioFragments);
   }
 }
@@ -60,6 +70,8 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   }
 
   function onKeyDown(evt: KeyboardEvent) {
+    if (evt.repeat) { return; }
+
     const code = evt.code;
     activeSounds.current[code] = chooseRandomKeyboardAudioFragment(code);
 
@@ -72,6 +84,8 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
   }
 
   function onKeyUp(evt: KeyboardEvent) {
+    if (evt.repeat) { return; }
+    
     const code = evt.code;
 
     if (!activeSounds.current[code]) { return; }
