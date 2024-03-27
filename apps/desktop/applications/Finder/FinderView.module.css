@@ -7,15 +7,15 @@
 
 .locations {
   width: 140px;
+  min-width: 140px;
   margin: 3px;
-  /* background: #fff; */
-  /* box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a; */
 }
 
 .header {
   width: auto;
   border: 1px solid black;
   padding: 3px;
+  height: 35px;
   margin: 3px;
 }
 
@@ -26,13 +26,14 @@
 }
 
 .path {
-  background-color: hotpink;
-  height: 30px;
   width: 100%;
-  overflow-y: hidden;
-  overflow-x: auto;
+  height: 35px;
+  padding: 3px;
+  margin-bottom: 3px;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
+  border-bottom: 1px solid #000;
 }
 
 .breadcrumb {
@@ -49,9 +50,36 @@
 
 .locations ul {
   margin: 0;
-  padding: 0;;
+  padding: 0;
 }
 
 .locations ul li {
  list-style: none;
+}
+
+.icon-prev {
+  background-position: 0px 0;
+}
+
+/* Not sure why the values have to be*/
+.icon-next {
+  background-position: -16px 0;
+}
+
+.icon-create-file {
+  background-position: -48px 0;
+}
+
+.icon-create-directory {
+  background-position: -64px 0;
+}
+
+.header-left {
+  margin: 1px auto;
+  float: left;
+}
+
+.header-right {
+  margin: 1px auto;
+  float: right;
 }

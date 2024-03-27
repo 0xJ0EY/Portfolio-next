@@ -14,7 +14,7 @@ export class NotesConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Notes.app';
-  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Notes application' };
+  public readonly appIcon = { src: '/icons/file-icon.png', alt: 'Notes application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,

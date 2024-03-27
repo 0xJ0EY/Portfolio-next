@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @font-face {
   font-family: 'Century Schoolbook';
   font-style: sans-serif;
@@ -9,10 +5,18 @@
   src: local('Century Schoolbook'), url('/fonts/century_schoolbook.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Noto Serif Toto';
+  font-style: sans-serif;
+  font-weight: normal;
+  src: local('Noto Serif Toto'), url('/fonts/noto_serif_toto.ttf') format('truetype');
+}
+
 html, body {
   padding: 0;
   margin: 0;
   overscroll-behavior: none;
+  font-family: 'Noto Serif Toto', 'Times New Roman', sans-serif;
 }
 
 *, *::before, *::after {
@@ -31,6 +35,31 @@ html, body {
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
   user-select: none;
   cursor: pointer;
+  white-space: nowrap;
+  font-family: 'Noto Serif Toto', sans-serif;
+}
+
+.system-button img {
+  height: 16px;
+}
+
+.system-text-input {
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  border-radius: 0;
+  padding: 5px 6px;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px grey, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
+  background-color: #fff;
+  font-size: 0.8rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+}
+
+.system-text-input:disabled {
+  background-color: #dcdcdc;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: auto;
+  color: grey;
 }
 
 .header-button {
@@ -63,6 +92,11 @@ html, body {
   color: grey;
 }
 
+.system-button:disabled img {
+  opacity: 0.6;
+}
+
+.content-border,
 .content {
   background: #fff;
   margin: 3px;
@@ -72,7 +106,7 @@ html, body {
   overflow: auto;
 }
 
-.contentOuter {
+.content-outer {
   display: flex;
   flex: 1 1;
   margin: 0;
@@ -89,4 +123,33 @@ h5,
 h6 {
   margin: 0;
   padding: 0;
+}
+
+.spritesheet-btn {
+  width: 26px;
+  height: 26px;
+  
+  display: inline-flex;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0;
+  margin: 0;
+}
+
+.spritesheet-btn:disabled .spritesheet-btn-icon {
+  opacity: 0.4;
+}
+
+.spritesheet-btn-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  
+  image-rendering: pixelated;
+  background-size: 80px 16px;
+  background-repeat: no-repeat;
+  background-image: url('/icons/icon-spritesheet.png');
 }

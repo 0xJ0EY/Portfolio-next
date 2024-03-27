@@ -4,7 +4,7 @@ import { MouseData, PointerCoordinates, TouchData } from "@/events/UserInteracti
 import { CameraController } from "../Camera";
 import { degToRad } from "three/src/math/MathUtils";
 import { calculateAspectRatio } from "../../util";
-import { DisplayName, DisplayParentName } from "@/components/asset-loader/Loaders";
+import { DisplayName, DisplayParentName } from "@/components/scene-loader/AssetLoaders";
 
 export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: PointerCoordinates) => boolean) => {
   // Use a closure so we don't need to init a new raycaster whenever isOverDisplay is called (every mouse movement)
@@ -18,7 +18,7 @@ export const constructIsOverDisplay = (ctx: CameraHandlerContext): ((data: Point
     const camera = ctx.cameraController.getCamera();
     raycaster.setFromCamera(point, camera);
 
-    const intersects = raycaster.intersectObjects(ctx.cameraController.getScene().children);
+    const intersects = raycaster.intersectObjects(ctx.cameraController.getCutoutScene().children);
     const first = intersects[0] ?? null;
 
     if (first === null) { return false; }
@@ -97,7 +97,7 @@ export const calculateCameraPosition = (display: Mesh, fov: number, zoomDistance
   position.add(centerPoint);
 
   const spherical = new Spherical();
-  spherical.phi = Math.atan2(height, depth) - 0.02;
+  spherical.phi = Math.atan2(height, depth);
 
   const rotation = new Vector3();
   rotation.setFromSpherical(spherical);
@@ -121,4 +121,36 @@ export const calculateCameraPosition = (display: Mesh, fov: number, zoomDistance
 
 export function easeInOutSine(x: number): number {
   return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+export function overDOMButton(x: number, y: number): boolean {
+  const maxDepth = 5;
+
+  let currentDepth = 0;
+  let element: Element | null = document.elementFromPoint(x, y);
+
+  do {
+    if (!element) { return false; }
+    if (element.tagName === 'BUTTON') { return true; }
+
+    element = element.parentElement;
+
+  } while (currentDepth++ < maxDepth);
+
+  return false;
+}
+
+export function clickedDOMButton(isPrimaryDown: boolean, x: number, y: number): boolean {
+  if (!isPrimaryDown) { return false; }
+
+  return overDOMButton(x, y);
+}
+
+export function focusDesktop(): void {
+  const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+  iframe.focus();
+}
+
+export function blurDesktop(): void {
+  (document.activeElement as HTMLElement | null)?.blur();
 }

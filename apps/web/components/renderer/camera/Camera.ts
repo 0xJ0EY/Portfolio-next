@@ -1,4 +1,4 @@
-import { AssetKeys } from "@/components/asset-loader/AssetKeys";
+import { AssetKeys } from "@/components/scene-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection, Vector } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
 
@@ -51,7 +51,11 @@ export class CameraController {
   private maxZoomDistance = 15.0;
   private currentZoomDistance = 10;
 
-  constructor(private camera: PerspectiveCamera, private scene: Scene) {}
+  constructor(
+    private camera: PerspectiveCamera,
+    private scene: Scene,
+    private cutoutScene: Scene
+  ) {}
 
   public getTarget(): Vector3 {
     return this.target;
@@ -69,6 +73,10 @@ export class CameraController {
     return this.scene;
   }
 
+  public getCutoutScene(): Scene {
+    return this.cutoutScene;
+  }
+
   public enableDamping(): void {
     this.dampingEnabled = true;
   }
@@ -77,14 +85,24 @@ export class CameraController {
     this.dampingEnabled = false;
   }
 
+  public isCameraFollowEnabled(): boolean {
+    return this.cameraFollowEnabled;
+  }
+
   public enableCameraFollow(): void {
+    if (!this.isCameraFollowEnabled()) {
+      this.syncFollowPositionToTarget();
+    }
+
     this.cameraFollowEnabled = true;
-    this.syncFollowPositionToTarget();
   }
 
   public disableCameraFollow(): void {
+    if (this.cameraFollowEnabled) {
+      this.syncTargetToFollowPosition();
+    }
+
     this.cameraFollowEnabled = false;
-    this.syncTargetToFollowPosition();
   }
 
   public syncFollowPositionToTarget(): void {

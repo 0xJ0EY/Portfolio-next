@@ -1,7 +1,7 @@
 import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { PanOriginData, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
+import { PanOriginData, blurDesktop, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
 import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class FreeRoamCameraState extends CameraState {
@@ -23,7 +23,7 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.enableWebGLPointerEvents();
 
     const position = new Vector3();
-    position.y = 5.5;
+    position.y = 6.8;
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
@@ -37,11 +37,13 @@ export class FreeRoamCameraState extends CameraState {
     this.ctx.cameraController.setMinZoom(2.0);
     this.ctx.cameraController.setMaxZoom(15.0);
 
-    this.ctx.cameraController.setOriginBoundaryX(null);
-    this.ctx.cameraController.setOriginBoundaryY(null);
+    this.ctx.cameraController.setOriginBoundaryX(40.0);
+    this.ctx.cameraController.setOriginBoundaryY(40.0);
     this.ctx.cameraController.setOriginBoundaryZ(null);
 
     this.ctx.cameraController.transition(position, rotation, zoom, 500);
+
+    blurDesktop();
   }
 
   private handleDisplayClick(data: PointerCoordinates): void {

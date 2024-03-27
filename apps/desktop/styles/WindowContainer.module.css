@@ -5,10 +5,10 @@
   height: 100%;
   padding: 3px;
   background-color: silver;
-  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #c8c8c8,inset -2px -2px grey,inset 2px 2px #fff;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #c8c8c8, inset -2px -2px grey, inset 2px 2px #fff;
 }
 
-.contentContainer {
+.content-container {
   position: relative;
   display: flex;
   flex-flow: column;
@@ -16,7 +16,7 @@
   height: 100%;
 }
 
-.contentContainer.focused {
+.content-container.focused {
   z-index: 101;
 }
 
@@ -30,24 +30,24 @@
   user-select: none;
 }
 
-.focusLayer {
+.focus-layer {
   position: absolute;
   width: 100%;
   height: 100%;
   display: block;
   top: 0;
   left: 0;
-  z-index: 100; /* TODO: Make this dynamic */
+  z-index: 100;
 }
 
 .focused.header {
-  background: rgb(255,106,0);
-  background: linear-gradient(90deg, rgba(255,106,0,1) 0%, rgba(156,65,0,1) 100%);
+  background: rgb(255, 106, 0);
+  background: linear-gradient(90deg, rgba(255, 106, 0, 1) 0%, rgba(156, 65, 0, 1) 100%);
 }
 
 .header {
-  background: rgb(142,142,141);
-  background: linear-gradient(90deg, rgba(142,142,141,1) 0%, rgba(184,184,184,1) 100%);
+  background: rgb(142, 142, 141);
+  background: linear-gradient(90deg, rgba(142, 142, 141, 1) 0%, rgba(184, 184, 184, 1) 100%);
   flex: 0 1 auto;
 
   height: 30px;
@@ -64,7 +64,7 @@
   z-index: 9999;
 }
 
-.header > span {
+.header>span {
   pointer-events: none;
   flex-basis: fit-content;
 }
@@ -72,8 +72,7 @@
 .lines {
   flex-grow: 1000;
   margin: 3px 5px;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAADCAYAAABS3WWCAAAAAXNSR0IArs4c6QAAABFJREFUCJljYICC/wwMDAwMAAYJAQAxUlJAAAAAAElFTkSuQmCC);
-  image-rendering: pixelated;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAFCAYAAACEhIafAAAAAXNSR0IArs4c6QAAAA5JREFUCJljYEAG/xFMAAsOAQCWzQL5AAAAAElFTkSuQmCC);
   pointer-events: none;
 }
 
@@ -84,7 +83,8 @@
   margin: 3px;
 }
 
-.resizingMask, .draggingMask {
+.resizingMask,
+.draggingMask {
   position: fixed;
   top: 0;
   left: 0;
@@ -110,4 +110,46 @@
 
 .header-buttons button {
   margin-left: 1px;
+}
+
+.action-overlay {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0.25, 0.25, 0.25, 0.35);
+
+  z-index: 99;
+}
+
+.action-container {
+  display: block;
+  width: 85%;
+  padding: 10px;
+
+  background-color: #fff;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+}
+
+.action-container span {
+  display: block;
+  padding: 16px;
+}
+
+.action-container input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: right;
+}
+
+.action-buttons button {
+  margin-left: 3px;
 }

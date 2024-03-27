@@ -1,14 +1,18 @@
 import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "@/events/UserInteractionEvents";
 import { UpdatableCameraState } from "../CameraState";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
-import { constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
+import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
 
 export class CinematicCameraState extends UpdatableCameraState {
 
   private cameraRotationSpeed = 7.5;
+
+  private hasBeenOverDisplay: boolean = false;
   private isOverDisplay: (data: PointerCoordinates) => boolean;
+  private wasOverDisplay: boolean = true;
+
   private progress: number = 0;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
@@ -22,7 +26,7 @@ export class CinematicCameraState extends UpdatableCameraState {
     if (!display) { return; }
 
     const position = new Vector3();
-    position.y = 5.5;
+    position.y = 6.8;
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
@@ -66,16 +70,29 @@ export class CinematicCameraState extends UpdatableCameraState {
     }
   }
 
+  private toggleHasBeenOverDisplay(isOverDisplay: boolean) {
+    if (!isOverDisplay) { return; }
+    if (this.wasOverDisplay) { return; }
+
+    this.hasBeenOverDisplay = true;
+  }
+
   private handleOverMonitor(data: PointerCoordinates): void {
     const overDisplay = this.isOverDisplay(data);
 
-    if (overDisplay) {
+    this.toggleHasBeenOverDisplay(overDisplay);
+
+    if (overDisplay && this.hasBeenOverDisplay) {
       this.manager.changeState(CameraHandlerState.MonitorView);
     }
+
+    this.wasOverDisplay = overDisplay;
   }
 
   private handleMouseClickEvent(data: MouseData): void {
     if (!data.isPrimaryDown()) { return; }
+
+    if (clickedDOMButton(true, data.x, data.y)) { return; }
 
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
@@ -85,7 +102,16 @@ export class CinematicCameraState extends UpdatableCameraState {
     this.handleMouseClickEvent(data);
   }
 
+  private handleTouchStartEvents(data: TouchData) {
+    const coords = data.pointerCoordinates();
+    if (clickedDOMButton(data.hasTouchesDown(1), coords.x, coords.y)) { return; }
+
+    this.manager.changeState(CameraHandlerState.MonitorView);
+  }
+
   private handleTouchEvent(data: TouchData) {
-    this.handleOverMonitor(data.pointerCoordinates());
+    if (data.source === 'start') {
+      this.handleTouchStartEvents(data);
+    }
   }
 }

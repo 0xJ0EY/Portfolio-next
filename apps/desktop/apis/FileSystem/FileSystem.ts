@@ -1,7 +1,7 @@
 import { Application, ApplicationConfig } from "@/applications/ApplicationManager";
 import { Action } from "../../components/util";
 import { Err, Ok, Result } from "result";
-import { infoConfig } from "@/applications/Info/InfoApplication";
+import { debugConfig } from "@/applications/Debug/DebugApplication";
 import { aboutConfig } from "@/applications/About/About";
 import { LocalWindowCompositor } from "../../components/WindowManagement/LocalWindowCompositor";
 import { finderConfig } from "@/applications/Finder/Finder";
@@ -12,6 +12,9 @@ import { Chain, Node } from "@/data/Chain";
 import { constructPath } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
+import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
+import { contactConfig } from "@/applications/Contract/Contact";
+import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -32,7 +35,13 @@ export type DirectoryContent = {
   overflowBehavior: 'overflow' | 'overlay'
 }
 
-export type FileSystemNode = FileSystemDirectory | FileSystemTextFile | FileSystemApplication | FileSystemHyperLink;
+export type FileSystemNode = (
+  FileSystemDirectory |
+  FileSystemImage |
+  FileSystemTextFile |
+  FileSystemApplication |
+  FileSystemHyperLink
+);
 
 export type DirectoryEntry = {
   node: FileSystemNode,
@@ -46,6 +55,7 @@ export type FileSystemDirectory = {
   kind: 'directory',
   name: string,
   filenameExtension: '',
+  icon?: ApplicationIcon,
   settings: DirectorySettings,
   content: DirectoryContent,
   children: Chain<DirectoryEntry>
@@ -73,6 +83,18 @@ export type FileSystemTextFile = {
   content: string,
   editable: boolean
 };
+
+export type FileSystemImageExtension = '.png' | '.jpg' | '.gif';
+export type FileSystemImage = {
+  id: number,
+  parent: FileSystemDirectory
+  kind: 'image',
+  filenameExtension: FileSystemImageExtension,
+  name: string,
+  source: string,
+  description: string,
+  editable: boolean
+}
 
 export type FileSystemApplication = {
   id: number,
@@ -129,7 +151,7 @@ function createRootNode(): FileSystemDirectory {
   }
 }
 
-function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean, icon?: ApplicationIcon): FileSystemDirectory {
   return {
     id,
     parent,
@@ -146,6 +168,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
       height: 800,
       overflowBehavior: 'overflow',
     },
+    icon,
     name,
     filenameExtension: '',
     editable,
@@ -166,6 +189,19 @@ function createTextFile(id: number, parent: FileSystemDirectory, name: string, c
   }
 }
 
+function createImage(id: number, parent: FileSystemDirectory, name: string, filenameExtension: FileSystemImageExtension, source: string, description: string, editable: boolean): FileSystemImage {
+  return {
+    id,
+    parent,
+    kind: 'image',
+    name,
+    filenameExtension,
+    source,
+    description,
+    editable
+  }
+}
+
 function createHyperLink(id: number, parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean): FileSystemHyperLink {
   return {
     id,
@@ -183,9 +219,13 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
   switch (node.kind) {
     case 'application':
     case 'hyperlink': return node.icon;
-    case "directory": return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    case "directory": {
+      if (node.icon) { return node.icon; }
+      return { src: '/icons/folder-icon.png', alt: 'Directory icon' };
+    }
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
-    case "textfile": return { src: '/icons/folder-icon.png', alt: 'File icon' }
+    case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
+    case "image": return { src: '/icons/file-icon.png', alt: 'Image icon' }
   }
 }
 
@@ -197,13 +237,14 @@ export function createBaseFileSystem(): FileSystem {
   const root = rootEntry.value;
 
   // Create base file tree
-  fileSystem.addDirectory(root, 'Applications', false, false);
+  const applications = fileSystem.addDirectory(root, 'Applications', false, false);
 
   fileSystem.addApplication(finderConfig);
+  fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
-  fileSystem.addApplication(infoConfig);
   fileSystem.addApplication(notesConfig);
-  fileSystem.addApplication(doomConfig);
+  const doom = fileSystem.addApplication(doomConfig);
+  fileSystem.addApplication(imageViewerConfig);
 
   // Create unix like /home folder (macOS also has one)
   fileSystem.addDirectory(root, 'home', false, false);
@@ -212,22 +253,51 @@ export function createBaseFileSystem(): FileSystem {
   const users = fileSystem.addDirectory(root, 'Users', false, false);
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
 
-  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
-  const trash = fileSystem.addDirectory(joey, 'Trash', false, true);
-
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
-  const tempIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
+  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
+  const trashCanIcon = { src: '/icons/trash-icon.png', alt: 'Trash can icon' };
+  const trash = fileSystem.addDirectory(joey, 'Trash', false, true, trashCanIcon);
 
-  fileSystem.addHyperLink(desktop, documents, 'Documents', tempIcon, true);
-  fileSystem.addHyperLink(desktop, trash, 'Trash', tempIcon, true);
+  const applicationShortcutIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
+  fileSystem.addHyperLink(desktop, applications, 'Applications', applicationShortcutIcon, true);
 
-  const text = `=====
-== README
-=====`;
+  if (doom.ok) {
+    const doomShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Play Doom' };
+    fileSystem.addHyperLink(desktop, doom.value, 'Doom', doomShortcutIcon, true);
+  }
 
-  fileSystem.addTextFile(desktop, 'readme', text, true);
+  const readmeText = `Hey, welcome to my portfolio website!
+
+This website is meant as an interactive showcase of my work as software developer for the last few years.
+
+Please enjoy, and explore as much as you would like.
+`;
+
+  const librariesText = `For this portfolio I used some libraries, so to give some credit:
+Three - https://threejs.org/ Awesome library for 3D web stuff.
+Nextjs - https://nextjs.org/ Great framework to build your React app in.
+Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and great integration with Vercel.
+`;
+
+  fileSystem.addTextFile(desktop, 'readme', readmeText, true);
+  fileSystem.addTextFile(documents, 'libraries', librariesText, true);
+
+  // We keep Cheems in the trash can :ˆ)
+  fileSystem.addImage(trash, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
 
   return fileSystem;
+}
+
+export function addDebugAppToFileSystem(fs: FileSystem): void {
+  fs.addApplication(debugConfig);
+}
+
+export function removeDebugAppFromFileSystem(fs: FileSystem): void {
+  const debugApplication = fs.getApplication('/Applications/Debug.app');
+
+  if (!debugApplication.ok) { return; }
+
+  fs.removeNodeFromDirectory(debugApplication.value);
 }
 
 function entriesWithinSelection(entries: Point[], x: number, y: number, dimensions: { width: number, height: number }): number {
@@ -314,7 +384,7 @@ export function calculateNodePosition(
   content: DirectoryContent,
   others: Point[]
 ): { x: number, y: number } {
-  const nodeBoundingBox = { width: 120, height: 80 };
+  const nodeBoundingBox = { width: IconWidth, height: IconHeight };
 
   const positionRange = generatePositionRange(settings, content, nodeBoundingBox);
   const possiblePosition = positionRange.find(pos => entriesWithinSelection(others, pos.x, pos.y, nodeBoundingBox) === 0);
@@ -386,6 +456,10 @@ function isEditable(node: FileSystemNode | null): boolean {
 
 function targetDirectoryAllowsModification(directory: FileSystemDirectory): boolean {
   return directory.editable || directory.stickyBit;
+}
+
+function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: FileSystemNode): boolean {
+  return targetDirectory.id === node.parent?.id;
 }
 
 export type NodeRefreshEvent = { kind: 'refresh' }
@@ -514,11 +588,28 @@ export class FileSystem {
       return Err(Error("Target directory does not allow modification"));
     }
 
+    if (targetMovedInSameDirectory(directory, node)) {
+      // Match the directory based on their unique node id
+      const originalDirectoryEntry = directory.children
+        .iterFromTail() // Doesn't matter which one we take, as long as it is a iterator
+        .find((entry: DirectoryEntry) => { return entry.node.id === node.id; });
+
+      if (!originalDirectoryEntry) {
+        return Err(Error("Parent moved in the same directory, but cannot be found in the directory listing"));
+      }
+
+      return Ok(originalDirectoryEntry);
+    }
+
     // Remove old path from lookup table
     const path = constructPath(node);
     if (this.lookupTable[path]) { delete this.lookupTable[path]; }
 
     this.removeNodeFromDirectory(node);
+
+    // Inform the old parent that the node has been removed
+    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
+
     const entry = this.addNodeToDirectory(directory, node);
 
     // Add new path to lookup table
@@ -553,6 +644,18 @@ export class FileSystem {
     return Ok(node.value);
   }
 
+  public getImage(path: string): Result<FileSystemImage, Error> {
+    const node = this.getNode(path);
+
+    if (!node.ok) { return node; }
+
+    if (node.value.kind !== 'image') {
+      return Err(Error("Node is not an image"))
+    }
+
+    return Ok(node.value);
+  }
+
   public addApplication(config: ApplicationConfig): Result<FileSystemApplication, Error> {
     const parent = this.lookupTable[config.path];
     if (parent.kind !== 'directory') { return Err(Error("Parent is not a directory")); }
@@ -563,15 +666,19 @@ export class FileSystem {
 
     this.lookupTable[constructPath(application)] = application;
 
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
     return Ok(application);
   }
 
-  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean): FileSystemDirectory {
-    const directory = createDirectory(++this.id, parent, name, editable, editableContent);
+  public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {
+    const directory = createDirectory(++this.id, parent, name, editable, editableContent, icon);
 
     this.addNodeToDirectory(parent, directory);
 
     this.lookupTable[constructPath(directory)] = directory;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
 
     return directory;
   }
@@ -583,7 +690,21 @@ export class FileSystem {
 
     this.lookupTable[constructPath(textFile)] = textFile;
 
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
     return textFile;
+  }
+
+  public addImage(parent: FileSystemDirectory, name: string, extension: FileSystemImageExtension, source: string, description: string, editable: boolean) {
+    const image = createImage(++this.id, parent, name, extension, source, description, editable);
+
+    this.addNodeToDirectory(parent, image);
+
+    this.lookupTable[constructPath(image)] = image;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
+    return image;
   }
 
   public addHyperLink(parent: FileSystemDirectory, target: FileSystemNode, name: string, icon: ApplicationIcon, editable: boolean) {
@@ -592,6 +713,8 @@ export class FileSystem {
     this.addNodeToDirectory(parent, hyperlink);
 
     this.lookupTable[constructPath(hyperlink)] = hyperlink;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
 
     return hyperlink;
   }

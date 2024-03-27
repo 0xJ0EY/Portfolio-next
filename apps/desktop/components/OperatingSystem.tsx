@@ -1,7 +1,7 @@
 import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
-import { createBaseFileSystem } from "@/apis/FileSystem/FileSystem";
+import { addDebugAppToFileSystem, createBaseFileSystem, removeDebugAppFromFileSystem } from "@/apis/FileSystem/FileSystem";
 import React, { MutableRefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
@@ -14,15 +14,27 @@ import { Camera } from "@/data/Camera";
 import { PointerCoordinates, TouchData } from "@/data/TouchData";
 import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
 import { SoundService } from "@/apis/Sound/Sound";
+import { SystemService } from "@/apis/System/System";
+import { PeripheralSounds } from "./PeripheralSounds/PeripheralSounds";
 
-const NodeNameButton = 'BUTTON';
+const NodeNameButton    = 'BUTTON';
+const NodeNameInput     = 'INPUT';
+const NodeNameTextArea  = 'TEXTAREA';
 
 const fileSystem = createBaseFileSystem();
+
 const dragAndDrop = new DragAndDropService();
 const sound = new SoundService();
+const system = new SystemService();
 
-export type SystemAPIs = { dragAndDrop: DragAndDropService, fileSystem: FileSystem, sound: SoundService };
-const apis: SystemAPIs = { dragAndDrop, fileSystem, sound };
+export type SystemAPIs = {
+  dragAndDrop: DragAndDropService,
+  fileSystem: FileSystem,
+  sound: SoundService,
+  system: SystemService,
+};
+
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound, system };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
@@ -53,18 +65,22 @@ function handleParentResponsesClosure(
   }
 }
 
-function findButtonNodeInDOM(value: HTMLElement): HTMLElement | null {
-  let element: HTMLElement | null = value;
+function findFirstElementNodeInDom(parent: HTMLElement, nodes: string[]): HTMLElement | null {
+  let element: HTMLElement | null = parent;
+
+  if (nodes.length === 0) { return null; }
 
   while (element !== null) {
-    if (element.nodeName === NodeNameButton) {
-      return element;
-    }
+    if (nodes.includes(element.nodeName)) { return element; }
 
     element = element.parentElement;
   }
 
   return null;
+}
+
+function clickedInteractiveWindowElement(element: HTMLElement): boolean {
+  return element.hasAttribute('data-interactive-window');
 }
 
 export const OperatingSystem = () => {
@@ -74,37 +90,17 @@ export const OperatingSystem = () => {
   const initialCamera = useRef<Camera | null>(null);
   const camera = useRef<Camera | null>(null);
 
-  const targetedButton = useRef<HTMLElement | null>(null);
-
-  function handlePhoneSafariButtonClickStart(evt: TouchEvent) {
-    if (!isPhoneSafari()) { return; }
-    // Always reset the targeted button
-    targetedButton.current = null;
-
-    // If it is the first touch, record the node if it is a button
-    if (evt.touches.length !== 1) { return; }
-
-    targetedButton.current = findButtonNodeInDOM(evt.target as HTMLElement);
-  }
-
-  function handlePhoneSafariButtonClickRelease(evt: TouchEvent) {
-    if (!isPhoneSafari()) { return; }
-    if (evt.target === null) { return; }
-    if (findButtonNodeInDOM(evt.target as HTMLElement) !== targetedButton.current) { return; }
-
-    evt.target.dispatchEvent(new Event('click', { bubbles: true }));
-  }
-
   function handleGestureStart(evt: Event): void {
     evt.preventDefault();
   }
 
   function handleTouchStartEvent(evt: TouchEvent) {
-    if (isPhoneSafari()) { evt.preventDefault(); }
+    if (isPhoneSafari()) {
+      let target = clickedInteractiveWindowElement(evt.target as HTMLElement);
+      if (target) { evt.preventDefault(); }
+    }
 
     sendRequestToParent({ method: 'camera_zoom_distance_request' });
-
-    handlePhoneSafariButtonClickStart(evt);
 
     if (evt.touches.length === 2) {
       touchOrigin.current = TouchData.fromTouchEvent('start', evt);
@@ -134,14 +130,10 @@ export const OperatingSystem = () => {
 
     const clampedZoomDistance = clamp(zoomDistance, min, max);
 
-    console.log(zoomOffset, clampedZoomDistance);
-
     return clampedZoomDistance;
   }
 
   function handleTouchMoveEvent(evt: TouchEvent) {
-    evt.preventDefault();
-
     const data = TouchData.fromTouchEvent('move', evt);
 
     // We provide our own zooming of the page, by zoom/move the camera instead of the page
@@ -173,10 +165,6 @@ export const OperatingSystem = () => {
   }
 
   function handleTouchEndEvent(evt: TouchEvent) {
-    evt.preventDefault();
-
-    handlePhoneSafariButtonClickRelease(evt);
-
     if (evt.touches.length !== 0) { return; }
     if (camera.current === null) { return; }
 
@@ -205,6 +193,10 @@ export const OperatingSystem = () => {
   }
 
   useEffect(() => {
+    system.init();
+
+    if (system.isDebug()) { addDebugAppToFileSystem(fileSystem); }
+
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
 
@@ -220,6 +212,8 @@ export const OperatingSystem = () => {
       applicationManager.reset();
       windowCompositor.reset();
 
+      if (system.isDebug()) { removeDebugAppFromFileSystem(fileSystem); }
+
       if (ref.current) {
         enableBrowserZoomTouchInteraction(ref.current);
       }
@@ -232,8 +226,9 @@ export const OperatingSystem = () => {
    <div ref={ref} className={styles.operatingSystem}>
       <MenuBar manager={applicationManager}/>
       <Desktop apis={apis} manager={applicationManager} windowCompositor={windowCompositor} />
-      <Dock manager={applicationManager} windowCompositor={windowCompositor}></Dock>
+      <Dock apis={apis} manager={applicationManager} windowCompositor={windowCompositor}></Dock>
       <DragAndDropView apis={apis}/>
+      <PeripheralSounds apis={apis}/>
     </div>
   </>
 }

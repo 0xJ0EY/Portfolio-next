@@ -11,6 +11,52 @@
     "english": "English",
     "dutch": "Dutch"
   },
+  "image": {
+    "no_image_to_load": "There is no image to load. Open the application by clicking on an image",
+    "loading": "Loading..."
+  },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "company_optional": "Company (optional)",
+    "message": "Message",
+    "send": "Send",
+    "processed": "An email has been sent to my inbox!",
+    "message_forwarding_instructions": "All messages will be forwarded straight to my personal inbox",
+    "required": "Required",
+    "error": {
+      "invalid-email": "Please enter a valid email."
+    }
+  },
+  "dos_emulator": {
+    "loading": "Loading"
+  },
+  "finder": {
+    "favorites": "Favorites",
+    "create_text_file_instructions": "Enter the name of the text file",
+    "create_text_file_duplicated_name": "The given name is already taken. Please choose a different name",
+    "create_directory_instructions": "Enter the name of the new directory",
+    "create_directory_duplicated_name": "The given name is already taken. Please choose a different name"
+  },
+  "notes": {
+    "create_file_instructions": "Enter the name of the new text file",
+    "create_file_duplicated_name": "The given name is already taken. Please choose a different name"
+  },
+  "about": {
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "experience": "Experience",
+      "projects": "Projects",
+      "contact": "Contact"
+    },
+    "download_cv": {
+      "title": "Looking for my resume?",
+      "instruction": "Click here to download it!",
+      "download_link": "/cv/CV_Joey_de_Ruiter_en.pdf"
+    }
+  },
   "date": {
     "weekdays": {
       "0": "sunday",

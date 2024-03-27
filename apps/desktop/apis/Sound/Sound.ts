@@ -82,8 +82,24 @@ export class SoundService extends ObserverSubject<boolean> {
     const currentIndex = this.index++;
 
     const audio = new Audio(source);
+    audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play();
+    audio.play().catch(() => { console.error('Cannot play audio'); });
+
+    this.activeAudio[currentIndex] = audio;
+
+    audio.addEventListener('ended', () => { delete this.activeAudio[currentIndex]; });
+
+    return currentIndex;
+  }
+
+  public playAudioFragment(audio: HTMLAudioElement, volume: number = 1.0): number {
+    const currentIndex = this.index++;
+
+    audio.volume = volume;
+    audio.muted = !this.enabled;
+
+    audio.play().catch(() => { console.error('Cannot play audio'); });
 
     this.activeAudio[currentIndex] = audio;
 
@@ -98,7 +114,7 @@ export class SoundService extends ObserverSubject<boolean> {
     const audio = new Audio(source);
     audio.volume = volume;
     audio.muted = !this.enabled;
-    audio.play();
+    audio.play().catch(() => { console.error('Cannot play audio'); });
 
     this.activeAudio[currentIndex] = audio;
 

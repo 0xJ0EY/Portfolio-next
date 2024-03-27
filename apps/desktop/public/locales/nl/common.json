@@ -11,6 +11,50 @@
     "english": "Engels",
     "dutch": "Nederlands"
   },
+  "image": {
+    "no_image_to_load": "Er is geen afbeelding om te laden. Klik op een afbeelding om de applicatie te openen",
+    "loading": "Laden..."
+  },
+  "contact": {
+    "name": "Naam",
+    "email": "E-mail",
+    "company": "Bedrijf",
+    "company_optional": "Bedrijf (optioneel)",
+    "message": "Bericht",
+    "send": "Verzenden",
+    "processed": "Er is een e-mail verstuurd naar mijn inbox!",
+    "message_forwarding_instructions": "Alle berichten zullen direct naar mijn inbox gestuurd worden",
+    "required": "Verplicht",
+    "error": {
+      "invalid-email": "Vul een geldig e-mailadres in."
+    }
+  },
+  "dos_emulator": {
+    "loading": "Laden"
+  },
+  "finder": {
+    "favorites": "Favorieten",
+    "create_directory_instructions": "Vul de naam in voor de nieuwe folder",
+    "create_directory_duplicated_name": "De gegeven naam bestaat al. Kies een andere naam"
+  },
+  "notes": {
+    "create_file_instructions": "Vul de naam in voor het nieuwe bestand",
+    "create_file_duplicated_name": "De gegeven naam bestaat al. Kies een andere naam"
+  },
+  "about": {
+    "navigation": {
+      "home": "Home",
+      "about": "Over mij",
+      "experience": "Ervaring",
+      "projects": "Projecten",
+      "contact": "Contact"
+    },
+    "download_cv": {
+      "title": "Opzoek naar mijn CV?",
+      "instruction": "Klik hier om hem te downloaden!",
+      "download_link": "/cv/CV_Joey_de_Ruiter_nl.pdf"
+    }
+  },
   "date": {
     "weekdays": {
       "0": "zondag",

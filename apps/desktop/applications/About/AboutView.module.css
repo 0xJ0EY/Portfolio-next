@@ -19,7 +19,15 @@
 }
 
 .navigation {
+  width: 12rem;
   min-width: 12rem;
+  padding: 1.5rem;
+}
+
+.navigation-button-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
 }
 
 .page-h1 {
@@ -38,4 +46,163 @@
 
 .home-page {
   display: flex;
+}
+
+.subpage {
+  display: flex;
+  height: 100%;
+}
+
+.subpage-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: auto;
+}
+
+.subpage-home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.home-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.home-button {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.subpage-content h2 {
+  margin-top: 1rem;
+}
+
+.subpage-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.project-button {
+  border-radius: 0;
+  margin-top: 0.5rem;
+  padding: 10px 15px;
+  border: none;
+  color: #000;
+  background-color: #dcdcdc;
+  font-size: 1.05em;
+  box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: 'Noto Serif Toto', sans-serif;
+  display: flex;
+  align-items: stretch;
+
+}
+
+.project-button div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 5px;
+}
+
+.project-button span {
+  line-height: 32px;
+  display: block;
+}
+
+.project-button img {
+  image-rendering: pixelated;
+}
+
+.project-button:hover {
+  background-color: #c9c9c9;
+}
+
+.project-button:active {
+  background-color: #dcdcdc;
+  box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
+}
+
+.button-link {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  color: blue;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.button-link:hover {
+  text-decoration: underline;
+}
+
+.download-cv hr {
+  display: block;
+  width: 100%;
+}
+
+.download-content {
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.download-content img {
+  user-select: none;
+  margin-right: 10px;
+  image-rendering: pixelated;
+}
+
+.download-content h2 {
+  margin: 0;
+}
+
+.image-container {
+  display: block;
+  float: right;
+  width: 33%;
+  padding: 5px;
+  margin: 5px;
+  background-color: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #c8c8c8, inset -2px -2px grey, inset 2px 2px #fff;
+}
+
+.image-container img {
+  width: 100%;
+}
+
+.image-container span {
+  width: 100%;
+  text-align: center;
+  display: block;
+}
+
+.project-image-container {
+  position: relative;
+  height: 300px;
+  min-width: 300px;
+  display: block;
+}
+
+.project-image-label {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.project-video {
+  min-width: 300px;
+  width: 100%;
 }

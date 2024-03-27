@@ -1,6 +1,6 @@
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
-import { PanOriginData, calculateCameraPosition, constructIsOverDisplay, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom } from "./util";
+import { PanOriginData, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom, overDOMButton } from "./util";
 import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
@@ -21,7 +21,7 @@ export class MonitorViewCameraState extends CameraState {
     const display = getDisplay(this.ctx.scene);
     if (!display) { return; }
 
-    const zoomDistance = 2;
+    const zoomDistance = 2.4;
     const cameraFov = this.ctx.cameraController.getCamera().fov;
 
     const { spherical, position, distance } = calculateCameraPosition(display, cameraFov, zoomDistance);
@@ -31,6 +31,8 @@ export class MonitorViewCameraState extends CameraState {
 
       this.ctx.cameraController.setOriginBoundaryX(2.0);
       this.ctx.cameraController.setOriginBoundaryY(1.5);
+
+      focusDesktop();
     }
 
     this.ctx.cameraController.enableDamping();
@@ -69,6 +71,11 @@ export class MonitorViewCameraState extends CameraState {
     const overDisplay = this.isOverDisplay(data);
 
     const hasChangedOverDisplay = (): boolean => overDisplay !== this.wasOverDisplay;
+
+    if (overDOMButton(data.x, data.y)) {
+      const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+      this.manager.emitUserInteractionEvent(cancelEvent);
+    }
 
     if (overDisplay) {
       this.ctx.disableWebGLPointerEvents();
@@ -117,7 +124,14 @@ export class MonitorViewCameraState extends CameraState {
     }
   }
 
-  private handleMouseUp(data: MouseData): void {
+  private handleMouseDown(data: MouseData): void {
+    if (clickedDOMButton(data.isPrimaryDown(), data.x, data.y)) { return; }
+    if (this.isOverDisplay(data)) { return; }
+
+    // Because we're changing the state anyway, always cancel the possible chance state event
+    const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+    this.manager.emitUserInteractionEvent(cancelEvent);
+
     this.manager.changeState(CameraHandlerState.DeskView);
   }
 
@@ -127,12 +141,15 @@ export class MonitorViewCameraState extends CameraState {
 
   handleMouseEvent(data: MouseData) {
     switch (data.source) {
-      case 'up': return this.handleMouseUp(data);
+      case 'down': return this.handleMouseDown(data);
       case 'move': return this.handleMouseMove(data);
     }
   }
 
   private handleTouchOutsideDisplay(data: TouchData) {
+    const coords = data.pointerCoordinates();
+    if (clickedDOMButton(data.hasTouchesDown(1), coords.x,coords.y)) { return; }
+
     const onSuccess = () => {
       this.manager.changeState(CameraHandlerState.FreeRoam);
     };

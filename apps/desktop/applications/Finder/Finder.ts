@@ -61,7 +61,7 @@ export class Finder extends Application {
       // Do not open a Finder window on the first start, due to the Operating system starting Finder at "boot"
       if (event.isFirst) { return; }
 
-      const path = event.args.length !== 0 ? event.args : '/';
+      const path = event.args.length !== 0 ? event.args : '/Users/joey/';
       this.openNewWindow(path);
     };
 

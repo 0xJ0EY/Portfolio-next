@@ -13,7 +13,7 @@ export class AboutConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'About.app';
-  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'About application' };
+  public readonly appIcon = { src: '/icons/about-app.png', alt: 'About application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
@@ -55,6 +55,10 @@ export class AboutApplication extends Application {
 
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     this.baseHandler(event, windowContext);
+
+    if (event.kind === 'about-open-contact-event') {
+      this.manager.open('/Applications/Contact.app');
+    }
 
     if (event.kind === 'application-open') {
       this.createNewWindow(event);

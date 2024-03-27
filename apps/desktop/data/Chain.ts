@@ -6,6 +6,7 @@ export class Node<T> {
 }
 
 export class ChainIterator<T> implements Iterable<Node<T>> {
+  private originalNode: Node<T> | null;
   private node: Node<T> | null;
 
   constructor(chain: Chain<T>, private direction: 'fromTail' | 'fromHead') {
@@ -17,10 +18,20 @@ export class ChainIterator<T> implements Iterable<Node<T>> {
         this.node = chain.getHead();
         break;
     }
+
+    this.originalNode = this.node;
+  }
+
+  private getNextIterator(node: Node<T>, direction: 'fromTail' | 'fromHead'): Node<T> | null {
+    switch (this.direction) {
+      case "fromTail": return node.next;
+      case "fromHead": return node.prev;
+    }
   }
 
   [Symbol.iterator](): Iterator<Node<T>, any, undefined> {
     let value: Node<T>;
+    this.node = this.originalNode;
 
     return {
       next: () => {
@@ -29,18 +40,23 @@ export class ChainIterator<T> implements Iterable<Node<T>> {
 
         value = this.node;
 
-        switch (this.direction) {
-          case "fromTail":
-            this.node = this.node.next;
-            break;
-          case "fromHead":
-            this.node = this.node.prev;
-            break;
-        }
+        this.node = this.getNextIterator(this.node, this.direction);
 
         return { done: false, value };
       }
     }
+  }
+
+  public find(predicate: (value: T) => boolean): T | null {
+    let node: Node<T> | null = this.node;
+
+    while (node) {
+      if (predicate(node.value)) { return node.value; }
+
+      node = this.getNextIterator(node, this.direction);
+    }
+
+    return null;
   }
 }
 

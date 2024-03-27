@@ -8,7 +8,8 @@ import { Application } from "../ApplicationManager";
 import React from "react";
 import { Chain, Node } from "@/data/Chain";
 import { Err, Ok, Result } from "result";
-import { constructPath } from "@/apis/FileSystem/util";
+import { constructPath, generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
+import { useTranslation } from "react-i18next";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }
@@ -49,9 +50,11 @@ export default function FinderView(props: WindowProps) {
   const [ canEdit, setCanEdit ] = useState(false);
   const [ pathNodes, setPathNodes ] = useState<FileSystemDirectory[]>([]);
 
+  const { t } = useTranslation('common');
+  const fs = application.apis.fileSystem;
+
   const currentHistoryElement = useRef<Node<FileSystemDirectory> | null>(null);
   const history = useRef(new Chain<FileSystemDirectory>());
-  const folderViewRef = useRef<FolderViewHandles>(null);
 
   function recordHistory(directory: FileSystemDirectory) {
     if (currentHistoryElement.current) {
@@ -101,7 +104,47 @@ export default function FinderView(props: WindowProps) {
   function createDirectory() {
     if (!canEdit) { return; }
 
-    folderViewRef.current?.createNewDirectory();
+    const dir = fs.getDirectory(path);
+    if (!dir.ok) { return; }
+
+    const template = t('filesystem.new_directory');
+    const name = generateUniqueNameForDirectory(dir.value, template);
+
+    const noop = () => {};
+
+    application.compositor.prompt(windowContext.id, t('finder.create_directory_instructions'), name)
+      .then((name) => {
+        if (fs.getDirectory(`${path}${name}`).ok) {
+          application.compositor.alert(windowContext.id, t('finder.create_directory_duplicated_name')).catch(noop);
+          return;
+        }
+        
+        fs.addDirectory(dir.value, name, true, true);
+        fs.propagateNodeEvent(dir.value, {kind: 'update'});
+      }).catch(noop);
+  }
+
+  function createTextFile() {
+    if (!canEdit) { return; }
+
+    const dir = fs.getDirectory(path);
+    if (!dir.ok) { return; }
+
+    const template = t('filesystem.new_file');
+    const name = generateUniqueNameForDirectory(dir.value, template);
+
+    const noop = () => {};
+
+    application.compositor.prompt(windowContext.id, t('finder.create_text_file_instructions'), name)
+      .then((name) => {
+        if (fs.getNode(`${path}${name}.txt`).ok) {
+          application.compositor.alert(windowContext.id, t('finder.create_text_file_duplicated_name')).catch(noop);
+          return;
+        }
+        
+        fs.addTextFile(dir.value, name, "", true);
+        fs.propagateNodeEvent(dir.value, {kind: 'update'});
+      }).catch(noop);
   }
 
   function updateWindowTitle(path: string) {
@@ -162,33 +205,32 @@ export default function FinderView(props: WindowProps) {
     }
   }
   
-  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onPointerDown={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
+  const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onClick={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
  
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.navigationActions}>
-          <button className="system-button" disabled={!hasBackwardHistory()} onPointerDown={() => goBackInHistory()}>prev</button>
-          <button className="system-button" disabled={!hasForwardHistory()} onPointerDown={() => goForwardInHistory()}>next</button>
-                  
-          <button className="system-button" disabled={!canEdit} onPointerDown={() => createDirectory()}>create directory</button>
-        </div>
-        <div className={styles.path}>
-          { locations }
-        </div>
-      </div>
-
       <div className={styles.content}>
         <div className={styles.locations}>
+          <div className={styles.header}>
+            <button className={["system-button spritesheet-btn", styles['header-left']].join(' ')} disabled={!hasBackwardHistory()} onClick={() => goBackInHistory()}><div className={['spritesheet-btn-icon', styles['icon-prev']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-left']].join(' ')} disabled={!hasForwardHistory()} onClick={() => goForwardInHistory()}><div className={['spritesheet-btn-icon', styles['icon-next']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-right']].join(' ')} disabled={!canEdit} onClick={() => createDirectory()}><div className={['spritesheet-btn-icon', styles['icon-create-directory']].join(' ')}></div></button>
+            <button className={["system-button spritesheet-btn", styles['header-right']].join(' ')} disabled={!canEdit} onClick={() => createTextFile()}><div className={['spritesheet-btn-icon', styles['icon-create-file']].join(' ')}></div></button>
+          </div>
+
+          {t("finder.favorites")}
           <ul>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
-            <li><button className="system-button" onPointerDown={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
+            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
           </ul>
         </div>
         <div className={styles.folder}>
-          <FolderView ref={folderViewRef} directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
+          <div className={styles.path}>
+            { locations }
+          </div>
+          <FolderView directory={path} apis={application.apis} onFileOpen={onFileOpen} allowOverflow={true}></FolderView>
         </div>
       </div>
     </div>

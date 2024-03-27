@@ -1,3 +1,5 @@
+import { time } from "console";
+
 export const calculateAspectRatio = (width: number, height: number): number => {
   return width / height;
 }
@@ -29,4 +31,36 @@ export const enableTouchInteraction = (element: HTMLElement): void => {
   element.removeEventListener('touchmove', noopTouchEvent);
   element.removeEventListener('touchend', noopTouchEvent);
   element.removeEventListener('touchcancel', noopTouchEvent);
+}
+
+export function writeOutCharsStreaming(
+  stream: () => string,
+  output: (value: string) => void,
+  timeBetweenInMs: number
+): () => void {
+  let index = 0;
+  let cancelled = false;
+
+  function writeChar() {
+    const string = stream();
+
+    const slice = string.slice(0, ++index);
+    output(slice);
+
+    if (index < string.length && cancelled === false) {
+      setTimeout(writeChar, timeBetweenInMs);
+    }
+  }
+
+  writeChar();
+
+  return () => { cancelled = true; }
+}
+
+export function writeOutChars(value: string, output: (value: string) => void, timeBetweenInMs: number): () => void {
+  return writeOutCharsStreaming(() => value, output, timeBetweenInMs);
+}
+
+export function joinStyles(styles: (string | null)[]) {
+  return styles.filter(x => x !== null).join(" ");
 }

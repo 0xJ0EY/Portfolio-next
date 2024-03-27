@@ -15,7 +15,7 @@
   left: 0;
   
   pointer-events: none;
-  width: 100vw;
+  width: 100%;
   /* TODO: Change this to the eventual height of the dock */
   height: calc(100% - 90px);
 }

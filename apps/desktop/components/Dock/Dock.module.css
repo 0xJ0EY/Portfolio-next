@@ -35,7 +35,8 @@
   margin: 0 4px;
 }
 
-.dock-application:hover::after {
+.dock-application:hover::after,
+.dock-application.hovered::after {
   position: absolute;
   top: -25px;
   left: 50%;
@@ -48,7 +49,6 @@
 
 .dock-application .dock-app-image {
   display: block;
-  max-height: calc(100% - 12px);
 }
 
 .dock-app-active-image {
@@ -60,9 +60,9 @@
   display: flex;
   justify-content: center;
   padding-top: 2px;
+  padding-bottom: 2px;
   height: 12px;
   width: 100%;
-  /* background: blue; */
 }
 
 .separator {

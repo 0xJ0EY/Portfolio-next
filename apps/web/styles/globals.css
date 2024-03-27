@@ -7,6 +7,31 @@ html, body {
   overscroll-behavior: none;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 #__next {
   height: 100vh;
+}
+
+@font-face {
+  font-family: 'Galyon Regular';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Galyon Regular'), url('/fonts/Galyon-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Galyon Bold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Galyon Bold'), url('/fonts/Galyon-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Metropolis Medium';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Metropolis Medium'), url('/fonts/Metropolis-Medium.otf') format('opentype');
 }

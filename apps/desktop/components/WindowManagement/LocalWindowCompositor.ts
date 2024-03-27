@@ -4,7 +4,7 @@ export class LocalWindowCompositor {
 
   private instances: Record<number, Window> = {};
 
-  constructor(private compositor: WindowCompositor) {}
+  constructor(private compositor: WindowCompositor) { }
 
   public focus(windowId: number) {
     this.compositor.focus(windowId);
@@ -34,6 +34,14 @@ export class LocalWindowCompositor {
     this.compositor.close(windowId);
 
     delete this.instances[windowId];
+  }
+
+  public async alert(windowId: number, alert: string): Promise<void> {
+    return await this.compositor.alert(windowId, alert);
+  }
+
+  public async prompt(windowId: number, prompt: string, defaultValue?: string): Promise<string> {
+    return await this.compositor.prompt(windowId, prompt, defaultValue);
   }
 
   public closeAll(): void {
