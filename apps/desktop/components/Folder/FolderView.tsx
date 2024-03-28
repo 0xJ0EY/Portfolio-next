@@ -355,6 +355,7 @@ export function FolderView(props: FolderViewProps) {
   }
 
   function onTouchDown(evt: TouchEvent) {
+    evt.preventDefault();
     if (evt.touches.length > 1) { return; }
 
     const touch = evt.touches[0];
@@ -826,8 +827,8 @@ export function FolderView(props: FolderViewProps) {
     if (!ref.current) { return; }
     const folder = ref.current;
 
-    folder.addEventListener('touchstart', onTouchDown, { passive: true });
-    folder.addEventListener('pointerdown', onPointerDown, { passive: true });
+    folder.addEventListener('touchstart', onTouchDown, { passive: false });
+    folder.addEventListener('pointerdown', onPointerDown, { passive: false });
     folder.addEventListener(FileSystemItemDragMove, onFileDropMove as EventListener);
     folder.addEventListener(FileSystemItemDragDrop, onFileDrop as EventListener);
     
