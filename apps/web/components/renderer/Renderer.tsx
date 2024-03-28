@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
@@ -92,7 +92,10 @@ const renderCssContext = (scene: Scene, renderer: CSS3DRenderer, camera: Perspec
   // This is due to safari rendering it incorrect when it is at 1, it now renders it correct, like all the other major browsers.
   camera.matrixWorldAutoUpdate = false;
   camera.updateMatrixWorld();
-  camera.matrixWorldInverse.elements[15] = -1;
+
+  if (isSafari()) {
+    camera.matrixWorldInverse.elements[15] = -1;
+  }
 
   renderer.render(scene, camera);
 
