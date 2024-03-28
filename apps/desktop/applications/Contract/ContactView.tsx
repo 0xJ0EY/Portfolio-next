@@ -12,11 +12,32 @@ type ValidationError = (
   'invalid-email'
 );
 
+
+function DutchContent() {
+  return (<>
+    <p className={styles['contact-info']}>
+      Momenteel ben ik niet contract gebonden, dus als je een leuke positie hebt neem dan gerust contact met mij op! Je kan mij bereiken via mijn persoonlijke e-mail, of via het contact formulier hieronder.
+    </p>
+
+    <p><b>E-mail:&nbsp;</b><a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
+  </>);
+}
+
+function EnglishContent() {
+  return (<>
+    <p className={styles['contact-info']}>
+      I am currently not contracted, so if you have any opportunities feel free to reach out! You can reach me via my personal email, or fill out the form below!
+    </p>
+
+    <p><b>Email:&nbsp;</b><a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
+  </>);
+}
+
 export default function ContactApplicationView(props: WindowProps) {
   const { application, args, windowContext } = props;
   const nameRef = useRef<HTMLInputElement>(null);
 
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
 
   const [inputFields, setInputFields] = useState({
     name: "",
@@ -117,10 +138,7 @@ export default function ContactApplicationView(props: WindowProps) {
                 <a rel="noreferrer" target="_blank" href="https://twitter.com/0xJ0EY"><Image src="icons/x-icon.svg" alt="X" width={22} height={22}/></a>
               </div>
             </div>
-            <p className={styles['contact-info']}>
-              I am currently not contracted, so if you have any opportunities feel free to reach out! You can reach me via my personal email, or fill out the form below!
-            </p>
-            <p><b>Email:&nbsp;</b><a href="mailto:contact@joeyderuiter.me">contact@joeyderuiter.me</a></p>
+            { i18n.language === 'nl' ? DutchContent() : EnglishContent() }
             <form onSubmit={onSubmit}>
               { processed ?
                 <div className={[styles['form-row'], styles['processed']].join(' ')}>

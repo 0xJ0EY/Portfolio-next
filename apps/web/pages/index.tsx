@@ -31,6 +31,7 @@ export default function Web() {
         <meta name="description" content="Portfolio website of Joey de Ruiter" />
 
         <meta property="og:title" content="Joey de Ruiter - Portfolio" />
+        <meta property="og:description" content="Portfolio website of Joey de Ruiter" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/assets/thumbnail.png" />
         <meta property="og:url" content="https://joeyderuiter.me/" />
