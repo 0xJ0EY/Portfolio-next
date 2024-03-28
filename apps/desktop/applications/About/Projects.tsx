@@ -85,7 +85,8 @@ export function ProjectPortfolio2024(params: SubViewParams) {
 
         <h3>Technology</h3>
         <p>
-          React, NextJS, TypeScript and webgl
+          React, NextJS, TypeScript and webgl<br/>
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/Portfolio-next">Link</a> to the code of the project.
         </p>
       </div>
     );
@@ -112,7 +113,8 @@ export function ProjectPortfolio2024(params: SubViewParams) {
 
         <h3>Technologie</h3>
         <p>
-          React, NextJS, TypeScript en webgl
+          React, NextJS, TypeScript en webgl<br/>
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/Portfolio-next">Link</a> naar de code van het project.
         </p>
       </div>
     );
@@ -138,7 +140,7 @@ export function ProjectJScript(params: SubViewParams) {
         <h3>Technology</h3>
         <p>
           Rust and the ECMAScript documentation<br/>
-          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> to the project.
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> to the code of the project.
         </p>
       </div>
     );
@@ -158,7 +160,7 @@ export function ProjectJScript(params: SubViewParams) {
         <h3>Technologie</h3>
         <p>
           Rust en de ECMAScript documentatie<br/>
-          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> naar het project.
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/joey-script">Link</a> naar de code van het project.
         </p>
       </div>
     );
