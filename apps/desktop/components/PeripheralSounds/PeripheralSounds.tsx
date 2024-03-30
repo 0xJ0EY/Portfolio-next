@@ -73,6 +73,9 @@ export function PeripheralSounds(props: { apis: SystemAPIs }) {
     if (evt.repeat) { return; }
 
     const code = evt.code;
+
+    if (['VolumeUp', 'VolumeDown'].includes(code)) { return; }
+
     activeSounds.current[code] = chooseRandomKeyboardAudioFragment(code);
 
     const audioSource = activeSounds.current[code].onDown;
