@@ -36,7 +36,7 @@ export class SkillsApplication extends Application {
     if (event.kind === 'application-open') {
       this.compositor.open({
         x: 200,
-        y: 200,
+        y: 100,
         height: 600,
         width: 700,
         title: `Skills`,
