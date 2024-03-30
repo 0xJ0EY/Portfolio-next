@@ -1,0 +1,24 @@
+.skills-content {
+  padding: 1.5rem;
+}
+
+.skills-content ul {
+  padding: 0;
+  min-width: 600px;
+  width: 100%;
+  columns: 2;
+}
+
+.skills-content ul li {
+  list-style: none;
+}
+
+.language-entry {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.language-entry span {
+  margin-left: 8px;
+}

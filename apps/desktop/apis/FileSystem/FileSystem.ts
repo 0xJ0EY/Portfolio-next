@@ -15,6 +15,7 @@ import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
 import { contactConfig } from "@/applications/Contract/Contact";
 import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
+import { skillsConfig } from "@/applications/Skills/Skills";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -245,6 +246,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(notesConfig);
   const doom = fileSystem.addApplication(doomConfig);
   fileSystem.addApplication(imageViewerConfig);
+  fileSystem.addApplication(skillsConfig);
 
   // Create unix like /home folder (macOS also has one)
   fileSystem.addDirectory(root, 'home', false, false);

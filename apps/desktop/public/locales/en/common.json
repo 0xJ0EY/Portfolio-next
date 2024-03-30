@@ -29,6 +29,13 @@
       "invalid-email": "Please enter a valid email."
     }
   },
+  "skills": {
+    "programming_languages": "Programming languages",
+    "frameworks": "Frameworks",
+    "databases": "Databases",
+    "devops": "DevOps",
+    "tools": "Tools"
+  },
   "dos_emulator": {
     "loading": "Loading"
   },
