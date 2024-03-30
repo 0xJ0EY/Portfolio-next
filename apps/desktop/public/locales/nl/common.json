@@ -29,6 +29,13 @@
       "invalid-email": "Vul een geldig e-mailadres in."
     }
   },
+  "skills": {
+    "programming_languages": "Programmeertalen",
+    "frameworks": "Frameworks",
+    "databases": "Databases",
+    "devops": "DevOps",
+    "tools": "Tools"
+  },
   "dos_emulator": {
     "loading": "Laden"
   },
