@@ -11,11 +11,13 @@ import { ApplicationIcon, FileSystem } from '@/apis/FileSystem/FileSystem';
 import { SystemAPIs } from '../OperatingSystem';
 import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
 import { contactConfig } from '@/applications/Contract/Contact';
+import { skillsConfig } from '@/applications/Skills/Skills';
 
 const DockApplications = [
   finderConfig,
   aboutConfig,
   contactConfig,
+  skillsConfig,
 ];
 
 const DebugDockApplications = [
