@@ -13,7 +13,7 @@ export class SkillsConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Skills.app';
-  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Skills application' };
+  public readonly appIcon = { src: '/icons/skills-icon.png', alt: 'Skills application' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
