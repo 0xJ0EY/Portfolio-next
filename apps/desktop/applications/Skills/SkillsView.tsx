@@ -34,7 +34,7 @@ export default function SkillsView(props: WindowProps) {
             <li><SkillEntry language="TypeScript / JavaScript" icon={{src: '/icons/skills/typescript.svg', alt: 'TypeScript' }} /></li>
             <li><SkillEntry language="Swift" icon={{src: '/icons/skills/swift.svg', alt: 'Swift' }} /></li>
             <li><SkillEntry language="Rust" icon={{src: '/icons/skills/rust.svg', alt: 'Rust' }} /></li>
-            <li><SkillEntry language="C (and a little C++)" icon={{src: '/icons/skills/c.svg', alt: 'C' }} /></li>
+            <li><SkillEntry language="C / C++" icon={{src: '/icons/skills/c.svg', alt: 'C' }} /></li>
             <li><SkillEntry language="Java" icon={{src: '/icons/skills/java.svg', alt: 'Java' }} /></li>
             <li><SkillEntry language="Python" icon={{src: '/icons/skills/python.svg', alt: 'Python' }} /></li>
             <li><SkillEntry language="HTML/CSS" icon={{src: '/icons/skills/html.svg', alt: 'HTML5' }} /></li>

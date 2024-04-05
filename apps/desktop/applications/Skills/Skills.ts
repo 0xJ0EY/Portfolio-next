@@ -33,6 +33,8 @@ export class SkillsApplication extends Application {
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext | undefined): void {
+    this.baseHandler(event, windowContext);
+
     if (event.kind === 'application-open') {
       this.compositor.open({
         x: 200,
