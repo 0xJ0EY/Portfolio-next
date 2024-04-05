@@ -59,6 +59,7 @@ export default function SkillsView(props: WindowProps) {
           <ul>
             <li><SkillEntry language="Azure DevOps" icon={{src: '/icons/skills/azure-devops.svg', alt: 'Azure DevOps' }} /></li>
             <li><SkillEntry language="GitLab" icon={{src: '/icons/skills/gitlab.svg', alt: 'GitLab' }} /></li>
+            <li><SkillEntry language="Docker" icon={{src: '/icons/skills/docker.svg', alt: 'Docker' }} /></li>
             <li><SkillEntry language="Ansible" icon={{src: '/icons/skills/ansible.svg', alt: 'Ansible' }} /></li>
           </ul>
 
