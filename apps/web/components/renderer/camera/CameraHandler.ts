@@ -56,11 +56,17 @@ export class CameraHandler {
     cameraController: CameraController,
     webglNode: HTMLElement,
     private userInteractionEventBus: UserInteractionEventBus,
+    userPrefersReducedMotion: boolean,
     private onChangeState?: (state: CameraHandlerState) => void
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
 
-    this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
+    if (userPrefersReducedMotion) {
+      this.state = this.stateToInstance(CameraHandlerState.MonitorView)!;
+    } else {
+      this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
+    }
+
     this.state.transition();
 
     this.userInteractionEventBusUnsubscribeHandler = this.userInteractionEventBus.subscribe(this.onUserInteractionEvent.bind(this));
