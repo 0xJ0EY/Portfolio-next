@@ -46,7 +46,7 @@ function OperatingSystemStats() {
     <div>
       <span className={styles['bold']}>{name}</span>
       {createSpacer(name, spacer)}
-      <span>Released: 7 april 1998</span>
+      <span>Released: april 1998</span>
     </div>
     <div>
       <span className={styles['bold']}>{company}</span>

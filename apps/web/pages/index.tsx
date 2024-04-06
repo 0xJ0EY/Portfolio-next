@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { SceneLoader } from "../components";
 import { useEffect, useState } from "react";
+import { NoScriptWarning } from "@/components/noscript/NoScript";
 
 const focusedTitle = "Joey de Ruiter - Portfolio";
 const blurredTitle = "👀 Joey de Ruiter - Portfolio";
@@ -38,6 +39,7 @@ export default function Web() {
 
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
       </Head>
+      <NoScriptWarning />
       <SceneLoader />
     </>
   );

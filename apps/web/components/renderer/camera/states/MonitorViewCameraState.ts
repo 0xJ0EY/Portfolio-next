@@ -1,3 +1,4 @@
+import { prefersReducedMotion } from "../../util";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom, overDOMButton } from "./util";
@@ -100,15 +101,17 @@ export class MonitorViewCameraState extends CameraState {
           }
         };
 
-        const confirm = ConfirmationData.fromMouseData(
-          data,
-          600,
-          onSuccess,
-          null,
-        );
+        if (!prefersReducedMotion()) {
+          const confirm = ConfirmationData.fromMouseData(
+            data,
+            600,
+            onSuccess,
+            null,
+          );
 
-        const confirmEvent = toUserInteractionMouseConfirmationEvent(confirm);
-        this.manager.emitUserInteractionEvent(confirmEvent);
+          const confirmEvent = toUserInteractionMouseConfirmationEvent(confirm);
+          this.manager.emitUserInteractionEvent(confirmEvent);
+        }
       }
     }
 

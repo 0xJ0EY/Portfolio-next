@@ -1,5 +1,3 @@
-import { time } from "console";
-
 export const calculateAspectRatio = (width: number, height: number): number => {
   return width / height;
 }
@@ -63,4 +61,9 @@ export function writeOutChars(value: string, output: (value: string) => void, ti
 
 export function joinStyles(styles: (string | null)[]) {
   return styles.filter(x => x !== null).join(" ");
+}
+
+export function prefersReducedMotion(): boolean {
+  const mediaQueryList = window.matchMedia('(prefers-reduced-motion: reduce)');
+  return mediaQueryList.matches;
 }
