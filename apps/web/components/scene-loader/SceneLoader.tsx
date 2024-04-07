@@ -155,8 +155,20 @@ function DisplayLoadingProgress(props: { loadingProgress: LoadingProgress }) {
       <OperatingSystemStats/>
       <ShowBios/>
       {loadingResources}
+      <DisplayLoadingFooter/>
     </div>
   </>)
+}
+
+function DisplayLoadingFooter() {
+  return (
+    <>
+      <br/>
+      <div>
+        <p>Loading taking a while? Take a sneak peak at my <a href="/assets/cv/Joey_de_Ruiter_resume.pdf" target="_blank">resume</a>.</p>
+      </div>
+    </>
+  );
 }
 
 function LoadingUnderscore() {
