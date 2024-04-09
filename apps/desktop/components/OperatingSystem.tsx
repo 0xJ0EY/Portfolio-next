@@ -16,25 +16,24 @@ import { clamp, isPhoneSafari, isTouchMoveCamera, isTouchZoom } from "./util";
 import { SoundService } from "@/apis/Sound/Sound";
 import { SystemService } from "@/apis/System/System";
 import { PeripheralSounds } from "./PeripheralSounds/PeripheralSounds";
-
-const NodeNameButton    = 'BUTTON';
-const NodeNameInput     = 'INPUT';
-const NodeNameTextArea  = 'TEXTAREA';
+import { ScreenService } from "@/apis/Screen/ScreenService";
 
 const fileSystem = createBaseFileSystem();
 
 const dragAndDrop = new DragAndDropService();
 const sound = new SoundService();
 const system = new SystemService();
+const screen = new ScreenService();
 
 export type SystemAPIs = {
   dragAndDrop: DragAndDropService,
   fileSystem: FileSystem,
   sound: SoundService,
   system: SystemService,
+  screen: ScreenService
 };
 
-const apis: SystemAPIs = { dragAndDrop, fileSystem, sound, system };
+const apis: SystemAPIs = { dragAndDrop, fileSystem, sound, system, screen };
 
 const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
@@ -50,16 +49,22 @@ function handleParentResponsesClosure(
 
     const value = response.value;
 
-    if (value.method === 'camera_zoom_distance_response') {
-      initialCamera.current = Camera.handleParentResponse(value);
-      camera.current = Camera.handleParentResponse(value);
-    }
+    switch (value.method) {
+      case 'camera_zoom_distance_response': {
+        initialCamera.current = Camera.handleParentResponse(value);
+        camera.current = Camera.handleParentResponse(value);
 
-    if (value.method === 'enable_sound_message') {
-      if (value.enabled) {
-        apis.sound.enable();
-      } else {
-        apis.sound.disable();
+        break;
+      }
+
+      case "enable_sound_message": {
+        value.enabled ? apis.sound.enable() : apis.sound.disable();
+        break;
+      }
+
+      case 'display_size': {
+        apis.screen.setResolution(value.width, value.height);
+        break;
       }
     }
   }
@@ -206,6 +211,8 @@ export const OperatingSystem = () => {
 
     const handleParentEvent = handleParentResponsesClosure(initialCamera, camera, apis);
     window.addEventListener('message', handleParentEvent, false);
+
+    sendRequestToParent({ method: 'mounted' });
 
     return () => {
       // Needs to be done, due to this class also opening files in the application manager

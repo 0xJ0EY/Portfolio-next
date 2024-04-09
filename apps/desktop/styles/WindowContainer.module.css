@@ -64,7 +64,13 @@
   z-index: 9999;
 }
 
-.header>span {
+.header.mobile {
+  height: 50px !important;
+}
+
+.header span {
+  display: flex;
+  align-items: center;
   pointer-events: none;
   flex-basis: fit-content;
 }
@@ -103,13 +109,20 @@
 }
 
 .header-buttons {
-  display: inline-block;
+  display: flex;
   flex-shrink: 0;
   flex-basis: fit-content;
+  align-content: baseline;
+  align-items: center;
 }
 
 .header-buttons button {
   margin-left: 1px;
+}
+
+.mobile .header-buttons button {
+  height: 35px;
+  width: 35px;
 }
 
 .action-overlay {

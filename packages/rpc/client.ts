@@ -38,6 +38,14 @@ export function parseMessageFromParent(event: MessageEvent): Result<MessageFromP
       });
     }
 
+    case 'display_size': {
+      return Ok({
+        method: 'display_size',
+        width: event.data['width'],
+        height: event.data['height']
+      });
+    }
+
     default: {
       return Err(Error("Not a deserializable data structure"));
     }

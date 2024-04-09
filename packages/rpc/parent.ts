@@ -41,6 +41,10 @@ export function parseRequestFromChild(event: MessageEvent): Result<RequestToPare
       });
     }
 
+    case 'mounted': {
+      return Ok({ method: 'mounted' });;
+    }
+
     default: {
       return Err(Error("Not a deserializable data structure"));
     }
