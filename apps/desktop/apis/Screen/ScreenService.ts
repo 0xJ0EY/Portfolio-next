@@ -9,7 +9,6 @@ export class ScreenResolution {
   ) {}
 
   public isMobileDevice(): boolean {
-    return true;
     return this.width < MobileDeviceWidthThreshold;
   }
 }
