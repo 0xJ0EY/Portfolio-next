@@ -10,6 +10,7 @@ import { Chain, Node } from "@/data/Chain";
 import { Err, Ok, Result } from "result";
 import { constructPath, generateUniqueNameForDirectory } from "@/apis/FileSystem/util";
 import { useTranslation } from "react-i18next";
+import { ScreenResolution } from "@/apis/Screen/ScreenService";
 
 function getFileSystemDirectoryByPath(application: Application, path: string): Result<FileSystemDirectory, Error> {
   if (!path.endsWith('/')) { path += '/'; }
@@ -49,6 +50,9 @@ export default function FinderView(props: WindowProps) {
   const [ path, setPath ] = useState(args);
   const [ canEdit, setCanEdit ] = useState(false);
   const [ pathNodes, setPathNodes ] = useState<FileSystemDirectory[]>([]);
+  const [needsMobileView, setNeedsMobileView] = useState(false);
+
+  const apis = props.application.apis;
 
   const { t } = useTranslation('common');
   const fs = application.apis.fileSystem;
@@ -177,14 +181,24 @@ export default function FinderView(props: WindowProps) {
     }
   }
 
+  function onScreenChangeListener(resolution: ScreenResolution): void {
+    setNeedsMobileView(resolution.isMobileDevice());
+  }
+
   useEffect(() => {
     const directory = getFileSystemDirectoryByPath(application, path);
+    const unsubscribe = apis.screen.subscribe(onScreenChangeListener);
+
+    const resolution = apis.screen.getResolution();
+    if (resolution) { onScreenChangeListener(resolution); }
+
     if (directory.ok) {
       changeDirectory(directory.value);
       recordHistory(directory.value);
     }
 
     return () => {
+      unsubscribe();
       clearHistory();
     }
 
@@ -204,6 +218,8 @@ export default function FinderView(props: WindowProps) {
       recordHistory(directory.value);
     }
   }
+
+  const mobileClass = needsMobileView ? styles['mobile'] : '';
   
   const locations = pathNodes.map((val, index) => <React.Fragment key={index}><button className={['system-button', styles.breadcrumb].join(' ')} onClick={() => onClickBreadcrumb(val, index)}>{val.name}</button></React.Fragment>);
  
@@ -220,10 +236,10 @@ export default function FinderView(props: WindowProps) {
 
           {t("finder.favorites")}
           <ul>
-            <li><button className="system-button" onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
-            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
-            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
-            <li><button className="system-button" onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
+            <li><button className={`system-button ${styles['navigation-btn']} ${mobileClass}`} onClick={() => { onClickLocation('/Applications/'); }}>Applications</button></li>
+            <li><button className={`system-button ${styles['navigation-btn']} ${mobileClass}`} onClick={() => { onClickLocation('/Users/joey/'); }}>Home</button></li>
+            <li><button className={`system-button ${styles['navigation-btn']} ${mobileClass}`} onClick={() => { onClickLocation('/Users/joey/Desktop/'); }}>Desktop</button></li>
+            <li><button className={`system-button ${styles['navigation-btn']} ${mobileClass}`} onClick={() => { onClickLocation('/Users/joey/Documents'); }}>Documents</button></li>
           </ul>
         </div>
         <div className={styles.folder}>

@@ -158,6 +158,14 @@ function handleDesktopRequestsClosure(cameraHandler: CameraHandler) {
         controller.setPanOffsetY(value.verticalOffset);
 
       } break;
+      case 'mounted': {
+        // Share the window size with the iframe, so we can see if it is a mobile device or not
+        sendMessageToChild(event.source as Window, {
+          method: 'display_size',
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      }
     }
   }
 }

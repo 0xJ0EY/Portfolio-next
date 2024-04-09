@@ -30,6 +30,12 @@
   margin-top: 1rem;
 }
 
+.navigation-button-container.mobile button {
+  padding: 10px 0;
+  margin-bottom: 2px;
+  font-size: 1rem;
+}
+
 .page-h1 {
   font-family: 'Century Schoolbook', sans-serif;
   font-weight: normal;
@@ -77,6 +83,11 @@
 .home-button {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
+}
+
+.home-button.mobile {
+  font-size: 1rem;
+  padding: 15px 10px;
 }
 
 .subpage-content h2 {

@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, RefObject, MutableRefObject, useReducer, F
 import { Window, WindowAction, WindowActionAlert, WindowActionPrompt, WindowApplication, WindowCompositor, WindowContext } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
+import { ScreenResolution } from '@/apis/Screen/ScreenService';
 
 const DoubleClickHeaderForMaximizingTimeInMs = 1000;
 
@@ -290,6 +291,8 @@ const WindowHeader = (
   maximized: MutableRefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
+  const [needsMobileView, setNeedsMobileView] = useState(false);
+  const apis = windowData.application.apis;
 
   const output: RefObject<HTMLDivElement> = useRef(null);
   const lastTimeHeaderClicked = useRef<number>(0);
@@ -301,6 +304,8 @@ const WindowHeader = (
   const originalWindow = useRef<OriginWindow>({ x: 0, y: 0, width: 0, height: 0 });
 
   const classes = [styles.header];
+
+  if (needsMobileView) { classes.push(styles['mobile']); }
   if (windowData.focused) { classes.push(styles.focused); }
 
   function onClickMaximize() {
@@ -421,13 +426,23 @@ const WindowHeader = (
     isDown.current = false;
   }
 
+  function onScreenChangeListener(resolution: ScreenResolution): void {
+    setNeedsMobileView(resolution.isMobileDevice());
+  }
+
   useEffect(() => {
     const node = output.current;
     if (node === null) { return; }
 
+    const unsubscribe = apis.screen.subscribe(onScreenChangeListener);
+
+    const resolution = apis.screen.getResolution();
+    if (resolution) { onScreenChangeListener(resolution); }
+
     node.addEventListener('pointerdown', onPointerDown);
 
     return () => {
+      unsubscribe();
       node.removeEventListener('pointerdown', onPointerDown);
     }
 

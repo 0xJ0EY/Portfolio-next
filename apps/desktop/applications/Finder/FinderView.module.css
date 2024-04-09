@@ -83,3 +83,7 @@
   margin: 1px auto;
   float: right;
 }
+
+.navigation-btn.mobile {
+  padding: 10px;
+}
