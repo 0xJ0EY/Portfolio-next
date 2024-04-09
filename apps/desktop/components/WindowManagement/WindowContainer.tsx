@@ -291,7 +291,7 @@ const WindowHeader = (
   maximized: MutableRefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
-  const [needsMobileView, setNeedsMobileView] = useState(true);
+  const [needsMobileView, setNeedsMobileView] = useState(false);
   const apis = windowData.application.apis;
 
   const output: RefObject<HTMLDivElement> = useRef(null);

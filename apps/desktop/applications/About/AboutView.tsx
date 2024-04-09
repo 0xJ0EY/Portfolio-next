@@ -425,7 +425,7 @@ export default function AboutApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
   const [subView, setSubView] = useState<SubView>('home');
-  const [needsMobileView, setNeedsMobileView] = useState<boolean>(true);
+  const [needsMobileView, setNeedsMobileView] = useState<boolean>(false);
   const { t, i18n } = useTranslation("common");
 
   const apis = application.apis;
@@ -449,15 +449,15 @@ export default function AboutApplicationView(props: WindowProps) {
     contentView.scrollTop = 0;
   }
 
-  function onScreenChangeListener(resoltion: ScreenResolution): void {
-    setNeedsMobileView(resoltion.isMobileDevice());
+  function onScreenChangeListener(resolution: ScreenResolution): void {
+    setNeedsMobileView(resolution.isMobileDevice());
   }
 
   useEffect(() => {
     const unsubscribe = apis.screen.subscribe(onScreenChangeListener);
 
-    const resoltion = apis.screen.getResolution();
-    if (resoltion) { onScreenChangeListener(resoltion); }
+    const resolution = apis.screen.getResolution();
+    if (resolution) { onScreenChangeListener(resolution); }
 
     return () => {
       unsubscribe();
