@@ -5,6 +5,7 @@ import { BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
+import { ScreenResolution } from '@/apis/Screen/ScreenService';
 
 type SubView = (
   'home' |
@@ -24,6 +25,7 @@ type SubView = (
 );
 
 export type SubViewParams = {
+  needsMobileView: boolean,
   manager: BaseApplicationManager,
   changeParent: (view: SubView) => void,
   translate: TFunction,
@@ -71,16 +73,18 @@ function DownloadCv(props: { translate: TFunction }) {
 function HomeSubView(params: SubViewParams) {
   const t = params.translate;
 
+  const mobileClass = params.needsMobileView ? styles['mobile'] : '';
+
   return (<>
     <div className={styles['subpage-home']}>
       <h1 className={styles['home-title']}>Joey de Ruiter</h1>
       <h3 className={styles['home-subtitle']}>Software engineer</h3>
 
       <div className={styles['home-button-container']}>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('about')}>{t("about.navigation.about")}</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('experience')}>{t("about.navigation.experience")}</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('projects')}>{t("about.navigation.projects")}</button>
-        <button className={`${styles['home-button']} system-button`} onClick={() => params.changeParent('contact')}>{t("about.navigation.contact")}</button>
+        <button className={`${styles['home-button']} system-button ${mobileClass}`} onClick={() => params.changeParent('about')}>{t("about.navigation.about")}</button>
+        <button className={`${styles['home-button']} system-button ${mobileClass}`} onClick={() => params.changeParent('experience')}>{t("about.navigation.experience")}</button>
+        <button className={`${styles['home-button']} system-button ${mobileClass}`} onClick={() => params.changeParent('projects')}>{t("about.navigation.projects")}</button>
+        <button className={`${styles['home-button']} system-button ${mobileClass}`} onClick={() => params.changeParent('contact')}>{t("about.navigation.contact")}</button>
       </div>
     </div>
   </>)
@@ -89,6 +93,8 @@ function HomeSubView(params: SubViewParams) {
 export function SubViewNavigation(params: SubViewParams) {
   const t = params.translate;
 
+  const mobileClass = params.needsMobileView ? styles['mobile'] : '';
+
   return (<>
     <div className={styles['navigation']}>
       <div>
@@ -96,7 +102,7 @@ export function SubViewNavigation(params: SubViewParams) {
         <span className={styles['logo-part']}>de Ruiter</span>
       </div>
 
-      <div className={styles['navigation-button-container']}>
+      <div className={`${styles['navigation-button-container']} ${mobileClass}`}>
         <button className='system-button' onClick={() => params.changeParent('home')}>{t("about.navigation.home")}</button>
         <button className='system-button' onClick={() => params.changeParent('about')}>{t("about.navigation.about")}</button>
         <button className='system-button' onClick={() => params.changeParent('experience')}>{t("about.navigation.experience")}</button>
@@ -419,7 +425,10 @@ export default function AboutApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
   const [subView, setSubView] = useState<SubView>('home');
+  const [needsMobileView, setNeedsMobileView] = useState<boolean>(true);
   const { t, i18n } = useTranslation("common");
+
+  const apis = application.apis;
 
   const contentParent = useRef<HTMLDivElement>(null);
 
@@ -440,6 +449,21 @@ export default function AboutApplicationView(props: WindowProps) {
     contentView.scrollTop = 0;
   }
 
+  function onScreenChangeListener(resoltion: ScreenResolution): void {
+    setNeedsMobileView(resoltion.isMobileDevice());
+  }
+
+  useEffect(() => {
+    const unsubscribe = apis.screen.subscribe(onScreenChangeListener);
+
+    const resoltion = apis.screen.getResolution();
+    if (resoltion) { onScreenChangeListener(resoltion); }
+
+    return () => {
+      unsubscribe();
+    }
+  }, []);
+
   useEffect(() => {
     resetSubPageScroll();
   }, [subView]);
@@ -458,6 +482,7 @@ export default function AboutApplicationView(props: WindowProps) {
       <div ref={contentParent} className="content">
         { RenderSubView(subView, 
           {
+            needsMobileView,
             manager: application.manager,
             changeParent,
             translate: t,

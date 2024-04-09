@@ -65,7 +65,7 @@
 }
 
 .header.mobile {
-  height: 50px !important;
+  min-height: 50px;
 }
 
 .header span {
@@ -73,6 +73,11 @@
   align-items: center;
   pointer-events: none;
   flex-basis: fit-content;
+  word-wrap: nowrap;
+}
+
+.header.mobile span {
+  font-size: 1.2rem;
 }
 
 .lines {

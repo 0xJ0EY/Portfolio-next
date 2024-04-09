@@ -291,7 +291,7 @@ const WindowHeader = (
   maximized: MutableRefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
-  const [needsMobileView, setNeedsMobileView] = useState(false);
+  const [needsMobileView, setNeedsMobileView] = useState(true);
   const apis = windowData.application.apis;
 
   const output: RefObject<HTMLDivElement> = useRef(null);
@@ -426,7 +426,7 @@ const WindowHeader = (
     isDown.current = false;
   }
 
-  function onScreenChangeListener(resolution: ScreenResolution) {
+  function onScreenChangeListener(resolution: ScreenResolution): void {
     setNeedsMobileView(resolution.isMobileDevice());
   }
 
