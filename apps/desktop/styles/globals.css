@@ -106,6 +106,12 @@ html, body {
   overflow: auto;
 }
 
+.content-inner {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+
 .content-outer {
   display: flex;
   flex: 1 1;
