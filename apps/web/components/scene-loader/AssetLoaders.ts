@@ -68,7 +68,9 @@ function getDesktopTargetUrl(): string {
 
     return transformWebUrlToDesktop(vercelUrl);
   } else {
-    return 'http://192.168.178.134:3001/'
+    const target = process.env.NEXT_PUBLIC_TARGET_URL ?? 'http://127.0.0.1:3001/'
+
+    return target;
   }
 }
 

@@ -69,11 +69,7 @@
 }
 
 .header span {
-  display: flex;
-  align-items: center;
   pointer-events: none;
-  flex-basis: fit-content;
-  word-wrap: nowrap;
 }
 
 .header.mobile span {
@@ -108,9 +104,9 @@
 }
 
 .headerTitle {
-  flex-grow: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header-buttons {

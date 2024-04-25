@@ -480,15 +480,17 @@ export default function AboutApplicationView(props: WindowProps) {
   return (
     <div className="content-outer">
       <div ref={contentParent} className="content">
-        { RenderSubView(subView, 
-          {
-            needsMobileView,
-            manager: application.manager,
-            changeParent,
-            translate: t,
-            language: i18n.language
-          }
-        ) }
+        <div className='content-inner'>
+          { RenderSubView(subView,
+            {
+              needsMobileView,
+              manager: application.manager,
+              changeParent,
+              translate: t,
+              language: i18n.language
+            }
+          ) }
+        </div>
       </div>
     </div>
   )
