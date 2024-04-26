@@ -1,3 +1,5 @@
+import { MessageFromParent, sendMessageToChild } from "rpc";
+
 export const calculateAspectRatio = (width: number, height: number): number => {
   return width / height;
 }
@@ -66,4 +68,10 @@ export function joinStyles(styles: (string | null)[]) {
 export function prefersReducedMotion(): boolean {
   const mediaQueryList = window.matchMedia('(prefers-reduced-motion: reduce)');
   return mediaQueryList.matches;
+}
+
+
+export function sendMessageToIframe(message: MessageFromParent) {
+  const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
+  sendMessageToChild(iframe.contentWindow, message);
 }

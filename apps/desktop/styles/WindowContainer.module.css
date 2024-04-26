@@ -90,8 +90,8 @@
   margin: 3px;
 }
 
-.resizingMask,
-.draggingMask {
+.resizing-mask,
+.dragging-mask {
   position: fixed;
   top: 0;
   left: 0;
@@ -103,7 +103,7 @@
   height: 100vh;
 }
 
-.headerTitle {
+.header-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -124,6 +124,10 @@
 .mobile .header-buttons button {
   height: 35px;
   width: 35px;
+}
+
+.mobile .header-title {
+  line-height: 50px;
 }
 
 .action-overlay {

@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, prefersReducedMotion } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, prefersReducedMotion, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
@@ -284,6 +284,12 @@ export const Renderer = (props: RendererProps) => {
 
       resizeRenderers(composer, renderer, cssRenderer, width, height);
       resizeCamera(camera, calculateAspectRatio(width, height));
+
+      sendMessageToIframe({
+        method: 'display_size',
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
     }
 
     const onDestroy = function() {
