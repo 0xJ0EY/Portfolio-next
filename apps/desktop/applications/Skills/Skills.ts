@@ -29,7 +29,11 @@ export class SkillsApplication extends Application {
   }
 
   menuEntries(): MenuEntry[] {
-    return [];
+    return [{
+      displayOptions: { boldText: true },
+      name: 'Skills',
+      items: []
+    }]
   }
 
   on(event: ApplicationEvent, windowContext?: WindowContext | undefined): void {
