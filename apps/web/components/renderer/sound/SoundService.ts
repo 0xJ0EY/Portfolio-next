@@ -1,4 +1,4 @@
-import { sendMessageToChild } from "rpc";
+import { sendMessageToIframe } from "../util";
 
 export type SoundServiceObserver = (enabled: boolean) => void;
 export type SoundServiceAction = () => void;
@@ -11,8 +11,7 @@ export class SoundService {
   private activeAudio: HTMLAudioElement[] = [];
 
   private notifyOtherWebpage(enabled: boolean) {
-    const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
-    sendMessageToChild(iframe.contentWindow, { method: 'enable_sound_message', enabled });
+    sendMessageToIframe({ method: 'enable_sound_message', enabled });
   }
 
   private notify(status: boolean): void {

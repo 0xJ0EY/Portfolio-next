@@ -267,8 +267,8 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   const resizableStyle = buildResizableStyle(cursor);
 
   return <>
-    <div ref={output} data-interactive-window className={styles.resizable} style={resizableStyle}></div>
-    {resizing && <div data-interactive-window className={styles.resizingMask} style={resizableStyle}></div>}
+    <div ref={output} data-interactive-window className={styles['resizable']} style={resizableStyle}></div>
+    {resizing && <div data-interactive-window className={styles['resizing-mask']} style={resizableStyle}></div>}
   </>;
 }
 
@@ -305,7 +305,7 @@ const WindowHeader = (
 
   const classes = [styles.header];
 
-  if (needsMobileView) { classes.push(styles['mobile']); }
+  if (needsMobileView) { classes.push(styles.mobile); }
   if (windowData.focused) { classes.push(styles.focused); }
 
   function onClickMaximize() {
@@ -450,7 +450,7 @@ const WindowHeader = (
 
   return <>
     <div ref={output} data-interactive-window className={classes.join(' ')}>
-      <span className={styles.headerTitle}>{windowData.title}</span>
+      <span className={styles['header-title']}>{windowData.title}</span>
       <div className={styles.lines}></div>
       <div className={styles['header-buttons']}>
         <button className='header-button' onClick={() => { windowCompositor.minimize(windowData.id) }}><img src={MinimizeIcon} alt='Minimize window' draggable={false} /></button>
@@ -458,7 +458,7 @@ const WindowHeader = (
         <button className='header-button' onClick={() => { windowCompositor.close(windowData.id) }}><img src={CloseIcon} alt='Close window' draggable={false} /></button>
       </div>
     </div>
-    {dragging && <div className={styles.draggingMask}></div>}
+    {dragging && <div className={styles['dragging-mask']}></div>}
   </>
 }
 

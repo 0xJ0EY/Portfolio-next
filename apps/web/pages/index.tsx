@@ -2,6 +2,7 @@ import Head from "next/head";
 import { SceneLoader } from "../components";
 import { useEffect, useState } from "react";
 import { NoScriptWarning } from "@/components/noscript/NoScript";
+import { Analytics } from "@vercel/analytics/react"
 
 const focusedTitle = "Joey de Ruiter - Portfolio";
 const blurredTitle = "👀 Joey de Ruiter - Portfolio";
@@ -41,6 +42,7 @@ export default function Web() {
       </Head>
       <NoScriptWarning />
       <SceneLoader />
+      <Analytics />
     </>
   );
 }
