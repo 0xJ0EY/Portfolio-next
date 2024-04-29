@@ -479,8 +479,8 @@ export default function AboutApplicationView(props: WindowProps) {
 
   return (
     <div className="content-outer">
-      <div ref={contentParent} className="content">
-        <div className='content-inner'>
+      <div className="content">
+        <div className='content-inner' ref={contentParent}>
           { RenderSubView(subView,
             {
               needsMobileView,
