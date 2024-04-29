@@ -38,7 +38,8 @@ export class MonitorViewCameraState extends CameraState {
 
     this.ctx.cameraController.enableDamping();
 
-    this.ctx.cameraController.transition(position, spherical, distance, 1250 / distance, callback);
+    const speed = 175;
+    this.ctx.cameraController.transition(position, spherical, distance, speed * distance, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
     this.ctx.cameraController.setMaxZoom(5.0);
