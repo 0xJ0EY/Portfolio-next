@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ApplicationConfig, ApplicationManager, ApplicationManagerEvent } from '@/applications/ApplicationManager';
+import { ApplicationConfig, ApplicationManager } from '@/applications/ApplicationManager';
 import styles from './Dock.module.css';
 import { aboutConfig } from '@/applications/About/About';
 import { finderConfig } from '@/applications/Finder/Finder';
 import { debugConfig } from '@/applications/Debug/DebugApplication';
 import { Window, WindowCompositor } from '../WindowManagement/WindowCompositor';
 import { WindowEvent } from '../WindowManagement/WindowEvents';
-import Image from 'next/image';
 import { ApplicationIcon, FileSystem } from '@/apis/FileSystem/FileSystem';
 import { SystemAPIs } from '../OperatingSystem';
 import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
@@ -37,8 +36,7 @@ type DockItem = ApplicationDockItem | MinimizedApplicationDockItem | SeparatorDo
 function DockItemViewApplication(item: ApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
-      <Image
-        quality={100}
+      <img
         className={styles['dock-app-image']}
         src={item.config.appIcon.src}
         alt={item.config.appIcon.alt}
@@ -56,8 +54,7 @@ function DockItemViewApplication(item: ApplicationDockItem) {
 function DockItemMinimizedApplication(item: MinimizedApplicationDockItem) {
   return (<>
     <button className={styles['dock-application']} onClick={() => item.onClick()} data-tooltip={item.config.displayName}>
-      <Image
-        quality={100}
+      <img
         className={styles['dock-app-image']}
         src={item.config.appIcon.src}
         alt={item.config.appIcon.alt}
@@ -121,8 +118,7 @@ function DockItemDirectory(item: DirectoryDockItem, fileSystem: FileSystem) {
       className={buttonStyle}
       onClick={() => item.onClick()}
       data-tooltip={item.title}>
-      <Image
-        quality={100}
+      <img
         className={styles['dock-app-image']}
         src={item.icon.src}
         alt={item.icon.alt}
@@ -174,7 +170,7 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
 
       Object.values(items)
         .sort((a, b) => { 
-        // Bubble sorting time 😎
+          // Bubble sorting time 😎
           const aPriority = a.config.dockPriority ?? 0;
           const bPriority = b.config.dockPriority ?? 0;
 
