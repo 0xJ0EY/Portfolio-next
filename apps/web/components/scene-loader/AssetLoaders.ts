@@ -1,4 +1,4 @@
-import { AmbientLight, Box3, BufferGeometry, Color, DoubleSide, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Scene, Texture } from "three";
+import { AmbientLight, Box3, BufferGeometry, Color, DoubleSide, Material, Mesh, MeshBasicMaterial, Scene, Texture } from "three";
 import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetManager";
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
@@ -125,7 +125,7 @@ export function FloorLoader(): AssetLoader {
 
     context.scenes.sourceScene.add(asset.scene);
 
-    const material = new MeshStandardMaterial({ map: texture });
+    const material = new MeshBasicMaterial({ map: texture });
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
@@ -161,7 +161,7 @@ export function DeskLoader(): AssetLoader {
       obj.userData[AssetKeys.CameraCollidable] = true;
     }
 
-    const material = new MeshStandardMaterial({ map: texture });
+    const material = new MeshBasicMaterial({ map: texture });
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
 
@@ -208,9 +208,9 @@ export function MonitorLoader(): AssetLoader {
     displayMaterial.stencilWrite = true;
     displayMaterial.transparent = true;
 
-    const monitorMaterial   = new MeshStandardMaterial({ map: monitorTexture });
-    const computerMaterial  = new MeshStandardMaterial({ map: computerTexture });
-    const nameplateMaterial = new MeshStandardMaterial({ map: namePlateTexture });
+    const monitorMaterial   = new MeshBasicMaterial({ map: monitorTexture });
+    const computerMaterial  = new MeshBasicMaterial({ map: computerTexture });
+    const nameplateMaterial = new MeshBasicMaterial({ map: namePlateTexture });
 
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
@@ -328,8 +328,8 @@ export function KeyboardLoader(): AssetLoader {
 
     enableCameraCollision(asset);
 
-    const caseMaterial    = new MeshStandardMaterial({ map: caseTexture });
-    const keyCapMaterial  = new MeshStandardMaterial({ map: keyCapTexture });
+    const caseMaterial    = new MeshBasicMaterial({ map: caseTexture });
+    const keyCapMaterial  = new MeshBasicMaterial({ map: keyCapTexture });
 
     asset.scene.traverse((node) => {
       if (!(node instanceof Mesh)) { return; }
