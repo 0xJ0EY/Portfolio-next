@@ -105,7 +105,7 @@ export class MonitorViewCameraState extends CameraState {
         if (!prefersReducedMotion()) {
           const confirm = ConfirmationData.fromMouseData(
             data,
-            600,
+            800,
             onSuccess,
             null,
           );
@@ -160,7 +160,7 @@ export class MonitorViewCameraState extends CameraState {
 
     const confirm = ConfirmationData.fromTouchData(
       data,
-      600,
+      800,
       onSuccess,
       null
     );

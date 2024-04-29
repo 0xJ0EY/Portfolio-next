@@ -171,7 +171,7 @@ export class FreeRoamCameraState extends CameraState {
 
     const confirm = ConfirmationData.fromTouchData(
       data,
-      600,
+      800,
       onSuccess,
       null,
     );
