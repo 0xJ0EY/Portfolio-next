@@ -38,7 +38,8 @@ export class MonitorViewCameraState extends CameraState {
 
     this.ctx.cameraController.enableDamping();
 
-    this.ctx.cameraController.transition(position, spherical, distance, 1250 / distance, callback);
+    const speed = 175;
+    this.ctx.cameraController.transition(position, spherical, distance, speed * distance, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
     this.ctx.cameraController.setMaxZoom(5.0);
@@ -104,7 +105,7 @@ export class MonitorViewCameraState extends CameraState {
         if (!prefersReducedMotion()) {
           const confirm = ConfirmationData.fromMouseData(
             data,
-            600,
+            800,
             onSuccess,
             null,
           );
@@ -159,7 +160,7 @@ export class MonitorViewCameraState extends CameraState {
 
     const confirm = ConfirmationData.fromTouchData(
       data,
-      600,
+      800,
       onSuccess,
       null
     );
