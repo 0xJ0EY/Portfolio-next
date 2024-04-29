@@ -10,20 +10,20 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.2.2",
-    "next": "^13.1.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "three": "^0.151.3"
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.164.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@types/node": "17.0.45",
-    "@types/react": "18.2.24",
-    "@types/react-dom": "^18.0.7",
-    "@types/three": "^0.150.1",
-    "eslint": "7.32.0",
+    "@babel/core": "^7.24.4",
+    "@types/node": "20.12.7",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.164.0",
+    "eslint": "9.1.1",
     "eslint-config-custom": "*",
     "tsconfig": "*",
-    "typescript": "^4.5.3"
+    "typescript": "^5.4.5"
   }
 }
