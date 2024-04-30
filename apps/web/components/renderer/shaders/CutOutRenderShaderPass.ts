@@ -12,7 +12,6 @@ import {
   WebGLRenderTarget
 } from 'three';
 import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass";
-import { isFirefox } from '../util';
 import { CutOutShader } from "./CutOutRenderShader";
 
 const RENDER_SAMPLES: number = 4;
@@ -27,7 +26,7 @@ export class CutOutRenderShaderPass extends Pass {
 
   private sourceTarget: WebGLRenderTarget;
   private cutoutTarget: WebGLRenderTarget;
-  private firefoxTarget: WebGLRenderTarget | null = null;
+  private sourceDepthTarget: WebGLRenderTarget | null = null;
 
   private camera: Camera;
 
@@ -43,51 +42,31 @@ export class CutOutRenderShaderPass extends Pass {
     this.cutoutScene = cutoutScene;
     this.camera = camera;
 
-    if (isFirefox()) {
-      // Firefox or Three js has a bug within the webgl2 that makes it impossible to render to a target with multiple samples and a depthTexture attached.
-      // So now for Firefox we do the following:
-      // 1. Render the scene to a target with multiple samples without a depth buffer attached for MSAA
-      // 2. Render the scene once to a target with a depth buffer attached (so we have the depth information)
-      // 3. Render the cutout shader, without multiple samples
-      // 4. Do normal composition
-      this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
-      this.sourceTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true,
-        samples: RENDER_SAMPLES
-      });
+    // I think Three js has a bug within the webgl2 that makes it impossible to render to a target with multiple samples and a depthTexture attached.
+    // As all the 3 major browsers have problems with rendering this, I changed it so we render the depth texture to a unique depth target
 
-      this.firefoxTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true,
-        depthTexture: this.sourceDepthTexture,
-        samples: 0
-      });
+    // 1. Render the scene to a target with multiple samples without a depth buffer attached for MSAA
+    // 2. Render the scene once to a target with a depth buffer attached (so we have the depth information)
+    // 3. Render the cutout shader, without multiple samples
+    // 4. Do normal composition
+    this.sourceTarget = new WebGLRenderTarget(width, height, {
+      depthBuffer: true,
+      samples: RENDER_SAMPLES
+    });
 
-      this.cutoutDepthTexture = new DepthTexture(width, height, UnsignedShortType);
-      this.cutoutTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true,
-        depthTexture: this.cutoutDepthTexture,
-        samples: 0
-      });
+    this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
+    this.sourceDepthTarget = new WebGLRenderTarget(width, height, {
+      depthBuffer: true,
+      depthTexture: this.sourceDepthTexture,
+      samples: 0
+    });
 
-    } else {
-      // For Chrome, Safari, etc we can use the following:
-      // 1. Render the scene to a target with multiple samples with a depth buffer attached for MSAA
-      // 2. Render the cutout shader with multiple samples
-      // 3. Do normal composition
-      this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
-      this.sourceTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true,
-        depthTexture: this.sourceDepthTexture,
-        samples: RENDER_SAMPLES
-      });
-
-      this.cutoutDepthTexture = new DepthTexture(width, height, UnsignedShortType);
-      this.cutoutTarget = new WebGLRenderTarget(width, height, {
-        depthBuffer: true,
-        depthTexture: this.cutoutDepthTexture,
-        samples: RENDER_SAMPLES
-      });
-    }
+    this.cutoutDepthTexture = new DepthTexture(width, height, UnsignedShortType);
+    this.cutoutTarget = new WebGLRenderTarget(width, height, {
+      depthBuffer: true,
+      depthTexture: this.cutoutDepthTexture,
+      samples: 0
+    });
 
     this.uniforms = UniformsUtils.clone(shader.uniforms);
 
@@ -107,10 +86,8 @@ export class CutOutRenderShaderPass extends Pass {
     renderer.setRenderTarget(this.sourceTarget);
     renderer.render(this.sourceScene, this.camera);
 
-    if (isFirefox()) {
-      renderer.setRenderTarget(this.firefoxTarget);
-      renderer.render(this.sourceScene, this.camera);
-    }
+    renderer.setRenderTarget(this.sourceDepthTarget);
+    renderer.render(this.sourceScene, this.camera);
 
     // Render the cutout output to the cutoutTarget buffer
     renderer.setRenderTarget(this.cutoutTarget);
