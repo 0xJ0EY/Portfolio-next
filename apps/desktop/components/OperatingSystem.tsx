@@ -70,20 +70,6 @@ function handleParentResponsesClosure(
   }
 }
 
-function findFirstElementNodeInDom(parent: HTMLElement, nodes: string[]): HTMLElement | null {
-  let element: HTMLElement | null = parent;
-
-  if (nodes.length === 0) { return null; }
-
-  while (element !== null) {
-    if (nodes.includes(element.nodeName)) { return element; }
-
-    element = element.parentElement;
-  }
-
-  return null;
-}
-
 function clickedInteractiveWindowElement(element: HTMLElement): boolean {
   return element.hasAttribute('data-interactive-window');
 }
@@ -204,6 +190,7 @@ export const OperatingSystem = () => {
 
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
+    applicationManager.open('/Applications/AlgoVisualizer.app');
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)

@@ -2,6 +2,7 @@ import { Chain, Node } from "../../data/Chain";
 import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent, MinimizeWindowEvent, MaximizeWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
+import { Action } from "../util";
 
 export type WindowProps = { application: Application, args: string, windowContext: WindowContext };
 export type WindowApplication = React.ComponentType<WindowProps>;
@@ -82,6 +83,8 @@ export class OrderedWindow {
   }
 }
 
+export type FilterPredicate = (evt: WindowEvent) => boolean;
+
 export class WindowCompositor {
   private windowId = 0;
   private windows: Chain<Window> = new Chain();
@@ -103,9 +106,19 @@ export class WindowCompositor {
     this.applicationManager?.focus(app);
   }
 
-  public subscribe(handler: WindowEventHandler) {
+  public subscribe(handler: WindowEventHandler): Action<void> {
     this.observers.push(handler);
     return () => { this.unsubscribe(handler); };
+  }
+
+  public subscribeWithFilter(predicate: FilterPredicate, handler: WindowEventHandler): Action<void> {
+    function wrapper(evt: WindowEvent) {
+      if (predicate(evt)) { handler(evt); }
+    }
+
+    this.observers.push(wrapper);
+
+    return () => { this.unsubscribe(wrapper)}
   }
 
   public unsubscribe(handler: WindowEventHandler) {
@@ -220,13 +233,16 @@ export class WindowCompositor {
     this.publish(UpdateWindowsEvent());
   }
 
-  public update(window: Window) {
+  public update(window: Window, updateOptions?: { moved?: boolean, resized?: boolean }) {
     const node = this.windowNodeLookup[window.id];
 
     if (!node) { return; }
     node.value = window;
 
-    this.publish(UpdateWindowEvent(window.id));
+    const moved = updateOptions?.moved ?? false;
+    const resized = updateOptions?.resized ?? false;
+
+    this.publish(UpdateWindowEvent(window.id, moved, resized));
   }
 
   public close(windowId: number): void {
@@ -352,7 +368,7 @@ export class WindowCompositor {
     const window = node.value;
     window.minimized = false;
 
-    this.update(window);
+    this.update(window, { moved: true, resized: true });
     this.focus(window.id, true);
 
     this.publish(MaximizeWindowEvent(window.id));

@@ -16,6 +16,7 @@ import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
 import { contactConfig } from "@/applications/Contract/Contact";
 import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 import { skillsConfig } from "@/applications/Skills/Skills";
+import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/AlgorithmVisualizer";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -244,6 +245,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
+  fileSystem.addApplication(algorithmVisualizerConfig);
   const doom = fileSystem.addApplication(doomConfig);
   fileSystem.addApplication(imageViewerConfig);
   fileSystem.addApplication(skillsConfig);
