@@ -4,7 +4,7 @@ import styles from './AboutView.module.css';
 import { BaseApplicationManager } from '../ApplicationManager';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectTBot, ProjectYoui } from './Projects';
+import { ProjectAdventOfCode, ProjectAlbert, ProjectJScript, ProjectPCParts, ProjectPaintboy, ProjectPortfolio2021, ProjectPortfolio2024, ProjectRedisClone, ProjectTBot, ProjectYoui } from './Projects';
 import { ScreenResolution } from '@/apis/Screen/ScreenService';
 
 type SubView = (
@@ -12,6 +12,7 @@ type SubView = (
   'about' |
   'experience' |
   'projects' |
+  'project-redis' |
   'project-portfolio-2024' |
   'project-j-script' |
   'project-advent-of-code' |
@@ -366,6 +367,7 @@ function ProjectsSubView(params: SubViewParams) {
 
         <h2>2024</h2>
         <ul>
+          <li>{ProjectButton('Redis clone', 'project-redis', '/icons/project-portfolio-2024.png')}</li>
           <li>{ProjectButton('Portfolio 2024', 'project-portfolio-2024', '/icons/project-portfolio-2024.png')}</li>
         </ul>
 
@@ -407,6 +409,7 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
     case 'about': return AboutSubView(params);
     case 'experience': return ExperienceSubView(params);
     case 'projects': return ProjectsSubView(params);
+    case 'project-redis': return ProjectRedisClone(params);
     case 'project-portfolio-2024': return ProjectPortfolio2024(params);
     case 'project-j-script': return ProjectJScript(params);
     case 'project-advent-of-code': return ProjectAdventOfCode(params);
