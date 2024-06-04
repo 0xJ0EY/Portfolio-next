@@ -367,7 +367,7 @@ function ProjectsSubView(params: SubViewParams) {
 
         <h2>2024</h2>
         <ul>
-          <li>{ProjectButton('Redis clone', 'project-redis', '/icons/project-portfolio-2024.png')}</li>
+          <li>{ProjectButton('Redis clone', 'project-redis', '/icons/project-redis.png')}</li>
           <li>{ProjectButton('Portfolio 2024', 'project-portfolio-2024', '/icons/project-portfolio-2024.png')}</li>
         </ul>
 
