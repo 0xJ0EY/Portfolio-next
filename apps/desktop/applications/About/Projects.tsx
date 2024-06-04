@@ -81,7 +81,7 @@ export function ProjectRedisClone(params: SubViewParams) {
         
         <h3>Technology</h3>
         <p>
-          Only Rust<br/> 
+          Rust<br/> 
           <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/codecrafters-redis-rust">Link</a> to the code of the project.
         </p>
       </div>
@@ -103,7 +103,7 @@ export function ProjectRedisClone(params: SubViewParams) {
 
         <h3>Technologie</h3>
         <p>
-          Enkel Rust<br/> 
+          Rust<br/> 
           <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/codecrafters-redis-rust">Link</a> naar de code van het project.
         </p>
       </div>
