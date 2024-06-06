@@ -7,10 +7,10 @@ export type SortViewEntry = {
   color: SortViewEntryColor,
 }
 
-export async function verifySort(view: SortView) {
+export async function verifySort(view: SortView): Promise<boolean> {
   for (let i = 1; i < view.size(); i++) {
     if (view.entry(i).value < view.entry(i - 1).value) {
-      return;
+      return false;
     }
 
     view.mark(i - 1, 'green');
@@ -25,6 +25,8 @@ export async function verifySort(view: SortView) {
 
   view.mark(index, 'green');
   view.maskSound(index);
+
+  return true;
 }
 
 
