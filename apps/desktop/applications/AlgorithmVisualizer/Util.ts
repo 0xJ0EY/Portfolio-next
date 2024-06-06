@@ -1,4 +1,4 @@
-import { SortViewEntry } from "./Algorithms/BubbleSort";
+import { SortViewEntry } from "./Algorithms/SortingView";
 
 export function generateRandomBarData(entries: number): SortViewEntry[] {
   let data: SortViewEntry[] = [];
