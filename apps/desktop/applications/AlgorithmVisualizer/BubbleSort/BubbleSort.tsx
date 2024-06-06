@@ -4,9 +4,11 @@ import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import styles from "./SortingStyles.module.css";
 import { generateRandomBarData } from "../Util";
 
+export type SortViewEntryColor = 'white' | 'red' | 'green';
+
 export type SortViewEntry = {
   value: number,
-  color: 'white' | 'red' | 'green'
+  color: SortViewEntryColor,
 }
 
 async function bubbleSort(view: SortView) {
@@ -22,13 +24,29 @@ async function bubbleSort(view: SortView) {
   view.cleanColors();
 }
 
+async function verifySort(view: SortView) {
+  for (let i = 1; i < view.size(); i++) {
+    if (view.entry(i).value < view.entry(i - 1).value) {
+      return;
+    }
+
+    view.mark(i - 1, 'green');
+    view.mark(i, 'red');
+
+    await sleep(2);
+  }
+
+  view.mark(view.size() - 1, 'green');
+}
+
 export async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 export class SortView {
   private dirty: boolean = false;
   private highestValue: number = 0;
-  private delayMs: number = 5;
+  private delayMs: number = 2;
+  private verificationDelayMs: number = 2;
 
   private accessCount: number = 0;
 
@@ -73,14 +91,19 @@ export class SortView {
 
     this.dirty = true;
 
-    this.data[idx].color = 'red';
-    this.data[idy].color = 'red';
+    this.mark(idx, 'red');
+    this.mark(idy, 'red');
 
     let temp = this.data[idx];
     this.data[idx] = this.data[idy];
     this.data[idy] = temp;
 
     await this.onAccess();
+  }
+
+  public mark(id: number, color: SortViewEntryColor): void {
+    this.data[id].color = color;
+    this.dirty = true;
   }
 
   public entry(index: number): SortViewEntry {
@@ -99,6 +122,8 @@ export class SortView {
 export default function BubbleSort(params: SubViewParams) {
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
+
+  const isSorting = useRef<boolean>(false);
 
   const view = useRef(new SortView(generateRandomBarData(50)));
   const graph = useRef(new BarGraph(view.current));
@@ -130,21 +155,26 @@ export default function BubbleSort(params: SubViewParams) {
   }, []);
 
   function onStart() {
-    let lastTime: number = 0;
+    if (isSorting.current) { return; }
+    isSorting.current = true;
+    
+    let isSorted = false;
 
-    console.log('foobar');
+    bubbleSort(view.current).then(() => {
+      verifySort(view.current).then(() => {
+        isSorted = true;
+        isSorting.current = false;
+      });
+    });
 
-    bubbleSort(view.current).then(() => { console.log('we done')});
-
-    function update(now: number) {
-      if (!lastTime) { lastTime = now; }
-      let elapsed = now - lastTime;
-
+    function update() {
       if (view.current.rerender()) {
         graph.current.render();
       }
 
-      window.requestAnimationFrame(update);
+      if (!isSorted) {
+        window.requestAnimationFrame(update);
+      }
     }
 
     window.requestAnimationFrame(update);
