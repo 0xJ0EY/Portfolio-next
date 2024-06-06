@@ -15,7 +15,7 @@ export type SubViewParams = {
   changeParent: (view: SubView) => void,
 }
 
-const BubbleSortLoader = dynamic(() => import('./BubbleSort/BubbleSort'), { loading: () => <>loading</>});
+const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: () => <>loading</>});
 
 function HomeSubView(params: SubViewParams) {
   function NavigationButton(name: string, target: SubView) {

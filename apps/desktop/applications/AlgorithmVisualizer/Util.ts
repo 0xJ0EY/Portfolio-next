@@ -1,7 +1,7 @@
-import { BarGraphEntry } from "@/components/GraphViewer/GraphViewer";
+import { SortViewEntry } from "./Algorithms/BubbleSort";
 
-export function generateRandomBarData(entries: number): BarGraphEntry[] {
-  let data: BarGraphEntry[] = [];
+export function generateRandomBarData(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
 
   for (let i = 0; i < entries; i++) {
     data.push({ value: i, color: 'white' });
@@ -14,4 +14,8 @@ export function generateRandomBarData(entries: number): BarGraphEntry[] {
   }
 
   return data;
+}
+
+export async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

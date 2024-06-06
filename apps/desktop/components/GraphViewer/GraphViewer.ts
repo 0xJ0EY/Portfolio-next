@@ -1,4 +1,4 @@
-import { SortView, SortViewEntry } from "@/applications/AlgorithmVisualizer/BubbleSort/BubbleSort";
+import { SortView, SortViewEntry } from "@/applications/AlgorithmVisualizer/Algorithms/SortingView";
 
 interface Graph {
   resize(width: number, height: number): void;
