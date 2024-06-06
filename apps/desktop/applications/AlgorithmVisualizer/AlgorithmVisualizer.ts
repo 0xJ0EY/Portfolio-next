@@ -18,12 +18,12 @@ export class AlgorithmVisualizerConfig implements ApplicationConfig {
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
     apis: SystemAPIs
-  ) => new DebugApplication(compositor, manager, apis);
+  ) => new AlgorithmVisualizer(compositor, manager, apis);
 }
 
 export const algorithmVisualizerConfig = new AlgorithmVisualizerConfig();
 
-export class DebugApplication extends Application {
+export class AlgorithmVisualizer extends Application {
 
   config(): ApplicationConfig {
     return algorithmVisualizerConfig;
