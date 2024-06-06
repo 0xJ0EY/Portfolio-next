@@ -13,10 +13,13 @@ async function bubbleSort(view: SortView) {
   for (let i = 0; i < view.size() - 1; i++) {
     for (let j = 0; j < view.size() - 1; j++) {
       if (view.entry(j).value > view.entry(j + 1).value) {
+        view.cleanColors();
         await view.swap(j, j + 1);
       }
     }
   }
+
+  view.cleanColors();
 }
 
 export async function sleep(ms: number) {
@@ -49,8 +52,29 @@ export class SortView {
     this.accessCount += 1;
   }
 
+  public cleanColors(): void {
+    for (let i = 0; i < this.data.length; i++) {
+      this.data[i].color = 'white';
+    }
+
+    this.dirty = true;
+  }
+
+  public rerender(): boolean {
+    let dirty = this.dirty;
+
+    this.dirty = false;
+
+    return dirty;
+  }
+
   public async swap(idx: number, idy: number): Promise<void> {
     await this.onAccess();
+
+    this.dirty = true;
+
+    this.data[idx].color = 'red';
+    this.data[idy].color = 'red';
 
     let temp = this.data[idx];
     this.data[idx] = this.data[idy];
@@ -116,7 +140,9 @@ export default function BubbleSort(params: SubViewParams) {
       if (!lastTime) { lastTime = now; }
       let elapsed = now - lastTime;
 
-      graph.current.render();
+      if (view.current.rerender()) {
+        graph.current.render();
+      }
 
       window.requestAnimationFrame(update);
     }
