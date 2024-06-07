@@ -38,9 +38,9 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
     view.mark(low, 'green');
     view.mark(high - 1, 'green');
 
-    for (let i = 0; i < data.length; i++) {
-      if (abortSignal.aborted) { return; }
+    if (abortSignal.aborted) { return; }
 
+    for (let i = 0; i < data.length; i++) {
       await view.set(low + i, data[i], color(low + i));
     }
   }

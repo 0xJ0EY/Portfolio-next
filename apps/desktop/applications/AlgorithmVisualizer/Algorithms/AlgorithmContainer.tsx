@@ -9,7 +9,6 @@ export type AlgorithmContainerProps = {
   title: string,
 }
 
-
 export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
 export function AlgorithmContainer(props: AlgorithmContainerProps) {
@@ -62,7 +61,7 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     let isSorted = false;
 
     entrypoint(view.current, abortController.current.signal).then(() => {
-      verifySort(view.current).then(() => {
+      verifySort(view.current, abortController.current.signal).then(() => {
         isSorted = true;
         setSorting(false);
       });
@@ -115,6 +114,13 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
 
   function onStop() {
     abortController.current.abort();
+
+    view.current.cleanColors();
+  }
+
+  function reset() {
+    view.current.setData(generateRandomBarData(50));
+    graph.current.render();
   }
 
   const actionButton = isSorting ? <button onClick={onStop}>Stop</button> : <button onClick={onStart}>Start</button>;
@@ -124,6 +130,10 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
       <canvas ref={graphRef}></canvas>
       <h3>{title}</h3>
       {actionButton}
+      
+      <hr />
+
+      <button onClick={reset} disabled={isSorting}>Reset</button>
     </div>
   );
 }

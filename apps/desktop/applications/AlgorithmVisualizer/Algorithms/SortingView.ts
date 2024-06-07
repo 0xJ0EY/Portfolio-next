@@ -7,8 +7,10 @@ export type SortViewEntry = {
   color: SortViewEntryColor,
 }
 
-export async function verifySort(view: SortView): Promise<boolean> {
+export async function verifySort(view: SortView, abortSignal: AbortSignal): Promise<boolean> {
   for (let i = 1; i < view.size(); i++) {
+    if (abortSignal.aborted) { return false; }
+
     if (view.entry(i).value < view.entry(i - 1).value) {
       return false;
     }
@@ -124,6 +126,10 @@ export class SortView {
 
   public getHighestValue(): number {
     return this.highestValue;
+  }
+
+  public setData(data: SortViewEntry[]): void {
+    this.data = data;
   }
 
   public setDelay(ms: number): void {

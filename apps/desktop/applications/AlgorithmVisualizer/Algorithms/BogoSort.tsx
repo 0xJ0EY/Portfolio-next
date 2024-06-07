@@ -4,9 +4,9 @@ import { SortView, verifySort } from "./SortingView";
 import { AlgorithmContainer } from "./AlgorithmContainer";
 
 async function bogosort(view: SortView, abortSignal: AbortSignal) {
-  while (!await verifySort(view)) {
-
+  while (!await verifySort(view, abortSignal)) {
     view.cleanColors();
+
     for (let i = view.size() - 1; i > 0; i--) {
       if (abortSignal.aborted) { return; }
 
