@@ -44,8 +44,8 @@ export class AlgorithmVisualizer extends Application {
       this.compositor.open({
         x: 200,
         y: 200,
-        height: 400,
-        width: 400,
+        height: 600,
+        width: 700,
         title: `Algorithm visualizer`,
         application: this,
         args: event.args,
