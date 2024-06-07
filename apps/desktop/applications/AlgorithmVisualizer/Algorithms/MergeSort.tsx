@@ -17,8 +17,8 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
     let i = low, j = pivot, o = 0;
 
     while (i < pivot && j < high) {
-      const entryI = view.entry(i);
-      const entryJ = view.entry(j);
+      const entryI = structuredClone(view.entry(i));
+      const entryJ = structuredClone(view.entry(j));
 
       if (entryI.value < entryJ.value) {
         i += 1;
