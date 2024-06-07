@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SortView, verifySort } from "./SortingView";
 import { generateRandomBarData } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
@@ -10,7 +10,7 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
 
-  const isSorting = useRef<boolean>(false);
+  const [isSorting, setSorting] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
   const view = useRef(new SortView(generateRandomBarData(50)));
@@ -46,15 +46,17 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
   }, []);
 
   function onStart() {
-    if (isSorting.current) { return; }
-    isSorting.current = true;
+    if (isSorting) { return; }
+
+    setSorting(true);
+    abortController.current = new AbortController();
     
     let isSorted = false;
 
     algorithm(view.current, abortController.current.signal).then(() => {
       verifySort(view.current).then(() => {
         isSorted = true;
-        isSorting.current = false;
+        setSorting(false);
       });
     });
 
@@ -66,8 +68,6 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
 
     function update() {
       if (view.current.rerender()) {
-        let len = 512;
-
         let indicesList = view.current.accessIndicesList;
 
         for (let i = 0; i < indicesList.length; i++) {
@@ -75,9 +75,6 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
 
           const oscillator = audioContext.createOscillator();
           oscillator.type = "triangle";
-
-          // TODO: Remove this?
-          if (relativeIndex === 1) { continue; }
 
           const freq = 120 + 1200 * (relativeIndex * relativeIndex);
           oscillator.frequency.value = freq;
@@ -108,11 +105,17 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
     window.requestAnimationFrame(update);
   }
 
+  function onStop() {
+    abortController.current.abort();
+  }
+
+  const actionButton = isSorting ? <button onClick={onStop}>Stop</button> : <button onClick={onStart}>Start</button>;
+
   return (
     <div className={styles['parent']} ref={parent}>
       <canvas ref={graphRef}></canvas>
-      <span>bubble sorting</span>
-      <button onClick={onStart}>Start</button>
+      <span>we be sorting</span>
+      {actionButton}
     </div>
   );
 }

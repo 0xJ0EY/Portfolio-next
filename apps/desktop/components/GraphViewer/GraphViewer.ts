@@ -34,7 +34,6 @@ export abstract class CanvasGraph implements Graph {
   abstract render(): void;
 }
 
-
 export class BarGraph extends CanvasGraph {
   constructor(private view: SortView) {
     super();

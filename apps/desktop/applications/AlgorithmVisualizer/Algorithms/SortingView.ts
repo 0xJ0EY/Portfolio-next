@@ -91,6 +91,16 @@ export class SortView {
     this.data[idx] = this.data[idy];
     this.data[idy] = temp;
 
+    await this.onAccess();
+  }
+
+  public async set(id: number, item: SortViewEntry, color?: SortViewEntryColor): Promise<void> {
+    this.dirty = true;
+
+    this.data[id] = item;
+
+    this.mark(id, color ?? 'red');
+    this.maskSound(id);
 
     await this.onAccess();
   }
@@ -114,5 +124,13 @@ export class SortView {
 
   public getHighestValue(): number {
     return this.highestValue;
+  }
+
+  public setDelay(ms: number): void {
+    this.delayMs = ms;
+  }
+
+  public getDelay(): number {
+    return this.delayMs;
   }
 }

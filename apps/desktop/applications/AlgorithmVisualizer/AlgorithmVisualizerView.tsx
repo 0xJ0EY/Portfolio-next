@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 type SubView = (
   'home' |
   'bubble-sort' |
+  'merge-sort' |
   'bogo-sort'
 );
 
@@ -18,6 +19,7 @@ export type SubViewParams = {
 
 const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: () => <>loading</>});
 const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: () => <>loading</>});
+const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: () => <>loading</>});
 
 function HomeSubView(params: SubViewParams) {
   function NavigationButton(name: string, target: SubView) {
@@ -34,6 +36,7 @@ function HomeSubView(params: SubViewParams) {
         <h1>Sorting</h1>
         {NavigationButton('Bubble sort', 'bubble-sort')}
         {NavigationButton('Bogo sort', 'bogo-sort')}
+        {NavigationButton('Merge sort', 'merge-sort')}
       </div>
     </div>
   </>);
@@ -44,6 +47,7 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
     case 'home': return HomeSubView(params);
     case 'bubble-sort': return <BubbleSortLoader {...params} />;
     case 'bogo-sort': return <BogoSortLoader {...params} />;
+    case 'merge-sort': return <MergeSortLoader {...params} />;
   }
 
   return <>No subview found</>;
