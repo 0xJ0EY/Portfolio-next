@@ -4,9 +4,17 @@ import { generateRandomBarData } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import styles from "./SortingStyles.module.css";
 
+export type AlgorithmContainerProps = {
+  entrypoint: SortingAlgorithmEntrypoint,
+  title: string,
+}
+
+
 export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
-export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
+export function AlgorithmContainer(props: AlgorithmContainerProps) {
+  const { entrypoint, title } = props;
+
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
 
@@ -53,7 +61,7 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
     
     let isSorted = false;
 
-    algorithm(view.current, abortController.current.signal).then(() => {
+    entrypoint(view.current, abortController.current.signal).then(() => {
       verifySort(view.current).then(() => {
         isSorted = true;
         setSorting(false);
@@ -114,7 +122,7 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
   return (
     <div className={styles['parent']} ref={parent}>
       <canvas ref={graphRef}></canvas>
-      <span>we be sorting</span>
+      <h3>{title}</h3>
       {actionButton}
     </div>
   );

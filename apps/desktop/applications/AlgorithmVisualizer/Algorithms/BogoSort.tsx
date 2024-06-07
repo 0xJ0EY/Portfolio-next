@@ -9,7 +9,7 @@ async function bogosort(view: SortView, abortSignal: AbortSignal) {
     view.cleanColors();
     for (let i = view.size() - 1; i > 0; i--) {
       if (abortSignal.aborted) { return; }
-      
+
       // Fisher–Yates shuffle
       const j = Math.floor(Math.random() * i);
       await view.swap(i, j);
@@ -18,5 +18,8 @@ async function bogosort(view: SortView, abortSignal: AbortSignal) {
 }
 
 export default function BogoSort(params: SubViewParams) {
-  return AlgorithmContainer(bogosort);
+  return AlgorithmContainer({
+    entrypoint: bogosort,
+    title: 'Bogo sort',
+  });
 }
