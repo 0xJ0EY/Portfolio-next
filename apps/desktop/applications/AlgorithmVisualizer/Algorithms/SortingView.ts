@@ -18,7 +18,7 @@ export async function verifySort(view: SortView): Promise<boolean> {
 
     view.maskSound(i);
 
-    await sleep(2);
+    await sleep(4);
   }
 
   const index = view.size() - 1;

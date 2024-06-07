@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
-import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView, verifySort } from "./SortingView";
 import { generateRandomBarData } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import styles from "./SortingStyles.module.css";
 
-export type SortingAlgorithmEntrypoint = (view: SortView) => Promise<void>;
+export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
 export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
 
   const isSorting = useRef<boolean>(false);
+  const abortController = useRef<AbortController>(new AbortController());
 
   const view = useRef(new SortView(generateRandomBarData(50)));
   const graph = useRef(new BarGraph(view.current));
@@ -19,6 +19,8 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
   useEffect(() => {
     if (!graphRef.current) { return; }
     if (!parent.current) { return; }
+
+    abortController.current = new AbortController();
 
     const barGraph = graph.current;
 
@@ -39,6 +41,7 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
 
     return () => {
       observer.disconnect();
+      abortController.current?.abort();
     }
   }, []);
 
@@ -48,7 +51,7 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
     
     let isSorted = false;
 
-    algorithm(view.current).then(() => {
+    algorithm(view.current, abortController.current.signal).then(() => {
       verifySort(view.current).then(() => {
         isSorted = true;
         isSorting.current = false;
@@ -56,9 +59,8 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
     });
 
     const audioContext = new AudioContext();
-
     const gainNode = audioContext.createGain();
-    gainNode.gain.value = 0.001;
+    gainNode.gain.value = 0.01;
 
     gainNode.connect(audioContext.destination);
 
@@ -68,33 +70,31 @@ export function AlgorithmContainer(algorithm: SortingAlgorithmEntrypoint) {
 
         let indicesList = view.current.accessIndicesList;
 
-        let pscale = len / indicesList.length;
-
-        let max = Math.max(...indicesList);
-
         for (let i = 0; i < indicesList.length; i++) {
-          let relativeIndex = indicesList[i] / max;
+          let relativeIndex = indicesList[i] / view.current.getHighestValue();
 
           const oscillator = audioContext.createOscillator();
-          oscillator.type = "square";
+          oscillator.type = "triangle";
 
-          const freq = 120 + 1000 * (relativeIndex * relativeIndex);
+          // TODO: Remove this?
+          if (relativeIndex === 1) { continue; }
+
+          const freq = 120 + 1200 * (relativeIndex * relativeIndex);
           oscillator.frequency.value = freq;
 
-          view.current.accessIndicesList = [];
+          const offset = i * 0.1;
 
-          const offset = (i * pscale);
           const duration = 0.1;
           
           const start = audioContext.currentTime + offset;
           const stop = start + duration;
+
   
           oscillator.connect(gainNode);
           oscillator.start(start);
           oscillator.stop(stop);
         }
         
-
         view.current.accessIndicesList = [];
 
         graph.current.render();
