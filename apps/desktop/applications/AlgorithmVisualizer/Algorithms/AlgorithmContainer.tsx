@@ -17,41 +17,6 @@ export type AlgorithmContainerProps = {
 export type DataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
 export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
-export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, onChange: (strategy: DataGenerationStrategy) => void) {
-  type DataGenEntry = {
-    title: string,
-    strategy: DataGenerationStrategy
-  }
-
-  const entries: DataGenEntry[] = [
-    {
-      title: 'Randomly distributed',
-      strategy: 'randomly-distributed'
-    },
-    {
-      title: 'Sorted left to right',
-      strategy: 'sorted-left-to-right'
-    },
-    {
-      title: 'Sorted right to left',
-      strategy: 'sorted-right-to-left'
-    }
-  ];
-
-  let options = entries.map(x => {
-    return <option key={x.strategy} value={x.strategy}>{x.title}</option>
-  })
-
-  return (
-    <>
-      <select value={value} onChange={(e) => onChange(e.target.value as DataGenerationStrategy)}>
-        {options}
-      </select>
-    </>
-  );
-}
-
-
 function generateData(strategy: DataGenerationStrategy, entries: number): SortViewEntry[] {
   switch (strategy) {
     case "randomly-distributed": return generateRandomData(entries);
@@ -145,7 +110,6 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
           const start = audioContext.currentTime + offset;
           const stop = start + duration;
 
-  
           oscillator.connect(gainNode);
           oscillator.start(start);
           oscillator.stop(stop);
