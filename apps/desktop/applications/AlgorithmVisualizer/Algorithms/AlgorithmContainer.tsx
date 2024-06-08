@@ -1,18 +1,70 @@
 import { useEffect, useRef, useState } from "react";
-import { SortView, verifySort } from "./SortingView";
-import { generateRandomBarData } from "../Util";
+import { SortView, SortViewEntry, verifySort } from "./SortingView";
+import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRightToLeft } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import styles from "./SortingStyles.module.css";
 
+export type AlgorithmOptions = {
+  dataGenerationStrategy: DataGenerationStrategy,
+  amountOfEntries: number
+}
 export type AlgorithmContainerProps = {
   entrypoint: SortingAlgorithmEntrypoint,
+  options: AlgorithmOptions,
   title: string,
 }
 
+export type DataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
 export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
-export function AlgorithmContainer(props: AlgorithmContainerProps) {
+export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, onChange: (strategy: DataGenerationStrategy) => void) {
+  type DataGenEntry = {
+    title: string,
+    strategy: DataGenerationStrategy
+  }
+
+  const entries: DataGenEntry[] = [
+    {
+      title: 'Randomly distributed',
+      strategy: 'randomly-distributed'
+    },
+    {
+      title: 'Sorted left to right',
+      strategy: 'sorted-left-to-right'
+    },
+    {
+      title: 'Sorted right to left',
+      strategy: 'sorted-right-to-left'
+    }
+  ];
+
+  let options = entries.map(x => {
+    return <option key={x.strategy} value={x.strategy}>{x.title}</option>
+  })
+
+  return (
+    <>
+      <select value={value} onChange={(e) => onChange(e.target.value as DataGenerationStrategy)}>
+        {options}
+      </select>
+    </>
+  );
+}
+
+
+function generateData(strategy: DataGenerationStrategy, entries: number): SortViewEntry[] {
+  switch (strategy) {
+    case "randomly-distributed": return generateRandomData(entries);
+    case "sorted-left-to-right": return generateSortedDataLeftToRight(entries);
+    case "sorted-right-to-left": return generateSortedDataRightToLeft(entries);
+  }
+}
+
+export function AlgorithmContainer(props: AlgorithmContainerProps) { 
   const { entrypoint, title } = props;
+
+  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.dataGenerationStrategy);
+  const [amountOfEntries, setAmountOfEntries] = useState(props.options.amountOfEntries);
 
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
@@ -20,7 +72,7 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
   const [isSorting, setSorting] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
-  const view = useRef(new SortView(generateRandomBarData(50)));
+  const view = useRef(new SortView(generateData(dataGenStrategy, amountOfEntries)));
   const graph = useRef(new BarGraph(view.current));
 
   useEffect(() => {
@@ -119,7 +171,7 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
   }
 
   function reset() {
-    view.current.setData(generateRandomBarData(50));
+    view.current.setData(generateData(dataGenStrategy, amountOfEntries));
     graph.current.render();
   }
 

@@ -1,11 +1,9 @@
-import { ScreenResolution } from '@/apis/Screen/ScreenService';
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styles from './AlgorithmVisualizerView.module.css';
 import dynamic from 'next/dynamic';
+import { AlgorithmOptions, DataGenerationStrategy } from './Algorithms/AlgorithmContainer';
 
-type SubView = (
+export type AlgorithmSubView = (
   'home' |
   'bubble-sort' |
   'merge-sort' |
@@ -14,37 +12,18 @@ type SubView = (
 
 export type SubViewParams = {
   windowProps: WindowProps,
-  changeParent: (view: SubView) => void,
+  changeParent: (view: AlgorithmSubView, options?: AlgorithmOptions) => void,
+  algorithmOptions: AlgorithmOptions | null;
 }
 
+const HomeLoader = dynamic(() => import('./Home/Home'), { loading: () => <>loading</>});
 const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: () => <>loading</>});
 const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: () => <>loading</>});
 const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: () => <>loading</>});
 
-function HomeSubView(params: SubViewParams) {
-  function NavigationButton(name: string, target: SubView) {
-    return (<>
-      <button className={styles['project-button']} onClick={() => params.changeParent(target) }>
-        <span>{name}</span>
-      </button>
-    </>);
-  }
-
-  return (<>
-    <div data-subpage className={styles['subpage']}>
-      <div data-subpage-content>
-        <h1>Sorting</h1>
-        {NavigationButton('Bubble sort', 'bubble-sort')}
-        {NavigationButton('Bogo sort', 'bogo-sort')}
-        {NavigationButton('Merge sort', 'merge-sort')}
-      </div>
-    </div>
-  </>);
-}
-
-function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
+function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
-    case 'home': return HomeSubView(params);
+    case 'home': return <HomeLoader {...params} />;
     case 'bubble-sort': return <BubbleSortLoader {...params} />;
     case 'bogo-sort': return <BogoSortLoader {...params} />;
     case 'merge-sort': return <MergeSortLoader {...params} />;
@@ -53,13 +32,11 @@ function RenderSubView(view: SubView, params: SubViewParams): JSX.Element {
   return <>No subview found</>;
 }
 
-export default function DebugApplicationView(props: WindowProps) {
+export default function AlgorithmVisualizerView(props: WindowProps) {
   const { application, windowContext } = props;
 
-  const [subView, setSubView] = useState<SubView>('home');
-  const [needsMobileView, setNeedsMobileView] = useState<boolean>(false);
-  const { t, i18n } = useTranslation("common");
-
+  const [subView, setSubView] = useState<AlgorithmSubView>('home');
+  const [algorithmOptions, setAlgorithmOptions] = useState<AlgorithmOptions | null>(null);
   const apis = application.apis;
 
   const contentParent = useRef<HTMLDivElement>(null);
@@ -81,26 +58,12 @@ export default function DebugApplicationView(props: WindowProps) {
     contentView.scrollTop = 0;
   }
 
-  function onScreenChangeListener(resolution: ScreenResolution): void {
-    setNeedsMobileView(resolution.isMobileDevice());
-  }
-
-  useEffect(() => {
-    const unsubscribe = apis.screen.subscribe(onScreenChangeListener);
-
-    const resolution = apis.screen.getResolution();
-    if (resolution) { onScreenChangeListener(resolution); }
-
-    return () => {
-      unsubscribe();
-    }
-  }, []);
-
   useEffect(() => {
     resetSubPageScroll();
   }, [subView]);
 
-  function changeParent(view: SubView) {
+  function changeParent(view: AlgorithmSubView, options?: AlgorithmOptions) {
+    setAlgorithmOptions(options ?? null);
     setSubView(view);
   }
 
@@ -111,7 +74,8 @@ export default function DebugApplicationView(props: WindowProps) {
           { RenderSubView(subView,
             {
               windowProps: props,
-              changeParent
+              changeParent,
+              algorithmOptions
             }
           ) }
         </div>

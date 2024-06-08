@@ -1,7 +1,7 @@
 
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView, SortViewEntry, SortViewEntryColor } from "./SortingView";
-import { AlgorithmContainer } from "./AlgorithmContainer";
+import { AlgorithmContainer, DataGenerationStrategy } from "./AlgorithmContainer";
 
 async function mergeSort(view: SortView, abortSignal: AbortSignal) {
   async function merge(view: SortView, low: number, pivot: number, high: number) {
@@ -65,6 +65,7 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
 export default function MergeSort(params: SubViewParams) {
   return AlgorithmContainer({
     entrypoint: mergeSort,
-    title: 'Merge sort'
+    title: 'Merge sort',
+    options: params.algorithmOptions!,
   });
 }

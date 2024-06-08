@@ -21,6 +21,7 @@ async function bubbleSort(view: SortView, abortSignal: AbortSignal) {
 export default function BubbleSort(params: SubViewParams) {
   return AlgorithmContainer({
     entrypoint: bubbleSort,
-    title: 'Bubble sort'
+    title: 'Bubble sort',
+    options: params.algorithmOptions!
   });
 }

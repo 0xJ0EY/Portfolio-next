@@ -21,5 +21,6 @@ export default function BogoSort(params: SubViewParams) {
   return AlgorithmContainer({
     entrypoint: bogosort,
     title: 'Bogo sort',
+    options: params.algorithmOptions!,
   });
 }
