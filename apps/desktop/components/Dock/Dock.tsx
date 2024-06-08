@@ -11,11 +11,13 @@ import { SystemAPIs } from '../OperatingSystem';
 import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEvent, FileSystemItemDragLeave } from '@/apis/DragAndDrop/DragAndDrop';
 import { contactConfig } from '@/applications/Contract/Contact';
 import { skillsConfig } from '@/applications/Skills/Skills';
+import { algorithmVisualizerConfig } from '@/applications/AlgorithmVisualizer/AlgorithmVisualizer';
 
 const DockApplications = [
   finderConfig,
   aboutConfig,
   contactConfig,
+  algorithmVisualizerConfig,
   skillsConfig,
 ];
 

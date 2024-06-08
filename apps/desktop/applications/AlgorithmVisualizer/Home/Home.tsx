@@ -33,6 +33,7 @@ export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, on
       <select
         id="data-generation-strategy"
         name="data-generation-strategy"
+        className="system-button"
         value={value}
         onChange={(e) => onChange(e.target.value as DataGenerationStrategy)}>
         {options}
@@ -94,7 +95,7 @@ export default function HomeSubView(params: SubViewParams) {
       };
 
       return (<>
-        <button className={styles['project-button']} onClick={() => params.changeParent(target, options) }>
+        <button className={`${styles['project-button']} system-button`} onClick={() => params.changeParent(target, options) }>
           <span>{name}</span>
         </button>
       </>);

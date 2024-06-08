@@ -40,12 +40,16 @@ export class AlgorithmVisualizer extends Application {
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     this.baseHandler(event, windowContext);
 
+    const y       = 90;
+    const width   = 700;
+    const height  = 600;
+    const x       = (window.innerWidth - width) / 2;
+
     if (event.kind === 'application-open') {
       this.compositor.open({
-        x: 200,
-        y: 200,
-        height: 600,
-        width: 700,
+        x, y,
+        height,
+        width,
         title: `Algorithm visualizer`,
         application: this,
         args: event.args,

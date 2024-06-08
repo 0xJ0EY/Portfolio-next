@@ -156,11 +156,14 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     <div className={styles['parent']} ref={parent}>
       <canvas ref={graphRef}></canvas>
       <h3>{title}</h3>
+
+      <button onClick={() => params.changeParent('home')}>Back to projects</button>
+
       {actionButton}
       
       <hr />
 
-      <button onClick={regenerate} disabled={isSorting}>Regenerate</button>
+      <button className="system-button" onClick={regenerate} disabled={isSorting}>Regenerate</button>
 
       <div>
         <label htmlFor="data-generation-strategy">Data generation strategy</label>
