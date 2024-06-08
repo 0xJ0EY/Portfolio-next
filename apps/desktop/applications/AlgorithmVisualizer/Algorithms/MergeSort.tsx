@@ -1,7 +1,7 @@
 
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView, SortViewEntry, SortViewEntryColor } from "./SortingView";
-import { AlgorithmContainer, DataGenerationStrategy } from "./AlgorithmContainer";
+import { AlgorithmContainer } from "./AlgorithmContainer";
 
 async function mergeSort(view: SortView, abortSignal: AbortSignal) {
   async function merge(view: SortView, low: number, pivot: number, high: number) {
@@ -44,7 +44,6 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
       await view.set(low + i, data[i], color(low + i));
     }
   }
-
 
   async function sort(view: SortView, low: number, high: number) {
     if (low + 1 < high) {
