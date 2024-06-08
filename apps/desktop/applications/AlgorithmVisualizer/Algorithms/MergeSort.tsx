@@ -64,6 +64,7 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
 
 export default function MergeSort(params: SubViewParams) {
   return AlgorithmContainer({
+    params,
     entrypoint: mergeSort,
     title: 'Merge sort',
     options: params.algorithmOptions!,

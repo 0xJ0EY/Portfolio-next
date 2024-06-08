@@ -116,7 +116,7 @@ export default function HomeSubView(params: SubViewParams) {
           </div>
 
           <div>
-            <label htmlFor="generated-data-size">Generated data size</label>
+            <label htmlFor="generated-data-size">Generated data points</label>
             { DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }
           </div>
         </div>

@@ -130,6 +130,8 @@ export class SortView {
 
   public setData(data: SortViewEntry[]): void {
     this.data = data;
+
+    this.highestValue = this.findHighestValue();
   }
 
   public setDelay(ms: number): void {

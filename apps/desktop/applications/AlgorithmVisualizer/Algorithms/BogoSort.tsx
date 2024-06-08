@@ -21,6 +21,7 @@ async function bogosort(view: SortView, abortSignal: AbortSignal) {
 
 export default function BogoSort(params: SubViewParams) {
   return AlgorithmContainer({
+    params,
     entrypoint: bogosort,
     title: 'Bogo sort',
     options: params.algorithmOptions!,

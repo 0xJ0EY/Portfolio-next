@@ -12,7 +12,7 @@ export class AlgorithmVisualizerConfig implements ApplicationConfig {
   public readonly displayName = 'Algorithm visualizer';
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
-  public readonly appName = 'AlgoVisualizer.app';
+  public readonly appName = 'Algorithms.app';
   public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Algorithm visualizer' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
