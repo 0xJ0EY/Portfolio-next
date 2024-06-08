@@ -108,6 +108,7 @@ export default function HomeSubView(params: SubViewParams) {
           {NavigationButton('Bubble sort', 'bubble-sort')}
           {NavigationButton('Bogo sort', 'bogo-sort')}
           {NavigationButton('Merge sort', 'merge-sort')}
+          {NavigationButton('Quick sort', 'quick-sort')}
   
           <h3>Options</h3>
 
