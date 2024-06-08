@@ -15,6 +15,8 @@ async function bogosort(view: SortView, abortSignal: AbortSignal) {
       await view.swap(i, j);
     }
   }
+
+  view.cleanColors();
 }
 
 export default function BogoSort(params: SubViewParams) {

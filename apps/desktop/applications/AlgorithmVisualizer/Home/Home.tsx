@@ -30,7 +30,11 @@ export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, on
 
   return (
     <>
-      <select value={value} onChange={(e) => onChange(e.target.value as DataGenerationStrategy)}>
+      <select
+        id="data-generation-strategy"
+        name="data-generation-strategy"
+        value={value}
+        onChange={(e) => onChange(e.target.value as DataGenerationStrategy)}>
         {options}
       </select>
     </>
@@ -38,6 +42,9 @@ export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, on
 }
 
 export function DataGenerationEntriesInput(value: number | null, onChange: (entries: number | null) => void) {
+  const MIN_VALUE = 1;
+  const MAX_VALUE = 2048;
+
   function filterInput(evt: KeyboardEvent<HTMLInputElement>) {
     const isAlphanumericKey = evt.key.length === 1;
     const isNumber = parseInt(evt.key, 10);
@@ -54,7 +61,10 @@ export function DataGenerationEntriesInput(value: number | null, onChange: (entr
     }
 
     let updatedValue = parseInt(value, 10);
-    updatedValue = Math.max(updatedValue, 1);
+
+    // Clamp values
+    updatedValue = Math.max(updatedValue, MIN_VALUE);
+    updatedValue = Math.min(updatedValue, MAX_VALUE);
 
     onChange(updatedValue);
   }
@@ -63,6 +73,7 @@ export function DataGenerationEntriesInput(value: number | null, onChange: (entr
 
   return (
     <input
+      id="generated-data-size"
       type="number"
       onKeyDown={(evt) => filterInput(evt)}
       value={safeValue}
@@ -98,9 +109,16 @@ export default function HomeSubView(params: SubViewParams) {
           {NavigationButton('Merge sort', 'merge-sort')}
   
           <h3>Options</h3>
-  
-          { DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }
-          { DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }
+
+          <div>
+            <label htmlFor="data-generation-strategy">Data generation strategy</label>
+            { DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }
+          </div>
+
+          <div>
+            <label htmlFor="generated-data-size">Generated data size</label>
+            { DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }
+          </div>
         </div>
       </div>
     </>);
