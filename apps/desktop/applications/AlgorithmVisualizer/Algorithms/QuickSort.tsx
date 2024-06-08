@@ -11,42 +11,30 @@ async function quickSort(view: SortView, abortSignal: AbortSignal) {
     let i = low;
     let j = high;
 
-    while (i <= j) {
+    while (true) {
       view.cleanColors();
 
       if (abortSignal.aborted) { return null; }
 
-      while (view.entry(i).value < pivot.value) {
-        i++;
-      }
+      while (view.entry(i).value < pivot.value) { i++; }
+      while (view.entry(j).value > pivot.value) { j--; }
 
-      while (view.entry(j).value > pivot.value) {
-        j--;
-      }
+      if (i >= j) { return j; }
 
-      if (i <= j) {
-        await view.swap(i, j);
-        i++;
-        j--;
-      }
+      await view.swap(i, j);
     }
-
-    return i;
   }
 
   async function sort(view: SortView, low: number, high: number) {
     if (abortSignal.aborted) { return; }
 
-    const index = await partition(view, low, high);
+    if (low >= 0 && high >= 0 && low < high) {
+      const pivot = await partition(view, low, high);
 
-    if (index === null) { return; }
+      if (pivot === null) { return; }
 
-    if (low < index - 1) {
-      await sort(view, low, index - 1);
-    }
-
-    if (index < high) {
-      await sort(view, index, high);
+      await sort(view, low, pivot);
+      await sort(view, pivot + 1, high);
     }
   }
 
