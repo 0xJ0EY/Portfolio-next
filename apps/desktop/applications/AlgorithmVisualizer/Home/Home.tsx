@@ -77,6 +77,7 @@ export function DataGenerationEntriesInput(value: number | null, onChange: (entr
     <input
       id="generated-data-size"
       type="number"
+      className="system-text-input"
       onKeyDown={(evt) => filterInput(evt)}
       value={safeValue}
       min={1}
