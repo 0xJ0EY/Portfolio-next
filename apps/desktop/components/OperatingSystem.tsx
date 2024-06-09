@@ -190,7 +190,6 @@ export const OperatingSystem = () => {
 
     applicationManager.open('/Applications/Finder.app');
     applicationManager.open('/Applications/About.app');
-    applicationManager.open('/Applications/Algorithms.app');
 
     if (ref.current) {
       disableBrowserZoomTouchInteraction(ref.current)

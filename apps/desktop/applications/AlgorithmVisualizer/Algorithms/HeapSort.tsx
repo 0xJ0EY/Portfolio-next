@@ -9,12 +9,10 @@ async function heapSort(view: SortView, abortSignal: AbortSignal) {
   const indexParent = (i: number) => Math.floor((i - 1) / 2);
 
   async function siftDown(view: SortView, root: number, end: number) {
-
     view.cleanColors();
 
     while (indexLeftChild(root) < end) {
       if (abortSignal.aborted) { return; }
-
 
       let child = indexLeftChild(root);
 
@@ -50,7 +48,7 @@ async function heapSort(view: SortView, abortSignal: AbortSignal) {
 
     while (end-- > 1) {
       if (abortSignal.aborted) { return; }
-      
+
       await view.swap(end, 0);
       await siftDown(view, 0, end);
     }
