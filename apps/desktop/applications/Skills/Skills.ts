@@ -40,11 +40,14 @@ export class SkillsApplication extends Application {
     this.baseHandler(event, windowContext);
 
     if (event.kind === 'application-open') {
+      const y       = 95;
+      const width   = 700;
+      const height  = 600;
+      const x       = (window.innerWidth - width) / 2;
+
       this.compositor.open({
-        x: 200,
-        y: 100,
-        height: 600,
-        width: 700,
+        x, y,
+        height, width,
         title: `Skills`,
         application: this,
         args: event.args,

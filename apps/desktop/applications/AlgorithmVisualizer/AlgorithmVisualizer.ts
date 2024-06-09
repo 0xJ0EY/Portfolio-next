@@ -40,7 +40,7 @@ export class AlgorithmVisualizer extends Application {
   on(event: ApplicationEvent, windowContext?: WindowContext): void {
     this.baseHandler(event, windowContext);
 
-    const y       = 90;
+    const y       = 70;
     const width   = 700;
     const height  = 650;
     const x       = (window.innerWidth - width) / 2;
