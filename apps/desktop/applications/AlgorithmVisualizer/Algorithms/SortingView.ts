@@ -120,6 +120,10 @@ export class SortView {
     return this.data[index];
   }
 
+  public entryValue(index: number): number {
+    return this.entry(index).value;
+  }
+
   public size(): number {
     return this.data.length;
   }

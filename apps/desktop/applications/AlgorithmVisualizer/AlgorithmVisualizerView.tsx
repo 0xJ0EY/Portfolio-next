@@ -9,6 +9,7 @@ export type AlgorithmSubView = (
   'bubble-sort' |
   'merge-sort' |
   'bogo-sort' |
+  'heap-sort' |
   'quick-sort' 
 );
 
@@ -24,6 +25,7 @@ const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { load
 const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: () => <>loading</>});
 const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: () => <>loading</>});
 const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loading: () => <>loading</>});
+const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: () => <>loading</>});
 
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
@@ -32,6 +34,7 @@ function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Eleme
     case 'bogo-sort': return <BogoSortLoader {...params} />;
     case 'merge-sort': return <MergeSortLoader {...params} />;
     case 'quick-sort': return <QuickSortLoader {...params} />;
+    case 'heap-sort': return <HeapSortLoader {...params} />;
   }
 
   return <>No subview found</>;
