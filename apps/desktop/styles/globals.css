@@ -23,6 +23,7 @@ html, body {
   box-sizing: border-box;
 }
 
+.xl-system-button,
 .system-button,
 .header-button {
   border-radius: 0;
@@ -31,7 +32,7 @@ html, body {
   border: none;
   color: #000;
   background-color: #dcdcdc;
-  font-size: 0.8em;
+  font-size: 0.85em;
   box-shadow: inset -1px -1px #535353,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
   user-select: none;
   cursor: pointer;
@@ -39,6 +40,13 @@ html, body {
   font-family: 'Noto Serif Toto', sans-serif;
 }
 
+.xl-system-button {
+  line-height: 18px;
+  padding: 7px;
+  font-size: 0.9em;
+}
+
+.xl-system-button img,
 .system-button img {
   height: 16px;
 }
@@ -67,22 +75,26 @@ html, body {
   padding: 3px 4px 3px;
 }
 
+.xl-system-button img,
 .system-button img,
 .header-button img {
   user-select: none;
 }
 
+.xl-system-button:hover,
 .system-button:hover,
 .header-button:hover {
   background-color: #c9c9c9;
 }
 
+.xl-system-button:active,
 .system-button:active,
 .header-button:active {
   background-color: #dcdcdc;
   box-shadow: inset -1px -1px #fff,inset 1px 1px #535353,inset -2px -2px #dfdfdf,inset 2px 2px grey
 }
 
+.xl-system-button:disabled,
 .system-button:disabled,
 .header-button:disabled {
   background-color: #dcdcdc;
@@ -92,6 +104,7 @@ html, body {
   color: grey;
 }
 
+.xl-system-button:disabled img,
 .system-button:disabled img {
   opacity: 0.6;
 }

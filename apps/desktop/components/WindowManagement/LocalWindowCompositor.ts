@@ -1,4 +1,6 @@
-import { WindowCompositor, WindowConfig, Window } from "./WindowCompositor";
+import { Action } from "../util";
+import { WindowCompositor, WindowConfig, Window, FilterPredicate } from "./WindowCompositor";
+import { WindowEvent, WindowEventHandler, toSingleWindowEvent } from "./WindowEvents";
 
 export class LocalWindowCompositor {
 
@@ -16,6 +18,31 @@ export class LocalWindowCompositor {
     this.instances[window.id] = window;
 
     return window;
+  }
+
+  public subscribe(windowId: number, handler: WindowEventHandler): Action<void> {
+    function filterOnWindowId(evt: WindowEvent): boolean {
+      const event = toSingleWindowEvent(evt);
+
+      if (!event) { return false; }
+
+      return event.windowId == windowId;
+    }
+
+    return this.compositor.subscribeWithFilter(filterOnWindowId, handler)
+  }
+
+  public subscribeWithFilter(windowId: number, predicate: FilterPredicate, handler: WindowEventHandler): Action<void> {
+    function filterOnWindowIdAndPredicate(evt: WindowEvent): boolean {
+      const event = toSingleWindowEvent(evt);
+
+      if (!event) { return false; }
+      if (event.windowId !== windowId) { return false; }
+
+      return predicate(evt);
+    }
+
+    return this.compositor.subscribeWithFilter(filterOnWindowIdAndPredicate, handler);
   }
 
   public getById(windowId: number): Window | null {

@@ -16,6 +16,7 @@ import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
 import { contactConfig } from "@/applications/Contract/Contact";
 import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 import { skillsConfig } from "@/applications/Skills/Skills";
+import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/AlgorithmVisualizer";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -244,6 +245,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
+  const algoViz = fileSystem.addApplication(algorithmVisualizerConfig);
   const doom = fileSystem.addApplication(doomConfig);
   fileSystem.addApplication(imageViewerConfig);
   fileSystem.addApplication(skillsConfig);
@@ -266,6 +268,11 @@ export function createBaseFileSystem(): FileSystem {
   if (doom.ok) {
     const doomShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Play Doom' };
     fileSystem.addHyperLink(desktop, doom.value, 'Doom', doomShortcutIcon, true);
+  }
+
+  if (algoViz.ok) {
+    const algoVizShortcutIcon = { src: '/icons/algorithm-visualizer-icon.png', alt: 'Start Algorithm Visualizer' };
+    fileSystem.addHyperLink(desktop, algoViz.value, 'Algorithms', algoVizShortcutIcon, true);
   }
 
   const readmeText = `Hey, welcome to my portfolio website!

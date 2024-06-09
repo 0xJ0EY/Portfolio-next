@@ -5,6 +5,8 @@ export type WindowCreateEvent = {
 
 export type WindowUpdateEvent = {
   event: 'update_window',
+  moved: boolean,
+  resized: boolean,
   windowId: number
 }
 
@@ -34,9 +36,11 @@ export const CreateWindowEvent = (windowId: number): WindowCreateEvent => {
   }
 }
 
-export const UpdateWindowEvent = (windowId: number): WindowUpdateEvent => {
+export const UpdateWindowEvent = (windowId: number, moved: boolean, resized: boolean): WindowUpdateEvent => {
   return {
     event: 'update_window',
+    moved,
+    resized,
     windowId
   }
 }
@@ -68,5 +72,20 @@ export const DestroyWindowEvent = (windowId: number): WindowDestroyEvent => {
   }
 }
 
-export type WindowEvent = WindowCreateEvent | WindowUpdateEvent | WindowMinimizeEvent | WindowMaximizeEvent | WindowsUpdateEvent | WindowDestroyEvent;
+export function toSingleWindowEvent(evt: WindowEvent): SingleWindowEvent | null {
+  switch (evt.event) {
+    case 'create_window':
+    case 'update_window':
+    case 'minimize_window':
+    case 'maximize_window':
+      return evt as SingleWindowEvent;
+    default:
+      return null;
+  }
+}
+
+export type SingleWindowEvent = WindowCreateEvent | WindowUpdateEvent | WindowMinimizeEvent | WindowMaximizeEvent | WindowDestroyEvent;
+export type MultiWindowEvent = WindowsUpdateEvent;
+export type WindowEvent = SingleWindowEvent | MultiWindowEvent;
+
 export type WindowEventHandler = (evt: WindowEvent) => void

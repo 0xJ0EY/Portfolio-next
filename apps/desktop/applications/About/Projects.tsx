@@ -2,6 +2,7 @@ import { SubViewNavigation, SubViewParams } from "./AboutView";
 import styles from './AboutView.module.css';
 import Image from 'next/image';
 
+
 function ProjectImage(props: { src: string, alt: string, label?: string, labelNumber?: number }) {
   const { src, alt, label, labelNumber } = props;
 
@@ -45,22 +46,73 @@ function ProjectPage(props: { title: string, params: SubViewParams, content: JSX
   }
 
   const content = params.language === 'nl' ? dutchContent() : englishContent();
+  const backToProjects = params.language === 'nl' ? 'Terug naar projecten' : 'Back to projects';
 
   return (<>
     <div data-subpage className={styles['subpage']}>
       { SubViewNavigation(params) }
       <div data-subpage-content className={styles['subpage-content']}>
         <h1>{props.title}</h1>
-        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>Back to projects</button>
+        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>{backToProjects}</button>
         { props.content }
 
         <h3>Contact</h3>
         { content.contact }
 
-        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>Back to projects</button>
+        <button onClick={() => params.changeParent('projects')} className={styles['button-link']}>{backToProjects}</button>
       </div>
     </div>
   </>);
+}
+
+export function ProjectRedisClone(params: SubViewParams) {
+  function RenderEnglishContent() {
+    return (
+      <div>
+        <p>In 2024 I came across a website (<a href="https://codecrafters.io" target="blank" rel="noreferrer">codecrafters.io</a>) where you could create programming challenges, these challenges consist of rebuilding applications that are used in the read world.</p>
+
+        <p>While creating these applications you will learn about different concepts and how to apply these concepts in your own application.</p>
+
+        <p>One of the reasons I decided to build a coderafters challenge was to demonstrate my familiarity with building more complex applications, in system level programming languages.</p>
+
+        <p>The application I chose to recreate was a Redis server. Redis is a distributed key-value database. This meant that I had to build the database logic but also the logic needed to synchronize different instances of the database.</p>
+
+        <p>After working on the Redis server for about two weeks, I had a version that passed all of the codecrafters' test cases.</p>
+        
+        <h3>Technology</h3>
+        <p>
+          Rust<br/> 
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/codecrafters-redis-rust">Link</a> to the code of the project.
+        </p>
+      </div>
+    );
+  }
+
+  function RenderDutchContent() {
+    return (
+      <div>
+        <p>In 2024 kwam ik achter een website (<a href="https://codecrafters.io" target="blank" rel="noreferrer">codecrafters.io</a>) waar je programmeer uitdagingen kan maken. Deze uitdagingen bestaan uit het opnieuw bouwen van applicaties die in de werkelijkheid worden gebruikt.</p>
+
+        <p>Tijdens het maken van deze applicaties leer je van verschillende concepten af, en hoe je deze concepten toe moet passen in je eigen applicatie.</p>
+
+        <p>Een van de redenen waarom ik besloot om een coderafters uitdaging te bouwen, was om te aan te tonen dat ik bekend ben met het bouwen van complexere applicaties, in system level programmeer talen.</p>
+
+        <p>De applicatie waar ik voor koos om na te bouwen was een Redis server. Redis is een distributed key-value database. Dit betekende dat ik de database logica moest bouwen maar ook de logica benodigd om verschillende instanties van de database te synchroniseren.</p>
+
+        <p>Na een ongeveer twee weken aan de Redis server hebben gewerkt, had ik een versie die door alle test cases van codecrafters heen kwam.</p>
+
+        <h3>Technologie</h3>
+        <p>
+          Rust<br/> 
+          <a target="blank" rel="noreferrer" href="https://github.com/0xJ0EY/codecrafters-redis-rust">Link</a> naar de code van het project.
+        </p>
+      </div>
+    );
+  }
+
+  let content = params.language === 'nl' ? RenderDutchContent() : RenderEnglishContent();
+
+  return ProjectPage({title: 'Redis clone', content, params});
 }
 
 export function ProjectPortfolio2024(params: SubViewParams) {

@@ -245,7 +245,11 @@ export function SceneLoader() {
     if (loadingProgress.isDoneLoading()) {
       if (!isDebug()) {
         setTimeout(() => { setShowProgress(false); }, 100);
-        setTimeout(() => { setLoadingUnderscore(false); }, 700);
+        setTimeout(() => { setLoadingUnderscore(false);
+          // If a user has a mobile phone with a small screen, display the warning
+          // Otherwise we just hide it
+          if (!isMobileDevice()) { setShowMessage(false); }
+         }, 700);
       } else {
         setShowMessage(false);
         setShowProgress(false);

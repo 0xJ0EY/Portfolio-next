@@ -180,6 +180,13 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   function onPointerMove(evt: PointerEvent) {
     if (!isDown.current) { return; }
 
+    const original = {
+      x: windowData.x,
+      y: windowData.y,
+      height: windowData.height,
+      width: windowData.width,
+    };
+
     const windowMinHeight = windowData.minimalHeight;
     const windowMinWidth = windowData.minimalWidth;
 
@@ -237,7 +244,10 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
       }
     }
 
-    windowCompositor.update(windowData);
+    const moved = original.x !== windowData.x || original.y !== windowData.y;
+    const resized = original.height !== windowData.height || original.width !== windowData.width;
+
+    windowCompositor.update(windowData, { moved, resized });
   }
 
   function onPointerMoveOnElement(evt: PointerEvent) {

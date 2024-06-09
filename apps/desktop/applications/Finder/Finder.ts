@@ -42,7 +42,7 @@ export class Finder extends Application {
   private openNewWindow(path: string) {
     const window = this.compositor.open({
       x: 100,
-      y: 100,
+      y: 80,
       height: 400,
       width: 670,
       title: `Finder`,
