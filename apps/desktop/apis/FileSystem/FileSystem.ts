@@ -271,7 +271,7 @@ export function createBaseFileSystem(): FileSystem {
   }
 
   if (algoViz.ok) {
-    const algoVizShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Start Algorithm Visualizer' };
+    const algoVizShortcutIcon = { src: '/icons/algorithm-visualizer-icon.png', alt: 'Start Algorithm Visualizer' };
     fileSystem.addHyperLink(desktop, algoViz.value, 'Algorithms', algoVizShortcutIcon, true);
   }
 
