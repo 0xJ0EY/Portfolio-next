@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { SortView, SortViewEntry, verifySort } from "./SortingView";
 import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRightToLeft } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
-import styles from "./SortingStyles.module.css";
 import { DataGenerationEntriesInput, DataGenerationStrategyDropDown } from "../Home/Home";
 import { SubViewParams } from "../AlgorithmVisualizerView";
+import styles from "./AlgorithmContainer.module.css";
 
 export type AlgorithmOptions = {
   dataGenerationStrategy: DataGenerationStrategy,
@@ -59,8 +59,8 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     function onResize() {
       const current = parent.current!;
 
-      const width = current.clientWidth;
-      const height = width / (16/9);
+      const width = current.scrollWidth;
+      const height = width / (16/8);
 
       barGraph.resize(width, height);
     }
@@ -150,29 +150,35 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     graph.current.render();
   }
 
-  const actionButton = isSorting ? <button onClick={onStop}>Stop</button> : <button onClick={onStart}>Start</button>;
+  const actionButton = isSorting ? <button className="xl-system-button" onClick={onStop}>Stop</button> : <button className="xl-system-button" onClick={onStart}>Start</button>;
 
   return (
     <div className={styles['parent']} ref={parent}>
-      <canvas ref={graphRef}></canvas>
-      <h3>{title}</h3>
+      <canvas className={styles['algo-visualization']} ref={graphRef}></canvas>
 
-      <button onClick={() => params.changeParent('home')}>Back to projects</button>
+      <div className={styles['data-container']}>
+        <h3>{title}</h3>
 
-      {actionButton}
-      
-      <hr />
+        <div>
+          {actionButton}
+        </div>
 
-      <button className="system-button" onClick={regenerate} disabled={isSorting}>Regenerate</button>
+        <hr />
 
-      <div>
-        <label htmlFor="data-generation-strategy">Data generation strategy</label>
-        { DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy) }
-      </div>
+        <button className="system-button" onClick={regenerate} disabled={isSorting}>Regenerate</button>
 
-      <div>
-        <label htmlFor="generated-data-size">Generated data points</label>
-        { DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }
+        <table>
+          <tr>
+            <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
+            <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy) }</td>
+          </tr>
+          <tr>
+            <td><label htmlFor="generated-data-size">Generated data points</label></td>
+            <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
+          </tr>
+        </table>
+
+        <button className={styles['button-link']} onClick={() => params.changeParent('home')}>Back to projects</button>
       </div>
     </div>
   );

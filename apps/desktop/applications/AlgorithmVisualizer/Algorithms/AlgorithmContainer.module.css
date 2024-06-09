@@ -1,0 +1,28 @@
+.parent {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.data-container {
+  padding: 1rem;
+}
+
+.algo-visualization {
+  width: 100%;
+}
+
+.button-link {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  color: blue;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.button-link:hover {
+  text-decoration: underline;
+}

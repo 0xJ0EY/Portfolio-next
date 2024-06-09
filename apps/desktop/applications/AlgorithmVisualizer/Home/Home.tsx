@@ -1,6 +1,7 @@
 import { KeyboardEvent, KeyboardEventHandler, useState } from "react";
 import { AlgorithmSubView, SubViewParams } from "../AlgorithmVisualizerView";
-import styles from './../AlgorithmVisualizerView.module.css';
+
+import styles from './Home.module.css';
 import { AlgorithmOptions, DataGenerationStrategy } from "../Algorithms/AlgorithmContainer";
 
 export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, onChange: (strategy: DataGenerationStrategy) => void) {
@@ -79,6 +80,7 @@ export function DataGenerationEntriesInput(value: number | null, onChange: (entr
       onKeyDown={(evt) => filterInput(evt)}
       value={safeValue}
       min={1}
+      style={{ width: '80px' }}
       onChange={(evt) => onInputChange(evt.target.value)}
     />
   );
@@ -95,14 +97,14 @@ export default function HomeSubView(params: SubViewParams) {
       };
 
       return (<>
-        <button className={`${styles['project-button']} system-button`} onClick={() => params.changeParent(target, options) }>
+        <button className={`${styles['project-button']} xl-system-button`} onClick={() => params.changeParent(target, options) }>
           <span>{name}</span>
         </button>
       </>);
     }
   
     return (<>
-      <div data-subpage className={styles['subpage']}>
+      <div data-subpage className={`${styles['subpage']} ${styles['home-page']}`}>
         <div data-subpage-content>
           <h1>Sorting</h1>
           {NavigationButton('Bubble sort', 'bubble-sort')}
@@ -110,17 +112,19 @@ export default function HomeSubView(params: SubViewParams) {
           {NavigationButton('Merge sort', 'merge-sort')}
           {NavigationButton('Quick sort', 'quick-sort')}
   
-          <h3>Options</h3>
+          <h3>Sorting options</h3>
 
-          <div>
-            <label htmlFor="data-generation-strategy">Data generation strategy</label>
-            { DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }
-          </div>
+          <table>
+            <tr>
+              <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
+              <td>{ DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }</td>
+            </tr>
 
-          <div>
-            <label htmlFor="generated-data-size">Generated data points</label>
-            { DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }
-          </div>
+            <tr>
+              <td><label htmlFor="generated-data-size">Generated data points</label></td>
+              <td>{ DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }</td>
+            </tr>
+          </table>
         </div>
       </div>
     </>);

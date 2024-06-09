@@ -42,7 +42,7 @@ export class AlgorithmVisualizer extends Application {
 
     const y       = 90;
     const width   = 700;
-    const height  = 600;
+    const height  = 650;
     const x       = (window.innerWidth - width) / 2;
 
     if (event.kind === 'application-open') {

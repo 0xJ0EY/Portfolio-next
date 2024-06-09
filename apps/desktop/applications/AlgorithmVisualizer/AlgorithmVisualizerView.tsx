@@ -2,6 +2,7 @@ import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AlgorithmOptions, DataGenerationStrategy } from './Algorithms/AlgorithmContainer';
+import styles from './AlgorithmVisualizerView.module.css';
 
 export type AlgorithmSubView = (
   'home' |
