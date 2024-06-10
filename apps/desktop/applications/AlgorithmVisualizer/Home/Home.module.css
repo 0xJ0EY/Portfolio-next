@@ -1,0 +1,12 @@
+.subpage {
+  display: flex;
+  height: 100%;
+}
+
+.home-page {
+  padding: 1rem;
+}
+
+.home-page h3 {
+  padding-top: 1rem;
+}

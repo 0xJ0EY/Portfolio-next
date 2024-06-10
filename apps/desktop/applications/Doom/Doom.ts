@@ -42,8 +42,8 @@ export class DoomApplication extends Application {
     return this.compositor.open({
       x: 200,
       y: 200,
-      height: 400,
-      width: 400,
+      height: 398,
+      width: 580,
       title: `Doom`,
       application: this,
       args: event.args,
