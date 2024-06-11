@@ -36,6 +36,7 @@ export default function SkillsView(props: WindowProps) {
               <li><SkillEntry language="Swift" icon={{src: '/icons/skills/swift.svg', alt: 'Swift' }} /></li>
               <li><SkillEntry language="Rust" icon={{src: '/icons/skills/rust.svg', alt: 'Rust' }} /></li>
               <li><SkillEntry language="C / C++" icon={{src: '/icons/skills/c.svg', alt: 'C' }} /></li>
+              <li><SkillEntry language="C#" icon={{src: '/icons/skills/c-sharp.svg', alt: 'C#' }} /></li>
               <li><SkillEntry language="Java" icon={{src: '/icons/skills/java.svg', alt: 'Java' }} /></li>
               <li><SkillEntry language="Python" icon={{src: '/icons/skills/python.svg', alt: 'Python' }} /></li>
               <li><SkillEntry language="HTML/CSS" icon={{src: '/icons/skills/html.svg', alt: 'HTML5' }} /></li>
@@ -53,6 +54,7 @@ export default function SkillsView(props: WindowProps) {
             <h1>{ t("skills.databases") }</h1>
             <ul>
               <li><SkillEntry language="PostgreSQL" icon={{src: '/icons/skills/postgresql.svg', alt: 'PostgreSQL' }} /></li>
+              <li><SkillEntry language="MS SQL" icon={{src: '/icons/skills/mssql.svg', alt: 'Microsoft SQL Server' }} /></li>
               <li><SkillEntry language="MariaDB" icon={{src: '/icons/skills/mariadb.svg', alt: 'MariaDB' }} /></li>
             </ul>
 
