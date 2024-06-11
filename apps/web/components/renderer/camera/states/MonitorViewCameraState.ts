@@ -108,7 +108,7 @@ export class MonitorViewCameraState extends CameraState {
     const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
     this.manager.emitUserInteractionEvent(cancelEvent);
 
-    this.manager.changeState(CameraHandlerState.DeskView);
+    this.manager.changeState(CameraHandlerState.FreeRoam);
   }
 
   private handleMouseMove(data: MouseData): void {

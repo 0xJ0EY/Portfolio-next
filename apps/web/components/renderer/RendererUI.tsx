@@ -95,10 +95,7 @@ function NameAndTime(props: {
 
   const [done, setDone] = useState(false);
 
-  const isActive = (
-    state === CameraHandlerState.DeskView ||
-    state === CameraHandlerState.FreeRoam
-  );
+  const isActive = state === CameraHandlerState.FreeRoam;
 
   function formatTime(dateTime: Date): string {
     const hours   = String(dateTime.getHours()).padStart(2, '0');
