@@ -5,6 +5,7 @@ import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import { DataGenerationEntriesInput, DataGenerationStrategyDropDown } from "../Home/Home";
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import styles from "./AlgorithmContainer.module.css";
+import { useTranslation } from "react-i18next";
 
 export type AlgorithmOptions = {
   dataGenerationStrategy: DataGenerationStrategy,
@@ -32,6 +33,8 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
   const { entrypoint, params, title } = props;
 
   const apis = params.windowProps.application.apis;
+
+  const { t } = useTranslation('common');
 
   const [dataGenStrategy, setDataGenStrategy] = useState(props.options.dataGenerationStrategy);
   const [amountOfEntries, setAmountOfEntries] = useState<number | null>(props.options.amountOfEntries);
@@ -150,7 +153,7 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     graph.current.render();
   }
 
-  const actionButton = isSorting ? <button className="xl-system-button" onClick={onStop}>Stop</button> : <button className="xl-system-button" onClick={onStart}>Start</button>;
+  const actionButton = isSorting ? <button className="xl-system-button" onClick={onStop}>{t('algorithms.stop')}</button> : <button className="xl-system-button" onClick={onStart}>{t('algorithms.start')}</button>;
 
   return (
     <div className={styles['parent']} ref={parent}>
@@ -165,22 +168,22 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
 
         <hr />
 
-        <button className="system-button" onClick={regenerate} disabled={isSorting}>Regenerate</button>
+        <button className="system-button" onClick={regenerate} disabled={isSorting}>{t('algorithms.regenerate')}</button>
 
         <table>
           <tbody>
             <tr>
-              <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
-              <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy) }</td>
+            <td><label htmlFor="data-generation-strategy">{t('algorithms.data_generation_strategy')}</label></td>
+              <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy, t) }</td>
             </tr>
             <tr>
-              <td><label htmlFor="generated-data-size">Generated data points</label></td>
+            <td><label htmlFor="generated-data-size">{t('algorithms.data_generation_points')}</label></td>
               <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
             </tr>
           </tbody>
         </table>
 
-        <button className={styles['button-link']} onClick={() => params.changeParent('home')}>Back to projects</button>
+        <button className={styles['button-link']} onClick={() => params.changeParent('home')}>{t('algorithms.return_to_overview')}</button>
       </div>
     </div>
   );

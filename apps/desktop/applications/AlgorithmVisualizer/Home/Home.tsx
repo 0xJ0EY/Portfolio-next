@@ -3,8 +3,11 @@ import { AlgorithmSubView, SubViewParams } from "../AlgorithmVisualizerView";
 
 import styles from './Home.module.css';
 import { AlgorithmOptions, DataGenerationStrategy } from "../Algorithms/AlgorithmContainer";
+import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
-export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, onChange: (strategy: DataGenerationStrategy) => void) {
+
+export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, onChange: (strategy: DataGenerationStrategy) => void, t: TFunction) {
   type DataGenEntry = {
     title: string,
     strategy: DataGenerationStrategy
@@ -12,15 +15,15 @@ export function DataGenerationStrategyDropDown(value: DataGenerationStrategy, on
 
   const entries: DataGenEntry[] = [
     {
-      title: 'Randomly distributed',
+      title: t('algorithms.data_generation_options.randomly_distributed'),
       strategy: 'randomly-distributed'
     },
     {
-      title: 'Sorted left to right',
+      title: t('algorithms.data_generation_options.sorted_left_to_right'),
       strategy: 'sorted-left-to-right'
     },
     {
-      title: 'Sorted right to left',
+      title: t('algorithms.data_generation_options.sorted_right_to_left'),
       strategy: 'sorted-right-to-left'
     }
   ];
@@ -90,6 +93,8 @@ export function DataGenerationEntriesInput(value: number | null, onChange: (entr
 export default function HomeSubView(params: SubViewParams) {
     const [dataGenerationStrategy, setDataGenerationStrategy] = useState<DataGenerationStrategy>("randomly-distributed");
     const [dataGenerationEntries, setDataGenerationEntries] = useState<number | null>(50);
+
+    const { t } = useTranslation('common');
   
     function NavigationButton(name: string, target: AlgorithmSubView) {
       const options: AlgorithmOptions = {
@@ -114,17 +119,17 @@ export default function HomeSubView(params: SubViewParams) {
           {NavigationButton('Quick sort', 'quick-sort')}
           {NavigationButton('Heap sort', 'heap-sort')}
   
-          <h3>Sorting options</h3>
+          <h3>{t('algorithms.sorting_options')}</h3>
 
           <table>
             <tbody>
               <tr>
-                <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
-                <td>{ DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }</td>
+                <td><label htmlFor="data-generation-strategy">{t('algorithms.data_generation_strategy')}</label></td>
+                <td>{ DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy, t) }</td>
               </tr>
 
               <tr>
-                <td><label htmlFor="generated-data-size">Generated data points</label></td>
+                <td><label htmlFor="generated-data-size">{t('algorithms.data_generation_points')}</label></td>
                 <td>{ DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }</td>
               </tr>
             </tbody>

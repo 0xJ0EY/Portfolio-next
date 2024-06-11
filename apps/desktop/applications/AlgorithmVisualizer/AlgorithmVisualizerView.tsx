@@ -45,7 +45,6 @@ export default function AlgorithmVisualizerView(props: WindowProps) {
 
   const [subView, setSubView] = useState<AlgorithmSubView>('home');
   const [algorithmOptions, setAlgorithmOptions] = useState<AlgorithmOptions | null>(null);
-  const apis = application.apis;
 
   const contentParent = useRef<HTMLDivElement>(null);
 

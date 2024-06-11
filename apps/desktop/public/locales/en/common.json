@@ -15,6 +15,20 @@
     "no_image_to_load": "There is no image to load. Open the application by clicking on an image",
     "loading": "Loading..."
   },
+  "algorithms": {
+    "start": "Start",
+    "stop": "Stop",
+    "regenerate": "Regenerate",
+    "return_to_overview": "Return to overview",
+    "sorting_options": "Sorting options",
+    "data_generation_strategy": "Data generation strategy",
+    "data_generation_options": {
+      "randomly_distributed": "Randomly distributed",
+      "sorted_left_to_right": "Sorted left to right",
+      "sorted_right_to_left": "Sorted right to left"
+    },
+    "data_generation_points": "Data generation points"
+  },
   "contact": {
     "name": "Name",
     "email": "Email",
