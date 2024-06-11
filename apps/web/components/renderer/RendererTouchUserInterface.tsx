@@ -24,7 +24,8 @@ function MouseInteraction(data: MouseInteractionInformationData) {
     background: '#000',
     userSelect: 'none',
     pointerEvents: 'none',
-    fontFamily: 'Metropolis Medium'
+    fontFamily: 'Metropolis Medium',
+    whiteSpace: 'nowrap',
   } as React.CSSProperties;
 
   return <>
@@ -77,7 +78,7 @@ export const HandleMouseInteractionInformation = (eventBus: UserInteractionEvent
   useEffect(() => {
     let unsubscribeHandler = eventBus.subscribe(handleUserInteractionEvent);
 
-    const interval = setInterval(update, 0.5);
+    const interval = setInterval(update, 0.25);
 
     return () => {
       unsubscribeHandler();
@@ -214,7 +215,7 @@ export const HandleTouchProgressCircle = (eventBus: UserInteractionEventBus) => 
     useEffect(() => {
       let unsubscribeHandler = eventBus.subscribe(handleUserInteractionEvent);
   
-      const interval = setInterval(update, 0.5);
+      const interval = setInterval(update, 0.25);
   
       return () => {
         unsubscribeHandler();
