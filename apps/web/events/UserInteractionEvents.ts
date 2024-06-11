@@ -1,6 +1,19 @@
 import { BoundingBox } from "@/data/BoundingBox";
 import { EventBus } from "./EventBus";
 
+export class MouseInstructionData {
+  constructor(
+    public x: number,
+    public y: number,
+    public instruction: string,
+  ) {}
+
+  public static fromMouseData(data: MouseData, instruction: string) {
+    const { x, y } = data.pointerCoordinates();
+    return new MouseInstructionData(x, y, instruction);
+  }
+}
+
 export class ConfirmationData {
   constructor(
     public x: number,
@@ -28,24 +41,6 @@ export class ConfirmationData {
       callbackCancelation
     );
   }
-
-  public static fromMouseData(
-    data: MouseData,
-    durationInMS: number,
-    callbackSuccess: () => void,
-    callbackCancelation: (() => void) | null
-  ) {
-    const coords = data.pointerCoordinates();
-
-    return new ConfirmationData(
-      coords.x,
-      coords.y,
-      Date.now(),
-      durationInMS,
-      callbackSuccess,
-      callbackCancelation
-    );
-  }
 }
 
 export type TouchConfirmationEvent = {
@@ -55,7 +50,7 @@ export type TouchConfirmationEvent = {
 
 export type MouseConfirmationEvent = {
   event: 'mouse_confirmation_event',
-  data: ConfirmationData
+  data: MouseInstructionData,
 }
 
 export type CancelMouseConfirmationEvent = {
@@ -186,7 +181,7 @@ export const toUserInteractionTouchConfirmationEvent = (data: ConfirmationData):
   return { event: 'touch_confirmation_event', data };
 }
 
-export const toUserInteractionMouseConfirmationEvent = (data: ConfirmationData): MouseConfirmationEvent => {
+export const toUserInteractionMouseConfirmationEvent = (data: MouseInstructionData): MouseConfirmationEvent => {
   return { event: 'mouse_confirmation_event', data };
 }
 

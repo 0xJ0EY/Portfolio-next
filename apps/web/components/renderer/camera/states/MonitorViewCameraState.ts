@@ -2,15 +2,13 @@ import { prefersReducedMotion } from "../../util";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom, overDOMButton } from "./util";
-import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, cancelUserInteractionMouseConfirmationEvent, MouseInstructionData } from "@/events/UserInteractionEvents";
 
 export class MonitorViewCameraState extends CameraState {
 
   private isOverDisplay: (data: PointerCoordinates) => boolean;
   private panOrigin: PanOriginData | null = null;
   private wasOverDisplay: boolean = false;
-
-  private lastUserInteractionEvent: UserInteractionEvent | null = null;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -69,58 +67,33 @@ export class MonitorViewCameraState extends CameraState {
   }
 
   private updateCursor(data: MouseData): void {
-    const overDisplay = this.isOverDisplay(data);
+    const isOverDisplay = this.isOverDisplay(data);
 
-    const hasChangedOverDisplay = (): boolean => overDisplay !== this.wasOverDisplay;
+    const hasChangedOverDisplay = (): boolean => isOverDisplay !== this.wasOverDisplay;
 
-    if (overDOMButton(data.x, data.y)) {
-      const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
-      this.manager.emitUserInteractionEvent(cancelEvent);
-    }
+    const isOverDOMButton = overDOMButton(data.x, data.y);
 
-    if (overDisplay) {
+    if (isOverDisplay || isOverDOMButton) {
       this.ctx.disableWebGLPointerEvents();
       this.ctx.setCursor('auto');
 
-      if (hasChangedOverDisplay()) {
-        const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
-        this.manager.emitUserInteractionEvent(cancelEvent);
-      }
+      const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+      this.manager.emitUserInteractionEvent(cancelEvent);
+
     } else {
       this.ctx.enableWebGLPointerEvents();
       this.ctx.setCursor('pointer');
 
       if (hasChangedOverDisplay()) {
-        const onSuccess = () => {
-          this.manager.changeState(CameraHandlerState.DeskView);
-
-          // Due to a design constraint, we need to "replay" the last effect, to get a nice flowing transition
-          // Otherwise the user will have to send a new user interaction event before a nice transition is played
-          if (this.lastUserInteractionEvent) {
-            this.manager.emitUserInteractionEvent(this.lastUserInteractionEvent);
-          }
-        };
-
-        if (!prefersReducedMotion()) {
-          const confirm = ConfirmationData.fromMouseData(
-            data,
-            800,
-            onSuccess,
-            null,
-          );
-
-          const confirmEvent = toUserInteractionMouseConfirmationEvent(confirm);
-          this.manager.emitUserInteractionEvent(confirmEvent);
-        }
+        const confirmEvent = toUserInteractionMouseConfirmationEvent(MouseInstructionData.fromMouseData(data, 'Click to zoom out'));
+        this.manager.emitUserInteractionEvent(confirmEvent);
       }
     }
 
-    this.wasOverDisplay = overDisplay;
+    this.wasOverDisplay = isOverDisplay;
   }
 
   onUserEvent(data: UserInteractionEvent): void {
-    this.lastUserInteractionEvent = data;
-
     switch (data.event) {
       case 'mouse_event': return this.handleMouseEvent(data.data);
       case 'touch_event': return this.handleTouchEvent(data.data);

@@ -13,7 +13,7 @@ import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler, CameraHandlerState } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { createUIEventBus } from '@/events/UserInteractionEvents';
-import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
+import { HandleMouseInteractionInformation, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
@@ -187,7 +187,7 @@ export const Renderer = (props: RendererProps) => {
 
   const touchEvents = createUIEventBus();
 
-  const mouseProgressCircle = HandleMouseProgressCircle(touchEvents);
+  const mouseProgressCircle = HandleMouseInteractionInformation(touchEvents);
   const touchProgressCircle = HandleTouchProgressCircle(touchEvents);
 
   let then: MutableRefObject<number | null> = useRef(null);

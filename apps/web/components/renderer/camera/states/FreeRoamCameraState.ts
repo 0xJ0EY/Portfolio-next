@@ -2,7 +2,7 @@ import { Spherical, Vector3 } from "three";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, blurDesktop, constructIsOverDisplay, isMouseMoveCamera, isMouseRotateCamera, isTouchMoveCamera, isTouchRotateCamera, isTouchTap, isTouchZoom } from "./util";
-import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent } from "@/events/UserInteractionEvents";
+import { MouseData, PointerCoordinates, ConfirmationData, TouchData, UserInteractionEvent, toUserInteractionTouchConfirmationEvent, toUserInteractionMouseConfirmationEvent, MouseInstructionData, cancelUserInteractionMouseConfirmationEvent } from "@/events/UserInteractionEvents";
 
 export class FreeRoamCameraState extends CameraState {
 
@@ -12,6 +12,7 @@ export class FreeRoamCameraState extends CameraState {
   private panOrigin: PanOriginData | null = null;
 
   private isOverDisplay: (data: PointerCoordinates) => boolean;
+  private wasOverDisplay: boolean = false;
 
   constructor(manager: CameraHandler, ctx: CameraHandlerContext) {
     super(manager, ctx);
@@ -49,6 +50,7 @@ export class FreeRoamCameraState extends CameraState {
   private handleDisplayClick(data: PointerCoordinates): void {
     if (!this.isOverDisplay(data)) { return; }
 
+    this.clearMouseInstruction();
     this.manager.changeState(CameraHandlerState.MonitorView);
   }
 
@@ -121,10 +123,33 @@ export class FreeRoamCameraState extends CameraState {
     }
   }
 
+  private clearMouseInstruction(): void {
+    const cancelEvent = cancelUserInteractionMouseConfirmationEvent();
+    this.manager.emitUserInteractionEvent(cancelEvent);
+  }
+
+  private handleMouseInstruction(data: MouseData): void {
+    const isOverDisplay = this.isOverDisplay(data);
+
+    const hasChangedOverDisplay = (): boolean => isOverDisplay !== this.wasOverDisplay;
+
+    if (hasChangedOverDisplay()) {
+      if (isOverDisplay) {
+        const confirmEvent = toUserInteractionMouseConfirmationEvent(MouseInstructionData.fromMouseData(data, 'Click to zoom in'));
+        this.manager.emitUserInteractionEvent(confirmEvent);
+      } else {
+        this.clearMouseInstruction();
+      }
+    }
+
+    this.wasOverDisplay = isOverDisplay;
+  }
+
   private handleMouseMove(data: MouseData): void {
     if (isMouseRotateCamera(data)) { this.rotateCamera(data.pointerCoordinates()); }
     if (isMouseMoveCamera(data)) { this.moveCamera(data.pointerCoordinates()); }
 
+    this.handleMouseInstruction(data);
     this.updateCursor(data);
   }
 
@@ -166,6 +191,7 @@ export class FreeRoamCameraState extends CameraState {
     if (!this.isOverDisplay(data.pointerCoordinates())) { return; }
 
     const onSuccess = () => {
+      this.clearMouseInstruction();
       this.manager.changeState(CameraHandlerState.MonitorView);
     };
 
