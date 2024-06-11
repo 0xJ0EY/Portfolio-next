@@ -238,8 +238,11 @@ export function createBaseFileSystem(): FileSystem {
   if (!rootEntry.ok) { return fileSystem; }
   const root = rootEntry.value;
 
+  const applicationFolderIcon = { src: '/icons/icon-applications-folder.png', alt: 'Application folder' };
+  const documentsFolderIcon =  { src: '/icons/icon-documents-folder.png', alt: 'Documents folder' };
+
   // Create base file tree
-  const applications = fileSystem.addDirectory(root, 'Applications', false, false);
+  const applications = fileSystem.addDirectory(root, 'Applications', false, false, applicationFolderIcon);
 
   fileSystem.addApplication(finderConfig);
   fileSystem.addApplication(contactConfig);
@@ -258,12 +261,11 @@ export function createBaseFileSystem(): FileSystem {
   const joey = fileSystem.addDirectory(users, 'joey', false, false);
 
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
-  const documents = fileSystem.addDirectory(joey, 'Documents', false, true);
+  const documents = fileSystem.addDirectory(joey, 'Documents', false, true, documentsFolderIcon);
   const trashCanIcon = { src: '/icons/trash-icon.png', alt: 'Trash can icon' };
   const trash = fileSystem.addDirectory(joey, 'Trash', false, true, trashCanIcon);
 
-  const applicationShortcutIcon = { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
-  fileSystem.addHyperLink(desktop, applications, 'Applications', applicationShortcutIcon, true);
+  fileSystem.addHyperLink(desktop, applications, 'Applications', applicationFolderIcon, true);
 
   if (doom.ok) {
     const doomShortcutIcon = { src: '/icons/doom-icon.png', alt: 'Play Doom' };
