@@ -168,14 +168,16 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
         <button className="system-button" onClick={regenerate} disabled={isSorting}>Regenerate</button>
 
         <table>
-          <tr>
-            <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
-            <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy) }</td>
-          </tr>
-          <tr>
-            <td><label htmlFor="generated-data-size">Generated data points</label></td>
-            <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
+              <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy) }</td>
+            </tr>
+            <tr>
+              <td><label htmlFor="generated-data-size">Generated data points</label></td>
+              <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
+            </tr>
+          </tbody>
         </table>
 
         <button className={styles['button-link']} onClick={() => params.changeParent('home')}>Back to projects</button>

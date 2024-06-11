@@ -117,15 +117,17 @@ export default function HomeSubView(params: SubViewParams) {
           <h3>Sorting options</h3>
 
           <table>
-            <tr>
-              <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
-              <td>{ DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td><label htmlFor="data-generation-strategy">Data generation strategy</label></td>
+                <td>{ DataGenerationStrategyDropDown(dataGenerationStrategy, setDataGenerationStrategy) }</td>
+              </tr>
 
-            <tr>
-              <td><label htmlFor="generated-data-size">Generated data points</label></td>
-              <td>{ DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }</td>
-            </tr>
+              <tr>
+                <td><label htmlFor="generated-data-size">Generated data points</label></td>
+                <td>{ DataGenerationEntriesInput(dataGenerationEntries, setDataGenerationEntries) }</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
