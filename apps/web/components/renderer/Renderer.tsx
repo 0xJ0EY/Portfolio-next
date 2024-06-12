@@ -4,7 +4,6 @@ import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMSh
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, prefersReducedMotion, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
