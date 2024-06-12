@@ -30,11 +30,13 @@ export class CinematicCameraState extends UpdatableCameraState {
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
-    rotation.theta = 0.0;
+    rotation.theta = this.calculateRotation(this.progress);
 
     const zoom = 10.0;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, 0);
+    const delay = this.ctx.isInitialScene() ? 0 : 500;
+
+    this.ctx.cameraController.transition(position, rotation, zoom, delay);
     this.ctx.setCursor('pointer');
   }
 

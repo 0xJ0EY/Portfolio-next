@@ -175,7 +175,7 @@ function UserInteractionButtons(props: {
         !isActive ? styles['fade-out'] : null
       ])}>
         <SoundManagementButton sound={sound}/>
-        <ChangeSceneButton targetState={state === CameraHandlerState.Cinematic ? CameraHandlerState.MonitorView : CameraHandlerState.FreeRoam} cameraHandler={cameraHandler}/>
+        <ChangeSceneButton targetState={state === CameraHandlerState.Cinematic ? CameraHandlerState.MonitorView : CameraHandlerState.Cinematic} cameraHandler={cameraHandler}/>
     </div>
   </>);
 }

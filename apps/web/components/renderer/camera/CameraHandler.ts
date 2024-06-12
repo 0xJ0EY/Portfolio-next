@@ -8,6 +8,9 @@ import { Scene } from "three";
 import { CinematicCameraState } from "./states/CinematicCameraState";
 
 export class CameraHandlerContext {
+
+  private initialScene = true;
+
   constructor(
     private _cameraController: CameraController,
     private _webglNode: HTMLElement,
@@ -23,6 +26,14 @@ export class CameraHandlerContext {
 
   get scene(): Scene {
     return this._cameraController.getScene();
+  }
+
+  public transitionScene(): void {
+    this.initialScene = false;
+  }
+
+  public isInitialScene(): boolean {
+    return this.initialScene;
   }
 
   public setCursor(style: string): void {
@@ -88,6 +99,8 @@ export class CameraHandler {
 
     this.state = this.stateToInstance(state);
     this.state.transition();
+
+    this.getContext().transitionScene();
 
     if (this.onChangeState) { this.onChangeState(state); }
   }
