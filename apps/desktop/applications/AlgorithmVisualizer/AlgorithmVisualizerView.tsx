@@ -19,13 +19,14 @@ export type SubViewParams = {
   algorithmOptions: AlgorithmOptions | null;
 }
 
+function Loader() { return <></> }
 
-const HomeLoader = dynamic(() => import('./Home/Home'), { loading: () => <>loading</>});
-const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: () => <>loading</>});
-const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: () => <>loading</>});
-const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: () => <>loading</>});
-const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loading: () => <>loading</>});
-const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: () => <>loading</>});
+const HomeLoader = dynamic(() => import('./Home/Home'), { loading: Loader });
+const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: Loader });
+const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: Loader });
+const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: Loader });
+const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loading: Loader });
+const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: Loader });
 
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
