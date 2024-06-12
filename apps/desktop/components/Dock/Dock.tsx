@@ -222,7 +222,7 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
       kind: 'directory',
       title: 'Applications',
       path: '/Applications',
-      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      icon:  { src: '/icons/icon-applications-folder.png', alt: 'File icon' },
       onClick: () => onClickDirectory('/Applications'),
     });
     
@@ -230,7 +230,7 @@ export function Dock(props: { apis: SystemAPIs, manager: ApplicationManager, win
       kind: 'directory',
       title: 'Documents',
       path: '/Users/joey/Documents',
-      icon:  { src: '/icons/folder-icon.png', alt: 'File icon' },
+      icon:  { src: '/icons/icon-documents-folder.png', alt: 'File icon' },
       onClick: () => onClickDirectory('/Users/joey/Documents'),
     });
 

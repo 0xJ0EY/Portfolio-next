@@ -6,9 +6,11 @@ import { UserInteractionEvent, UserInteractionEventBus } from "@/events/UserInte
 import { UnsubscribeHandler } from "@/events/EventBus";
 import { Scene } from "three";
 import { CinematicCameraState } from "./states/CinematicCameraState";
-import { DeskViewCameraState } from "./states/DeskViewCameraState";
 
 export class CameraHandlerContext {
+
+  private initialScene = true;
+
   constructor(
     private _cameraController: CameraController,
     private _webglNode: HTMLElement,
@@ -24,6 +26,14 @@ export class CameraHandlerContext {
 
   get scene(): Scene {
     return this._cameraController.getScene();
+  }
+
+  public transitionScene(): void {
+    this.initialScene = false;
+  }
+
+  public isInitialScene(): boolean {
+    return this.initialScene;
   }
 
   public setCursor(style: string): void {
@@ -43,7 +53,6 @@ export enum CameraHandlerState {
   FreeRoam,
   MonitorView,
   Cinematic,
-  DeskView,
 }
 
 export class CameraHandler {
@@ -56,16 +65,10 @@ export class CameraHandler {
     cameraController: CameraController,
     webglNode: HTMLElement,
     private userInteractionEventBus: UserInteractionEventBus,
-    userPrefersReducedMotion: boolean,
     private onChangeState?: (state: CameraHandlerState) => void
   ) {
     this.ctx = new CameraHandlerContext(cameraController, webglNode);
-
-    if (userPrefersReducedMotion) {
-      this.state = this.stateToInstance(CameraHandlerState.MonitorView)!;
-    } else {
-      this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
-    }
+    this.state = this.stateToInstance(CameraHandlerState.Cinematic)!;
 
     this.state.transition();
 
@@ -81,7 +84,6 @@ export class CameraHandler {
       case CameraHandlerState.FreeRoam: return new FreeRoamCameraState(this, this.ctx);
       case CameraHandlerState.MonitorView: return new MonitorViewCameraState(this, this.ctx);
       case CameraHandlerState.Cinematic: return new CinematicCameraState(this, this.ctx);
-      case CameraHandlerState.DeskView: return new DeskViewCameraState(this, this.ctx);
       default: throw new Error("unsupported state");
     }
   }
@@ -97,6 +99,8 @@ export class CameraHandler {
 
     this.state = this.stateToInstance(state);
     this.state.transition();
+
+    this.getContext().transitionScene();
 
     if (this.onChangeState) { this.onChangeState(state); }
   }

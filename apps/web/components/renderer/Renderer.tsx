@@ -4,7 +4,6 @@ import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMSh
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, prefersReducedMotion, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
@@ -13,7 +12,7 @@ import { MouseInputHandler } from './camera/MouseInputHandler';
 import { CameraHandler, CameraHandlerState } from './camera/CameraHandler';
 import { TouchInputHandler } from './camera/TouchInputHandler';
 import { createUIEventBus } from '@/events/UserInteractionEvents';
-import { HandleMouseProgressCircle, HandleTouchProgressCircle } from './RendererTouchUserInterface';
+import { HandleMouseInteractionInformation, HandleTouchProgressCircle } from './RendererTouchUserInterface';
 import { parseRequestFromChild, sendMessageToChild } from "rpc";
 import { RendererUI } from './RendererUI';
 import { SoundService } from './sound/SoundService';
@@ -187,7 +186,7 @@ export const Renderer = (props: RendererProps) => {
 
   const touchEvents = createUIEventBus();
 
-  const mouseProgressCircle = HandleMouseProgressCircle(touchEvents);
+  const mouseProgressCircle = HandleMouseInteractionInformation(touchEvents);
   const touchProgressCircle = HandleTouchProgressCircle(touchEvents);
 
   let then: MutableRefObject<number | null> = useRef(null);
@@ -218,14 +217,11 @@ export const Renderer = (props: RendererProps) => {
     disableTouchInteraction(cssRenderNode);
     disableTouchInteraction(webglRenderNode);
 
-    const userPrefersReducedMotion = prefersReducedMotion();
-
     const cameraController  = new CameraController(camera, scene, cutoutScene);
     const cameraHandler     = new CameraHandler(
       cameraController,
       webglRenderNode,
       touchEvents,
-      userPrefersReducedMotion,
       handleCameraHandlerStateChange,
     );
     const mouseInputHandler = new MouseInputHandler(allowUserInput, cameraHandler);
