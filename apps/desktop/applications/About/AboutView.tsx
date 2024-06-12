@@ -227,6 +227,8 @@ function ExperienceSubView(params: SubViewParams) {
   const t = params.translate;
 
   function dutchContent() {
+    const freelance = (<></>);
+
     const bpi = (<>
       <p>Toen ik voor het eerst als stagiair bij BPI kwam, werd ik op het ID Flow team geplaatst. Het toenmalig doel was om het product beter toepasbaar te maken op verschillende soorten klant processen. Dit was gedaan door de statische proces flow van de applicatie configureerbaar te maken. Hiervoor hebben een collega en ik samen de Flow Manager ontworpen, ontwikkeld en geïmplementeerd. De Flow Manager is een drag and drop implementatie voor het configureren van de proces flow aan het gewenste business proces.</p>
 
@@ -270,10 +272,22 @@ function ExperienceSubView(params: SubViewParams) {
       <p>PHP, jQuery en Git</p>
     </>);
 
-    return { bpi, ing, floro }
+    return { freelance, bpi, ing, floro }
   }
 
   function englishContent() {
+
+    const freelance = (<>
+      <p>In late 2023 I had the opportunity to help build out an internal platform for managing the transport of flowers throughout Europe. The objective I was hired for was to do some general development, improve the quality of the platform and make it maintainable for future development.</p>
+
+      <p>I achieved the quality goal by introducing software testing into the organization, so we could measure the code quality and be alerted if a new functionality changed the expected workings of the code base.</p>
+
+      <p>The second goal was achieved by introducing continuous integration and continuous deployment into the organisation. The pipelines are responsible for checking the required quality gates, as deploying it to the multi stage environments.</p>
+
+      <h3>Technologies</h3>
+      <p>Java, Spring boot and React.</p>
+    </>);
+
     const bpi = (<>
       <p>When I first joined BPI services as an intern, I was placed on the ID Flow team. The then objective was to make the product more suitable for different kind of customer processes. This was done by making the process flow configurable, here me and colleague designed, developed and implemented the Flow Manager. A drag and drop implementation to configure the process flow to model the business process.</p>
 
@@ -317,7 +331,7 @@ function ExperienceSubView(params: SubViewParams) {
       <p>PHP, jQuery and git</p>
     </>);
 
-    return { bpi, ing, floro }
+    return { freelance, bpi, ing, floro }
   }
 
   const content = params.language === 'nl' ? dutchContent() : englishContent();
@@ -327,6 +341,9 @@ function ExperienceSubView(params: SubViewParams) {
       { SubViewNavigation(params) }
       <div data-subpage-content className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.experience")}</h1>
+
+        <h2>2023 - Current - Freelance</h2>
+        { content.freelance }
         
         <h2>2021 - 2023 - BPI services b.v.</h2>
         { content.bpi }
