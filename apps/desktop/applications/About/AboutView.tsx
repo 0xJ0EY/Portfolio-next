@@ -227,7 +227,13 @@ function ExperienceSubView(params: SubViewParams) {
   const t = params.translate;
 
   function dutchContent() {
-    const freelance = (<></>);
+    const freelance = (<>
+      <p>Aan het einde van 2023 kreeg ik de kans om mee te bouwen aan een intern platform voor het managen van het transport van bloemen door heel Europa. Het doel waarvoor ik ingehuurd was, was algemene ontwikkeling van de software, de kwaliteit van het platform verbeteren en het onderhoudbaar maken voor toekomstige ontwikkelingen.</p>
+
+      <p>Dit resultaat heb ik behaald door software testen bij de organisatie te introduceren. Zo konden we de codekwaliteit meten en werden we op de hoogte gesteld wanneer een functionaliteit de verwachte werking van de codebase veranderde.</p>
+
+      <p>Het tweede doel heb ik bereikt door continuous integration en continuous deployment binnen de organisatie introduceren. De pipelines zijn verantwoordelijk voor het controleren van de vereiste kwaliteitskenmerken, en het deployen van de software naar de test, acceptatie en productie omgevingen.</p>
+    </>);
 
     const bpi = (<>
       <p>Toen ik voor het eerst als stagiair bij BPI kwam, werd ik op het ID Flow team geplaatst. Het toenmalig doel was om het product beter toepasbaar te maken op verschillende soorten klant processen. Dit was gedaan door de statische proces flow van de applicatie configureerbaar te maken. Hiervoor hebben een collega en ik samen de Flow Manager ontworpen, ontwikkeld en geïmplementeerd. De Flow Manager is een drag and drop implementatie voor het configureren van de proces flow aan het gewenste business proces.</p>
@@ -282,7 +288,7 @@ function ExperienceSubView(params: SubViewParams) {
 
       <p>I achieved the quality goal by introducing software testing into the organization, so we could measure the code quality and be alerted if a new functionality changed the expected workings of the code base.</p>
 
-      <p>The second goal was achieved by introducing continuous integration and continuous deployment into the organisation. The pipelines are responsible for checking the required quality gates, as deploying it to the multi stage environments.</p>
+      <p>The second goal was achieved by introducing continuous integration and continuous deployment into the organisation. The pipelines are responsible for checking the required quality gates, as deploying it to the testing, acceptance and production environments.</p>
 
       <h3>Technologies</h3>
       <p>Java, Spring boot and React.</p>
