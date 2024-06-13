@@ -4,6 +4,7 @@ import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../Came
 import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
+import { easeOutCubicErp } from "../util";
 
 export class CinematicCameraState extends UpdatableCameraState {
 
@@ -41,13 +42,13 @@ export class CinematicCameraState extends UpdatableCameraState {
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
-    rotation.theta = this.calculateRotation(this.cameraRotationSpeed * (this.initialTransitionMs/ 1000));
+    rotation.theta = this.calculateRotation(this.cameraRotationSpeed * (this.initialTransitionMs / 1000));
 
     const zoom = 10.0;
 
     const delay = this.ctx.isInitialScene() ? this.initialTransitionMs : this.otherTransitionsMs;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, delay);
+    this.ctx.cameraController.transition(position, rotation, zoom, delay, easeOutCubicErp);
     this.ctx.setCursor('pointer');
   }
 
