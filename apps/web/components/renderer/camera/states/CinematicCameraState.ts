@@ -10,7 +10,7 @@ export class CinematicCameraState extends UpdatableCameraState {
 
   private cameraRotationSpeed = 7.5;
 
-  private initialTransitionMs = 1500;
+  private initialTransitionMs = 2000;
   private otherTransitionsMs = 500;
 
   private hasBeenOverDisplay: boolean = false;
@@ -42,13 +42,16 @@ export class CinematicCameraState extends UpdatableCameraState {
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
-    rotation.theta = this.calculateRotation(this.cameraRotationSpeed * (this.initialTransitionMs / 1000));
+    rotation.theta = this.calculateRotation(0);
 
     const zoom = 10.0;
 
     const delay = this.ctx.isInitialScene() ? this.initialTransitionMs : this.otherTransitionsMs;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, delay, lerp);
+    this.ctx.cameraController.transition(position, rotation, zoom, delay, easeOutCubicErp, () => {
+      this.progress = 0;
+    });
+
     this.ctx.setCursor('pointer');
   }
 

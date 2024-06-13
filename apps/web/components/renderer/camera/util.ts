@@ -5,5 +5,7 @@ export function lerp(start: number, end: number, amt: number): number {
 }
 
 export function easeOutCubicErp(start: number, end: number, amt: number): number {
-  return 1 - Math.pow(1 - lerp(start, end, amt), 3);
+  const factor = 1 - Math.pow(1 - amt, 3);
+
+  return (1 - factor) * start + factor * end;
 }
