@@ -65,12 +65,6 @@ export function joinStyles(styles: (string | null)[]) {
   return styles.filter(x => x !== null).join(" ");
 }
 
-export function prefersReducedMotion(): boolean {
-  const mediaQueryList = window.matchMedia('(prefers-reduced-motion: reduce)');
-  return mediaQueryList.matches;
-}
-
-
 export function sendMessageToIframe(message: MessageFromParent) {
   const iframe = document.getElementById('operating-system-iframe') as HTMLIFrameElement;
   sendMessageToChild(iframe.contentWindow, message);

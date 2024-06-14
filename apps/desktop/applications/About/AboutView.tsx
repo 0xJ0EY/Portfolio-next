@@ -161,6 +161,8 @@ function AboutSubView(params: SubViewParams) {
         <p>Bij de BPI afstudeerstage werkt ik aan ID Flow een webapplicatie origineel ontworpen voor het aanmelden en registeren van bezoekers aan een bedrijventerrein. Het doel van de stage was het ontwerpen, ontwikkelen en implementeren van de Flow Manager. Een oplossing waarmee we de procesflow van IDFlow beter konden configureren en aanpassen op de wensen van de klant. Het resultaat van deze stage is uiteindelijk opgenomen in het daadwerkelijke product.</p>
 
         <p>Nadat ik mijn stages en opleiding had afgerond besloot ik bij BPI te blijven werken. Ik was op het iMatch team geplaatst. Dit team was verantwoordelijk voor het bouwen en ontwikkelen van de software en hardware oplossing van de iMatch. Een apparaat gebruikt voor het verifiëren van reisdocumenten en opnemen van vingerafdrukken.</p>
+
+        <p>Na BPI kreeg ik de kans om mee te bouwen aan een intern platform voor het managen van het transport van bloemen door heel Europa. Het doel waarvoor ik ingehuurd was, was algemene ontwikkeling van de software, de kwaliteit van het platform verbeteren en het onderhoudbaar maken voor toekomstige ontwikkelingen.</p>
       
         <h2>Hobbies</h2>
 
@@ -202,7 +204,9 @@ function AboutSubView(params: SubViewParams) {
 
         <p>After my internship and graduation I decided to keep working at BPI for a bit. I was placed onto the iMatch team. This team was responsible for building and developing a hardware and software solution used in reading and verifying the NFC chip in travel documents, and capturing fingerprints.</p>
 
-        <p>During my last few weeks at BPI, I quickly build a product to flash, test and verify the PCBs used within the iMatches. This was always a difficult problem to automate due to the steps needed to flash the hardware. But am now open for new opportunities!</p>
+        <p>During my last few weeks at BPI, I quickly build a product to flash, test and verify the PCBs used within the iMatches. This was always a difficult problem to automate due to the steps needed to flash the hardware.</p>
+
+        <p>After BPI I got the opportunity to help build out an internal platform for managing the transport of flowers throughout Europe. The objective I was hired for was to do some general development, improve the quality of the platform and make it maintainable for future development.</p>
 
         <h2>Hobbies</h2>
 
@@ -227,6 +231,14 @@ function ExperienceSubView(params: SubViewParams) {
   const t = params.translate;
 
   function dutchContent() {
+    const freelance = (<>
+      <p>Aan het einde van 2023 kreeg ik de kans om mee te bouwen aan een intern platform voor het managen van het transport van bloemen door heel Europa. Het doel waarvoor ik ingehuurd was, was algemene ontwikkeling van de software, de kwaliteit van het platform verbeteren en het onderhoudbaar maken voor toekomstige ontwikkelingen.</p>
+
+      <p>Dit resultaat heb ik behaald door software testen bij de organisatie te introduceren. Zo konden we de codekwaliteit meten en werden we op de hoogte gesteld wanneer een functionaliteit de verwachte werking van de codebase veranderde.</p>
+
+      <p>Het tweede doel heb ik bereikt door continuous integration en continuous deployment binnen de organisatie introduceren. De pipelines zijn verantwoordelijk voor het controleren van de vereiste kwaliteitskenmerken, en het deployen van de software naar de test, acceptatie en productie omgevingen.</p>
+    </>);
+
     const bpi = (<>
       <p>Toen ik voor het eerst als stagiair bij BPI kwam, werd ik op het ID Flow team geplaatst. Het toenmalig doel was om het product beter toepasbaar te maken op verschillende soorten klant processen. Dit was gedaan door de statische proces flow van de applicatie configureerbaar te maken. Hiervoor hebben een collega en ik samen de Flow Manager ontworpen, ontwikkeld en geïmplementeerd. De Flow Manager is een drag and drop implementatie voor het configureren van de proces flow aan het gewenste business proces.</p>
 
@@ -270,10 +282,22 @@ function ExperienceSubView(params: SubViewParams) {
       <p>PHP, jQuery en Git</p>
     </>);
 
-    return { bpi, ing, floro }
+    return { freelance, bpi, ing, floro }
   }
 
   function englishContent() {
+
+    const freelance = (<>
+      <p>In late 2023 I had the opportunity to help build out an internal platform for managing the transport of flowers throughout Europe. The objective I was hired for was to do some general development, improve the quality of the platform and make it maintainable for future development.</p>
+
+      <p>I achieved the quality goal by introducing software testing into the organization, so we could measure the code quality and be alerted if a new functionality changed the expected workings of the code base.</p>
+
+      <p>The second goal was achieved by introducing continuous integration and continuous deployment into the organisation. The pipelines are responsible for checking the required quality gates, as deploying it to the testing, acceptance and production environments.</p>
+
+      <h3>Technologies</h3>
+      <p>Java, Spring boot and React.</p>
+    </>);
+
     const bpi = (<>
       <p>When I first joined BPI services as an intern, I was placed on the ID Flow team. The then objective was to make the product more suitable for different kind of customer processes. This was done by making the process flow configurable, here me and colleague designed, developed and implemented the Flow Manager. A drag and drop implementation to configure the process flow to model the business process.</p>
 
@@ -317,7 +341,7 @@ function ExperienceSubView(params: SubViewParams) {
       <p>PHP, jQuery and git</p>
     </>);
 
-    return { bpi, ing, floro }
+    return { freelance, bpi, ing, floro }
   }
 
   const content = params.language === 'nl' ? dutchContent() : englishContent();
@@ -327,6 +351,9 @@ function ExperienceSubView(params: SubViewParams) {
       { SubViewNavigation(params) }
       <div data-subpage-content className={styles['subpage-content']}>
         <h1 className={styles['page-h1']}>{t("about.navigation.experience")}</h1>
+
+        <h2>2023 - Current - Freelance</h2>
+        { content.freelance }
         
         <h2>2021 - 2023 - BPI services b.v.</h2>
         { content.bpi }

@@ -1,6 +1,7 @@
 import { AssetKeys } from "@/components/scene-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection } from "three";
 import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
+import { Erp, lerp } from "./util";
 
 
 type Action = (deltaTime: number) => ActionResult;
@@ -187,12 +188,14 @@ export class CameraController {
     this.sphericalDelta.theta -= radians;
   }
 
-  // TODO: Move this to a math util lib
-  private lerp(start: number, end: number, amt: number): number {
-    return (1 - amt) * start + amt * end;
-  }
+  public autoZoom(
+    targetZoom: number,
+    durationInMs: number,
+    interpolation?: Erp,
+    callback?: () => void
+  ) {
+    const smoothingFunction = interpolation ?? lerp;
 
-  public autoZoom(targetZoom: number, durationInMs: number, callback?: () => void) {
     let timePassedInMs = 0;
     const originalZoom = this.currentZoomDistance;
 
@@ -200,7 +203,7 @@ export class CameraController {
       timePassedInMs += 1000 * deltaTime;
       const progress = Math.min(timePassedInMs / durationInMs, 1);
 
-      this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
+      this.currentZoomDistance = smoothingFunction(originalZoom, targetZoom, progress);
 
       const isDone = progress === 1;
 
@@ -219,8 +222,11 @@ export class CameraController {
     targetRotation: Spherical,
     targetZoom: number,
     durationInMs: number,
+    interpolation?: Erp,
     callback?: () => void
     ) {
+    const smoothingFunction = interpolation ?? lerp;
+
     let timePassedInMs = 0;
 
     const originalPosition = this.cameraFollowEnabled ? this.targetFollowPosition.clone() : this.target.clone();
@@ -233,12 +239,12 @@ export class CameraController {
       timePassedInMs += 1000 * deltaTime;
       const progress = durationInMs !== 0 ? Math.min(timePassedInMs / durationInMs, 1) : 1;
 
-      const x = this.lerp(originalPosition.x, targetPosition.x, progress);
-      const y = this.lerp(originalPosition.y, targetPosition.y, progress);
-      const z = this.lerp(originalPosition.z, targetPosition.z, progress);
+      const x = smoothingFunction(originalPosition.x, targetPosition.x, progress);
+      const y = smoothingFunction(originalPosition.y, targetPosition.y, progress);
+      const z = smoothingFunction(originalPosition.z, targetPosition.z, progress);
 
-      const phi   = this.lerp(originalRotation.phi, targetRotation.phi, progress);
-      const theta = this.lerp(originalRotation.theta, targetRotation.theta, progress);
+      const phi   = smoothingFunction(originalRotation.phi, targetRotation.phi, progress);
+      const theta = smoothingFunction(originalRotation.theta, targetRotation.theta, progress);
 
       // Calculate deltas for the position / rotation
       this.panOffset.x = -(this.target.x - x);
@@ -248,7 +254,7 @@ export class CameraController {
       this.sphericalDelta.phi   = -(this.spherical.phi - phi);
       this.sphericalDelta.theta = -(this.spherical.theta - theta);
 
-      this.currentZoomDistance = this.lerp(originalZoom, targetZoom, progress);
+      this.currentZoomDistance = lerp(originalZoom, targetZoom, progress);
 
       const isDone = progress === 1;
 

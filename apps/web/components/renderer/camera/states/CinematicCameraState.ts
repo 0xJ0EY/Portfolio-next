@@ -4,10 +4,14 @@ import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../Came
 import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
+import { easeOutCubicErp, lerp } from "../util";
 
 export class CinematicCameraState extends UpdatableCameraState {
 
   private cameraRotationSpeed = 7.5;
+
+  private initialTransitionMs = 2000;
+  private otherTransitionsMs = 500;
 
   private hasBeenOverDisplay: boolean = false;
   private isOverDisplay: (data: PointerCoordinates) => boolean;
@@ -25,22 +29,35 @@ export class CinematicCameraState extends UpdatableCameraState {
     const display = getDisplay(this.ctx.scene);
     if (!display) { return; }
 
+    if (this.ctx.isInitialScene()) {
+      // If we're an initial scene we kinda want to start somewhere else
+      // So set the position, and instantly calculate the new position
+      this.ctx.cameraController.setPanOffsetY(10);
+      this.ctx.cameraController.setPanOffsetZ(3);
+      this.ctx.cameraController.update(0);
+    }
+
     const position = new Vector3();
     position.y = 6.8;
 
     const rotation = new Spherical();
     rotation.phi = 1.0;
-    rotation.theta = this.calculateRotation(this.progress);
+    rotation.theta = this.calculateRotation(0);
 
     const zoom = 10.0;
 
-    const delay = this.ctx.isInitialScene() ? 0 : 500;
+    const delay = this.ctx.isInitialScene() ? this.initialTransitionMs : this.otherTransitionsMs;
 
-    this.ctx.cameraController.transition(position, rotation, zoom, delay);
+    this.ctx.cameraController.transition(position, rotation, zoom, delay, easeOutCubicErp, () => {
+      this.progress = 0;
+    });
+
     this.ctx.setCursor('pointer');
   }
 
   private calculateRotation(progress: number): number {
+    progress %= 100;
+
     const min = degToRad(-30);
     const max = degToRad(30);
 

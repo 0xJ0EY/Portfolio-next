@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, prefersReducedMotion, sendMessageToIframe } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
@@ -326,11 +326,7 @@ export const Renderer = (props: RendererProps) => {
 
   useEffect(() => {
     if (!loading) {
-      if (prefersReducedMotion()) {
-        cameraHandlerRef.current!.changeState(CameraHandlerState.MonitorView);
-      } else {
-        cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
-      }
+      cameraHandlerRef.current!.changeState(CameraHandlerState.Cinematic);
     }
   }, [loading]);
 

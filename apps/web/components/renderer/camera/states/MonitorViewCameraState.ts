@@ -1,4 +1,4 @@
-import { prefersReducedMotion } from "../../util";
+import { lerp } from "three/src/math/MathUtils";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { CameraState } from "../CameraState";
 import { PanOriginData, calculateCameraPosition, clickedDOMButton, constructIsOverDisplay, focusDesktop, getDisplay, isOwnOrigin, isRpcOrigin, isTouchTap, isTouchZoom, overDOMButton } from "./util";
@@ -36,7 +36,7 @@ export class MonitorViewCameraState extends CameraState {
 
     this.ctx.cameraController.enableDamping();
 
-    this.ctx.cameraController.transition(position, spherical, distance, 1250 / distance, callback);
+    this.ctx.cameraController.transition(position, spherical, distance, 1250 / distance, lerp, callback);
 
     this.ctx.cameraController.setMinZoom(1.0);
     this.ctx.cameraController.setMaxZoom(5.0);
