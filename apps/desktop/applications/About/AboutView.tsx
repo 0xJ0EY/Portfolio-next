@@ -161,6 +161,8 @@ function AboutSubView(params: SubViewParams) {
         <p>Bij de BPI afstudeerstage werkt ik aan ID Flow een webapplicatie origineel ontworpen voor het aanmelden en registeren van bezoekers aan een bedrijventerrein. Het doel van de stage was het ontwerpen, ontwikkelen en implementeren van de Flow Manager. Een oplossing waarmee we de procesflow van IDFlow beter konden configureren en aanpassen op de wensen van de klant. Het resultaat van deze stage is uiteindelijk opgenomen in het daadwerkelijke product.</p>
 
         <p>Nadat ik mijn stages en opleiding had afgerond besloot ik bij BPI te blijven werken. Ik was op het iMatch team geplaatst. Dit team was verantwoordelijk voor het bouwen en ontwikkelen van de software en hardware oplossing van de iMatch. Een apparaat gebruikt voor het verifiëren van reisdocumenten en opnemen van vingerafdrukken.</p>
+
+        <p>Na BPI kreeg ik de kans om mee te bouwen aan een intern platform voor het managen van het transport van bloemen door heel Europa. Het doel waarvoor ik ingehuurd was, was algemene ontwikkeling van de software, de kwaliteit van het platform verbeteren en het onderhoudbaar maken voor toekomstige ontwikkelingen.</p>
       
         <h2>Hobbies</h2>
 
@@ -202,7 +204,9 @@ function AboutSubView(params: SubViewParams) {
 
         <p>After my internship and graduation I decided to keep working at BPI for a bit. I was placed onto the iMatch team. This team was responsible for building and developing a hardware and software solution used in reading and verifying the NFC chip in travel documents, and capturing fingerprints.</p>
 
-        <p>During my last few weeks at BPI, I quickly build a product to flash, test and verify the PCBs used within the iMatches. This was always a difficult problem to automate due to the steps needed to flash the hardware. But am now open for new opportunities!</p>
+        <p>During my last few weeks at BPI, I quickly build a product to flash, test and verify the PCBs used within the iMatches. This was always a difficult problem to automate due to the steps needed to flash the hardware.</p>
+
+        <p>After BPI I got the opportunity to help build out an internal platform for managing the transport of flowers throughout Europe. The objective I was hired for was to do some general development, improve the quality of the platform and make it maintainable for future development.</p>
 
         <h2>Hobbies</h2>
 
