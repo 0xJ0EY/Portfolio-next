@@ -4,7 +4,14 @@ import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../Came
 import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
 import { degToRad } from "three/src/math/MathUtils";
 import { Spherical, Vector3 } from "three";
-import { easeOutCubicErp, lerp } from "../util";
+import { easeOutCubicErp } from "../util";
+import { CameraController } from "../Camera";
+
+export function setInitialCameraPosition(cameraController: CameraController) {
+  cameraController.setPanOffsetY(7);
+  cameraController.setPanOffsetZ(3);
+  cameraController.update(0);
+}
 
 export class CinematicCameraState extends UpdatableCameraState {
 
@@ -32,9 +39,7 @@ export class CinematicCameraState extends UpdatableCameraState {
     if (this.ctx.isInitialScene()) {
       // If we're an initial scene we kinda want to start somewhere else
       // So set the position, and instantly calculate the new position
-      this.ctx.cameraController.setPanOffsetY(10);
-      this.ctx.cameraController.setPanOffsetZ(3);
-      this.ctx.cameraController.update(0);
+      setInitialCameraPosition(this.ctx.cameraController)
     }
 
     const position = new Vector3();
