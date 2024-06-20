@@ -12,6 +12,7 @@ import { FileSystemItemDragDrop, FileSystemItemDragEnter, FileSystemItemDragEven
 import { contactConfig } from '@/applications/Contract/Contact';
 import { skillsConfig } from '@/applications/Skills/Skills';
 import { algorithmVisualizerConfig } from '@/applications/AlgorithmVisualizer/AlgorithmVisualizer';
+import { terminalConfig } from '@/applications/Terminal/TerminalApplication';
 
 const DockApplications = [
   finderConfig,
@@ -19,6 +20,7 @@ const DockApplications = [
   contactConfig,
   algorithmVisualizerConfig,
   skillsConfig,
+  terminalConfig
 ];
 
 const DebugDockApplications = [
