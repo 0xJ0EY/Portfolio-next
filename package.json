@@ -25,6 +25,7 @@
   },
   "packageManager": "npm@9.5.1",
   "dependencies": {
+    "@xterm/xterm": "^5.5.0",
     "emulators-ui": "^0.73.9",
     "i18next": "^23.11.3",
     "next-i18next": "^15.3.0",
