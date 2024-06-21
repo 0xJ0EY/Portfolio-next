@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@vercel/analytics": "^1.2.2",
-    "@xterm/addon-fit": "^0.10.0",
     "emulators": "^0.80.22"
   }
 }
