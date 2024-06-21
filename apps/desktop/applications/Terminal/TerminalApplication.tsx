@@ -13,7 +13,7 @@ export class TerminalConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'Terminal.app';
-  public readonly appIcon = { src: '/icons/folder-icon.png', alt: 'Terminal' };
+  public readonly appIcon = { src: '/icons/terminal-icon.png', alt: 'Terminal' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
