@@ -8,12 +8,29 @@ export interface PseudoTerminal {
   writeln(input: string): void;
 }
 
+
+function splitStringInParts(input: string, rowLength: number): string[] {
+  if (input === '') { return ['']; }
+
+  let index = 0;
+  let parts: string[] = [];
+
+  while (index < input.length) {
+    let part = input.slice(index, Math.min(index + rowLength, input.length));
+    parts.push(part);
+
+    index += rowLength;
+  }
+
+  return parts;
+}
+
 class TerminalManager {
   private prompt = "$ ";
 
   private lines: string[] = [
-    "foobar",
-    "barfoo"
+    "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
+    "barfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo"
   ];
   private line: string = "";
 
@@ -21,31 +38,56 @@ class TerminalManager {
 
   constructor(private terminal: Terminal, private domElement: HTMLElement) {}
 
+  public writeln(line: string) {
+    this.lines.push(line);
+    this.terminal.write(`${line}\r\n`);
+  }
+
   private write() {
-    this.terminal.write(`\r${this.prompt}${this.line}`);
+    // this.terminal.write(`\r${this.prompt}${this.line}`);
+    this.fullRender();
   }
+
+  private fullRender() {
+    // Store cursor position
+    const originalCursorX = this.terminal.buffer.active.cursorX;
+    const originalCursorY = this.terminal.buffer.active.cursorY;
+
+    const baseY = this.terminal.buffer.active.baseY;
+    const rows = this.terminal.rows;
+
+    const lines: string[] = [];
   
-  private draw() {
-    this.terminal.buffer.active.baseY;
+    this.terminal.clear();
 
+    for (const historyLine of this.lines) {
+      const parts = splitStringInParts(historyLine, this.terminal.cols);
+      
+      for (const part of parts) {
+        lines.push(part);
+      }
+    }
 
+    for (const line of lines) {
+      this.terminal.writeln(line);
+    }
 
+    this.terminal.refresh(0, lines.length);
   }
-
 
   private insertKey(character: string): void {
     const promptOffsetX = this.prompt.length;
     const cursorX = this.terminal.buffer.active.cursorX;
-
     const lineX = cursorX - promptOffsetX;
+
+    const currentLineY = this.terminal.buffer.active.length - this.terminal.buffer.active.baseY;
 
     if (lineX === this.line.length) {
       this.line += character;
-    } else {      
+    } else {
+      
       const start = this.line.slice(0, lineX);
       const end = this.line.slice(lineX);
-
-      console.log(start, end);
 
       this.line = start + character + end;
     }
@@ -95,6 +137,7 @@ class TerminalManager {
     const rows = Math.floor(terminalContainer.clientHeight / cell.height);
 
     this.terminal.resize(cols, rows);
+    this.fullRender();
   }
 
   public bind(): void {
