@@ -1,6 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
+import ansiEscapes from 'ansi-escapes';
 
 export interface PseudoTerminal {
   activeTerminal(): Terminal;
@@ -8,6 +9,17 @@ export interface PseudoTerminal {
   writeln(input: string): void;
 }
 
+
+function restoreCursor(lambda: () => void, terminal: Terminal): void {
+  const cursorX = terminal.buffer.active.cursorX;
+  const cursorY = terminal.buffer.active.cursorY;
+
+  console.log(cursorX, cursorY);
+
+  lambda();
+
+  terminal.write(ansiEscapes.cursorTo(cursorX, cursorY));
+}
 
 function splitStringInParts(input: string, rowLength: number): string[] {
   if (input === '') { return ['']; }
@@ -26,70 +38,46 @@ function splitStringInParts(input: string, rowLength: number): string[] {
 }
 
 class TerminalManager {
-  private prompt = "$ ";
-
-  private lines: string[] = [
-    "foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar",
-    "barfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoo"
-  ];
-  private line: string = "";
+  private ps1 = "$ ";
+  
+  private prompt: string = "";
+  private promptLines: number = 1;
 
   private resizeObserver: ResizeObserver | null = null;
 
   constructor(private terminal: Terminal, private domElement: HTMLElement) {}
 
   public writeln(line: string) {
-    this.lines.push(line);
     this.terminal.write(`${line}\r\n`);
   }
 
   private write() {
-    // this.terminal.write(`\r${this.prompt}${this.line}`);
-    this.fullRender();
-  }
+    const completePrompt = `\r${this.ps1}${this.prompt}`;
+    const promptLines = splitStringInParts(completePrompt, this.terminal.cols);
 
-  private fullRender() {
-    // Store cursor position
-    const originalCursorX = this.terminal.buffer.active.cursorX;
-    const originalCursorY = this.terminal.buffer.active.cursorY;
+    const lineDiff = promptLines.length - this.promptLines;
 
-    const baseY = this.terminal.buffer.active.baseY;
-    const rows = this.terminal.rows;
-
-    const lines: string[] = [];
-  
-    this.terminal.clear();
-
-    for (const historyLine of this.lines) {
-      const parts = splitStringInParts(historyLine, this.terminal.cols);
-      
-      for (const part of parts) {
-        lines.push(part);
-      }
+    for (let i = 0; i > lineDiff; i++) {
+      this.terminal.write('\r\n'); // Write empty lines, so we can write over them with a write with data
     }
 
-    for (const line of lines) {
-      this.terminal.writeln(line);
-    }
-
-    this.terminal.refresh(0, lines.length);
+    this.promptLines = Math.max(this.promptLines, promptLines.length);
+    this.terminal.write(ansiEscapes.cursorUp(this.promptLines - 1) + completePrompt);
   }
 
   private insertKey(character: string): void {
-    const promptOffsetX = this.prompt.length;
+    const promptOffsetX = this.ps1.length;
     const cursorX = this.terminal.buffer.active.cursorX;
     const lineX = cursorX - promptOffsetX;
 
-    const currentLineY = this.terminal.buffer.active.length - this.terminal.buffer.active.baseY;
-
-    if (lineX === this.line.length) {
-      this.line += character;
+    if (lineX === this.prompt.length) {
+      this.prompt += character;
     } else {
       
-      const start = this.line.slice(0, lineX);
-      const end = this.line.slice(lineX);
+      const start = this.prompt.slice(0, lineX);
+      const end = this.prompt.slice(lineX);
 
-      this.line = start + character + end;
+      this.prompt = start + character + end;
     }
 
     this.write();
@@ -137,7 +125,6 @@ class TerminalManager {
     const rows = Math.floor(terminalContainer.clientHeight / cell.height);
 
     this.terminal.resize(cols, rows);
-    this.fullRender();
   }
 
   public bind(): void {
