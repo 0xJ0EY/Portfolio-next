@@ -1,7 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
-import ansiEscapes from 'ansi-escapes';
+import ansiEscapes, { cursorTo } from 'ansi-escapes';
 
 export interface PseudoTerminal {
   activeTerminal(): Terminal;
@@ -42,6 +42,7 @@ class TerminalManager {
   
   private prompt: string = "";
   private promptLines: number = 1;
+  private promptLine: number = 0;
 
   private resizeObserver: ResizeObserver | null = null;
 
@@ -49,6 +50,15 @@ class TerminalManager {
 
   public writeln(line: string) {
     this.terminal.write(`${line}\r\n`);
+  }
+
+  private coordsInPrompt(index: number): { x: number, y: number } {
+    index += this.ps1.length;
+
+    const x = index % this.terminal.cols;
+    const y = Math.floor(index / this.terminal.cols);
+
+    return { x, y: y + this.promptLine }
   }
 
   private write() {
@@ -70,17 +80,25 @@ class TerminalManager {
     const cursorX = this.terminal.buffer.active.cursorX;
     const lineX = cursorX - promptOffsetX;
 
-    if (lineX === this.prompt.length) {
+    const cursorDeltaY = this.terminal.buffer.active.cursorY - this.promptLine;
+    const linePosition = cursorDeltaY * this.terminal.cols + lineX;
+
+    if (linePosition === this.prompt.length) {
       this.prompt += character;
+
+      this.write();
     } else {
       
-      const start = this.prompt.slice(0, lineX);
-      const end = this.prompt.slice(lineX);
+      const start = this.prompt.slice(0, linePosition);
+      const end = this.prompt.slice(linePosition);
 
       this.prompt = start + character + end;
-    }
 
-    this.write();
+      this.write();
+
+      const { x, y } = this.coordsInPrompt(linePosition + 1);
+      this.terminal.write(cursorTo(x, y));
+    }
   }
 
   private onKey(args: { key: string, domEvent: KeyboardEvent }): void {
