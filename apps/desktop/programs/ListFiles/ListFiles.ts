@@ -3,7 +3,23 @@ import { SystemAPIs } from "@/components/OperatingSystem";
 import { ProgramConfig } from "../Programs";
 
 function ListFile(shell: Shell, args: string[], apis: SystemAPIs): void {
-  shell.getTerminal().writeResponse('Hello from List Files');
+  const fs = apis.fileSystem;
+  const path = args[1] ?? shell.getPath();
+
+  const directoryResult = fs.getDirectory(path);
+
+  if (!directoryResult.ok) {
+    shell.getTerminal().writeResponse(`ls: ${path}: No such file or directory`);
+    return;
+  }
+
+  const directory = directoryResult.value;
+
+  for (const entry of directory.children.iterFromHead()) {
+    const directoryNode = entry.value.node;
+
+    shell.getTerminal().writeResponse(directoryNode.name);
+  }
 }
 
 export class ListFileConfig implements ProgramConfig {

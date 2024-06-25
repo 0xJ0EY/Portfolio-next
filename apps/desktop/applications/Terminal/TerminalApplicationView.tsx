@@ -32,13 +32,17 @@ function splitStringInParts(input: string, rowLength: number): string[] {
 
 export class Shell {
   private promptString = "$ ";
-  private path: string = '/home/joey/'
+  private path: string = '/Users/joey/'
 
   constructor(private terminal: TerminalConnector, private apis: SystemAPIs) {
   }
 
   public getTerminal(): TerminalConnector {
     return this.terminal;
+  }
+
+  public getPath(): string {
+    return this.path;
   }
 
   public getPromptString(): string {
@@ -76,21 +80,18 @@ export class Shell {
 
         const binaryDir = binaryDirResult.value;
 
-        console.log(binaryDir.children);
-
         for (const program of binaryDir.children.iterFromHead()) {
           const fileSystemNode = program.value.node;
 
           if (fileSystemNode.kind !== 'program') { continue; }
-
-          console.log(fileSystemNode.name);
-
           if (fileSystemNode.name !== applicationName) { continue; }
 
           fileSystemNode.program(this, args, this.apis);
+
+          return;
         }
 
-        // this.terminal.writeResponse('meowdy');
+        this.terminal.writeResponse(`jsh: command not found: ${applicationName}`);
         break;
       }
     }
