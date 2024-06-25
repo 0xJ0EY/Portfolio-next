@@ -1,7 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
-import ansiEscapes, { cursorTo } from 'ansi-escapes';
+import ansiEscapes, { cursorHide, cursorShow, cursorTo } from 'ansi-escapes';
 
 export interface PseudoTerminal {
   activeTerminal(): Terminal;
@@ -41,7 +41,11 @@ class TerminalManager {
   private ps1 = "$ ";
   
   private prompt: string = "";
+
+  // Used for managing the 
   private promptLines: number = 1;
+  private actualPromptLines: number = 1;
+
   private promptLine: number = 0;
 
   private promptPosition: number = 0;
@@ -63,6 +67,13 @@ class TerminalManager {
     return { x, y: y + this.promptLine }
   }
 
+  private simpleWrite() {
+    this.hideCursor();
+    this.write();
+    this.updateCursor();
+    this.showCursor();
+  }
+
   private write() {
     const completePrompt = `\r${this.ps1}${this.prompt}`;
     const promptLines = splitStringInParts(completePrompt, this.terminal.cols);
@@ -74,9 +85,18 @@ class TerminalManager {
     }
 
     this.promptLines = Math.max(this.promptLines, promptLines.length);
+    this.actualPromptLines = promptLines.length;
 
     const y = this.promptLine - this.terminal.buffer.active.baseY;
     this.terminal.write(cursorTo(0, y) + completePrompt + ' ');
+  }
+
+  private hideCursor() {
+    this.terminal.write(cursorHide);
+  }
+
+  private showCursor() {
+    this.terminal.write(cursorShow);
   }
 
   private updateCursor(): void {
@@ -100,7 +120,8 @@ class TerminalManager {
   }
 
   private insertEnter(): void {
-    this.promptLine += this.promptLines;
+    this.promptLine += this.actualPromptLines;
+
     console.log('execute', this.prompt);
 
     this.prompt = "";
@@ -109,9 +130,7 @@ class TerminalManager {
     this.promptPosition = 0;
 
     this.terminal.writeln('');
-    this.write();
-    
-    this.updateCursor();
+    this.simpleWrite();
   }
 
   private insertBackspace(): void {
@@ -126,10 +145,8 @@ class TerminalManager {
       this.prompt = begin + end;
     }
 
-    this.write();
-
     this.promptPosition--;
-    this.updateCursor();
+    this.simpleWrite();
   }
 
   private insertKey(character: string): void {
@@ -138,9 +155,7 @@ class TerminalManager {
 
       this.promptPosition++;
 
-      this.write();
-      this.updateCursor();
-
+      this.simpleWrite();
     } else {
       const begin = this.prompt.slice(0, this.promptPosition);
       const end = this.prompt.slice(this.promptPosition);
@@ -149,8 +164,7 @@ class TerminalManager {
 
       this.promptPosition++;
 
-      this.write();
-      this.updateCursor();
+      this.simpleWrite();
     }
   }
 
