@@ -4,8 +4,13 @@ import { Terminal } from '@xterm/xterm';
 import { cursorHide, cursorShow, cursorTo } from 'ansi-escapes';
 
 export interface TerminalConnector {
+  clear(): void;
   writeResponse(response: string): void;
   writeResponseLines(lines: string[]): void;
+}
+
+function splitCommand(input: string): string[] {
+  return input.split(' ').filter(x => x.length > 0); 
 }
 
 function splitStringInParts(input: string, rowLength: number): string[] {
@@ -24,6 +29,36 @@ function splitStringInParts(input: string, rowLength: number): string[] {
   return parts;
 }
 
+class Shell {
+  private path: string = '/home/joey/'
+
+  constructor(private terminal: TerminalConnector) {
+  }
+
+  public getTerminal(): TerminalConnector {
+    return this.terminal;
+  }
+
+  public process(command: string): void {
+    const args = splitCommand(command);
+    const applicationName = args[0]?.toLocaleLowerCase() ?? null;
+
+    if (applicationName === null) { return; }
+
+    switch (applicationName) {
+
+      case 'clear': {
+        this.terminal.clear();
+        break;
+      }
+      default: {
+        this.terminal.writeResponse('meowdy');
+        break;
+      }
+    }
+  }
+}
+
 class TerminalManager implements TerminalConnector {
   private ps1 = "$ ";
   
@@ -36,8 +71,11 @@ class TerminalManager implements TerminalConnector {
   private promptPosition: number = 0;
 
   private resizeObserver: ResizeObserver | null = null;
+  private shell: Shell;
 
-  constructor(private terminal: Terminal, private domElement: HTMLElement) {}
+  constructor(private terminal: Terminal, private domElement: HTMLElement) {
+    this.shell = new Shell(this);
+  }
 
   public writeln(line: string): void {
     this.terminal.write(`${line}\r\n`);
@@ -52,11 +90,28 @@ class TerminalManager implements TerminalConnector {
     return { x, y: y + this.promptLine }
   }
 
+  private resetPrompt(): void {
+    this.prompt = '';
+    this.promptPosition = 0;
+
+    this.promptLines = 1;
+    this.actualPromptLines = 1;
+  }
+
   private updatePrompt(): void {
     this.hideCursor();
     this.writePrompt();
     this.updateCursor();
     this.showCursor();
+  }
+
+  public clear(): void {
+    this.resetPrompt();
+
+    this.promptLine = 0;
+    this.terminal.reset();
+
+    this.updatePrompt();
   }
 
   public writeResponse(response: string): void {
@@ -102,9 +157,10 @@ class TerminalManager implements TerminalConnector {
 
   private newLine(): void {
     this.promptLine += this.actualPromptLines;
-    this.prompt = "";
-    this.promptLines = 1;
-    this.promptPosition = 0;
+
+    this.terminal.writeln('');
+
+    this.resetPrompt();
   }
 
   private hideCursor(): void {
@@ -141,8 +197,7 @@ class TerminalManager implements TerminalConnector {
     this.newLine();
 
     {
-      console.log(command);
-      this.writeResponseLines(['foo', 'bar']);
+      this.shell.process(command);
     }
 
     this.updatePrompt();
