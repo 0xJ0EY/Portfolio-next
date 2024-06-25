@@ -74,7 +74,10 @@ class TerminalManager {
     }
 
     this.promptLines = Math.max(this.promptLines, promptLines.length);
-    this.terminal.write(ansiEscapes.cursorUp(this.promptLines - 1) + completePrompt + ' ');
+
+    const y = this.promptLine;
+
+    this.terminal.write(cursorTo(0, y) + completePrompt + ' ');
   }
 
   private updateCursor(): void {
@@ -95,6 +98,21 @@ class TerminalManager {
     
     const { x, y } = this.coordsInPrompt(this.promptPosition);
     this.terminal.write(cursorTo(x, y));
+  }
+
+  private insertEnter(): void {
+    this.promptLine += this.promptLines;
+    console.log('execute', this.prompt);
+
+    this.prompt = "";
+
+    this.promptLines = 1;
+    this.promptPosition = 0;
+
+    this.terminal.writeln('');
+    this.write();
+    
+    this.updateCursor();
   }
 
   private insertBackspace(): void {
@@ -144,7 +162,7 @@ class TerminalManager {
 
     switch (code) {
       case "Enter": {
-        console.log('todo');
+        this.insertEnter();
         break;
       }
       case "Backspace": {
