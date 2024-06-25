@@ -18,6 +18,9 @@ import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 import { skillsConfig } from "@/applications/Skills/Skills";
 import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/AlgorithmVisualizer";
 import { terminalConfig } from "@/applications/Terminal/TerminalApplication";
+import { Shell } from "@/applications/Terminal/TerminalApplicationView";
+import { ProgramConfig } from "@/programs/Programs";
+import { ListFileConfig, listFileConfig } from "@/programs/ListFiles/ListFiles";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -43,7 +46,8 @@ export type FileSystemNode = (
   FileSystemImage |
   FileSystemTextFile |
   FileSystemApplication |
-  FileSystemHyperLink
+  FileSystemHyperLink |
+  FileSystemProgram
 );
 
 export type DirectoryEntry = {
@@ -110,6 +114,16 @@ export type FileSystemApplication = {
   entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application,
 }
 
+export type FileSystemProgram = {
+  id: number,
+  parent: FileSystemDirectory
+  kind: 'program',
+  name: string,
+  filenameExtension: '',
+  editable: boolean,
+  program: (shell: Shell, args: string[], apis: SystemAPIs) => void;
+}
+
 function createApplication(
   id: number,
   parent: FileSystemDirectory,
@@ -120,12 +134,29 @@ function createApplication(
   return {
     id,
     parent,
+    icon,
     kind: 'application',
     name,
     filenameExtension: '',
-    icon,
     editable: false,
     entrypoint
+  }
+}
+
+function createProgram(
+  id: number,
+  parent: FileSystemDirectory,
+  name: string,
+  program: (shell: Shell, args: string[], apis: SystemAPIs) => void
+): FileSystemProgram {
+  return {
+    id,
+    parent,
+    kind: 'program',
+    name,
+    filenameExtension: '',
+    editable: false,
+    program
   }
 }
 
@@ -229,6 +260,7 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
     case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
     case "image": return { src: '/icons/file-icon.png', alt: 'Image icon' }
+    case "program":  return { src: '/icons/file-icon.png', alt: 'Program icon' }
   }
 }
 
@@ -297,6 +329,9 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
 
   // We keep Cheems in the trash can :ˆ)
   fileSystem.addImage(trash, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
+
+  const binaryDirectory = fileSystem.addDirectory(root, 'bin', false, false);
+  fileSystem.addProgram(binaryDirectory, listFileConfig)
 
   return fileSystem;
 }
@@ -682,6 +717,18 @@ export class FileSystem {
     this.propagateNodeEvent(parent, { kind: 'update' });
 
     return Ok(application);
+  }
+
+  public addProgram(parent: FileSystemDirectory, config: ProgramConfig): FileSystemProgram {
+    const program = createProgram(++this.id, parent, config.appName, config.program);
+
+    this.addNodeToDirectory(parent, program);
+
+    this.lookupTable[constructPath(program)] = program;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
+    return program;
   }
 
   public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {

@@ -2,6 +2,7 @@ import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { cursorHide, cursorShow, cursorTo } from 'ansi-escapes';
+import { SystemAPIs } from '@/components/OperatingSystem';
 
 export interface TerminalConnector {
   clear(): void;
@@ -29,14 +30,19 @@ function splitStringInParts(input: string, rowLength: number): string[] {
   return parts;
 }
 
-class Shell {
+export class Shell {
+  private promptString = "$ ";
   private path: string = '/home/joey/'
 
-  constructor(private terminal: TerminalConnector) {
+  constructor(private terminal: TerminalConnector, private apis: SystemAPIs) {
   }
 
   public getTerminal(): TerminalConnector {
     return this.terminal;
+  }
+
+  public getPromptString(): string {
+    return this.promptString;
   }
 
   public process(command: string): void {
@@ -51,17 +57,47 @@ class Shell {
         this.terminal.clear();
         break;
       }
+      case 'ps': {
+        const title = args.slice(1).join(' ');
+        
+        if (title.length === 0) {
+          this.terminal.writeResponse('jsh: ps requires a value to be set');
+          this.promptString = '$ ';
+        } else {
+          this.promptString = title + ' ';
+        }
+
+        break;
+      }
       default: {
-        this.terminal.writeResponse('meowdy');
+        // Get a program from the /bin directory
+        const binaryDirResult = this.apis.fileSystem.getDirectory('/bin');
+        if (!binaryDirResult.ok) { return; }
+
+        const binaryDir = binaryDirResult.value;
+
+        console.log(binaryDir.children);
+
+        for (const program of binaryDir.children.iterFromHead()) {
+          const fileSystemNode = program.value.node;
+
+          if (fileSystemNode.kind !== 'program') { continue; }
+
+          console.log(fileSystemNode.name);
+
+          if (fileSystemNode.name !== applicationName) { continue; }
+
+          fileSystemNode.program(this, args, this.apis);
+        }
+
+        // this.terminal.writeResponse('meowdy');
         break;
       }
     }
   }
 }
 
-class TerminalManager implements TerminalConnector {
-  private ps1 = "$ ";
-  
+class TerminalManager implements TerminalConnector {  
   private prompt: string = "";
 
   private promptLines: number = 1;
@@ -73,8 +109,8 @@ class TerminalManager implements TerminalConnector {
   private resizeObserver: ResizeObserver | null = null;
   private shell: Shell;
 
-  constructor(private terminal: Terminal, private domElement: HTMLElement) {
-    this.shell = new Shell(this);
+  constructor(private terminal: Terminal, private domElement: HTMLElement, apis: SystemAPIs) {
+    this.shell = new Shell(this, apis);
   }
 
   public writeln(line: string): void {
@@ -82,7 +118,7 @@ class TerminalManager implements TerminalConnector {
   }
 
   private coordsInPrompt(index: number): { x: number, y: number } {
-    index += this.ps1.length;
+    index += this.shell.getPromptString().length;
 
     const x = index % this.terminal.cols;
     const y = Math.floor(index / this.terminal.cols);
@@ -135,7 +171,7 @@ class TerminalManager implements TerminalConnector {
   }
 
   private writePrompt(): void {
-    const completePrompt = `\r${this.ps1}${this.prompt}`;
+    const completePrompt = `\r${this.shell.getPromptString()}${this.prompt}`;
     this.write(completePrompt);
   }
 
@@ -309,7 +345,7 @@ export default function TerminalApplicationView(props: WindowProps) {
     if (!terminalRef.current) { return; }
 
     const terminal = new Terminal();
-    const manager = new TerminalManager(terminal, terminalRef.current);
+    const manager = new TerminalManager(terminal, terminalRef.current, application.apis);
 
     manager.bind();
 
