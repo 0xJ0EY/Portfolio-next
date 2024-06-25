@@ -75,8 +75,7 @@ class TerminalManager {
 
     this.promptLines = Math.max(this.promptLines, promptLines.length);
 
-    const y = this.promptLine;
-
+    const y = this.promptLine - this.terminal.buffer.active.baseY;
     this.terminal.write(cursorTo(0, y) + completePrompt + ' ');
   }
 
