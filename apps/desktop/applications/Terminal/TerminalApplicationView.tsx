@@ -44,6 +44,8 @@ class TerminalManager {
   private promptLines: number = 1;
   private promptLine: number = 0;
 
+  private promptPosition: number = 0;
+
   private resizeObserver: ResizeObserver | null = null;
 
   constructor(private terminal: Terminal, private domElement: HTMLElement) {}
@@ -65,39 +67,73 @@ class TerminalManager {
     const completePrompt = `\r${this.ps1}${this.prompt}`;
     const promptLines = splitStringInParts(completePrompt, this.terminal.cols);
 
-    const lineDiff = promptLines.length - this.promptLines;
-
+    const lineDiff = Math.max(promptLines.length - this.promptLines, 0);
+    
     for (let i = 0; i > lineDiff; i++) {
       this.terminal.write('\r\n'); // Write empty lines, so we can write over them with a write with data
     }
 
     this.promptLines = Math.max(this.promptLines, promptLines.length);
-    this.terminal.write(ansiEscapes.cursorUp(this.promptLines - 1) + completePrompt);
+    this.terminal.write(ansiEscapes.cursorUp(this.promptLines - 1) + completePrompt + ' ');
+  }
+
+  private updateCursor(): void {
+    const { x, y } = this.coordsInPrompt(this.promptPosition);
+    this.terminal.write(cursorTo(x, y));
+  }
+
+  private moveCursor(direction: 'left' | 'right'): void {    
+    if (direction === 'left') {
+      if (this.promptPosition === 0) { return; }
+
+      this.promptPosition--;
+    } else {
+      if (this.promptPosition >= this.prompt.length) { return; }
+
+      this.promptPosition++;
+    }
+    
+    const { x, y } = this.coordsInPrompt(this.promptPosition);
+    this.terminal.write(cursorTo(x, y));
+  }
+
+  private insertBackspace(): void {
+    if (this.promptPosition === 0) { return; }
+
+    if (this.promptPosition === this.prompt.length) {
+      this.prompt = this.prompt.slice(0, this.prompt.length - 1);
+    } else {
+      const begin = this.prompt.slice(0, this.promptPosition - 1);
+      const end = this.prompt.slice(this.promptPosition);
+
+      this.prompt = begin + end;
+    }
+
+    this.write();
+
+    this.promptPosition--;
+    this.updateCursor();
   }
 
   private insertKey(character: string): void {
-    const promptOffsetX = this.ps1.length;
-    const cursorX = this.terminal.buffer.active.cursorX;
-    const lineX = cursorX - promptOffsetX;
-
-    const cursorDeltaY = this.terminal.buffer.active.cursorY - this.promptLine;
-    const linePosition = cursorDeltaY * this.terminal.cols + lineX;
-
-    if (linePosition === this.prompt.length) {
+    if (this.promptPosition === this.prompt.length) {
       this.prompt += character;
 
+      this.promptPosition++;
+
       this.write();
+      this.updateCursor();
+
     } else {
-      
-      const start = this.prompt.slice(0, linePosition);
-      const end = this.prompt.slice(linePosition);
+      const begin = this.prompt.slice(0, this.promptPosition);
+      const end = this.prompt.slice(this.promptPosition);
 
-      this.prompt = start + character + end;
+      this.prompt = begin + character + end;
+
+      this.promptPosition++;
 
       this.write();
-
-      const { x, y } = this.coordsInPrompt(linePosition + 1);
-      this.terminal.write(cursorTo(x, y));
+      this.updateCursor();
     }
   }
 
@@ -112,12 +148,12 @@ class TerminalManager {
         break;
       }
       case "Backspace": {
-        console.log('todo');
+        this.insertBackspace();
         break;
       }
       case "ArrowLeft":
       case "ArrowRight": {
-        this.terminal.write(key);
+        this.moveCursor(code === 'ArrowLeft' ? 'left' : 'right');
         break;
       }
       case "ArrowUp":
@@ -154,6 +190,7 @@ class TerminalManager {
     this.resizeObserver.observe(this.domElement);
 
     this.write();
+    this.updateCursor();
   }
 
   public dispose(): void {
