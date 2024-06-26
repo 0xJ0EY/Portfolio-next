@@ -23,6 +23,7 @@ import { ProgramConfig } from "@/programs/Programs";
 import { lsConfig } from "@/programs/ListFiles/ListFiles";
 import { pwdConfig } from "@/programs/PrintWorkingDirectory/PrintWorkingDirectory";
 import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
+import { openConfig } from "@/programs/Open/Open";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -336,6 +337,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, lsConfig);
   fileSystem.addProgram(binaryDirectory, pwdConfig);
   fileSystem.addProgram(binaryDirectory, cdConfig);
+  fileSystem.addProgram(binaryDirectory, openConfig);
 
   return fileSystem;
 }
@@ -514,17 +516,19 @@ function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: 
   return targetDirectory.id === node.parent?.id;
 }
 
-function getAbsolutePath(path: string): string {
-  const isDirectory = path.endsWith('/');
+export function getAbsolutePath(path: string): string {
+  let isDirectory = path.endsWith('/');
   const pathParts = path.split('/').filter(x => x.length > 0);
 
   let stack: string[] = [];
 
   for (let i = 0; i < pathParts.length; i++) {
+    const isLast = i === pathParts.length - 1;
     const part = pathParts[i];
 
     switch (part) {
       case '.': {
+        if (isLast) { isDirectory = true; }
         break;
       }
       case '..': {

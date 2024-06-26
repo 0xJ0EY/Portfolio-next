@@ -17,8 +17,7 @@ function ListFile(shell: Shell, args: string[], apis: SystemAPIs): void {
 
   for (const entry of directory.children.iterFromHead()) {
     const directoryNode = entry.value.node;
-
-    shell.getTerminal().writeResponse(directoryNode.name);
+    shell.getTerminal().writeResponse(directoryNode.name + directoryNode.filenameExtension);
   }
 }
 

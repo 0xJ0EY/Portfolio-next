@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { cursorHide, cursorShow, cursorTo } from 'ansi-escapes';
 import { SystemAPIs } from '@/components/OperatingSystem';
+import { BaseApplicationManager } from '../ApplicationManager';
 
 export interface TerminalConnector {
   clear(): void;
@@ -34,8 +35,11 @@ export class Shell {
   private promptString = "$ ";
   private path: string = '/Users/joey/'
 
-  constructor(private terminal: TerminalConnector, private apis: SystemAPIs) {
-  }
+  constructor(
+    private terminal: TerminalConnector,
+    private applicationManager: BaseApplicationManager,
+    private apis: SystemAPIs
+  ) {}
 
   public getTerminal(): TerminalConnector {
     return this.terminal;
@@ -51,6 +55,10 @@ export class Shell {
 
   public changeDirectory(path: string): void {
     this.path = path;
+  }
+
+  public openNewProcess(path: string): void {
+    this.applicationManager.open(path);
   }
 
   public process(command: string): void {
@@ -114,8 +122,8 @@ class TerminalManager implements TerminalConnector {
   private resizeObserver: ResizeObserver | null = null;
   private shell: Shell;
 
-  constructor(private terminal: Terminal, private domElement: HTMLElement, apis: SystemAPIs) {
-    this.shell = new Shell(this, apis);
+  constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
+    this.shell = new Shell(this, applicationManager, apis);
   }
 
   public writeln(line: string): void {
@@ -350,7 +358,7 @@ export default function TerminalApplicationView(props: WindowProps) {
     if (!terminalRef.current) { return; }
 
     const terminal = new Terminal();
-    const manager = new TerminalManager(terminal, terminalRef.current, application.apis);
+    const manager = new TerminalManager(terminal, terminalRef.current, application.manager, application.apis);
 
     manager.bind();
 
