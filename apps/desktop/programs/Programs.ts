@@ -1,4 +1,3 @@
-import { ApplicationIcon } from "@/apis/FileSystem/FileSystem";
 import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { SystemAPIs } from "@/components/OperatingSystem";
 

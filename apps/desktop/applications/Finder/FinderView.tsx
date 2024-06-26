@@ -1,8 +1,7 @@
 import { WindowProps } from "@/components/WindowManagement/WindowCompositor";
 import { useState, useEffect, useRef } from "react";
-import FolderView, { FolderViewHandles } from "@/components/Folder/FolderView";
-import { ApplicationWindowEvent } from "../ApplicationEvents";
-import { FileSystemDirectory, FileSystemNode, FileSystemTextFile } from "@/apis/FileSystem/FileSystem";
+import FolderView from "@/components/Folder/FolderView";
+import { FileSystemDirectory, FileSystemNode } from "@/apis/FileSystem/FileSystem";
 import styles from './FinderView.module.css';
 import { Application } from "../ApplicationManager";
 import React from "react";
