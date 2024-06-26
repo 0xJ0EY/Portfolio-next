@@ -20,7 +20,9 @@ import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/Al
 import { terminalConfig } from "@/applications/Terminal/TerminalApplication";
 import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { ProgramConfig } from "@/programs/Programs";
-import { ListFileConfig, listFileConfig } from "@/programs/ListFiles/ListFiles";
+import { lsConfig } from "@/programs/ListFiles/ListFiles";
+import { pwdConfig } from "@/programs/PrintWorkingDirectory/PrintWorkingDirectory";
+import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -331,7 +333,9 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addImage(trash, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
 
   const binaryDirectory = fileSystem.addDirectory(root, 'bin', false, false);
-  fileSystem.addProgram(binaryDirectory, listFileConfig)
+  fileSystem.addProgram(binaryDirectory, lsConfig);
+  fileSystem.addProgram(binaryDirectory, pwdConfig);
+  fileSystem.addProgram(binaryDirectory, cdConfig);
 
   return fileSystem;
 }
@@ -510,6 +514,34 @@ function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: 
   return targetDirectory.id === node.parent?.id;
 }
 
+function getAbsolutePath(path: string): string {
+  const isDirectory = path.endsWith('/');
+  const pathParts = path.split('/').filter(x => x.length > 0);
+
+  let stack: string[] = [];
+
+  for (let i = 0; i < pathParts.length; i++) {
+    const part = pathParts[i];
+
+    switch (part) {
+      case '.': {
+        break;
+      }
+      case '..': {
+        stack.pop();
+        break;
+      }
+      default: {
+        stack.push(part);
+      }
+    }
+  }
+
+  if (stack.length === 0) { return '/' };
+
+  return '/' + stack.join('/') + (isDirectory ? '/' : '');
+}
+
 export type NodeRefreshEvent = { kind: 'refresh' }
 export type NodeUpdateEvent = { kind: 'update' }
 export type NodeRenameEvent = { kind: 'rename', path: string }
@@ -558,7 +590,7 @@ export class FileSystem {
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
-    const node = this.lookupTable[path];
+    const node = this.lookupTable[getAbsolutePath(path)];
 
     if (!node) {
       return Err(Error("Node not found"));

@@ -27,4 +27,4 @@ export class ListFileConfig implements ProgramConfig {
   public readonly program = ListFile
 }
 
-export const listFileConfig = new ListFileConfig();
+export const lsConfig = new ListFileConfig();

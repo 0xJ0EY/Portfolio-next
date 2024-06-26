@@ -49,6 +49,10 @@ export class Shell {
     return this.promptString;
   }
 
+  public changeDirectory(path: string): void {
+    this.path = path;
+  }
+
   public process(command: string): void {
     const args = splitCommand(command);
     const applicationName = args[0]?.toLocaleLowerCase() ?? null;
