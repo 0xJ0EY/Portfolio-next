@@ -42,10 +42,10 @@ export class TerminalApplication extends Application {
 
     if (event.kind === 'application-open') {
       this.compositor.open({
-        x: 200,
-        y: 200,
+        x: 150,
+        y: 150,
         height: 400,
-        width: 400,
+        width: 600,
         title: `Terminal`,
         application: this,
         args: event.args,

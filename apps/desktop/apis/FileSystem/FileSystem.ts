@@ -516,8 +516,8 @@ function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: 
   return targetDirectory.id === node.parent?.id;
 }
 
-export function getAbsolutePath(path: string): string {
-  let isDirectory = path.endsWith('/');
+export function getAbsolutePath(path: string, appendDirectorySlash?: boolean): string {
+  let isDirectory = path.endsWith('/') || appendDirectorySlash;
   const pathParts = path.split('/').filter(x => x.length > 0);
 
   let stack: string[] = [];

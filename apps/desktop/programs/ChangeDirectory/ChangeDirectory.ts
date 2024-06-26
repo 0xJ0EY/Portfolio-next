@@ -9,10 +9,10 @@ function ChangeDirectory(shell: Shell, args: string[], apis: SystemAPIs): void {
 
   if (!path) { path = '/Users/joey/'; }
   if (!path.startsWith('/')) {
-    path = shell.getPath() + '/' + path;
+    path = shell.getPath() + path;
   }
 
-  const absolutePath = getAbsolutePath(path);
+  const absolutePath = getAbsolutePath(path, true);
   const directory = fs.getDirectory(absolutePath);
 
   if (!directory.ok) {

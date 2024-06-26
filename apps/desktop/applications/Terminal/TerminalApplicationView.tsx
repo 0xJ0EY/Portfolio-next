@@ -32,7 +32,9 @@ function splitStringInParts(input: string, rowLength: number): string[] {
 }
 
 export class Shell {
-  private promptString = "$ ";
+  private promptString = "{hostname} :: {path} % ";
+
+  private hostname: string = "j-os";
   private path: string = '/Users/joey/'
 
   constructor(
@@ -50,7 +52,9 @@ export class Shell {
   }
 
   public getPromptString(): string {
-    return this.promptString;
+    return this.promptString
+      .replace("{hostname}", this.hostname)
+      .replace('{path}', this.path);
   }
 
   public changeDirectory(path: string): void {
