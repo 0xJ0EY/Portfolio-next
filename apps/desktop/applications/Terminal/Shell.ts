@@ -1,13 +1,14 @@
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { BaseApplicationManager } from "../ApplicationManager";
 import { TerminalConnector } from "./TerminalApplicationView";
+import ansiColors from "ansi-colors";
 
 function splitCommand(input: string): string[] {
   return input.split(' ').filter(x => x.length > 0);
 }
 
 export class Shell {
-  private promptString = "{hostname} :: {path} % ";
+  private promptString = `${ansiColors.white("{hostname}")} ${ansiColors.magentaBright("::")} ${ansiColors.greenBright("{path}")} ${ansiColors.blueBright("%")} `;
 
   private hostname: string = "j-os";
   private path: string = '/Users/joey/'
@@ -34,6 +35,10 @@ export class Shell {
 
   public changeDirectory(path: string): void {
     this.path = path;
+  }
+
+  public changeHostname(hostname: string): void {
+    this.hostname = hostname;
   }
 
   public openNewProcess(path: string): void {

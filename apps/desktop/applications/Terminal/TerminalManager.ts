@@ -5,6 +5,86 @@ import { BaseApplicationManager } from "../ApplicationManager";
 import { Shell } from "./Shell";
 import { TerminalConnector } from "./TerminalApplicationView";
 
+function isEscapeSequence(ansi: string, index: number): boolean {
+  return ansi.charCodeAt(index) === 0x1B;
+}
+
+function isControlSequenceIntroducer(ansi: string, index: number): boolean {
+  return ansi.charCodeAt(index) === 0x5B;
+}
+
+function isControlSequenceEndMarker(ansi: string, index: number): boolean {
+  return ansi.charCodeAt(index) === 0x6D;
+}
+
+function ansiSplit(ansi: string, maxLength: number): { part: string, offset: number } {
+  let lastUsableIndex = 0;
+
+  let length = 0;
+  let index = 0;
+
+  let inControlSequence: boolean = false;
+
+  while (length < maxLength) {
+    if (isEscapeSequence(ansi, index)) {
+      index++;
+      continue;
+    }
+
+    if (isEscapeSequence(ansi, index - 1) && isControlSequenceIntroducer(ansi, index)) {
+      inControlSequence = true;
+    }
+
+    if (!inControlSequence) {
+      length++;
+    }
+
+    if (inControlSequence && isControlSequenceEndMarker(ansi, index)) {
+      inControlSequence = false;
+    }
+
+    index++;
+
+    if (!inControlSequence) {
+      lastUsableIndex = index;
+    }
+  }
+
+  return { part: ansi.slice(0, lastUsableIndex), offset: lastUsableIndex };
+}
+
+function ansiStringLength(ansi: string): number {
+  if (ansi.length < 1) { return ansi.length; }
+
+  let length = 0;
+  let index = 0;
+
+  let inControlSequence: boolean = false;
+
+  while (index < ansi.length) {
+    if (isEscapeSequence(ansi, index)) {
+      index++;
+      continue;
+    }
+
+    if (isEscapeSequence(ansi, index - 1) && isControlSequenceIntroducer(ansi, index)) {
+      inControlSequence = true;
+    }
+
+    if (!inControlSequence) {
+      length++;
+    }
+
+    if (inControlSequence && isControlSequenceEndMarker(ansi, index)) {
+      inControlSequence = false;
+    }
+
+    index++;
+  }
+
+  return length;
+}
+
 function splitStringInParts(input: string, rowLength: number): string[] {
   if (input === '') { return ['']; }
 
@@ -12,10 +92,10 @@ function splitStringInParts(input: string, rowLength: number): string[] {
   let parts: string[] = [];
 
   while (index < input.length) {
-    let part = input.slice(index, Math.min(index + rowLength, input.length));
-    parts.push(part);
+    const { part, offset } = ansiSplit(input.slice(index), rowLength);
 
-    index += rowLength;
+    parts.push(part);
+    index += offset;
   }
 
   return parts;
@@ -42,7 +122,7 @@ export class TerminalManager implements TerminalConnector {
   }
 
   private coordsInPrompt(index: number): { x: number, y: number } {
-    index += this.shell.getPromptString().length;
+    index += ansiStringLength(this.shell.getPromptString());
 
     const x = index % this.terminal.cols;
     const y = Math.floor(index / this.terminal.cols);
@@ -101,7 +181,6 @@ export class TerminalManager implements TerminalConnector {
 
   private write(content: string): void {
     const lines = splitStringInParts(content, this.terminal.cols);
-
     const lineDiff = Math.max(lines.length - this.promptLines, 0);
 
     for (let i = 0; i > lineDiff; i++) {
