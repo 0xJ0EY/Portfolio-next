@@ -1,6 +1,6 @@
 import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { SystemAPIs } from "@/components/OperatingSystem";
-import { ProgramConfig } from "../Programs";
+import { ProgramConfig, getAbsolutePathFromArgs } from "../Programs";
 import { getAbsolutePath } from "@/apis/FileSystem/FileSystem";
 
 function ChangeDirectory(shell: Shell, args: string[], apis: SystemAPIs): void {
@@ -8,11 +8,8 @@ function ChangeDirectory(shell: Shell, args: string[], apis: SystemAPIs): void {
   let path = args[1] ?? null;
 
   if (!path) { path = '/Users/joey/'; }
-  if (!path.startsWith('/')) {
-    path = shell.getPath() + path;
-  }
 
-  const absolutePath = getAbsolutePath(path, true);
+  const absolutePath = getAbsolutePathFromArgs(path, shell, true);
   const directory = fs.getDirectory(absolutePath);
 
   if (!directory.ok) {

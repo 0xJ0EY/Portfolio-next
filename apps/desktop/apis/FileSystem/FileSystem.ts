@@ -24,6 +24,7 @@ import { lsConfig } from "@/programs/ListFiles/ListFiles";
 import { pwdConfig } from "@/programs/PrintWorkingDirectory/PrintWorkingDirectory";
 import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
 import { openConfig } from "@/programs/Open/Open";
+import { catConfig } from "@/programs/Concatenation/Concatenation";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -338,6 +339,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, pwdConfig);
   fileSystem.addProgram(binaryDirectory, cdConfig);
   fileSystem.addProgram(binaryDirectory, openConfig);
+  fileSystem.addProgram(binaryDirectory, catConfig);
 
   return fileSystem;
 }
