@@ -8,7 +8,7 @@ function Concatenation(shell: Shell, args: string[], apis: SystemAPIs): void {
 
   if (!path) { return; }
 
-  const absolutePath = getAbsolutePathFromArgs(path, shell, false);
+  const absolutePath = getAbsolutePathFromArgs(path, shell);
   const nodeResult = fs.getNode(absolutePath);
 
   if (!nodeResult.ok) {

@@ -1,7 +1,6 @@
 import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { ProgramConfig, getAbsolutePathFromArgs } from "../Programs";
-import { getAbsolutePath } from "@/apis/FileSystem/FileSystem";
 
 function ChangeDirectory(shell: Shell, args: string[], apis: SystemAPIs): void {
   const fs = apis.fileSystem;
