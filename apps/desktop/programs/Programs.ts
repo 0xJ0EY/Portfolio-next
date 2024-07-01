@@ -1,5 +1,5 @@
+import { Shell } from "@/applications/Terminal/Shell";
 import { getAbsolutePath } from "@/apis/FileSystem/FileSystem";
-import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { SystemAPIs } from "@/components/OperatingSystem";
 
 export type Program = (shell: Shell, args: string[], apis: SystemAPIs) => void;

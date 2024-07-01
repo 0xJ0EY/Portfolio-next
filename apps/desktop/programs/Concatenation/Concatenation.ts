@@ -1,6 +1,6 @@
 import { SystemAPIs } from "@/components/OperatingSystem"
 import { ProgramConfig, getAbsolutePathFromArgs } from "../Programs"
-import { Shell } from "@/applications/Terminal/TerminalApplicationView"
+import { Shell } from "@/applications/Terminal/Shell";
 
 function Concatenation(shell: Shell, args: string[], apis: SystemAPIs): void {
   const fs = apis.fileSystem;

@@ -18,13 +18,13 @@ import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 import { skillsConfig } from "@/applications/Skills/Skills";
 import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/AlgorithmVisualizer";
 import { terminalConfig } from "@/applications/Terminal/TerminalApplication";
-import { Shell } from "@/applications/Terminal/TerminalApplicationView";
 import { ProgramConfig } from "@/programs/Programs";
 import { lsConfig } from "@/programs/ListFiles/ListFiles";
 import { pwdConfig } from "@/programs/PrintWorkingDirectory/PrintWorkingDirectory";
 import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
 import { openConfig } from "@/programs/Open/Open";
 import { catConfig } from "@/programs/Concatenation/Concatenation";
+import { Shell } from "@/applications/Terminal/Shell";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,

@@ -1,4 +1,4 @@
-import { Shell } from "@/applications/Terminal/TerminalApplicationView";
+import { Shell } from "@/applications/Terminal/Shell";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { ProgramConfig } from "../Programs";
 
