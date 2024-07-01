@@ -25,7 +25,7 @@ function ansiSplit(ansi: string, maxLength: number): { part: string, offset: num
 
   let inControlSequence: boolean = false;
 
-  while (length < maxLength) {
+  while (length < maxLength || index < ansi.length) {
     if (isEscapeSequence(ansi, index)) {
       index++;
       continue;
