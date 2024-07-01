@@ -12,6 +12,7 @@ export class Shell {
 
   private hostname: string = "j-os";
   private path: string = '/Users/joey/'
+  private relativePath: string = '~/';
 
   constructor(
     private terminal: TerminalConnector,
@@ -27,14 +28,45 @@ export class Shell {
     return this.path;
   }
 
+  public getRelativePath(): string {
+    return this.relativePath;
+  }
+
   public getPromptString(): string {
     return this.promptString
       .replace("{hostname}", this.hostname)
-      .replace('{path}', this.path);
+      .replace('{path}', this.getRelativePath());
+  }
+
+  private buildRelativePath(path: string): string {
+    const TopItems = 3;
+
+    const pathItems = path.split('/').filter(x => x.length > 0);
+    if (pathItems.length === 0) { return "/" };
+
+    const topItems = pathItems.slice(-TopItems);
+
+    const isHomeDirectory = pathItems.length >= 2 && pathItems[0] === "Users" && pathItems[1] === "joey";
+    const pathItemsDelta = pathItems.length - topItems.length;
+
+    if (isHomeDirectory && pathItemsDelta <= 1) {
+      const itemsToRemove = 2 - pathItemsDelta;
+
+      for (let i = 0; i < itemsToRemove; i++) { topItems.shift(); }
+
+      topItems.unshift("~");
+    }
+
+    if (isHomeDirectory) {
+      return `${topItems.join('/')}/`;
+    } else {
+      return `/${topItems.join('/')}/`;
+    }
   }
 
   public changeDirectory(path: string): void {
     this.path = path;
+    this.relativePath = this.buildRelativePath(path);
   }
 
   public changeHostname(hostname: string): void {
