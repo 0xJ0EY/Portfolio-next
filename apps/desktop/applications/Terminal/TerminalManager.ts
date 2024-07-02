@@ -91,14 +91,8 @@ function splitStringInParts(input: string, cols: number): string[] {
   let index = 0;
   let parts: string[] = [];
 
-  console.log('split string');
-
-  console.log(input);
-
   while (index < input.length) {
     const { part, offset } = ansiSplit(input.slice(index), cols);
-
-    console.log(part.length, offset);
 
     parts.push(part);
     index += offset;
