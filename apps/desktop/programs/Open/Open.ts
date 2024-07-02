@@ -16,6 +16,17 @@ function Open(shell: Shell, args: string[], apis: SystemAPIs): void {
   const fs = apis.fileSystem;
   let path = args[1] ?? null;
 
+  if (!path) {
+    shell.getTerminal().writeResponseLines([
+      'Usage: open filename',
+      'Help: Open opens files from a shell.',
+      'By default, opens each file using the default application for that file.',
+      'If the file is in the form of a URL, the file will be opened as a URL.'
+    ]);
+
+    return;
+  }
+
   if (!path.startsWith('/')) {
     path = shell.getPath() + '/' + path;
   }
