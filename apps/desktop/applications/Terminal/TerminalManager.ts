@@ -25,7 +25,7 @@ function ansiSplit(ansi: string, maxLength: number): { part: string, offset: num
 
   let inControlSequence: boolean = false;
 
-  while (length < maxLength || index < ansi.length) {
+  while (length < maxLength && index < ansi.length) {
     if (isEscapeSequence(ansi, index)) {
       index++;
       continue;
@@ -85,14 +85,20 @@ function ansiStringLength(ansi: string): number {
   return length;
 }
 
-function splitStringInParts(input: string, rowLength: number): string[] {
+function splitStringInParts(input: string, cols: number): string[] {
   if (input === '') { return ['']; }
 
   let index = 0;
   let parts: string[] = [];
 
+  console.log('split string');
+
+  console.log(input);
+
   while (index < input.length) {
-    const { part, offset } = ansiSplit(input.slice(index), rowLength);
+    const { part, offset } = ansiSplit(input.slice(index), cols);
+
+    console.log(part.length, offset);
 
     parts.push(part);
     index += offset;
@@ -180,7 +186,7 @@ export class TerminalManager implements TerminalConnector {
   }
 
   private write(content: string): void {
-    const lines = splitStringInParts(content, this.terminal.cols);
+    const lines = splitStringInParts(content, this.terminal.cols - 1);
     const lineDiff = Math.max(lines.length - this.promptLines, 0);
 
     for (let i = 0; i > lineDiff; i++) {
