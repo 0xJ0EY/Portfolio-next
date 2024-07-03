@@ -26,6 +26,7 @@ import { openConfig } from "@/programs/Open/Open";
 import { catConfig } from "@/programs/Concatenation/Concatenation";
 import { Shell } from "@/applications/Terminal/Shell";
 import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
+import { rmConfig } from "@/programs/Remove/Remove";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -342,6 +343,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, openConfig);
   fileSystem.addProgram(binaryDirectory, catConfig);
   fileSystem.addProgram(binaryDirectory, mkdirConfig);
+  fileSystem.addProgram(binaryDirectory, rmConfig);
 
   return fileSystem;
 }
@@ -838,5 +840,15 @@ export class FileSystem {
 
     const result = chainNode.value;
     parentDirectory.children.unlink(result);
+
+    const resultNode = result.value.node;
+
+    if (resultNode.kind === 'directory') {
+      const path = constructPath(node);
+
+      if (this.lookupTable[path]) {
+        delete this.lookupTable[path];
+      }
+    }
   }
 }
