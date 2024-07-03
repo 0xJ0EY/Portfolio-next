@@ -9,7 +9,7 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
-import { constructPath } from "./util";
+import { constructPath, isUniqueFile } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
@@ -25,6 +25,7 @@ import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
 import { openConfig } from "@/programs/Open/Open";
 import { catConfig } from "@/programs/Concatenation/Concatenation";
 import { Shell } from "@/applications/Terminal/Shell";
+import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -340,6 +341,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, cdConfig);
   fileSystem.addProgram(binaryDirectory, openConfig);
   fileSystem.addProgram(binaryDirectory, catConfig);
+  fileSystem.addProgram(binaryDirectory, mkdirConfig);
 
   return fileSystem;
 }
@@ -619,23 +621,13 @@ export class FileSystem {
   }
 
   public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
-    function filenameExistsInParent(parent: FileSystemDirectory, name: string): boolean {
-      for (const file of parent.children.iterFromTail()) {
-        if (file.value.node.name === name) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
     // We only check for a duplicate names
     if (!node.parent) {
       return Err(Error("A parent is required, to rename the directory"));
     }
 
     // We allow any other name, like Apple's HFS+
-    if (filenameExistsInParent(node.parent, name)) {
+    if (!isUniqueFile(node.parent, name)) {
       return Err(Error("Duplicate filename"));
     }
 
