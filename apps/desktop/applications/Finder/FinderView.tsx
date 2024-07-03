@@ -163,7 +163,7 @@ export default function FinderView(props: WindowProps) {
     setPathNodes(buildPathNodesFromDirectoryEntry(directory));
     const path = constructPath(directory);
 
-    setCanEdit(directory.editable || directory.stickyBit);
+    setCanEdit(directory.editable || directory.editableContent);
 
     updateWindowTitle(path);
     setPath(path);

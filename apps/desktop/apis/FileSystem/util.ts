@@ -19,6 +19,14 @@ export function constructPath(node: FileSystemNode): string {
   return path + node.filenameExtension;
 }
 
+export function pathParts(path: string): string[] {
+  const nodes = path.split('/').filter(x => x.length > 0);
+
+  if (nodes.length < 1 ) { return ["/"]; }
+
+  return nodes;
+}
+
 // Pops the last entry off the path, so it should always return a directory path
 export function pathPop(path: string): string {
   const nodes = path.split('/').filter(x => x.length > 0);

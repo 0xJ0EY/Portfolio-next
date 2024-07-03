@@ -72,7 +72,7 @@ export type FileSystemDirectory = {
   content: DirectoryContent,
   children: Chain<DirectoryEntry>
   editable: boolean,
-  stickyBit: boolean,
+  editableContent: boolean,
 };
 
 export type FileSystemHyperLink = {
@@ -185,12 +185,12 @@ function createRootNode(): FileSystemDirectory {
     name: '/',
     filenameExtension: '',
     editable: false,
-    stickyBit: false,
+    editableContent: false,
     children: new Chain()
   }
 }
 
-function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean, icon?: ApplicationIcon): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {
   return {
     id,
     parent,
@@ -211,7 +211,7 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     name,
     filenameExtension: '',
     editable,
-    stickyBit,
+    editableContent,
     children: new Chain()
   }
 }
@@ -297,7 +297,7 @@ export function createBaseFileSystem(): FileSystem {
 
   // Create macOS like Users folder
   const users = fileSystem.addDirectory(root, 'Users', false, false);
-  const joey = fileSystem.addDirectory(users, 'joey', false, false);
+  const joey = fileSystem.addDirectory(users, 'joey', false, true);
 
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
   const documents = fileSystem.addDirectory(joey, 'Documents', false, true, documentsFolderIcon);
@@ -513,7 +513,7 @@ function isEditable(node: FileSystemNode | null): boolean {
 }
 
 function targetDirectoryAllowsModification(directory: FileSystemDirectory): boolean {
-  return directory.editable || directory.stickyBit;
+  return directory.editable || directory.editableContent;
 }
 
 function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: FileSystemNode): boolean {
