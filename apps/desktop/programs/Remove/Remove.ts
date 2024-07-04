@@ -2,7 +2,6 @@ import { Shell } from "@/applications/Terminal/Shell";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { ProgramConfig, getAbsolutePathFromArgs } from "../Programs";
 import { FileSystemDirectory, FileSystem, FileSystemNode } from "@/apis/FileSystem/FileSystem";
-import { Ok, Result } from "result";
 import { constructPath } from "@/apis/FileSystem/util";
 
 function findNode(absolutePath: string, fs: FileSystem): FileSystemNode | null {

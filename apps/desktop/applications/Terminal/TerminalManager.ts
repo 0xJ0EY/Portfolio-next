@@ -4,6 +4,7 @@ import { cursorTo, cursorHide, cursorShow } from "ansi-escapes";
 import { BaseApplicationManager } from "../ApplicationManager";
 import { Shell } from "./Shell";
 import { TerminalConnector } from "./TerminalApplicationView";
+import { clamp } from "@/components/util";
 
 function isEscapeSequence(ansi: string, index: number): boolean {
   return ansi.charCodeAt(index) === 0x1B;
@@ -113,6 +114,10 @@ export class TerminalManager implements TerminalConnector {
   private resizeObserver: ResizeObserver | null = null;
   private shell: Shell;
 
+  private historyPrompt: string = "";
+  private historyEntries: string[] = [];
+  private historyIndex = 0;
+
   constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
     this.shell = new Shell(this, applicationManager, apis);
   }
@@ -130,16 +135,23 @@ export class TerminalManager implements TerminalConnector {
     return { x, y: y + this.promptLine }
   }
 
+  private clearPrompt(): void {
+    this.write("\r" + " ".repeat(this.getCompletePrompt().length));
+  }
+
   private resetPrompt(): void {
     this.prompt = '';
     this.promptPosition = 0;
 
     this.promptLines = 1;
     this.actualPromptLines = 1;
+
+    this.historyPrompt = '';
   }
 
   private updatePrompt(): void {
     this.hideCursor();
+    this.clearPrompt();
     this.writePrompt();
     this.updateCursor();
     this.showCursor();
@@ -158,6 +170,7 @@ export class TerminalManager implements TerminalConnector {
     this.hideCursor();
 
     this.write(response);
+
     this.newLine();
 
     this.showCursor();
@@ -174,13 +187,16 @@ export class TerminalManager implements TerminalConnector {
     this.showCursor();
   }
 
+  private getCompletePrompt(): string {
+    return `\r${this.shell.getPromptString()}${this.prompt}`;
+  }
+
   private writePrompt(): void {
-    const completePrompt = `\r${this.shell.getPromptString()}${this.prompt}`;
-    this.write(completePrompt);
+    this.write(this.getCompletePrompt());
   }
 
   private write(content: string): void {
-    const lines = splitStringInParts(content, this.terminal.cols - 1);
+    const lines = splitStringInParts(content, this.terminal.cols);
     const lineDiff = Math.max(lines.length - this.promptLines, 0);
 
     for (let i = 0; i > lineDiff; i++) {
@@ -230,13 +246,31 @@ export class TerminalManager implements TerminalConnector {
     this.terminal.write(cursorTo(x, y));
   }
 
+  private loadHistory(direction: 'prev' | 'next'): void {
+    const offset = direction === 'next' ? 1 : -1;
+    this.historyIndex = clamp(this.historyIndex + offset, 0, this.historyEntries.length);
+
+    if (this.historyIndex === this.historyEntries.length) {
+      this.prompt = this.historyPrompt;
+    } else {
+      this.prompt = this.historyEntries[this.historyIndex];
+    }
+
+    this.promptPosition = this.prompt.length;
+
+    this.updatePrompt();
+  }
+
   private insertEnter(): void {
     const command = this.prompt;
 
     this.newLine();
 
-    {
-      this.shell.process(command);
+    this.shell.process(command);
+
+    if (command.length > 0) {
+      this.historyEntries.push(command);
+      this.historyIndex = this.historyEntries.length;
     }
 
     this.updatePrompt();
@@ -275,6 +309,8 @@ export class TerminalManager implements TerminalConnector {
 
       this.updatePrompt();
     }
+
+    this.historyPrompt = this.prompt;
   }
 
   private onKey(args: { key: string, domEvent: KeyboardEvent }): void {
@@ -298,6 +334,7 @@ export class TerminalManager implements TerminalConnector {
       }
       case "ArrowUp":
       case "ArrowDown": {
+        this.loadHistory(code === 'ArrowUp' ? 'prev' : 'next');
         break;
       }
       default: {
