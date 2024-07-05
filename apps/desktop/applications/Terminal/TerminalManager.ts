@@ -292,20 +292,20 @@ export class TerminalManager implements TerminalConnector {
     this.updatePrompt();
   }
 
-  private insertKey(character: string): void {
+  private insertCharacters(characters: string): void {
     if (this.promptPosition === this.prompt.length) {
-      this.prompt += character;
+      this.prompt += characters;
 
-      this.promptPosition++;
+      this.promptPosition += characters.length;
 
       this.updatePrompt();
     } else {
       const begin = this.prompt.slice(0, this.promptPosition);
       const end = this.prompt.slice(this.promptPosition);
 
-      this.prompt = begin + character + end;
+      this.prompt = begin + characters + end;
 
-      this.promptPosition++;
+      this.promptPosition += characters.length;
 
       this.updatePrompt();
     }
@@ -338,7 +338,8 @@ export class TerminalManager implements TerminalConnector {
         break;
       }
       default: {
-        this.insertKey(key);
+        if (key.length !== 1) { return; }
+        this.insertCharacters(key);
       }
     }
   }
