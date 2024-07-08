@@ -84,13 +84,13 @@ function Move(shell: Shell, args: string[], apis: SystemAPIs): void {
   const source = args[1] ?? null;
   const target = args[2] ?? null;
 
-  const sourcePath = getSourcePath(source, fs, shell);
-  const targetPath = getTargetPath(sourcePath, target, fs, shell);
-
   if (!source || !target) {
     shell.getTerminal().writeResponse('usage: mv source target');
     return;
   }
+
+  const sourcePath = getSourcePath(source, fs, shell);
+  const targetPath = getTargetPath(sourcePath, target, fs, shell);
 
   const sourceAbsolutePath = getAbsolutePathFromArgs(sourcePath, shell);
   const targetAbsolutePath = getAbsolutePathFromArgs(targetPath, shell);
