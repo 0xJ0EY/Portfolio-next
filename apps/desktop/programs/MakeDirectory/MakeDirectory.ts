@@ -23,7 +23,9 @@ function createDirectory(shell: Shell, fs: FileSystem, root: FileSystemDirectory
 
 function createSequentialDirectory(shell: Shell, fs: FileSystem, path: string): void {
   const root = pathPop(path);
-  const directory = pathLastEntry(path) ?? '';
+  const directory = pathLastEntry(path);
+
+  if (!directory) { return; }
 
   const rootDirectoryResult = fs.getDirectory(root);
 

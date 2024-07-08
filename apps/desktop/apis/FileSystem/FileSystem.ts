@@ -27,6 +27,7 @@ import { catConfig } from "@/programs/Concatenation/Concatenation";
 import { Shell } from "@/applications/Terminal/Shell";
 import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
 import { rmConfig } from "@/programs/Remove/Remove";
+import { touchConfig } from "@/programs/Touch/Touch";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -91,7 +92,7 @@ export type FileSystemTextFile = {
   id: number,
   parent: FileSystemDirectory
   kind: 'textfile',
-  filenameExtension: '.txt',
+  filenameExtension: string,
   name: string,
   content: string,
   editable: boolean
@@ -217,13 +218,13 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
   }
 }
 
-function createTextFile(id: number, parent: FileSystemDirectory, name: string, content: string, editable: boolean): FileSystemTextFile {
+function createTextFile(id: number, parent: FileSystemDirectory, name: string, content: string, editable: boolean, extension: string): FileSystemTextFile {
   return {
     id,
     parent,
     kind: 'textfile',
     name,
-    filenameExtension: '.txt',
+    filenameExtension: extension,
     content,
     editable,
   }
@@ -344,6 +345,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, catConfig);
   fileSystem.addProgram(binaryDirectory, mkdirConfig);
   fileSystem.addProgram(binaryDirectory, rmConfig);
+  fileSystem.addProgram(binaryDirectory, touchConfig);
 
   return fileSystem;
 }
@@ -775,8 +777,8 @@ export class FileSystem {
     return directory;
   }
 
-  public addTextFile(parent: FileSystemDirectory, name: string, content: string, editable: boolean): FileSystemTextFile {
-    const textFile = createTextFile(++this.id, parent, name, content, editable);
+  public addTextFile(parent: FileSystemDirectory, name: string, content: string, editable: boolean, extension: string = '.txt'): FileSystemTextFile {
+    const textFile = createTextFile(++this.id, parent, name, content, editable, extension);
 
     this.addNodeToDirectory(parent, textFile);
 
