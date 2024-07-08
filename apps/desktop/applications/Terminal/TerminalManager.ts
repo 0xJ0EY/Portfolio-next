@@ -119,6 +119,7 @@ export class TerminalManager implements TerminalConnector {
   private historyIndex = 0;
 
   constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
+    this.terminal.options.fontSize = 16;
     this.shell = new Shell(this, applicationManager, apis);
   }
 
