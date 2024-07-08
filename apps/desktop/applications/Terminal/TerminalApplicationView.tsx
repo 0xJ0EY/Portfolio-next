@@ -1,5 +1,5 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { TerminalManager } from './TerminalManager';
 
@@ -12,20 +12,35 @@ export interface TerminalConnector {
 export default function TerminalApplicationView(props: WindowProps) {
   const { application, windowContext } = props;
 
+  const terminal = useRef<Terminal | null>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState<boolean>(false);
   
   useEffect(() => {
     if (!terminalRef.current) { return; }
 
-    const terminal = new Terminal();
-    const manager = new TerminalManager(terminal, terminalRef.current, application.manager, application.apis);
+    terminal.current = new Terminal();
+    const manager = new TerminalManager(
+      terminal.current,
+      terminalRef.current,
+      application.manager,
+      application.apis
+    );
 
     manager.bind();
+
+    setLoaded(true);
 
     return () => { 
       manager.dispose();
     }
   }, []);
+
+  useEffect(() => {
+    if (loaded && terminal.current) {
+      terminal.current.focus();
+    }
+  }, [loaded]);
 
   // I think loading a style sheet like this is illegal according to the HTML spec
   // But the browsers accept it anyway :ˆ)
