@@ -51,7 +51,9 @@ function ansiSplit(ansi: string, maxLength: number): { part: string, offset: num
     }
   }
 
-  return { part: ansi.slice(0, lastUsableIndex), offset: lastUsableIndex };
+  const offset = index < ansi.length ? lastUsableIndex : index;
+
+  return { part: ansi.slice(0, lastUsableIndex), offset: offset };
 }
 
 function ansiStringLength(ansi: string): number {
@@ -137,7 +139,7 @@ export class TerminalManager implements TerminalConnector {
   }
 
   private clearPrompt(): void {
-    this.write("\r" + " ".repeat(this.getCompletePrompt().length));
+    this.write('\x1b[2K\r');
   }
 
   private resetPrompt(): void {
