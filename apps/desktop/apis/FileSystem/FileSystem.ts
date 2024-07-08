@@ -28,6 +28,7 @@ import { Shell } from "@/applications/Terminal/Shell";
 import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
 import { rmConfig } from "@/programs/Remove/Remove";
 import { touchConfig } from "@/programs/Touch/Touch";
+import { moveConfig } from "@/programs/Move/Move";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -346,6 +347,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, mkdirConfig);
   fileSystem.addProgram(binaryDirectory, rmConfig);
   fileSystem.addProgram(binaryDirectory, touchConfig);
+  fileSystem.addProgram(binaryDirectory, moveConfig);
 
   return fileSystem;
 }
@@ -624,6 +626,40 @@ export class FileSystem {
       });
   }
 
+  public renameAndMove(node: FileSystemNode, name: string, directory: FileSystemDirectory): Result<DirectoryEntry, Error> {
+    if (isParentOfTargetDirectory(directory, node)) {
+      return Err(Error("Node is a parent of the target directory"));
+    }
+
+    if (!isEditable(node)) {
+      return Err(Error("Node or target directory is not editable"));
+    }
+
+    if (!targetDirectoryAllowsModification(directory)) {
+      return Err(Error("Target directory does not allow modification"));
+    }
+
+    const oldLookupPath = constructPath(node);
+
+    this.removeNodeFromDirectory(node);
+    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
+
+    node.name = name;
+
+    const entry = this.addNodeToDirectory(directory, node);
+
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
+
+    this.propagateNodeEvent(node, { kind: 'rename', path: newLookupPath });
+    this.propagateNodeEvent(node.parent!, { kind: 'update' });
+
+    return Ok(entry);
+  }
+
   public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
     // We only check for a duplicate names
     if (!node.parent) {
@@ -683,19 +719,23 @@ export class FileSystem {
       return Ok(originalDirectoryEntry);
     }
 
-    // Remove old path from lookup table
-    const path = constructPath(node);
-    if (this.lookupTable[path]) { delete this.lookupTable[path]; }
+    const oldLookupPath = constructPath(node);
 
+    // Delete the old directory entry
     this.removeNodeFromDirectory(node);
 
     // Inform the old parent that the node has been removed
     if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
 
+    // Create the new directory entry
+    // NOTE: This method call modifies the node object, so we can reconstruct the path again
     const entry = this.addNodeToDirectory(directory, node);
 
-    // Add new path to lookup table
-    this.lookupTable[constructPath(node)] = node;
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
 
     return Ok(entry);
   }
