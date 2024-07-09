@@ -12,7 +12,7 @@ export class Shell {
 
   private hostname: string = "j-os";
   private path: string = '/Users/joey/'
-  private relativePath: string = '~/';
+  private relativePath: string = '~';
 
   constructor(
     private terminal: TerminalConnector,
@@ -58,6 +58,8 @@ export class Shell {
     }
 
     if (isHomeDirectory) {
+      if (topItems.length === 1) { return '~'; }
+
       return `${topItems.join('/')}/`;
     } else {
       return `/${topItems.join('/')}/`;
