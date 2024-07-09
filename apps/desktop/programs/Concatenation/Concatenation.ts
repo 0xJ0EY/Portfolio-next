@@ -39,8 +39,7 @@ function Concatenation(shell: Shell, args: string[], apis: SystemAPIs): void {
       shell.getTerminal().writeResponse(`cat: ${path}: Is a program`);
       break;
   }
-
-};
+}
 
 export class ConcatenationConfig implements ProgramConfig {
   public readonly appName = "cat"

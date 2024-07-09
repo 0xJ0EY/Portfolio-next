@@ -29,6 +29,7 @@ import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
 import { rmConfig } from "@/programs/Remove/Remove";
 import { touchConfig } from "@/programs/Touch/Touch";
 import { moveConfig } from "@/programs/Move/Move";
+import { motdConfig } from "@/programs/MessageOfTheDay/MessageOfTheDay";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -348,6 +349,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, rmConfig);
   fileSystem.addProgram(binaryDirectory, touchConfig);
   fileSystem.addProgram(binaryDirectory, moveConfig);
+  fileSystem.addProgram(binaryDirectory, motdConfig);
 
   return fileSystem;
 }

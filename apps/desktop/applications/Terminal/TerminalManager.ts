@@ -122,6 +122,16 @@ export class TerminalManager implements TerminalConnector {
 
   constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
     this.terminal.options.fontSize = 16;
+
+    // xterm js has a bit of a weird initialization process, so we hardcode these values
+    const cellWidth   = 9.6;
+    const cellHeight  = 17;
+
+    const cols = Math.floor(domElement.clientWidth / cellWidth);
+    const rows = Math.floor(domElement.clientHeight / cellHeight);
+
+    this.terminal.resize(cols, rows);
+
     this.shell = new Shell(this, applicationManager, apis);
   }
 
@@ -366,6 +376,9 @@ export class TerminalManager implements TerminalConnector {
     const dimensions = core._renderService.dimensions;
     const cell: { height: number, width: number } = dimensions.css.cell;
 
+    console.log(cell.width);
+    console.log(cell.height);
+
     const cols = Math.floor(terminalContainer.clientWidth / cell.width);
     const rows = Math.floor(terminalContainer.clientHeight / cell.height);
 
@@ -379,6 +392,8 @@ export class TerminalManager implements TerminalConnector {
 
     this.resizeObserver = new ResizeObserver(this.onResize.bind(this));
     this.resizeObserver.observe(this.domElement);
+
+    this.shell.process('motd');
 
     this.updatePrompt();
     this.updateCursor();
