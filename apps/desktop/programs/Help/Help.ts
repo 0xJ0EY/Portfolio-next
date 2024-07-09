@@ -26,6 +26,8 @@ function Help(shell: Shell, args: string[], apis: SystemAPIs): void {
     command('touch', 'Create a new text file'),
     command('rm', 'Removes files or directories'),
     command('pwd', 'Prints Path of current working directory'),
+    command('clear', 'Clear the terminal screen'),
+    command('ps', 'Set prompt string'),
   ]);
 }
 

@@ -86,7 +86,6 @@ export class Shell {
     if (applicationName === null) { return; }
 
     switch (applicationName) {
-
       case 'clear': {
         this.terminal.clear();
         break;
@@ -95,8 +94,10 @@ export class Shell {
         const title = args.slice(1).join(' ');
 
         if (title.length === 0) {
-          this.terminal.writeResponse('jsh: ps requires a value to be set');
-          this.promptString = '$ ';
+          this.terminal.writeResponseLines([
+            'jsh: ps requires a value to be set',
+            'possible variables: {hostname}, {path}'
+          ]);
         } else {
           this.promptString = title + ' ';
         }
