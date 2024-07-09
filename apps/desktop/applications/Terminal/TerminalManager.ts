@@ -1,6 +1,6 @@
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { Terminal } from "@xterm/xterm";
-import { cursorTo, cursorHide, cursorShow } from "ansi-escapes";
+import { cursorTo, cursorHide, cursorShow, cursorUp, cursorDown, cursorMove } from "ansi-escapes";
 import { BaseApplicationManager } from "../ApplicationManager";
 import { Shell } from "./Shell";
 import { TerminalConnector } from "./TerminalApplicationView";
@@ -135,11 +135,22 @@ export class TerminalManager implements TerminalConnector {
     const x = index % this.terminal.cols;
     const y = Math.floor(index / this.terminal.cols);
 
-    return { x, y: y + this.promptLine }
+    const baseY = this.promptLine - this.terminal.buffer.active.baseY;
+
+    return { x, y: baseY + y}
   }
 
   private clearPrompt(): void {
-    this.write('\x1b[2K\r');
+    const baseY = this.promptLine - this.terminal.buffer.active.baseY;
+    const clear = '\x1b[2K\r';
+
+    for (let i = 0; i < this.promptLines; i++) {
+      const y = baseY + i;
+
+      this.write(cursorTo(0, y) + clear);
+    }
+
+    this.write(cursorTo(0, baseY));
   }
 
   private resetPrompt(): void {
@@ -210,7 +221,7 @@ export class TerminalManager implements TerminalConnector {
     this.actualPromptLines = lines.length;
 
     const y = this.promptLine - this.terminal.buffer.active.baseY;
-    this.terminal.write(cursorTo(0, y) + content + ' ');
+    this.terminal.write(cursorTo(0, y) + content);
   }
 
   private newLine(): void {
@@ -369,7 +380,7 @@ export class TerminalManager implements TerminalConnector {
     this.resizeObserver = new ResizeObserver(this.onResize.bind(this));
     this.resizeObserver.observe(this.domElement);
 
-    this.writePrompt();
+    this.updatePrompt();
     this.updateCursor();
   }
 
