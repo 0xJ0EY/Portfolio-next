@@ -56,7 +56,7 @@ function ansiSplit(ansi: string, maxLength: number): { part: string, offset: num
   return { part: ansi.slice(0, lastUsableIndex), offset: offset };
 }
 
-function ansiStringLength(ansi: string): number {
+export function ansiStringLength(ansi: string): number {
   if (ansi.length < 1) { return ansi.length; }
 
   let length = 0;
@@ -86,6 +86,28 @@ function ansiStringLength(ansi: string): number {
   }
 
   return length;
+}
+
+export function ansiStringPadStart(ansi: string, length: number, fillString?: string): string {
+  const fill = fillString || ' ';
+
+  const stringLength = ansiStringLength(ansi);
+  if (stringLength > length) { return ansi; }
+
+  const filling = fill.repeat(length - stringLength);
+
+  return filling + ansi;
+}
+
+export function ansiStringPadEnd(ansi: string, length: number, fillString?: string): string {
+  const fill = fillString || ' ';
+
+  const stringLength = ansiStringLength(ansi);
+  if (stringLength > length) { return ansi; }
+
+  const filling = fill.repeat(length - stringLength);
+
+  return ansi + filling;
 }
 
 function splitStringInParts(input: string, cols: number): string[] {
@@ -376,9 +398,6 @@ export class TerminalManager implements TerminalConnector {
     const dimensions = core._renderService.dimensions;
     const cell: { height: number, width: number } = dimensions.css.cell;
 
-    console.log(cell.width);
-    console.log(cell.height);
-
     const cols = Math.floor(terminalContainer.clientWidth / cell.width);
     const rows = Math.floor(terminalContainer.clientHeight / cell.height);
 
@@ -394,6 +413,7 @@ export class TerminalManager implements TerminalConnector {
     this.resizeObserver.observe(this.domElement);
 
     this.shell.process('motd');
+    this.shell.process('help');
 
     this.updatePrompt();
     this.updateCursor();
