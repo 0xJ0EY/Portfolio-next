@@ -1,6 +1,16 @@
 import { Shell } from "@/applications/Terminal/Shell";
 import { SystemAPIs } from "@/components/OperatingSystem";
 import { ProgramConfig } from "../Programs";
+import { FileSystemNode } from "@/apis/FileSystem/FileSystem";
+import { blueBright } from "ansi-colors";
+
+function formatEntry(node: FileSystemNode): string {
+  const isDirectory = node.kind === 'directory';
+
+  const name = node.name + node.filenameExtension;
+
+  return isDirectory ? blueBright(name) : name;
+}
 
 function ListFile(shell: Shell, args: string[], apis: SystemAPIs): void {
   const fs = apis.fileSystem;
@@ -17,7 +27,8 @@ function ListFile(shell: Shell, args: string[], apis: SystemAPIs): void {
 
   for (const entry of directory.children.iterFromHead()) {
     const directoryNode = entry.value.node;
-    shell.getTerminal().writeResponse(directoryNode.name + directoryNode.filenameExtension);
+
+    shell.getTerminal().writeResponse(formatEntry(directoryNode));
   }
 }
 
