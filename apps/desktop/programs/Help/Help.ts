@@ -1,14 +1,14 @@
 import { SystemAPIs } from "@/components/OperatingSystem"
 import { ProgramConfig } from "../Programs"
 import { Shell } from "@/applications/Terminal/Shell";
-import { green } from "ansi-colors";
+import { greenBright } from "ansi-colors";
 import { ansiStringPadEnd, ansiStringPadStart } from "@/applications/Terminal/TerminalManager";
 
 function command(name: string, description: string): string {
   const COMMAND_LENGTH = 12;
   const COMMAND_PRE_LENGTH = 4 + name.length;
 
-  const command = ansiStringPadEnd(ansiStringPadStart(green(name), COMMAND_PRE_LENGTH), COMMAND_LENGTH);
+  const command = ansiStringPadEnd(ansiStringPadStart(greenBright(name), COMMAND_PRE_LENGTH), COMMAND_LENGTH);
 
   return command + description;
 }
