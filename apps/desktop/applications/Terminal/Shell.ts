@@ -2,10 +2,7 @@ import { SystemAPIs } from "@/components/OperatingSystem";
 import { BaseApplicationManager } from "../ApplicationManager";
 import { TerminalConnector } from "./TerminalApplicationView";
 import ansiColors from "ansi-colors";
-
-function splitCommand(input: string): string[] {
-  return input.split(' ').filter(x => x.length > 0);
-}
+import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
 
 export class Shell {
   private promptString = `${ansiColors.white("{hostname}")} ${ansiColors.magentaBright("::")} ${ansiColors.greenBright("{path}")} ${ansiColors.blueBright("%")} `;
@@ -80,7 +77,7 @@ export class Shell {
   }
 
   public process(command: string): void {
-    const args = splitCommand(command);
+    const args = parseCommand(command);
     const applicationName = args[0]?.toLocaleLowerCase() ?? null;
 
     if (applicationName === null) { return; }
