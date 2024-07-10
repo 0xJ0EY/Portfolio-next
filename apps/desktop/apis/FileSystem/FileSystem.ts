@@ -31,6 +31,7 @@ import { touchConfig } from "@/programs/Touch/Touch";
 import { moveConfig } from "@/programs/Move/Move";
 import { motdConfig } from "@/programs/MessageOfTheDay/MessageOfTheDay";
 import { helpConfig } from "@/programs/Help/Help";
+import { uwuConfig } from "@/programs/Uwufier/Uwufier";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -352,6 +353,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, moveConfig);
   fileSystem.addProgram(binaryDirectory, motdConfig);
   fileSystem.addProgram(binaryDirectory, helpConfig);
+  fileSystem.addProgram(binaryDirectory, uwuConfig);
 
   return fileSystem;
 }
