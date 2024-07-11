@@ -5,10 +5,10 @@ import { PRNG } from "@/data/PRNG";
 import { unwrap } from "result";
 import { isCapitalized, capitalize, isUpperCase, isLowerCase } from "./util";
 
-// Thresholds = 1 is never, 0 is always
-const NYAIFY_THRESHOLD = 0.25;
-const STUTTER_THRESHOLD = 0.85;
-const EMOJIFY_THRESHOLD = 0;
+// Thresholds = 0 is never, 1 is always
+const NYAIFY_THRESHOLD = 0.90;
+const STUTTER_THRESHOLD = 0.25;
+const EMOJIFY_THRESHOLD = 0.75;
 
 const replacementsMap: Array<[string, string]> = [
   ["small", "smol"],
@@ -28,6 +28,38 @@ const uwuMap: Array<[RegExp, string]> = [
   [/ove/g, "uv"],
 ];
 
+const emojiList: string[] = [
+  " rawr x3",
+  " OwO",
+  " UwU",
+  " o.O",
+  " -.-",
+  " >w<",
+  " (⑅˘꒳˘)",
+  " (ꈍᴗꈍ)",
+  " (˘ω˘)",
+  " (U ᵕ U❁)",
+  " σωσ",
+  " òωó",
+  " (///ˬ///✿)",
+  " (U ﹏ U)",
+  " ( ͡o ω ͡o )",
+  " ʘwʘ",
+  " :3",
+  " :3",
+  " :3",
+  " :3",
+  " XD",
+  " nyaa~~",
+  " mya",
+  " >_<",
+  " rawr",
+  " (ˆ ﻌ ˆ)♡",
+  " ^•ﻌ•^",
+  " /(^•ω•^)",
+  " (✿oωo))"
+];
+
 function replaceWord(source: string, replacement: string, index: number, sliceLength: number): string {
   const start = source.slice(0, index);
   const end = source.slice(index + sliceLength);
@@ -36,7 +68,7 @@ function replaceWord(source: string, replacement: string, index: number, sliceLe
 }
 
 function passesThreshold(rng: PRNG, threshold: number): boolean {
-  return unwrap(rng.random())! > threshold;
+  return unwrap(rng.random())! > (1 - threshold);
 }
 
 function replaceWords(words: string[], changeTracker: Set<number>): string[] {
@@ -94,9 +126,13 @@ function nyaify(words: string[], rng: PRNG, changeTracker: Set<number>): string[
 
 function stutter(words: string[], rng: PRNG): string[] {
   function formatStutter(word: string): string {
-    const letter = word.charAt(0);
+    if (word.length < 1) { return word; }
 
-    console.log(word, isUpperCase(word));
+    const letter = word.charAt(0);
+    const code = letter.charCodeAt(0);
+
+    const isLetter = (code >= 65 && code < 91) || (code >= 97 && code < 123);
+    if (!isLetter) { return word; }
 
     if (isUpperCase(word)) {
       return `${letter.toUpperCase()}-${word.toUpperCase()}`;
@@ -117,10 +153,39 @@ function stutter(words: string[], rng: PRNG): string[] {
 }
 
 function emojify(words: string[], rng: PRNG): string[] {
-  return words;
-}
+  function isPunctuation(character: string): boolean {
+    return [".", ",", "?", "!"].includes(character);
+  }
 
-console.log(transform("Thomas needs to become a catgirl in FFXIV"));
+  function canEmojify(words: string[], index: number): boolean {
+    const word = words[index];
+
+    if (word.length < 1) { return false; }
+
+    // Do not add an emoji if multiple punctuations are used at the end of a word
+    const multiplePunctuation = word.length > 1 &&
+      isPunctuation(word[word.length - 2]) &&
+      isPunctuation(word[word.length - 1]);
+
+    if (multiplePunctuation) { return false; }
+
+    return isPunctuation(word[word.length - 1]);
+  }
+
+  function formatEmojify(word: string, rng: PRNG): string {
+    const index = Math.floor(unwrap(rng.random(0, emojiList.length))!);
+    const emoji = emojiList[index];
+
+    return word + emoji;
+  }
+
+  return words.map((word, index) => {
+    if (!passesThreshold(rng, EMOJIFY_THRESHOLD)) { return word; }
+    if (!canEmojify(words, index)) { return word; }
+
+    return formatEmojify(word, rng);
+  });
+}
 
 // Transformations based on the research of this repository
 // https://github.com/Daniel-Liu-c0deb0t/uwu
