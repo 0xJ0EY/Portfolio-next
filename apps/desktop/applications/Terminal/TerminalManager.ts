@@ -88,6 +88,38 @@ export function ansiStringLength(ansi: string): number {
   return length;
 }
 
+export function stripAnsi(ansi: string): string {
+  if (ansi.length < 1) { return ""; }
+
+  let output = "";
+  let index = 0;
+
+  let inControlSequence: boolean = false;
+
+  while (index < ansi.length) {
+    if (isEscapeSequence(ansi, index)) {
+      index++;
+      continue;
+    }
+
+    if (isEscapeSequence(ansi, index - 1) && isControlSequenceIntroducer(ansi, index)) {
+      inControlSequence = true;
+    }
+
+    if (!inControlSequence) {
+      output += ansi[index];
+    }
+
+    if (inControlSequence && isControlSequenceEndMarker(ansi, index)) {
+      inControlSequence = false;
+    }
+
+    index++;
+  }
+
+  return output;
+}
+
 export function ansiStringPadStart(ansi: string, length: number, fillString?: string): string {
   const fill = fillString || ' ';
 
@@ -140,7 +172,7 @@ export class TerminalManager implements TerminalConnector {
   private shell: Shell;
 
   private historyPrompt: string = "";
-  private historyEntries: string[] = ["cat Desktop/readme.txt | uwu"];
+  private historyEntries: string[] = ["cat Desktop/readme.txt | uwu", "help | uwu"];
   private historyIndex = 0;
 
   private responseLines: string[] = [];
@@ -218,9 +250,12 @@ export class TerminalManager implements TerminalConnector {
 
     this.hideCursor();
 
-    this.write(response);
+    const lines = response.split('\n');
 
-    this.newLine();
+    for (const line of lines) {
+      this.write(line);
+      this.newLine();
+    }
 
     this.showCursor();
   }
@@ -230,14 +265,9 @@ export class TerminalManager implements TerminalConnector {
 
     if (!this.showOutput) { return; }
 
-    this.hideCursor();
-
     for (const line of lines) {
-      this.write(line);
-      this.newLine();
+      this.writeResponse(line);
     }
-
-    this.showCursor();
   }
 
   public resetResponseLines(): void {

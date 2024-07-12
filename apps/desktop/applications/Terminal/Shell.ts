@@ -3,6 +3,7 @@ import { BaseApplicationManager } from "../ApplicationManager";
 import { TerminalConnector } from "./TerminalApplicationView";
 import ansiColors from "ansi-colors";
 import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
+import { stripAnsi } from "./TerminalManager";
 
 type CommandOutput = { type: 'stdout' } | { type: 'pipe' } | { type: 'output_redirection', filename: string };
 
@@ -74,7 +75,6 @@ function parseRedirection(fullCommand: string): Command[] {
       }
 
       const filename = getFileName(nextCommand.slice);
-
       return outputRedirection(slice, filename);
     }
 
@@ -87,8 +87,6 @@ function parseRedirection(fullCommand: string): Command[] {
   while (slice = getNextSlice()) {
     slices.push(slice);
   }
-
-  console.log(slices);
 
   return slices;
 }
@@ -186,23 +184,18 @@ export class Shell {
       }
 
       shell.getTerminal().writeResponse(`jsh: command not found: ${applicationName}`);
-
     }
-
 
     const redirection = parseRedirection(command);
 
     for (const [index, part] of redirection.entries()) {
-      // const previousWasPipe = index > 0 && redirection[index - 1].output.type === 'pipe';
-
-      console.log(index);
-
       const previous = index > 0 ? redirection[index - 1] : null;
       const previousWasPipe = previous ? previous.output.type === 'pipe' : false;
-      const previousStdout = previous ? this.terminal.getResponseLines().join('\r\n') : '';
+      const isOutputRedirection = part.output.type === 'output_redirection';
+
+      const previousStdout  = previous ? `"${this.terminal.getResponseLines().join('\r\n')}"` : '';
 
       const stdin = previousWasPipe ? part.slice + " " + previousStdout : part.slice;
-
       const args = parseCommand(stdin);
 
       const type = part.output.type;
@@ -246,6 +239,10 @@ export class Shell {
         default: {
           handleCommand(applicationName, this, args, this.apis);
         }
+      }
+
+      if (isOutputRedirection) {
+        // Write it to a file.
       }
     }
   }

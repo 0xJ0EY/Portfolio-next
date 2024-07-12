@@ -16,19 +16,19 @@ function command(name: string, description: string): string {
 function Help(shell: Shell, args: string[], apis: SystemAPIs): void {
   shell.getTerminal().writeResponseLines([
     'Available commands:',
-    command('cat', 'Print file content'),
-    command('open', 'Open files or applications'),
-    command('motd', 'Display message of the day'),
-    command('help', 'Displays this menu'),
-    command('cd', 'Changes the current directory'),
-    command('ls', 'Lists directory content'),
-    command('mkdir', 'Create a new directory'),
-    command('touch', 'Create a new text file'),
-    command('rm', 'Removes files or directories'),
-    command('pwd', 'Prints Path of current working directory'),
-    command('clear', 'Clear the terminal screen'),
-    command('ps', 'Set prompt string'),
-    command('uwu', 'uwufies your text')
+    command('cat', 'Print file content.'),
+    command('open', 'Open files or applications.'),
+    command('motd', 'Display message of the day.'),
+    command('help', 'Displays this menu.'),
+    command('cd', 'Changes the current directory.'),
+    command('ls', 'Lists directory content.'),
+    command('mkdir', 'Create a new directory.'),
+    command('touch', 'Create a new text file.'),
+    command('rm', 'Removes files or directories.'),
+    command('pwd', 'Prints Path of current working directory.'),
+    command('clear', 'Clear the terminal screen.'),
+    command('ps', 'Set prompt string.'),
+    command('uwu', 'uwufies your text.')
   ]);
 }
 

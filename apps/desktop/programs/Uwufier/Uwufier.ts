@@ -8,7 +8,7 @@ import { isCapitalized, capitalize, isUpperCase, isLowerCase } from "./util";
 // Thresholds = 0 is never, 1 is always
 const NYAIFY_THRESHOLD = 0.90;
 const STUTTER_THRESHOLD = 0.25;
-const EMOJIFY_THRESHOLD = 0.75;
+const EMOJIFY_THRESHOLD = 0.85;
 
 const replacementsMap: Array<[string, string]> = [
   ["small", "smol"],
@@ -158,7 +158,7 @@ function emojify(words: string[], rng: PRNG): string[] {
   }
 
   function canEmojify(words: string[], index: number): boolean {
-    const word = words[index];
+    const word = words[index].trim();
 
     if (word.length < 1) { return false; }
 
@@ -176,7 +176,11 @@ function emojify(words: string[], rng: PRNG): string[] {
     const index = Math.floor(unwrap(rng.random(0, emojiList.length))!);
     const emoji = emojiList[index];
 
-    return word + emoji;
+    const isNewLine = word[word.length - 1] === '\n';
+
+    if (!isNewLine) { return word + emoji; }
+
+    return word.trim() + emoji + '\r\n';
   }
 
   return words.map((word, index) => {
