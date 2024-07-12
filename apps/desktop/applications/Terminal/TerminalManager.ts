@@ -128,6 +128,7 @@ function splitStringInParts(input: string, cols: number): string[] {
 
 export class TerminalManager implements TerminalConnector {
   private prompt: string = "";
+  private showOutput: boolean = true;
 
   private promptLines: number = 1;
   private actualPromptLines: number = 1;
@@ -139,8 +140,10 @@ export class TerminalManager implements TerminalConnector {
   private shell: Shell;
 
   private historyPrompt: string = "";
-  private historyEntries: string[] = [];
+  private historyEntries: string[] = ["cat Desktop/readme.txt | uwu"];
   private historyIndex = 0;
+
+  private responseLines: string[] = [];
 
   constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
     this.terminal.options.fontSize = 16;
@@ -155,10 +158,6 @@ export class TerminalManager implements TerminalConnector {
     this.terminal.resize(cols, rows);
 
     this.shell = new Shell(this, applicationManager, apis);
-  }
-
-  public writeln(line: string): void {
-    this.terminal.write(`${line}\r\n`);
   }
 
   private coordsInPrompt(index: number): { x: number, y: number } {
@@ -213,6 +212,10 @@ export class TerminalManager implements TerminalConnector {
   }
 
   public writeResponse(response: string): void {
+    this.responseLines.push(response);
+
+    if (!this.showOutput) { return; }
+
     this.hideCursor();
 
     this.write(response);
@@ -223,6 +226,10 @@ export class TerminalManager implements TerminalConnector {
   }
 
   public writeResponseLines(lines: string[]): void {
+    this.responseLines.push(...lines);
+
+    if (!this.showOutput) { return; }
+
     this.hideCursor();
 
     for (const line of lines) {
@@ -231,6 +238,22 @@ export class TerminalManager implements TerminalConnector {
     }
 
     this.showCursor();
+  }
+
+  public resetResponseLines(): void {
+    this.responseLines = [];
+  }
+
+  public getResponseLines(): string[] {
+    return this.responseLines;
+  }
+
+  public enableOutput(): void {
+    this.showOutput = true;
+  }
+
+  public disableOutput(): void {
+    this.showOutput = false;
   }
 
   private getCompletePrompt(): string {

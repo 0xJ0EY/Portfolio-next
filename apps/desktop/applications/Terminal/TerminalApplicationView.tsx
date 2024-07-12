@@ -7,6 +7,12 @@ export interface TerminalConnector {
   clear(): void;
   writeResponse(response: string): void;
   writeResponseLines(lines: string[]): void;
+
+  resetResponseLines(): void;
+  getResponseLines(): string[];
+  
+  enableOutput(): void;
+  disableOutput(): void;
 }
 
 export default function TerminalApplicationView(props: WindowProps) {

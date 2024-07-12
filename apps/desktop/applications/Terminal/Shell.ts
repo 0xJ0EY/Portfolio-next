@@ -4,6 +4,95 @@ import { TerminalConnector } from "./TerminalApplicationView";
 import ansiColors from "ansi-colors";
 import { parseCommand } from "@/apis/FileSystem/CommandEncoding";
 
+type CommandOutput = { type: 'stdout' } | { type: 'pipe' } | { type: 'output_redirection', filename: string };
+
+type Command = {
+  slice: string,
+  output: CommandOutput
+}
+
+function parseRedirection(fullCommand: string): Command[] {
+  let index = 0;
+  let last = 0;
+
+  function getFileName(slice: string): string {
+    const words = slice.trim().split(' ');
+
+    return words[0] ?? '';
+  }
+
+  function getNextSlice(): Command | null {
+    // Output functions, set last to the current index and transform the result
+    function stdout(slice: string): Command {
+      last = index;
+      return { slice, output: { type: 'stdout'} };
+    }
+
+    function pipe(slice: string): Command {
+      last = index;
+      return { slice, output: { type: 'pipe'} };
+    }
+
+    function outputRedirection(slice: string, filename: string): Command {
+      last = index;
+      return { slice, output: { type: 'output_redirection', filename } };
+    }
+
+    if (last === fullCommand.length) { return null; }
+
+    let isPipe = false;
+    let isOutputRedirection = false;
+
+    while (index < fullCommand.length) {
+      const char = fullCommand[index];
+
+      isPipe = char === '|';
+      isOutputRedirection = char === '>';
+
+      index++;
+
+      if (isPipe || isOutputRedirection) { break; }
+    }
+
+    const isAtEnd = index === fullCommand.length;
+
+    let slice = fullCommand.slice(last, isAtEnd ? index : index - 1).trim();
+
+    if (isPipe) {
+      last = index;
+
+      return pipe(slice);
+    }
+
+    if (isOutputRedirection) {
+      last = index;
+      const nextCommand = getNextSlice();
+
+      if (nextCommand === null) {
+        // If we do not have a valid file, just handle it as a stdout
+        return stdout(slice);
+      }
+
+      const filename = getFileName(nextCommand.slice);
+
+      return outputRedirection(slice, filename);
+    }
+
+    return stdout(slice);
+  }
+
+  let slices: Command[] = [];
+  let slice: Command | null = null;
+
+  while (slice = getNextSlice()) {
+    slices.push(slice);
+  }
+
+  console.log(slices);
+
+  return slices;
+}
+
 export class Shell {
   private promptString = `${ansiColors.white("{hostname}")} ${ansiColors.magentaBright("::")} ${ansiColors.greenBright("{path}")} ${ansiColors.blueBright("%")} `;
 
@@ -77,50 +166,86 @@ export class Shell {
   }
 
   public process(command: string): void {
-    const args = parseCommand(command);
-    const applicationName = args[0]?.toLocaleLowerCase() ?? null;
+    function handleCommand(applicationName: string, shell: Shell, args: string[], apis: SystemAPIs): void {
 
-    if (applicationName === null) { return; }
+      // Get a program from the /bin directory
+      const binaryDirResult = apis.fileSystem.getDirectory('/bin');
+      if (!binaryDirResult.ok) { return; }
 
-    switch (applicationName) {
-      case 'clear': {
-        this.terminal.clear();
-        break;
+      const binaryDir = binaryDirResult.value;
+
+      for (const program of binaryDir.children.iterFromHead()) {
+        const fileSystemNode = program.value.node;
+
+        if (fileSystemNode.kind !== 'program') { continue; }
+        if (fileSystemNode.name !== applicationName) { continue; }
+
+        fileSystemNode.program(shell, args, apis);
+
+        return;
       }
-      case 'ps': {
-        const title = args.slice(1).join(' ');
 
-        if (title.length === 0) {
-          this.terminal.writeResponseLines([
-            'jsh: ps requires a value to be set',
-            'possible variables: {hostname}, {path}'
-          ]);
-        } else {
-          this.promptString = title + ' ';
+      shell.getTerminal().writeResponse(`jsh: command not found: ${applicationName}`);
+
+    }
+
+
+    const redirection = parseRedirection(command);
+
+    for (const [index, part] of redirection.entries()) {
+      // const previousWasPipe = index > 0 && redirection[index - 1].output.type === 'pipe';
+
+      console.log(index);
+
+      const previous = index > 0 ? redirection[index - 1] : null;
+      const previousWasPipe = previous ? previous.output.type === 'pipe' : false;
+      const previousStdout = previous ? this.terminal.getResponseLines().join('\r\n') : '';
+
+      const stdin = previousWasPipe ? part.slice + " " + previousStdout : part.slice;
+
+      const args = parseCommand(stdin);
+
+      const type = part.output.type;
+      const applicationName = args[0]?.toLocaleLowerCase() ?? null;
+
+      if (applicationName === null) { return; }
+
+      switch (type) {
+        case "pipe":
+        case "output_redirection": {
+          this.terminal.disableOutput();
+          break;
         }
-
-        break;
+        case "stdout": {
+          this.terminal.enableOutput();
+          break;
+        }
       }
-      default: {
-        // Get a program from the /bin directory
-        const binaryDirResult = this.apis.fileSystem.getDirectory('/bin');
-        if (!binaryDirResult.ok) { return; }
 
-        const binaryDir = binaryDirResult.value;
+      this.terminal.resetResponseLines();
 
-        for (const program of binaryDir.children.iterFromHead()) {
-          const fileSystemNode = program.value.node;
-
-          if (fileSystemNode.kind !== 'program') { continue; }
-          if (fileSystemNode.name !== applicationName) { continue; }
-
-          fileSystemNode.program(this, args, this.apis);
-
-          return;
+      switch (applicationName) {
+        case 'clear': {
+          this.terminal.clear();
+          break;
         }
+        case 'ps': {
+          const title = args.slice(1).join(' ');
 
-        this.terminal.writeResponse(`jsh: command not found: ${applicationName}`);
-        break;
+          if (title.length === 0) {
+            this.terminal.writeResponseLines([
+              'jsh: ps requires a value to be set',
+              'possible variables: {hostname}, {path}'
+            ]);
+          } else {
+            this.promptString = title + ' ';
+          }
+
+          break;
+        }
+        default: {
+          handleCommand(applicationName, this, args, this.apis);
+        }
       }
     }
   }
