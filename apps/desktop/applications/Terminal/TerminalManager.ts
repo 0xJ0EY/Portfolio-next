@@ -172,7 +172,7 @@ export class TerminalManager implements TerminalConnector {
   private shell: Shell;
 
   private historyPrompt: string = "";
-  private historyEntries: string[] = ["cat Desktop/readme.txt | uwu", "help | uwu"];
+  private historyEntries: string[] = [];
   private historyIndex = 0;
 
   private responseLines: string[] = [];
