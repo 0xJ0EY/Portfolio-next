@@ -1,7 +1,7 @@
 import { Shell } from "@/applications/Terminal/Shell";
 import { FileSystem, FileSystemDirectory } from "@/apis/FileSystem/FileSystem";
 import { SystemAPIs } from "@/components/OperatingSystem";
-import { ProgramConfig, getAbsolutePathFromArgs } from "../Programs";
+import { ProgramConfig, getAbsolutePathFromArgs, getFileNameParts } from "../Programs";
 import { isUniqueFile, pathLastEntry, pathPop } from "@/apis/FileSystem/util";
 
 function createFile(shell: Shell, fs: FileSystem, root: FileSystemDirectory, fileName: string, path: string): boolean {
@@ -15,16 +15,18 @@ function createFile(shell: Shell, fs: FileSystem, root: FileSystemDirectory, fil
     return false;
   }
 
-  fs.addTextFile(root, fileName, "", true, "");
+  const { base, extension } = getFileNameParts(fileName);
+
+  fs.addTextFile(root, base, "", true, extension);
 
   return true;
 }
 
 function createSequentialDirectory(shell: Shell, fs: FileSystem, path: string): void {
   const root = pathPop(path);
-  const directory = pathLastEntry(path);
+  const fileName = pathLastEntry(path);
 
-  if (!directory) { return; }
+  if (!fileName) { return; }
 
   const rootDirectoryResult = fs.getDirectory(root);
 
@@ -35,7 +37,7 @@ function createSequentialDirectory(shell: Shell, fs: FileSystem, path: string): 
 
   const rootDir = rootDirectoryResult.value;
 
-  createFile(shell, fs, rootDir, directory, path);
+  createFile(shell, fs, rootDir, fileName, path);
 }
 
 function Touch(shell: Shell, args: string[], apis: SystemAPIs): void {

@@ -28,7 +28,8 @@ function Help(shell: Shell, args: string[], apis: SystemAPIs): void {
     command('pwd', 'Prints Path of current working directory.'),
     command('clear', 'Clear the terminal screen.'),
     command('ps', 'Set prompt string.'),
-    command('uwu', 'uwufies your text.')
+    command('uwu', 'uwufies your text.'),
+    'This shell supports pipes (|) and output redirection (>)'
   ]);
 }
 

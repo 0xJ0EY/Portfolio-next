@@ -17,6 +17,20 @@ export function getAbsolutePathFromArgs(path: string, shell: Shell, appendDirect
   return getAbsolutePath(path, appendDirectorySlash);
 }
 
+export function getFileNameParts(input: string): { base: string, extension: string } {
+  const directorySeparations = input.split('/');
+  const lastEntry = directorySeparations[directorySeparations.length - 1];
+
+  const parts = lastEntry.split(".");
+
+  if (parts.length <= 1) { return { base: input, extension: "" }; }
+
+  const extension = parts.length > 1 ? `.${parts.pop()}` : "";
+  const base = parts.join(".");
+
+  return { base, extension };
+}
+
 export interface ProgramConfig {
   readonly appName: string,
   readonly program: Program
