@@ -417,6 +417,8 @@ export class TerminalManager implements TerminalConnector {
 
     const code = domEvent.code;
 
+    if (domEvent.ctrlKey || domEvent.altKey) { return; }
+
     switch (code) {
       case "Enter": {
         this.insertEnter();
