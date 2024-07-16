@@ -10,6 +10,11 @@ export type WindowUpdateEvent = {
   windowId: number
 }
 
+export type WindowFocusEvent = {
+  event: 'focus_window',
+  windowId: number,
+}
+
 export type WindowMinimizeEvent = {
   event: 'minimize_window',
   windowId: number
@@ -29,14 +34,14 @@ export type WindowDestroyEvent = {
   windowId: number
 }
 
-export const CreateWindowEvent = (windowId: number): WindowCreateEvent => {
+export function CreateWindowEvent(windowId: number): WindowCreateEvent {
   return {
     event: 'create_window',
     windowId
   }
 }
 
-export const UpdateWindowEvent = (windowId: number, moved: boolean, resized: boolean): WindowUpdateEvent => {
+export function UpdateWindowEvent(windowId: number, moved: boolean, resized: boolean): WindowUpdateEvent {
   return {
     event: 'update_window',
     moved,
@@ -45,27 +50,34 @@ export const UpdateWindowEvent = (windowId: number, moved: boolean, resized: boo
   }
 }
 
-export const MinimizeWindowEvent = (windowId: number): WindowMinimizeEvent => {
+export function FocusWindowEvent(windowId: number): WindowFocusEvent {
+  return {
+    event: 'focus_window',
+    windowId
+  }
+}
+
+export function MinimizeWindowEvent(windowId: number): WindowMinimizeEvent {
   return {
     event: 'minimize_window',
     windowId
   }
 }
 
-export const MaximizeWindowEvent = (windowId: number): WindowMaximizeEvent => {
+export function MaximizeWindowEvent(windowId: number): WindowMaximizeEvent {
   return {
     event: 'maximize_window',
     windowId
   }
 }
 
-export const UpdateWindowsEvent = (): WindowsUpdateEvent => {
+export function UpdateWindowsEvent(): WindowsUpdateEvent {
   return {
     event: 'update_windows'
   }
 }
 
-export const DestroyWindowEvent = (windowId: number): WindowDestroyEvent => {
+export function DestroyWindowEvent(windowId: number): WindowDestroyEvent {
   return {
     event: 'destroy_window',
     windowId
@@ -76,6 +88,7 @@ export function toSingleWindowEvent(evt: WindowEvent): SingleWindowEvent | null 
   switch (evt.event) {
     case 'create_window':
     case 'update_window':
+    case 'focus_window':
     case 'minimize_window':
     case 'maximize_window':
       return evt as SingleWindowEvent;
@@ -84,7 +97,7 @@ export function toSingleWindowEvent(evt: WindowEvent): SingleWindowEvent | null 
   }
 }
 
-export type SingleWindowEvent = WindowCreateEvent | WindowUpdateEvent | WindowMinimizeEvent | WindowMaximizeEvent | WindowDestroyEvent;
+export type SingleWindowEvent = WindowCreateEvent | WindowUpdateEvent | WindowMinimizeEvent | WindowMaximizeEvent | WindowDestroyEvent | WindowFocusEvent;
 export type MultiWindowEvent = WindowsUpdateEvent;
 export type WindowEvent = SingleWindowEvent | MultiWindowEvent;
 

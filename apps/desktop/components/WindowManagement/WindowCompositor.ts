@@ -1,5 +1,5 @@
 import { Chain, Node } from "../../data/Chain";
-import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent, MinimizeWindowEvent, MaximizeWindowEvent } from "./WindowEvents";
+import { DestroyWindowEvent, UpdateWindowsEvent, CreateWindowEvent, WindowEvent, WindowEventHandler, UpdateWindowEvent, MinimizeWindowEvent, MaximizeWindowEvent, FocusWindowEvent } from "./WindowEvents";
 import { Application, ApplicationManager } from "@/applications/ApplicationManager";
 import { createAllWindowsClosedEvent, createWindowCloseEvent, createWindowOpenEvent } from "@/applications/ApplicationEvents";
 import { Action } from "../util";
@@ -230,6 +230,7 @@ export class WindowCompositor {
     this.windows.moveToHead(node);
     this.updateWindowOrder();
 
+    this.publish(FocusWindowEvent(windowId));
     this.publish(UpdateWindowsEvent());
   }
 

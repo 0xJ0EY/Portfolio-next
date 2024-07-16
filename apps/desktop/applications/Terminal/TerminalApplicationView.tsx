@@ -21,6 +21,12 @@ export default function TerminalApplicationView(props: WindowProps) {
   const terminal = useRef<Terminal | null>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
+
+  function onWindowFocus() {
+    if (loaded && terminal.current) {
+      terminal.current.focus();
+    }
+  }
   
   useEffect(() => {
     if (!terminalRef.current) { return; }
@@ -35,10 +41,17 @@ export default function TerminalApplicationView(props: WindowProps) {
 
     manager.bind();
 
+    const unsubscribe = application.compositor.subscribeWithFilter(
+      windowContext.id,
+      (evt) => evt.event === 'focus_window',
+      onWindowFocus
+    );
+
     setLoaded(true);
 
-    return () => { 
+    return () => {
       manager.dispose();
+      unsubscribe();
     }
   }, []);
 
