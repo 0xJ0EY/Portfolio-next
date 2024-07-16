@@ -9,7 +9,7 @@ import { LocalApplicationManager } from "@/applications/LocalApplicationManager"
 import { SystemAPIs } from "../../components/OperatingSystem";
 import { BoundingBox, Point, rectangleIntersection } from "@/applications/math";
 import { Chain, Node } from "@/data/Chain";
-import { constructPath } from "./util";
+import { constructPath, isUniqueFile } from "./util";
 import { notesConfig } from "@/applications/Notes/Notes";
 import { doomConfig } from "@/applications/Doom/Doom";
 import { imageViewerConfig } from "@/applications/ImageViewer/ImageViewer";
@@ -17,6 +17,21 @@ import { contactConfig } from "@/applications/Contract/Contact";
 import { IconHeight, IconWidth } from "@/components/Icons/FolderIcon";
 import { skillsConfig } from "@/applications/Skills/Skills";
 import { algorithmVisualizerConfig } from "@/applications/AlgorithmVisualizer/AlgorithmVisualizer";
+import { terminalConfig } from "@/applications/Terminal/TerminalApplication";
+import { ProgramConfig } from "@/programs/Programs";
+import { lsConfig } from "@/programs/ListFiles/ListFiles";
+import { pwdConfig } from "@/programs/PrintWorkingDirectory/PrintWorkingDirectory";
+import { cdConfig } from "@/programs/ChangeDirectory/ChangeDirectory";
+import { openConfig } from "@/programs/Open/Open";
+import { catConfig } from "@/programs/Concatenation/Concatenation";
+import { Shell } from "@/applications/Terminal/Shell";
+import { mkdirConfig } from "@/programs/MakeDirectory/MakeDirectory";
+import { rmConfig } from "@/programs/Remove/Remove";
+import { touchConfig } from "@/programs/Touch/Touch";
+import { moveConfig } from "@/programs/Move/Move";
+import { motdConfig } from "@/programs/MessageOfTheDay/MessageOfTheDay";
+import { helpConfig } from "@/programs/Help/Help";
+import { uwuConfig } from "@/programs/Uwufier/Uwufier";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -42,7 +57,8 @@ export type FileSystemNode = (
   FileSystemImage |
   FileSystemTextFile |
   FileSystemApplication |
-  FileSystemHyperLink
+  FileSystemHyperLink |
+  FileSystemProgram
 );
 
 export type DirectoryEntry = {
@@ -62,7 +78,7 @@ export type FileSystemDirectory = {
   content: DirectoryContent,
   children: Chain<DirectoryEntry>
   editable: boolean,
-  stickyBit: boolean,
+  editableContent: boolean,
 };
 
 export type FileSystemHyperLink = {
@@ -80,7 +96,7 @@ export type FileSystemTextFile = {
   id: number,
   parent: FileSystemDirectory
   kind: 'textfile',
-  filenameExtension: '.txt',
+  filenameExtension: string,
   name: string,
   content: string,
   editable: boolean
@@ -109,6 +125,16 @@ export type FileSystemApplication = {
   entrypoint: (compositor: LocalWindowCompositor, manager: LocalApplicationManager, apis: SystemAPIs) => Application,
 }
 
+export type FileSystemProgram = {
+  id: number,
+  parent: FileSystemDirectory
+  kind: 'program',
+  name: string,
+  filenameExtension: '',
+  editable: boolean,
+  program: (shell: Shell, args: string[], apis: SystemAPIs) => void;
+}
+
 function createApplication(
   id: number,
   parent: FileSystemDirectory,
@@ -119,12 +145,29 @@ function createApplication(
   return {
     id,
     parent,
+    icon,
     kind: 'application',
     name,
     filenameExtension: '',
-    icon,
     editable: false,
     entrypoint
+  }
+}
+
+function createProgram(
+  id: number,
+  parent: FileSystemDirectory,
+  name: string,
+  program: (shell: Shell, args: string[], apis: SystemAPIs) => void
+): FileSystemProgram {
+  return {
+    id,
+    parent,
+    kind: 'program',
+    name,
+    filenameExtension: '',
+    editable: false,
+    program
   }
 }
 
@@ -148,12 +191,12 @@ function createRootNode(): FileSystemDirectory {
     name: '/',
     filenameExtension: '',
     editable: false,
-    stickyBit: false,
+    editableContent: false,
     children: new Chain()
   }
 }
 
-function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, stickyBit: boolean, icon?: ApplicationIcon): FileSystemDirectory {
+function createDirectory(id: number, parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {
   return {
     id,
     parent,
@@ -174,18 +217,18 @@ function createDirectory(id: number, parent: FileSystemDirectory, name: string, 
     name,
     filenameExtension: '',
     editable,
-    stickyBit,
+    editableContent,
     children: new Chain()
   }
 }
 
-function createTextFile(id: number, parent: FileSystemDirectory, name: string, content: string, editable: boolean): FileSystemTextFile {
+function createTextFile(id: number, parent: FileSystemDirectory, name: string, content: string, editable: boolean, extension: string): FileSystemTextFile {
   return {
     id,
     parent,
     kind: 'textfile',
     name,
-    filenameExtension: '.txt',
+    filenameExtension: extension,
     content,
     editable,
   }
@@ -228,6 +271,7 @@ export function getIconFromNode(node: FileSystemNode): ApplicationIcon {
     case "hyperlink": return { src: '/icons/folder-icon.png', alt: 'Hyperlink icon' };
     case "textfile": return { src: '/icons/file-icon.png', alt: 'File icon' }
     case "image": return { src: '/icons/file-icon.png', alt: 'Image icon' }
+    case "program":  return { src: '/icons/file-icon.png', alt: 'Program icon' }
   }
 }
 
@@ -248,6 +292,7 @@ export function createBaseFileSystem(): FileSystem {
   fileSystem.addApplication(contactConfig);
   fileSystem.addApplication(aboutConfig);
   fileSystem.addApplication(notesConfig);
+  fileSystem.addApplication(terminalConfig);
   const algoViz = fileSystem.addApplication(algorithmVisualizerConfig);
   const doom = fileSystem.addApplication(doomConfig);
   fileSystem.addApplication(imageViewerConfig);
@@ -258,7 +303,7 @@ export function createBaseFileSystem(): FileSystem {
 
   // Create macOS like Users folder
   const users = fileSystem.addDirectory(root, 'Users', false, false);
-  const joey = fileSystem.addDirectory(users, 'joey', false, false);
+  const joey = fileSystem.addDirectory(users, 'joey', false, true);
 
   const desktop = fileSystem.addDirectory(joey, 'Desktop', false, true);
   const documents = fileSystem.addDirectory(joey, 'Documents', false, true, documentsFolderIcon);
@@ -295,6 +340,20 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
 
   // We keep Cheems in the trash can :ˆ)
   fileSystem.addImage(trash, 'Cheems', '.png', '/images/temp.png', "A lovely debug image", true);
+
+  const binaryDirectory = fileSystem.addDirectory(root, 'bin', false, false);
+  fileSystem.addProgram(binaryDirectory, lsConfig);
+  fileSystem.addProgram(binaryDirectory, pwdConfig);
+  fileSystem.addProgram(binaryDirectory, cdConfig);
+  fileSystem.addProgram(binaryDirectory, openConfig);
+  fileSystem.addProgram(binaryDirectory, catConfig);
+  fileSystem.addProgram(binaryDirectory, mkdirConfig);
+  fileSystem.addProgram(binaryDirectory, rmConfig);
+  fileSystem.addProgram(binaryDirectory, touchConfig);
+  fileSystem.addProgram(binaryDirectory, moveConfig);
+  fileSystem.addProgram(binaryDirectory, motdConfig);
+  fileSystem.addProgram(binaryDirectory, helpConfig);
+  fileSystem.addProgram(binaryDirectory, uwuConfig);
 
   return fileSystem;
 }
@@ -466,11 +525,41 @@ function isEditable(node: FileSystemNode | null): boolean {
 }
 
 function targetDirectoryAllowsModification(directory: FileSystemDirectory): boolean {
-  return directory.editable || directory.stickyBit;
+  return directory.editable || directory.editableContent;
 }
 
 function targetMovedInSameDirectory(targetDirectory: FileSystemDirectory, node: FileSystemNode): boolean {
   return targetDirectory.id === node.parent?.id;
+}
+
+export function getAbsolutePath(path: string, appendDirectorySlash?: boolean): string {
+  let isDirectory = path.endsWith('/') || appendDirectorySlash;
+  const pathParts = path.split('/').filter(x => x.length > 0);
+
+  let stack: string[] = [];
+
+  for (let i = 0; i < pathParts.length; i++) {
+    const isLast = i === pathParts.length - 1;
+    const part = pathParts[i];
+
+    switch (part) {
+      case '.': {
+        if (isLast) { isDirectory = true; }
+        break;
+      }
+      case '..': {
+        stack.pop();
+        break;
+      }
+      default: {
+        stack.push(part);
+      }
+    }
+  }
+
+  if (stack.length === 0) { return '/' };
+
+  return '/' + stack.join('/') + (isDirectory ? '/' : '');
 }
 
 export type NodeRefreshEvent = { kind: 'refresh' }
@@ -521,7 +610,7 @@ export class FileSystem {
   }
 
   public getNode(path: string): Result<FileSystemNode, Error> {
-    const node = this.lookupTable[path];
+    const node = this.lookupTable[getAbsolutePath(path)];
 
     if (!node) {
       return Err(Error("Node not found"));
@@ -543,24 +632,48 @@ export class FileSystem {
       });
   }
 
-  public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
-    function filenameExistsInParent(parent: FileSystemDirectory, name: string): boolean {
-      for (const file of parent.children.iterFromTail()) {
-        if (file.value.node.name === name) {
-          return true;
-        }
-      }
-
-      return false;
+  public renameAndMove(node: FileSystemNode, name: string, directory: FileSystemDirectory): Result<DirectoryEntry, Error> {
+    if (isParentOfTargetDirectory(directory, node)) {
+      return Err(Error("Node is a parent of the target directory"));
     }
 
+    if (!isEditable(node)) {
+      return Err(Error("Node or target directory is not editable"));
+    }
+
+    if (!targetDirectoryAllowsModification(directory)) {
+      return Err(Error("Target directory does not allow modification"));
+    }
+
+    const oldLookupPath = constructPath(node);
+
+    this.removeNodeFromDirectory(node);
+    if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
+
+    node.name = name;
+
+    const entry = this.addNodeToDirectory(directory, node);
+
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
+
+    this.propagateNodeEvent(node, { kind: 'rename', path: newLookupPath });
+    this.propagateNodeEvent(node.parent!, { kind: 'update' });
+
+    return Ok(entry);
+  }
+
+  public renameNode(node: FileSystemNode, name: string): Result<FileSystemNode, Error> {
     // We only check for a duplicate names
     if (!node.parent) {
       return Err(Error("A parent is required, to rename the directory"));
     }
 
     // We allow any other name, like Apple's HFS+
-    if (filenameExistsInParent(node.parent, name)) {
+    if (!isUniqueFile(node.parent, name)) {
       return Err(Error("Duplicate filename"));
     }
 
@@ -612,19 +725,23 @@ export class FileSystem {
       return Ok(originalDirectoryEntry);
     }
 
-    // Remove old path from lookup table
-    const path = constructPath(node);
-    if (this.lookupTable[path]) { delete this.lookupTable[path]; }
+    const oldLookupPath = constructPath(node);
 
+    // Delete the old directory entry
     this.removeNodeFromDirectory(node);
 
     // Inform the old parent that the node has been removed
     if (node.parent) { this.propagateNodeEvent(node.parent, { kind: 'update' }); }
 
+    // Create the new directory entry
+    // NOTE: This method call modifies the node object, so we can reconstruct the path again
     const entry = this.addNodeToDirectory(directory, node);
 
-    // Add new path to lookup table
-    this.lookupTable[constructPath(node)] = node;
+    const newLookupPath = constructPath(node);
+
+    if (oldLookupPath !== newLookupPath) {
+      this.updateLookupTableWithPrefix(oldLookupPath);
+    }
 
     return Ok(entry);
   }
@@ -682,6 +799,18 @@ export class FileSystem {
     return Ok(application);
   }
 
+  public addProgram(parent: FileSystemDirectory, config: ProgramConfig): FileSystemProgram {
+    const program = createProgram(++this.id, parent, config.appName, config.program);
+
+    this.addNodeToDirectory(parent, program);
+
+    this.lookupTable[constructPath(program)] = program;
+
+    this.propagateNodeEvent(parent, { kind: 'update' });
+
+    return program;
+  }
+
   public addDirectory(parent: FileSystemDirectory, name: string, editable: boolean, editableContent: boolean, icon?: ApplicationIcon): FileSystemDirectory {
     const directory = createDirectory(++this.id, parent, name, editable, editableContent, icon);
 
@@ -694,8 +823,8 @@ export class FileSystem {
     return directory;
   }
 
-  public addTextFile(parent: FileSystemDirectory, name: string, content: string, editable: boolean): FileSystemTextFile {
-    const textFile = createTextFile(++this.id, parent, name, content, editable);
+  public addTextFile(parent: FileSystemDirectory, name: string, content: string, editable: boolean, extension: string = '.txt'): FileSystemTextFile {
+    const textFile = createTextFile(++this.id, parent, name, content, editable, extension);
 
     this.addNodeToDirectory(parent, textFile);
 
@@ -759,5 +888,15 @@ export class FileSystem {
 
     const result = chainNode.value;
     parentDirectory.children.unlink(result);
+
+    const resultNode = result.value.node;
+
+    if (resultNode.kind === 'directory') {
+      const path = constructPath(node);
+
+      if (this.lookupTable[path]) {
+        delete this.lookupTable[path];
+      }
+    }
   }
 }

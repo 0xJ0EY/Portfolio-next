@@ -253,9 +253,9 @@ export function MonitorLoader(): AssetLoader {
     const viewWidthScale  = width / pageWidth;
 
     // TODO: Calculate the correct aspect ratio for the content
-    const div = document.createElement('div');
-    div.style.width = `${pageWidth}px`;
-    div.style.height = `${pageHeight}px`;
+    const container = document.createElement('div');
+    container.style.width = `${pageWidth}px`;
+    container.style.height = `${pageHeight}px`;
 
     const iframe = document.createElement('iframe');
     iframe.id = 'operating-system-iframe';
@@ -268,9 +268,8 @@ export function MonitorLoader(): AssetLoader {
 
     iframe.src = getDesktopTarget(context.debug);
 
-    div.appendChild(iframe);
-
-    const cssPage = new CSS3DObject(div);
+    container.appendChild(iframe);
+    const cssPage = new CSS3DObject(container);
 
     const [localX, localY, localZ] = [
       (box.min.x - margin / 2) + width / 2,
