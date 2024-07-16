@@ -5,7 +5,7 @@ import { Shell } from "@/applications/Terminal/Shell";
 function MessageOfTheDay(shell: Shell, args: string[], apis: SystemAPIs): void {
   shell.getTerminal().writeResponseLines([
     'J-OS Generic alpha build, (C)1998 Joeysoft, bv.',
-    'Authorized uses only.',
+    'Authorized use only.',
     'All activity is monitored and may be reported.',
     ''
   ]);
