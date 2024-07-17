@@ -13,7 +13,7 @@ export class AboutConfig implements ApplicationConfig {
   public readonly dockPriority = null;
   public readonly path = '/Applications/';
   public readonly appName = 'About.app';
-  public readonly appIcon = { src: '/icons/about-app.png', alt: 'About application' };
+  public readonly appIcon = { src: '/icons/about-app.png', alt: 'About' };
   public readonly entrypoint = (
     compositor: LocalWindowCompositor,
     manager: LocalApplicationManager,
@@ -46,7 +46,7 @@ export class AboutApplication extends Application {
       x, y,
       height,
       width,
-      title: "About application",
+      title: "About",
       application: this,
       args: event.args,
       generator: () => { return View; }
