@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { SystemAPIs } from "../OperatingSystem";
 import { isSafari } from "../util";
+import { SoundService } from "@/apis/Sound/Sound";
 
 type AudioFragment = {
   onDown?: string,
@@ -51,6 +52,15 @@ function chooseRandomKeyboardAudioFragment(code: string): AudioFragment {
       return chooseRandomAudioFragment(ShiftKeyAudioFragments);
     default: return chooseRandomAudioFragment(RegularKeyAudioFragments);
   }
+}
+
+export function playKeyDownSound(soundService: SoundService, code: string): void {
+  if (['VolumeUp', 'VolumeDown'].includes(code)) { return; }
+
+  const sound = chooseRandomKeyboardAudioFragment(code);
+  const audio = new Audio(sound.onDown);
+
+  soundService.playAudioFragment(audio, 0.6);
 }
 
 export function PeripheralSounds(props: { apis: SystemAPIs }) {
