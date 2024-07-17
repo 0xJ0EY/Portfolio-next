@@ -5,6 +5,8 @@ import { BaseApplicationManager } from "../ApplicationManager";
 import { Shell } from "./Shell";
 import { TerminalConnector } from "./TerminalApplicationView";
 import { clamp } from "@/components/util";
+import { SoundService } from "@/apis/Sound/Sound";
+import { playKeyDownSound } from "@/components/PeripheralSounds/PeripheralSounds";
 
 function isEscapeSequence(ansi: string, index: number): boolean {
   return ansi.charCodeAt(index) === 0x1B;
@@ -177,6 +179,8 @@ export class TerminalManager implements TerminalConnector {
 
   private responseLines: string[] = [];
 
+  private soundService: SoundService;
+
   constructor(private terminal: Terminal, private domElement: HTMLElement, applicationManager: BaseApplicationManager, apis: SystemAPIs) {
     this.terminal.options.fontSize = 16;
 
@@ -190,6 +194,7 @@ export class TerminalManager implements TerminalConnector {
     this.terminal.resize(cols, rows);
 
     this.shell = new Shell(this, applicationManager, apis);
+    this.soundService = apis.sound;
   }
 
   private coordsInPrompt(index: number): { x: number, y: number } {
@@ -412,12 +417,22 @@ export class TerminalManager implements TerminalConnector {
     this.historyPrompt = this.prompt;
   }
 
+  private playKeySound(keyCode: string): void {
+    // No clue why, but xterm doesn't capture the space event, like it does with the other keys
+    // So the space is still handled by the PeripheralSounds service
+    if (keyCode === 'Space') { return; }
+
+    playKeyDownSound(this.soundService, keyCode);
+  }
+
   private onKey(args: { key: string, domEvent: KeyboardEvent }): void {
     const { key, domEvent } = args;
 
     const code = domEvent.code;
 
     if (domEvent.ctrlKey || domEvent.altKey) { return; }
+
+    if (!domEvent.repeat) { this.playKeySound(code); }
 
     switch (code) {
       case "Enter": {

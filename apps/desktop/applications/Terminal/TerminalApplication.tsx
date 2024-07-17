@@ -44,7 +44,7 @@ export class TerminalApplication extends Application {
       this.compositor.open({
         x: 150,
         y: 150,
-        height: 400,
+        height: 450,
         width: 600,
         title: `Terminal`,
         application: this,
