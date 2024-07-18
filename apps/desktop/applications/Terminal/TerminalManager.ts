@@ -4,7 +4,7 @@ import { cursorTo, cursorHide, cursorShow, cursorUp, cursorDown, cursorMove } fr
 import { BaseApplicationManager } from "../ApplicationManager";
 import { Shell } from "./Shell";
 import { TerminalConnector } from "./TerminalApplicationView";
-import { clamp } from "@/components/util";
+import { clamp, isSafari } from "@/components/util";
 import { SoundService } from "@/apis/Sound/Sound";
 import { playKeyDownSound } from "@/components/PeripheralSounds/PeripheralSounds";
 
@@ -418,6 +418,8 @@ export class TerminalManager implements TerminalConnector {
   }
 
   private playKeySound(keyCode: string): void {
+    if (isSafari()) { return; }
+
     // No clue why, but xterm doesn't capture the space event, like it does with the other keys
     // So the space is still handled by the PeripheralSounds service
     if (keyCode === 'Space') { return; }
