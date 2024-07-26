@@ -116,6 +116,10 @@ export class Shell {
     return this.path;
   }
 
+  public getHostname(): string {
+    return this.hostname;
+  }
+
   public getRelativePath(): string {
     return this.relativePath;
   }

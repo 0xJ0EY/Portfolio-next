@@ -32,6 +32,7 @@ import { moveConfig } from "@/programs/Move/Move";
 import { motdConfig } from "@/programs/MessageOfTheDay/MessageOfTheDay";
 import { helpConfig } from "@/programs/Help/Help";
 import { uwuConfig } from "@/programs/Uwufier/Uwufier";
+import { neofetchConfig } from "@/programs/Neofetch/Neofetch";
 
 export type DirectorySettings = {
   alwaysOpenAsIconView: boolean,
@@ -354,6 +355,7 @@ Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and 
   fileSystem.addProgram(binaryDirectory, motdConfig);
   fileSystem.addProgram(binaryDirectory, helpConfig);
   fileSystem.addProgram(binaryDirectory, uwuConfig);
+  fileSystem.addProgram(binaryDirectory, neofetchConfig);
 
   return fileSystem;
 }
