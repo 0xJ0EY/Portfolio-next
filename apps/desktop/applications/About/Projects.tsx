@@ -499,7 +499,7 @@ export function ProjectPaintboy(params: SubViewParams) {
       <div>
         <p>Paintboy is a game that was meant to promote my previous school the Grafisch Lyceum Rotterdam. (2016) This project was build by a team of 6. Whereof 2 programmers and 4 game artists. This game was build using Unity 5 and C#.</p>
 
-        <video src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <p>My main work on this game was the movement of the player, the shooting mechanics and the camera shake implementation.</p>
 
@@ -514,7 +514,7 @@ export function ProjectPaintboy(params: SubViewParams) {
       <div>
         <p>Paintboy is een game die was bedoeld om het Grafisch Lyceum Rotterdam te promoten. (2016) Dit project is gemaakt met een team van 6 personen waaronder 2 programmeurs & 4 game artists. De game is gemaakt in Unity 5 en de code is geschreven in C#.</p>
 
-        <video src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
+        <video className={styles['project-video']} src="/videos/paintboy.mp4" autoPlay muted loop disablePictureInPicture></video>
 
         <p>Het meeste van mijn tijd ging in de movement van de speler zitten, de schiet mechanics en de camera shake implementatie.</p>
 
