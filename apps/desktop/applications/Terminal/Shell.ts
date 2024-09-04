@@ -9,6 +9,8 @@ import { FileSystem } from "@/apis/FileSystem/FileSystem";
 import { isUniqueFile, pathLastEntry, pathPop } from "@/apis/FileSystem/util";
 import { stripAnsi } from "./TerminalManager";
 
+export const HomeDirectory = '/Users/joey/'
+
 type CommandOutput = { type: 'stdout' } | { type: 'pipe' } | { type: 'output_redirection', filename: string };
 
 type Command = {
@@ -99,7 +101,7 @@ export class Shell {
   private promptString = `${ansiColors.white("{hostname}")} ${ansiColors.magentaBright("::")} ${ansiColors.greenBright("{path}")} ${ansiColors.blueBright("%")} `;
 
   private hostname: string = "j-os";
-  private path: string = '/Users/joey/'
+  private path: string = HomeDirectory;
   private relativePath: string = '~';
 
   constructor(
@@ -303,8 +305,8 @@ export class Shell {
       }
 
       if (part.output.type === 'output_redirection') {
-        const filename = part.output.filename;
-        const result = writeOutputToFile(this, filename, this.terminal.getResponseLines(), fs);
+        const outputFile = getAbsolutePathFromArgs(part.output.filename, this);
+        const result = writeOutputToFile(this, outputFile, this.terminal.getResponseLines(), fs);
 
         if (!result.ok) {
           this.terminal.enableOutput();

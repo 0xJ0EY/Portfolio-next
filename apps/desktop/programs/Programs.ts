@@ -1,4 +1,4 @@
-import { Shell } from "@/applications/Terminal/Shell";
+import { HomeDirectory, Shell } from "@/applications/Terminal/Shell";
 import { getAbsolutePath } from "@/apis/FileSystem/FileSystem";
 import { SystemAPIs } from "@/components/OperatingSystem";
 
@@ -10,6 +10,10 @@ export function getParameters(args: string[]): string[] {
 }
 
 export function getAbsolutePathFromArgs(path: string, shell: Shell, appendDirectorySlash?: boolean): string {
+  if (path.startsWith('~')) {
+    path = HomeDirectory + path.slice(1, path.length);
+  }
+
   if (!path.startsWith('/')) {
     path = shell.getPath() + path;
   }

@@ -6,7 +6,7 @@ import { ansiStringPadEnd, ansiStringPadStart } from "@/applications/Terminal/Te
 
 function command(name: string, description: string): string {
   const COMMAND_LENGTH = 12;
-  const COMMAND_PRE_LENGTH = 4 + name.length;
+  const COMMAND_PRE_LENGTH = 2 + name.length;
 
   const command = ansiStringPadEnd(ansiStringPadStart(greenBright(name), COMMAND_PRE_LENGTH), COMMAND_LENGTH);
 
