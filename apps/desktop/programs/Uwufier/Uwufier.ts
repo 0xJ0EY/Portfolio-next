@@ -24,7 +24,7 @@ const uwuMap: Array<[RegExp, string]> = [
   [/(?:R|L)/g, "W"],
   [/n([aeiou])/g, "ny$1"],
   [/N([aeiou])/g, "Ny$1"],
-  [/N([AEIOU])/g, "Ny$1"],
+  [/N([AEIOU])/g, "NY$1"],
   [/ove/g, "uv"],
 ];
 
@@ -66,7 +66,6 @@ function replaceWord(source: string, replacement: string, index: number, sliceLe
 
   return start + replacement + end;
 }
-
 function passesThreshold(rng: PRNG, threshold: number): boolean {
   return unwrap(rng.random())! > (1 - threshold);
 }
