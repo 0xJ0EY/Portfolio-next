@@ -7,8 +7,7 @@ import {
   Scene,
   ShaderMaterial,
   UniformsUtils,
-  UnsignedByteType,
-  UnsignedShortType,
+  UnsignedIntType,
   WebGLRenderTarget
 } from 'three';
 import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass";
@@ -54,14 +53,14 @@ export class CutOutRenderShaderPass extends Pass {
       samples: RENDER_SAMPLES
     });
 
-    this.sourceDepthTexture = new DepthTexture(width, height, UnsignedByteType);
+    this.sourceDepthTexture = new DepthTexture(width, height, UnsignedIntType);
     this.sourceDepthTarget = new WebGLRenderTarget(width, height, {
       depthBuffer: true,
       depthTexture: this.sourceDepthTexture,
       samples: 0
     });
 
-    this.cutoutDepthTexture = new DepthTexture(width, height, UnsignedShortType);
+    this.cutoutDepthTexture = new DepthTexture(width, height, UnsignedIntType);
     this.cutoutTarget = new WebGLRenderTarget(width, height, {
       depthBuffer: true,
       depthTexture: this.cutoutDepthTexture,
