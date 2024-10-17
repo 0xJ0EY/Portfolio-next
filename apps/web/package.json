@@ -13,17 +13,17 @@
     "next": "^14.2.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "three": "^0.164.1"
+    "three": "^0.169.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
-    "@types/node": "20.12.7",
-    "@types/react": "18.3.1",
+    "@types/node": "^22.7.6",
+    "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
-    "@types/three": "^0.164.0",
-    "eslint": "9.1.1",
+    "@types/three": "^0.169.0",
+    "eslint": "^9.12.0",
     "eslint-config-custom": "*",
-    "tsconfig": "*",
+    "tsconfig": "^7.0.0",
     "typescript": "^5.4.5"
   }
 }
