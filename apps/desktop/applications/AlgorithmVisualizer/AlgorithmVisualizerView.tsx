@@ -3,14 +3,20 @@ import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AlgorithmOptions } from './Algorithms/AlgorithmContainer';
 
-export type AlgorithmSubView = (
-  'home' |
+type SortingAlgorithms = (
   'bubble-sort' |
   'merge-sort' |
   'bogo-sort' |
   'heap-sort' |
-  'quick-sort' 
-);
+  'quick-sort'
+)
+
+type PathFindingAlgorithm = (
+  'bfs' |
+  'dfs'
+)
+
+export type AlgorithmSubView = 'home' | SortingAlgorithms | PathFindingAlgorithm;
 
 export type SubViewParams = {
   windowProps: WindowProps,

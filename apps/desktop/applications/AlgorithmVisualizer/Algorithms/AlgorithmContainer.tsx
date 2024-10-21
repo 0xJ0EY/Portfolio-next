@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { SortView, SortViewEntry, verifySort } from "./SortingView";
 import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRightToLeft } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
-import { DataGenerationEntriesInput, DataGenerationStrategyDropDown } from "../Home/Home";
+import { DataGenerationEntriesInput, SortingGenerationStrategyDropdown } from "../Home/Home";
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import styles from "./AlgorithmContainer.module.css";
 import { useTranslation } from "react-i18next";
 
 export type AlgorithmOptions = {
-  dataGenerationStrategy: DataGenerationStrategy,
-  amountOfEntries: number
+  sorting: {
+    dataGenerationStrategy: SortingDataGenerationStrategy,
+    amountOfEntries: number
+  }
 }
 export type AlgorithmContainerProps = {
   params: SubViewParams,
@@ -18,10 +20,12 @@ export type AlgorithmContainerProps = {
   title: string,
 }
 
-export type DataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
+export type SortingDataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
+export type PathFindingDataGenerationStrategy = 'maze' | 'open-field' | 'pipes';
+
 export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
 
-function generateData(strategy: DataGenerationStrategy, entries: number): SortViewEntry[] {
+function generateData(strategy: SortingDataGenerationStrategy, entries: number): SortViewEntry[] {
   switch (strategy) {
     case "randomly-distributed": return generateRandomData(entries);
     case "sorted-left-to-right": return generateSortedDataLeftToRight(entries);
@@ -29,15 +33,15 @@ function generateData(strategy: DataGenerationStrategy, entries: number): SortVi
   }
 }
 
-export function AlgorithmContainer(props: AlgorithmContainerProps) { 
+export function SortingAlgorithmContainer(props: AlgorithmContainerProps) { 
   const { entrypoint, params, title } = props;
 
   const apis = params.windowProps.application.apis;
 
   const { t } = useTranslation('common');
 
-  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.dataGenerationStrategy);
-  const [amountOfEntries, setAmountOfEntries] = useState<number | null>(props.options.amountOfEntries);
+  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.sorting.dataGenerationStrategy);
+  const [amountOfEntries, setAmountOfEntries] = useState<number | null>(props.options.sorting.amountOfEntries);
 
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
@@ -174,11 +178,11 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
           <tbody>
             <tr>
             <td><label htmlFor="data-generation-strategy">{t('algorithms.data_generation_strategy')}</label></td>
-              <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy, t) }</td>
+              <td>{ SortingGenerationStrategyDropdown("data-generation-strategy", dataGenStrategy, setDataGenStrategy, t) }</td>
             </tr>
             <tr>
             <td><label htmlFor="generated-data-size">{t('algorithms.data_generation_points')}</label></td>
-              <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
+              <td>{ DataGenerationEntriesInput("generated-data-size", amountOfEntries, setAmountOfEntries, 1, 2048) }</td>
             </tr>
           </tbody>
         </table>
