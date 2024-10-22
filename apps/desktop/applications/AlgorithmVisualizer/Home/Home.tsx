@@ -2,7 +2,7 @@ import { KeyboardEvent, useState } from "react";
 import { AlgorithmSubView, SubViewParams } from "../AlgorithmVisualizerView";
 
 import styles from './Home.module.css';
-import { AlgorithmOptions, PathFindingDataGenerationStrategy, SortingDataGenerationStrategy } from "../Algorithms/AlgorithmContainer";
+import { AlgorithmOptions, PathFindingDataGenerationStrategy, SortingDataGenerationStrategy } from "../Algorithms/SortingAlgorithmContainer";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 

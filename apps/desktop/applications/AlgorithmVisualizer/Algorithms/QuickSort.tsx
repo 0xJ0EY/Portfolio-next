@@ -1,7 +1,7 @@
 
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView } from "./SortingView";
-import { SortingAlgorithmContainer } from "./AlgorithmContainer";
+import { SortingAlgorithmContainer } from "./SortingAlgorithmContainer";
 
 async function quickSort(view: SortView, abortSignal: AbortSignal) {
   async function partition(view: SortView, low: number, high: number): Promise<number | null> {

@@ -4,7 +4,7 @@ import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRi
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
 import { DataGenerationEntriesInput, SortingGenerationStrategyDropdown } from "../Home/Home";
 import { SubViewParams } from "../AlgorithmVisualizerView";
-import styles from "./AlgorithmContainer.module.css";
+import styles from "./SortingAlgorithmContainer.module.css";
 import { useTranslation } from "react-i18next";
 
 export type AlgorithmOptions = {

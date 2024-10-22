@@ -1,7 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { AlgorithmOptions } from './Algorithms/AlgorithmContainer';
+import { AlgorithmOptions } from './Algorithms/SortingAlgorithmContainer';
 
 type SortingAlgorithms = (
   'bubble-sort' |

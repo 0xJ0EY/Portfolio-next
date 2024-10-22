@@ -1,7 +1,7 @@
 
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView, verifySort } from "./SortingView";
-import { SortingAlgorithmContainer } from "./AlgorithmContainer";
+import { SortingAlgorithmContainer } from "./SortingAlgorithmContainer";
 
 async function bogosort(view: SortView, abortSignal: AbortSignal) {
   while (!await verifySort(view, abortSignal)) {

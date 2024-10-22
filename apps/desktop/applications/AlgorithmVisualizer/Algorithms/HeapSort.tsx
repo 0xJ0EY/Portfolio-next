@@ -1,7 +1,7 @@
 
 import { SubViewParams } from "../AlgorithmVisualizerView";
 import { SortView } from "./SortingView";
-import { SortingAlgorithmContainer } from "./AlgorithmContainer";
+import { SortingAlgorithmContainer } from "./SortingAlgorithmContainer";
 
 async function heapSort(view: SortView, abortSignal: AbortSignal) {
 
