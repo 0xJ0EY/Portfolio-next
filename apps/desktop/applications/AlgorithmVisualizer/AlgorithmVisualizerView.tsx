@@ -34,6 +34,7 @@ const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loadin
 const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: Loader });
 
 const BfsPathFindingLoader = dynamic(() => import('./Algorithms/Bfs'), { loading: Loader });
+const DfsPathFindingLoader = dynamic(() => import('./Algorithms/Dfs'), { loading: Loader });
 
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
@@ -44,6 +45,7 @@ function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Eleme
     case 'quick-sort': return <QuickSortLoader {...params} />;
     case 'heap-sort': return <HeapSortLoader {...params} />;
     case 'bfs': return <BfsPathFindingLoader {...params} />;
+    case 'dfs': return <DfsPathFindingLoader {...params} />;
   }
 
   return <>No subview found</>;

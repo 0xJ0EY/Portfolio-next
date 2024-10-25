@@ -102,7 +102,8 @@ export class AreaGraph extends CanvasGraph {
         case "wall": return '#000';
         case "start": return '#0f0';
         case "end": return '#f00';
-        case "visited": return "#00f"
+        case "visited": return "#5ca314"
+        case "happy-path": return '#90e83c';
       }
     }
 

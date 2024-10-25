@@ -79,6 +79,7 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
 
     entrypoint(view.current, abortController.current.signal).then(() => {
         isSolved = true;
+        setPathFinding(false);
     });
 
     function update() {

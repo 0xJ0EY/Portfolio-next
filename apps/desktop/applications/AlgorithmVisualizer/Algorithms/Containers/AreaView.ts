@@ -2,7 +2,7 @@ import { Point } from "@/applications/math";
 import { sleep } from "../../Util";
 
 export type AreaTile = 'open' | 'wall' | 'start' | 'end';
-export type AreaViewTile = AreaTile | 'visited';
+export type AreaViewTile = AreaTile | 'visited' | 'happy-path';
 
 function create2DArray<T>(width: number, height: number, value: T): T[][] {
   let result: T[][] = [];
@@ -175,9 +175,9 @@ export class AreaView {
   public async visit(x: number, y: number) {
     this.dirty = true;
 
-    await sleep(5);
-
     this.visited[y][x] = true;
+
+    await sleep(50);
   }
 
   public hasVisited(x: number, y: number): boolean {
@@ -186,9 +186,20 @@ export class AreaView {
     return this.visited[y][x];
   }
 
+  private inHappyPath(x: number, y: number): boolean {
+    for (const node of this.happyPath) {
+      if (node.x === x && node.y === y) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public getTile(x: number, y: number): AreaViewTile | null {
     const tile = this.getArea().getTile(x, y);
 
+    if (tile === 'open' && this.inHappyPath(x, y)) { return 'happy-path'; }
     if (tile === 'open' && this.hasVisited(x, y)) { return 'visited'; }
 
     return tile;
