@@ -50,6 +50,8 @@ async function bfs(view: AreaView, abortSignal: AbortSignal) {
   queue.enqueue({ value: root, parent: null });
 
   while (queue.size() > 0) {
+    if (abortSignal.aborted) { return; }
+
     const container = queue.dequeue()!;
     const value = container.value;
 

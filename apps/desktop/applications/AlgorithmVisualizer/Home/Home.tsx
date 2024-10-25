@@ -116,7 +116,7 @@ export default function HomeSubView(params: SubViewParams) {
     const [sortingGenerationStrategy, setSortingGenerationStrategy] = useState<SortingDataGenerationStrategy>("randomly-distributed");
     const [sortingGenerationEntries, setSortingGenerationEntries] = useState<number | null>(50);
 
-    const [pathFindingGenerationStrategy, setPathFindingGenerationStrategy] = useState<PathFindingDataGenerationStrategy>("maze");
+    const [pathFindingGenerationStrategy, setPathFindingGenerationStrategy] = useState<PathFindingDataGenerationStrategy>("pipes");
     const [pathFindingWidth, setPathFindingWidth] = useState<number | null>(40);
     const [pathFindingHeight, setPathFindingHeight] = useState<number | null>(20);
 

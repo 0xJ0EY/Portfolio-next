@@ -62,7 +62,37 @@ export function generateOpenFieldArea(width: number, height: number): Area {
 }
 
 export function generatePipes(width: number, height: number): Area {
-  return generateOpenFieldArea(width, height);
+  function drawPipe(area: Area, x: number) {
+    const openY = Math.floor(Math.random() * (area.getHeight() - 2)) + 1;
+
+    for (let y = 1; y < area.getHeight() - 1; y++) {
+      area.setTile(x, y, openY === y ? 'open' : 'wall');
+    }
+  }
+
+  const area = generateOpenFieldArea(width, height);
+
+  const isEven = width % 2 === 0;
+
+  if (isEven) {
+    const center = Math.floor((width - 2) / 2);
+
+    for (let x = 2; x < center; x += 2) {
+      drawPipe(area, x);
+    }
+
+    for (let x = width - 3; x > center; x -= 2) {
+      drawPipe(area, x);
+    }
+
+  } else {
+    // Draw only pipes from the left side
+    for (let x = 2; x < width - 2; x += 2) {
+      drawPipe(area, x);
+    }
+  }
+
+  return area;
 }
 
 export class Area {
@@ -103,6 +133,10 @@ export class Area {
     const vertical = y < 0 || y > this.getHeight();
 
     return !horizontal && !vertical
+  }
+
+  public setTile(x: number, y: number, tile: AreaTile) {
+    this.grid[y][x] = tile;
   }
 
   public getTile(x: number, y: number): AreaTile | null {
@@ -153,9 +187,16 @@ export class AreaView {
   }
 
   public getTile(x: number, y: number): AreaViewTile | null {
-    if (this.hasVisited(x, y)) { return 'visited'; }
+    const tile = this.getArea().getTile(x, y);
 
-    return this.getArea().getTile(x, y);
+    if (tile === 'open' && this.hasVisited(x, y)) { return 'visited'; }
+
+    return tile;
+  }
+
+  public clearVisited() {
+    this.dirty = true;
+    this.visited = create2DArray(this.area.getWidth(), this.area.getHeight(), false);
   }
 
   public rerender(): boolean {

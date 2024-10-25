@@ -70,7 +70,10 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
   function onStart() {
     if (isPathFinding) { return; }
 
+    view.current.clearVisited();
+
     setPathFinding(true);
+    abortController.current = new AbortController();
 
     let isSolved = false;
 
@@ -91,7 +94,11 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     window.requestAnimationFrame(update);
   }
 
-  function onStop() {}
+  function onStop() {
+    abortController.current.abort();
+
+    setPathFinding(false);
+  }
 
   const actionButton = isPathFinding ? <button className="xl-system-button" onClick={onStop}>{t('algorithms.stop')}</button> : <button className="xl-system-button" onClick={onStart}>{t('algorithms.start')}</button>;
 
@@ -105,6 +112,10 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
         <div>
           {actionButton}
         </div>
+
+        <hr/>
+
+        <button className={styles['button-link']} onClick={() => params.changeParent('home')}>{t('algorithms.return_to_overview')}</button>
 
       </div>
 
