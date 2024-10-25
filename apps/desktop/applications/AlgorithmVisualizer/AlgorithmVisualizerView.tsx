@@ -1,7 +1,7 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { AlgorithmOptions } from './Algorithms/SortingAlgorithmContainer';
+import { AlgorithmOptions } from './Algorithms/Containers/Containers';
 
 type SortingAlgorithms = (
   'bubble-sort' |
@@ -33,6 +33,8 @@ const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loadin
 const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loading: Loader });
 const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: Loader });
 
+const BfsPathFindingLoader = dynamic(() => import('./Algorithms/Bfs'), { loading: Loader });
+
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
     case 'home': return <HomeLoader {...params} />;
@@ -41,6 +43,7 @@ function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Eleme
     case 'merge-sort': return <MergeSortLoader {...params} />;
     case 'quick-sort': return <QuickSortLoader {...params} />;
     case 'heap-sort': return <HeapSortLoader {...params} />;
+    case 'bfs': return <BfsPathFindingLoader {...params} />;
   }
 
   return <>No subview found</>;

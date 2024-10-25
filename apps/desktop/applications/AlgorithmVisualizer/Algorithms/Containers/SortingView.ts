@@ -1,4 +1,4 @@
-import { sleep } from "../Util";
+import { sleep } from "../../Util";
 
 export type SortViewEntryColor = 'white' | 'red' | 'green';
 

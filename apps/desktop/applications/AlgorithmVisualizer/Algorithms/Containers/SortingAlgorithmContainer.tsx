@@ -1,29 +1,48 @@
 import { useEffect, useRef, useState } from "react";
 import { SortView, SortViewEntry, verifySort } from "./SortingView";
-import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRightToLeft } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
-import { DataGenerationEntriesInput, SortingGenerationStrategyDropdown } from "../Home/Home";
-import { SubViewParams } from "../AlgorithmVisualizerView";
-import styles from "./SortingAlgorithmContainer.module.css";
+import { DataGenerationEntriesInput, SortingGenerationStrategyDropdown } from "../../Home/Home";
+import styles from "./AlgorithmContainer.module.css";
 import { useTranslation } from "react-i18next";
-
-export type AlgorithmOptions = {
-  sorting: {
-    dataGenerationStrategy: SortingDataGenerationStrategy,
-    amountOfEntries: number
-  }
-}
-export type AlgorithmContainerProps = {
-  params: SubViewParams,
-  entrypoint: SortingAlgorithmEntrypoint,
-  options: AlgorithmOptions,
-  title: string,
-}
+import { SortingAlgorithmContainerProps } from "./Containers";
 
 export type SortingDataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
-export type PathFindingDataGenerationStrategy = 'maze' | 'open-field' | 'pipes';
 
-export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
+function generateRandomData(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
+
+  for (let i = 0; i < entries; i++) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  // Fisher–Yates shuffle
+  for (let i = entries - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i));
+    [data[i], data[j]] = [data[j], data[i]];
+  }
+
+  return data;
+}
+
+function generateSortedDataLeftToRight(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
+
+  for (let i = 0; i < entries; i++) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  return data;
+}
+
+function generateSortedDataRightToLeft(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
+
+  for (let i = entries; i > 0; i--) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  return data;
+}
 
 function generateData(strategy: SortingDataGenerationStrategy, entries: number): SortViewEntry[] {
   switch (strategy) {
@@ -33,7 +52,7 @@ function generateData(strategy: SortingDataGenerationStrategy, entries: number):
   }
 }
 
-export function SortingAlgorithmContainer(props: AlgorithmContainerProps) { 
+export function SortingAlgorithmContainer(props: SortingAlgorithmContainerProps) { 
   const { entrypoint, params, title } = props;
 
   const apis = params.windowProps.application.apis;

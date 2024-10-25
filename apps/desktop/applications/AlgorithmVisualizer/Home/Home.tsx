@@ -2,9 +2,11 @@ import { KeyboardEvent, useState } from "react";
 import { AlgorithmSubView, SubViewParams } from "../AlgorithmVisualizerView";
 
 import styles from './Home.module.css';
-import { AlgorithmOptions, PathFindingDataGenerationStrategy, SortingDataGenerationStrategy } from "../Algorithms/SortingAlgorithmContainer";
+import { SortingDataGenerationStrategy } from "../Algorithms/Containers/SortingAlgorithmContainer";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
+import { AlgorithmOptions } from "../Algorithms/Containers/Containers";
+import { PathFindingDataGenerationStrategy } from "../Algorithms/Containers/PathFindingAlgorithmContainer";
 
 export function SortingGenerationStrategyDropdown(id: string, value: string, onChange: (strategy: SortingDataGenerationStrategy) => void, t: TFunction) {
   const entries: DataGenerationEntry<SortingDataGenerationStrategy>[] = [
@@ -125,6 +127,11 @@ export default function HomeSubView(params: SubViewParams) {
         sorting: {
           dataGenerationStrategy: sortingGenerationStrategy,
           amountOfEntries: sortingGenerationEntries ?? 50
+        },
+        pathFinding: {
+          dataGenerationStrategy: pathFindingGenerationStrategy,
+          width: pathFindingWidth ?? 40,
+          height: pathFindingHeight ?? 20
         }
       };
 
@@ -173,12 +180,12 @@ export default function HomeSubView(params: SubViewParams) {
               </tr>
 
               <tr>
-                <td><label htmlFor="path-finding-width">{t('algorithms.data_path_finding_width')}</label></td>
+                <td><label htmlFor="path-finding-width">{t('algorithms.path_finding_width')}</label></td>
                 <td>{ DataGenerationEntriesInput("path-finding-width", pathFindingWidth, setPathFindingWidth, 5, 100) }</td>
               </tr>
 
               <tr>
-                <td><label htmlFor="path-finding-width">{t('algorithms.data_path_finding_width')}</label></td>
+                <td><label htmlFor="path-finding-height">{t('algorithms.path_finding_height')}</label></td>
                 <td>{ DataGenerationEntriesInput("path-finding-height", pathFindingHeight, setPathFindingHeight, 5, 100) }</td>
               </tr>
             </tbody>
