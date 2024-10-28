@@ -4,6 +4,7 @@ import { AreaGraph } from "@/components/GraphViewer/GraphViewer";
 import { Area, AreaView, generateMaze, generateOpenFieldArea, generatePipes } from "./AreaView";
 import { PathFindingAlgorithmContainerProps } from "./Containers";
 import { useTranslation } from "react-i18next";
+import { PathFindingGenerationStrategyDropdown, DataGenerationEntriesInput } from "../../Home/Home";
 
 export type PathFindingDataGenerationStrategy = 'maze' | 'open-field' | 'pipes';
 
@@ -25,9 +26,9 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
 
   const { t } = useTranslation('common');
 
-  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.pathFinding.dataGenerationStrategy);
-  const [dataGenWidth, setDataGenWidth] = useState(props.options.pathFinding.width);
-  const [dataGenHeight, setDataGenHeight] = useState(props.options.pathFinding.height);
+  const [pathFindingGenerationStrategy, setPathFindingGenerationStrategy] = useState(props.options.pathFinding.dataGenerationStrategy);
+  const [pathFindingWidth, setPathFindingWidth] = useState<number | null>(props.options.pathFinding.width);
+  const [pathFindingHeight, setPathFindingHeight] = useState<number | null>(props.options.pathFinding.height);
 
   const view = useRef(new AreaView());
   const graph = useRef(new AreaGraph(view.current));
@@ -35,8 +36,27 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
   const [isPathFinding, setPathFinding] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
+  function onResize() {
+    const current = parent.current!;
+    const data = view.current;
+    const areaGraph = graph.current;
+
+    const width = current.scrollWidth;
+
+    const tileSize = width / data.getWidth();
+    const height = tileSize * data.getHeight();
+
+    areaGraph.resize(width, height);
+  }
+
   useEffect(() => {
-    view.current.setData(generateData(dataGenStrategy, dataGenWidth, dataGenHeight));
+    view.current.setData(
+      generateData(
+        pathFindingGenerationStrategy,
+        pathFindingWidth ?? 40,
+        pathFindingHeight ?? 20
+      )
+    );
 
     if (!parent.current) { return; }
     if (!graphRef.current) { return; }
@@ -48,17 +68,6 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     if (!areaGraph) { return; }
     if (!areaGraph.bind(graphRef.current)) { return; }
 
-    function onResize() {
-      const current = parent.current!;
-      const data = view.current;
-
-      const width = current.scrollWidth;
-
-      const tileSize = width / data.getWidth();
-      const height = tileSize * data.getHeight();
-
-      areaGraph.resize(width, height);
-    }
 
     const observer = new ResizeObserver(onResize);
     observer.observe(parent.current);
@@ -103,6 +112,19 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     setPathFinding(false);
   }
 
+  function regenerate(): void {
+    view.current.setData(
+      generateData(
+        pathFindingGenerationStrategy,
+        pathFindingWidth ?? 40,
+        pathFindingHeight ?? 20
+      )
+    );
+
+    graph.current.render();
+    onResize();
+  }
+
   const actionButton = isPathFinding ? <button className="xl-system-button" onClick={onStop}>{t('algorithms.stop')}</button> : <button className="xl-system-button" onClick={onStart}>{t('algorithms.start')}</button>;
 
   return (
@@ -118,10 +140,29 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
 
         <hr/>
 
+        <button className="system-button" onClick={regenerate} disabled={isPathFinding}>{t('algorithms.regenerate')}</button>
+
+        <table>
+        <tbody>
+              <tr>
+                <td><label htmlFor="path-finding-data-gen-strategy">{t('algorithms.data_generation_strategy')}</label></td>
+                <td>{ PathFindingGenerationStrategyDropdown("path-finding-data-gen-strategy", pathFindingGenerationStrategy, setPathFindingGenerationStrategy, t) }</td>
+              </tr>
+
+              <tr>
+                <td><label htmlFor="path-finding-width">{t('algorithms.path_finding_width')}</label></td>
+                <td>{ DataGenerationEntriesInput("path-finding-width", pathFindingWidth, setPathFindingWidth, 5, 100) }</td>
+              </tr>
+
+              <tr>
+                <td><label htmlFor="path-finding-height">{t('algorithms.path_finding_height')}</label></td>
+                <td>{ DataGenerationEntriesInput("path-finding-height", pathFindingHeight, setPathFindingHeight, 5, 100) }</td>
+              </tr>
+            </tbody>
+        </table>
+
         <button className={styles['button-link']} onClick={() => params.changeParent('home')}>{t('algorithms.return_to_overview')}</button>
-
       </div>
-
     </div>
   );
 }

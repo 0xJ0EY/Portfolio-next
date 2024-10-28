@@ -36,7 +36,6 @@ export class SortView {
   private dirty: boolean = false;
   private highestValue: number = 0;
   private delayMs: number = 5;
-  private verificationDelayMs: number = 2;
 
   private accessCount: number = 0;
 

@@ -231,6 +231,7 @@ export class AreaView {
   public setData(data: Area): void {
     this.area = data;
     this.visited = create2DArray(this.area.getWidth(), this.area.getHeight(), false);
+    this.happyPath = [];
   }
 
   public getWidth(): number {
