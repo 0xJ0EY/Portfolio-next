@@ -80,6 +80,20 @@ export function generateMaze(width: number, height: number): Area {
     }
   }
 
+  function findValidEndHeight(): number {
+    let endY;
+    let iteration = 0;
+
+    do {
+      if (iteration++ > 10) { return -1; }
+
+      endY = Math.floor(Math.random() * (height - 2)) + 1;
+
+    } while (grid[endY][width - 2] !== 'open');
+
+    return endY;
+  }
+
   const start: Point = {
     x: 0,
     y: Math.floor(Math.random() * (height - 2)) + 1
@@ -87,15 +101,9 @@ export function generateMaze(width: number, height: number): Area {
 
   carvePath(start.x + 1, start.y);
 
-  let endY = null;
-
-  do {
-    endY = Math.floor(Math.random() * (height - 2)) + 1;
-  } while (grid[endY][width - 1] === 'open');
-
   const end: Point = {
     x: width - 1,
-    y: endY
+    y: findValidEndHeight()
   }
 
   grid[start.y][start.x] = 'start';
@@ -163,7 +171,7 @@ export class Area {
   private height: number;
 
   constructor(private grid: AreaTile[][], private start: Point, private end: Point) {
-    this.width = this.grid[0].length ?? 0;
+    this.width = this.grid[0]?.length ?? 0;
     this.height = this.grid.length ?? 0;
   }
 
@@ -212,11 +220,17 @@ export class Area {
 export class AreaView {
   private dirty: boolean = false;
 
-  private visited: boolean[][];
+  private visited: boolean[][] = [];
   private happyPath: Point[] = [];
+  private area: Area;
 
-  constructor(private area: Area) {
-    this.visited = create2DArray(area.getWidth(), area.getHeight(), false);
+  constructor() {
+    this.area = new Area([], { x: 0, y: 0 }, { x: 0, y: 0 });
+  }
+
+  public setData(data: Area): void {
+    this.area = data;
+    this.visited = create2DArray(this.area.getWidth(), this.area.getHeight(), false);
   }
 
   public getWidth(): number {

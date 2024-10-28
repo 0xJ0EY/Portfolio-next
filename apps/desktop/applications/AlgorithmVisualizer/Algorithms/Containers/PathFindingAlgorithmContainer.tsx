@@ -29,13 +29,15 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
   const [dataGenWidth, setDataGenWidth] = useState(props.options.pathFinding.width);
   const [dataGenHeight, setDataGenHeight] = useState(props.options.pathFinding.height);
 
-  const view = useRef(new AreaView(generateData(dataGenStrategy, dataGenWidth, dataGenHeight)));
+  const view = useRef(new AreaView());
   const graph = useRef(new AreaGraph(view.current));
 
   const [isPathFinding, setPathFinding] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
   useEffect(() => {
+    view.current.setData(generateData(dataGenStrategy, dataGenWidth, dataGenHeight));
+
     if (!parent.current) { return; }
     if (!graphRef.current) { return; }
 

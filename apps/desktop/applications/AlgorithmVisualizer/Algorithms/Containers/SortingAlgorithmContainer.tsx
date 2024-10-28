@@ -68,10 +68,12 @@ export function SortingAlgorithmContainer(props: SortingAlgorithmContainerProps)
   const [isSorting, setSorting] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
-  const view = useRef(new SortView(generateData(dataGenStrategy, amountOfEntries ?? 50)));
+  const view = useRef(new SortView([]));
   const graph = useRef(new BarGraph(view.current));
 
   useEffect(() => {
+    view.current.setData(generateData(dataGenStrategy, amountOfEntries ?? 50));
+
     if (!graphRef.current) { return; }
     if (!parent.current) { return; }
 
