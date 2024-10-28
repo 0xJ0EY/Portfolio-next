@@ -49,6 +49,33 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     areaGraph.resize(width, height);
   }
 
+  function onPointerEvt(evt: PointerEvent) {
+    const current = parent.current!;
+    const data = view.current;
+    const area = view.current.getArea();
+
+    const width = current.scrollWidth;
+    const tileSize = width / data.getWidth();
+
+    const rect = current.getBoundingClientRect();
+    const [x, y] = [evt.clientX - rect.x, evt.clientY - rect.y];
+
+    const [tileX, tileY] = [Math.floor(x / tileSize), Math.floor(y / tileSize)]
+
+    // TODO: Move tile swapping to a more appropriate area
+    const inHorizontalBounds  = tileX > 0 && tileX < data.getWidth() - 1;
+    const inVerticalBounds    = tileY > 0 && tileY < data.getHeight() - 1;
+
+    const inBounds = inHorizontalBounds && inVerticalBounds;
+
+    if (!inBounds) { return; }
+
+    area.setTile(tileX, tileY, area.getTile(tileX, tileY) === 'wall' ? 'open' : 'wall');
+
+    view.current.clearVisited();
+    graph.current.render();
+  }
+
   useEffect(() => {
     view.current.setData(
       generateData(
@@ -66,14 +93,16 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     const areaGraph = graph.current;
 
     if (!areaGraph) { return; }
-    if (!areaGraph.bind(graphRef.current)) { return; }
+    if (!areaGraph.bind(graphRef.current)) { return; } // Bind the rendering
 
+    areaGraph.subscribe(onPointerEvt); // Subscribe to pointer events
 
     const observer = new ResizeObserver(onResize);
     observer.observe(parent.current);
 
     return () => {
       observer.disconnect();
+      areaGraph.disconnect(onPointerEvt);
       abortController.current?.abort();
     }
   }, []);

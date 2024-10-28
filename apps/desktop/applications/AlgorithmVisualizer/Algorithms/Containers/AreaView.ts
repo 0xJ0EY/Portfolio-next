@@ -286,6 +286,7 @@ export class AreaView {
   public clearVisited() {
     this.dirty = true;
     this.visited = create2DArray(this.area.getWidth(), this.area.getHeight(), false);
+    this.happyPath = [];
   }
 
   public rerender(): boolean {

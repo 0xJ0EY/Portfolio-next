@@ -89,6 +89,18 @@ export class AreaGraph extends CanvasGraph {
     super();
   }
 
+  public subscribe(handler: (evt: PointerEvent) => void) {
+    if (!this.parent) { return; }
+
+    this.parent.addEventListener('pointerdown', handler);
+  }
+
+  public disconnect(handler: (evt: PointerEvent) => void) {
+    if (!this.parent) { return; }
+
+    this.parent.removeEventListener('pointerdown', handler);
+  }
+
   private calculateTileSize(): number {
     const width = this.parent!.width;
 
