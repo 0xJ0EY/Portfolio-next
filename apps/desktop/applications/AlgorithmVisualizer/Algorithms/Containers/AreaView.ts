@@ -1,5 +1,5 @@
 import { Point } from "@/applications/math";
-import { sleep } from "../../Util";
+import { shuffleArray, sleep } from "../../Util";
 
 export type AreaTile = 'open' | 'wall' | 'start' | 'end';
 export type AreaViewTile = AreaTile | 'visited' | 'happy-path';
@@ -16,6 +16,10 @@ function create2DArray<T>(width: number, height: number, value: T): T[][] {
   }
 
   return result;
+}
+
+function createWalledOutGrid(width: number, height: number): AreaTile[][] {
+  return create2DArray<AreaTile>(width, height, 'wall');
 }
 
 function createWalledGrid(width: number, height: number): AreaTile[][] {
@@ -38,7 +42,66 @@ function createWalledGrid(width: number, height: number): AreaTile[][] {
 }
 
 export function generateMaze(width: number, height: number): Area {
-  return generateOpenFieldArea(width, height);
+  const grid = createWalledOutGrid(width, height);
+  const directions: Point[] = [{ x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: -1, y: 0 }];
+
+  function availablePlace(nx: number, ny: number, dx: number, dy: number): boolean {
+    // We require that there is an exclusive direction between dx and dy
+    const bx = dx === 0;
+    const by = dy === 0;
+
+    if (!(bx || by) && (bx && by)) { return false; }
+
+    return (
+      grid[ny + (1 * dx)][nx + (1 * dy)] === 'wall' &&
+      grid[ny + (0 * dx)][nx + (0 * dy)] === 'wall' &&
+      grid[ny - (1 * dx)][nx - (1 * dy)] === 'wall' &&
+      grid[ny + dy][nx + dx] === 'wall'
+    );
+  }
+
+  function carvePath(x: number, y: number) {
+    grid[y][x] = 'open';
+
+    const shuffledDirections = shuffleArray(directions);
+
+    for (const direction of shuffledDirections) {
+      const { x: dx, y: dy } = direction;
+      const [nx, ny] = [x + dx, y + dy]; // Neighbor coordinates
+
+      const inHorizontalBounds  = nx >= 1 && nx < width - 1;
+      const inVerticalBounds    = ny >= 1 && ny < height - 1;
+
+      const inBounds = inHorizontalBounds && inVerticalBounds;
+
+      if (inBounds && availablePlace(nx, ny, dx, dy)) {
+        carvePath(nx, ny);
+      }
+    }
+  }
+
+  const start: Point = {
+    x: 0,
+    y: Math.floor(Math.random() * (height - 2)) + 1
+  }
+
+  carvePath(start.x + 1, start.y);
+
+  let endY = null;
+
+  do {
+    endY = Math.floor(Math.random() * (height - 2)) + 1;
+  } while (grid[endY][width - 1] === 'open');
+
+  const end: Point = {
+    x: width - 1,
+    y: endY
+  }
+
+  grid[start.y][start.x] = 'start';
+  grid[end.y][end.x] = 'end';
+
+  return new Area(grid, start, end);
 }
 
 export function generateOpenFieldArea(width: number, height: number): Area {
