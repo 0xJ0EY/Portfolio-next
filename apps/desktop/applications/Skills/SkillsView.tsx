@@ -46,7 +46,6 @@ export default function SkillsView(props: WindowProps) {
             <ul>
               <li><SkillEntry language="React / NextJS" icon={{src: '/icons/skills/react.svg', alt: 'React' }} /></li>
               <li><SkillEntry language="Angular" icon={{src: '/icons/skills/angular.svg', alt: 'Angular' }} /></li>
-              <li><SkillEntry language="Svelte" icon={{src: '/icons/skills/svelte.svg', alt: 'Svelte' }} /></li>
               <li><SkillEntry language="SwiftUI" icon={{src: '/icons/skills/swiftui.png', alt: 'SwiftUI' }} /></li>
               <li><SkillEntry language="Spring Boot" icon={{src: '/icons/skills/spring-boot.svg', alt: 'Spring Boot' }} /></li>
             </ul>
@@ -68,7 +67,6 @@ export default function SkillsView(props: WindowProps) {
 
             <h1>{ t("skills.tools") }</h1>
             <ul>
-              <li><SkillEntry language="Visual Studio Code" icon={{src: '/icons/skills/vsc.svg', alt: 'Visual Studio Code' }} /></li>
               <li><SkillEntry language="Git" icon={{src: '/icons/skills/git.svg', alt: 'Git' }} /></li>
               <li><SkillEntry language="Vim" icon={{src: '/icons/skills/vim.svg', alt: 'Vim' }} /></li>
             </ul>
