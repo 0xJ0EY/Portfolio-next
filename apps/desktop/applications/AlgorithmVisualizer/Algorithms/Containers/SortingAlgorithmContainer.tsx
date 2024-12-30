@@ -124,30 +124,30 @@ export function SortingAlgorithmContainer(props: SortingAlgorithmContainerProps)
     gainNode.connect(audioContext.destination);
 
     function playSound() {
-      let indicesList = view.current.accessIndicesList;
+      const indicesList = view.current.accessIndicesList;
 
-        for (let i = 0; i < indicesList.length; i++) {
-          let relativeIndex = indicesList[i] / view.current.getHighestValue();
+      for (let i = 0; i < indicesList.length; i++) {
+        const relativeIndex = indicesList[i] / view.current.getHighestValue();
 
-          const oscillator = audioContext.createOscillator();
-          oscillator.type = "triangle";
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = "triangle";
 
-          const freq = 120 + 1200 * (relativeIndex * relativeIndex);
-          oscillator.frequency.value = freq;
+        const freq = 120 + 1200 * (relativeIndex * relativeIndex);
+        oscillator.frequency.value = freq;
 
-          const offset = i * 0.1;
+        const offset = i * 0.1;
 
-          const duration = 0.1;
-          
-          const start = audioContext.currentTime + offset;
-          const stop = start + duration;
-
-          oscillator.connect(gainNode);
-          oscillator.start(start);
-          oscillator.stop(stop);
-        }
+        const duration = 0.1;
         
-        view.current.accessIndicesList = [];
+        const start = audioContext.currentTime + offset;
+        const stop = start + duration;
+
+        oscillator.connect(gainNode);
+        oscillator.start(start);
+        oscillator.stop(stop);
+      }
+
+      view.current.accessIndicesList = [];
     }
 
     function update() {

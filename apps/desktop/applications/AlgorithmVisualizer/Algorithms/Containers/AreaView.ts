@@ -224,6 +224,8 @@ export class AreaView {
   private happyPath: Point[] = [];
   private area: Area;
 
+  public accessedList: Point[] = [];
+
   constructor() {
     this.area = new Area([], { x: 0, y: 0 }, { x: 0, y: 0 });
   }
@@ -254,6 +256,8 @@ export class AreaView {
     this.dirty = true;
 
     this.visited[y][x] = true;
+
+    this.accessedList.push({ x, y });
 
     await sleep(50);
   }

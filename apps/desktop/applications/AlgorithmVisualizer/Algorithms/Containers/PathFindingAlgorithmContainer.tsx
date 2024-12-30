@@ -5,6 +5,7 @@ import { Area, AreaView, generateMaze, generateOpenFieldArea, generatePipes } fr
 import { PathFindingAlgorithmContainerProps } from "./Containers";
 import { useTranslation } from "react-i18next";
 import { PathFindingGenerationStrategyDropdown, DataGenerationEntriesInput } from "../../Home/Home";
+import { pointMagnitude } from "@/applications/math";
 
 export type PathFindingDataGenerationStrategy = 'maze' | 'open-field' | 'pipes';
 
@@ -122,8 +123,54 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
         setPathFinding(false);
     });
 
+    const audioContext = new AudioContext();
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = 0.01;
+
+    gainNode.connect(audioContext.destination);
+
+    const start = view.current.getArea().getStart();
+    const end = view.current.getArea().getEnd();
+
+    const maxMagnitude = pointMagnitude(start, end);
+
+    function playSound() {
+      const accessedList = view.current.accessedList;
+
+      console.log(accessedList.length);
+
+      for (let i = 0; i < accessedList.length; i++) {
+        const magnitude = pointMagnitude(accessedList[i], end);
+
+        const scale = magnitude / maxMagnitude;
+
+        const freq = 120 + 1200 * (scale * scale);
+
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = "triangle";
+
+        oscillator.frequency.value = freq;
+
+        const offset = i * 0.1;
+        const duration = 0.1;
+
+        const startTime = audioContext.currentTime + offset;
+        const endTime = startTime + duration;
+
+        oscillator.connect(gainNode);
+        oscillator.start(startTime);
+        oscillator.stop(endTime);
+      }
+
+      view.current.accessedList = [];
+    }
+
     function update() {
       if (view.current.rerender()) {
+        if (apis.sound.isEnabled()) {
+          playSound();
+        }
+
         graph.current.render();
       }
 
@@ -172,22 +219,22 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
         <button className="system-button" onClick={regenerate} disabled={isPathFinding}>{t('algorithms.regenerate')}</button>
 
         <table>
-        <tbody>
-              <tr>
-                <td><label htmlFor="path-finding-data-gen-strategy">{t('algorithms.data_generation_strategy')}</label></td>
-                <td>{ PathFindingGenerationStrategyDropdown("path-finding-data-gen-strategy", pathFindingGenerationStrategy, setPathFindingGenerationStrategy, t) }</td>
-              </tr>
+          <tbody>
+            <tr>
+              <td><label htmlFor="path-finding-data-gen-strategy">{t('algorithms.data_generation_strategy')}</label></td>
+              <td>{ PathFindingGenerationStrategyDropdown("path-finding-data-gen-strategy", pathFindingGenerationStrategy, setPathFindingGenerationStrategy, t) }</td>
+            </tr>
 
-              <tr>
-                <td><label htmlFor="path-finding-width">{t('algorithms.path_finding_width')}</label></td>
-                <td>{ DataGenerationEntriesInput("path-finding-width", pathFindingWidth, setPathFindingWidth, 5, 100) }</td>
-              </tr>
+            <tr>
+              <td><label htmlFor="path-finding-width">{t('algorithms.path_finding_width')}</label></td>
+              <td>{ DataGenerationEntriesInput("path-finding-width", pathFindingWidth, setPathFindingWidth, 5, 100) }</td>
+            </tr>
 
-              <tr>
-                <td><label htmlFor="path-finding-height">{t('algorithms.path_finding_height')}</label></td>
-                <td>{ DataGenerationEntriesInput("path-finding-height", pathFindingHeight, setPathFindingHeight, 5, 100) }</td>
-              </tr>
-            </tbody>
+            <tr>
+              <td><label htmlFor="path-finding-height">{t('algorithms.path_finding_height')}</label></td>
+              <td>{ DataGenerationEntriesInput("path-finding-height", pathFindingHeight, setPathFindingHeight, 5, 100) }</td>
+            </tr>
+          </tbody>
         </table>
 
         <button className={styles['button-link']} onClick={() => params.changeParent('home')}>{t('algorithms.return_to_overview')}</button>
