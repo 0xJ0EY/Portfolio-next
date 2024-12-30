@@ -137,8 +137,6 @@ export function PathFindingAlgorithmContainer(props: PathFindingAlgorithmContain
     function playSound() {
       const accessedList = view.current.accessedList;
 
-      console.log(accessedList.length);
-
       for (let i = 0; i < accessedList.length; i++) {
         const magnitude = pointMagnitude(accessedList[i], end);
 
