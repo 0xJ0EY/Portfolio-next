@@ -60,7 +60,5 @@ export const pointMagnitude = (a: Point, b: Point): number => {
   const xAxis = (b.x - a.x);
   const yAxis = (b.y - a.y);
 
-  console.log(xAxis, yAxis);
-
   return Math.sqrt(Math.pow(xAxis, 2) + Math.pow(yAxis, 2));
 }
