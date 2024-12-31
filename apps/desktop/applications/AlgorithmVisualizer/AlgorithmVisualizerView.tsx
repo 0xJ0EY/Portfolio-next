@@ -13,7 +13,8 @@ type SortingAlgorithms = (
 
 type PathFindingAlgorithm = (
   'bfs' |
-  'dfs'
+  'dfs' |
+  'astar'
 )
 
 export type AlgorithmSubView = 'home' | SortingAlgorithms | PathFindingAlgorithm;
@@ -35,6 +36,7 @@ const HeapSortLoader = dynamic(() => import('./Algorithms/Sorting/HeapSort'), { 
 
 const BfsPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Bfs'), { loading: Loader });
 const DfsPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Dfs'), { loading: Loader });
+const AstarPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Astar'), { loading: Loader });
 
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
@@ -46,6 +48,7 @@ function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Eleme
     case 'heap-sort': return <HeapSortLoader {...params} />;
     case 'bfs': return <BfsPathFindingLoader {...params} />;
     case 'dfs': return <DfsPathFindingLoader {...params} />;
+    case 'astar': return <AstarPathFindingLoader {...params} />;
   }
 
   return <>No subview found</>;

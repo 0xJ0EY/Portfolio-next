@@ -171,6 +171,7 @@ export default function HomeSubView(params: SubViewParams) {
           <h1>Path finding</h1>
           {NavigationButton('Depth-first search', 'dfs')}
           {NavigationButton('Breadth-first search', 'bfs')}
+          {NavigationButton('A* search', 'astar')}
 
           <table>
             <tbody>
