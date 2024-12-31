@@ -55,3 +55,10 @@ export const pointIndexInsideAnyRectangles = (
 ): number => {
   return rects.findIndex(x => pointInsideRectangle(point, x));
 }
+
+export const pointMagnitude = (a: Point, b: Point): number => {
+  const xAxis = Math.abs(b.x - a.x);
+  const yAxis = Math.abs(b.y - a.y);
+
+  return Math.sqrt(xAxis * xAxis + yAxis * yAxis);
+}

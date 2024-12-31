@@ -1,4 +1,5 @@
-import { SortView, SortViewEntry } from "@/applications/AlgorithmVisualizer/Algorithms/SortingView";
+import { AreaView, AreaViewTile } from "@/applications/AlgorithmVisualizer/Algorithms/Containers/AreaView";
+import { SortView, SortViewEntry } from "@/applications/AlgorithmVisualizer/Algorithms/Containers/SortingView";
 
 interface Graph {
   resize(width: number, height: number): void;
@@ -37,10 +38,6 @@ export abstract class CanvasGraph implements Graph {
 export class BarGraph extends CanvasGraph {
   constructor(private view: SortView) {
     super();
-  }
-
-  public updateData(data: SortViewEntry[]): void {
-    this.render();
   }
 
   private renderBar(index: number) {
@@ -82,6 +79,90 @@ export class BarGraph extends CanvasGraph {
 
     for (let i = 0; i < this.view.size(); i++) {
       this.renderBar(i);
+    }
+  }
+}
+
+export class AreaGraph extends CanvasGraph {
+
+  constructor(private view: AreaView) {
+    super();
+  }
+
+  public subscribe(handler: (evt: PointerEvent) => void) {
+    if (!this.parent) { return; }
+
+    this.parent.addEventListener('pointerdown', handler);
+  }
+
+  public disconnect(handler: (evt: PointerEvent) => void) {
+    if (!this.parent) { return; }
+
+    this.parent.removeEventListener('pointerdown', handler);
+  }
+
+  private calculateTileSize(): number {
+    const width = this.parent!.width;
+
+    return width / this.view.getWidth();
+  }
+
+  private renderTile(x: number, y: number, tile: AreaViewTile, tileSize: number) {
+    function tileColor(tile: AreaViewTile) {
+      switch (tile) {
+        case "open": return '#fff';
+        case "wall": return '#000';
+        case "start": return '#0f0';
+        case "end": return '#f00';
+        case "visited": return "#5ca314"
+        case "happy-path": return '#90e83c';
+      }
+    }
+
+    const context = this.context!;
+
+    const offsetX = x * tileSize;
+    const offsetY = y * tileSize;
+
+
+    context.fillStyle = '#000';
+
+    context.fillRect(
+      Math.floor(offsetX),
+      Math.floor(offsetY),
+      Math.ceil(tileSize),
+      Math.ceil(tileSize)
+    );
+
+    context.fillStyle = tileColor(tile);
+
+    context.fillRect(
+      Math.floor(offsetX) + 1,
+      Math.floor(offsetY) + 1,
+      Math.ceil(tileSize),
+      Math.ceil(tileSize)
+    );
+  }
+
+  public render(): void {
+    if (this.context === null) { return; }
+    if (this.parent === null) { return; }
+
+    const area = this.view.getArea();
+    const width = this.view.getWidth();
+
+    const tileSize = this.calculateTileSize();
+
+    this.context.fillStyle = '#000';
+    this.context.fillRect(0, 0, this.parent.width, this.parent.height);
+
+    for (let i = 0; i < area.getSize(); i++) {
+      const x = i % width;
+      const y = Math.floor(i / width);
+
+      const tile = this.view.getTile(x, y);
+
+      if (tile) { this.renderTile(x, y, tile, tileSize); }
     }
   }
 }

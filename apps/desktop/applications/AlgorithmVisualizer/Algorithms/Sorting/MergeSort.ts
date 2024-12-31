@@ -1,7 +1,6 @@
-
-import { SubViewParams } from "../AlgorithmVisualizerView";
-import { SortView, SortViewEntry, SortViewEntryColor } from "./SortingView";
-import { AlgorithmContainer } from "./AlgorithmContainer";
+import { SubViewParams } from "../../AlgorithmVisualizerView";
+import { SortingAlgorithmContainer } from "../Containers/SortingAlgorithmContainer";
+import { SortView, SortViewEntryColor, SortViewEntry } from "../Containers/SortingView";
 
 async function mergeSort(view: SortView, abortSignal: AbortSignal) {
   async function merge(view: SortView, low: number, pivot: number, high: number) {
@@ -11,7 +10,7 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
 
       return 'red';
     }
-    
+
     let data: SortViewEntry[] = [];
 
     let i = low, j = pivot, o = 0;
@@ -57,12 +56,12 @@ async function mergeSort(view: SortView, abortSignal: AbortSignal) {
   }
 
   await sort(view, 0, view.size());
-  
+
   view.cleanColors();
 }
 
 export default function MergeSort(params: SubViewParams) {
-  return AlgorithmContainer({
+  return SortingAlgorithmContainer({
     params,
     entrypoint: mergeSort,
     title: 'Merge sort',

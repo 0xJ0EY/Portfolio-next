@@ -1,7 +1,7 @@
 
-import { SubViewParams } from "../AlgorithmVisualizerView";
-import { SortView } from "./SortingView";
-import { AlgorithmContainer } from "./AlgorithmContainer";
+import { SubViewParams } from "../../AlgorithmVisualizerView";
+import { SortView } from "../Containers/SortingView";
+import { SortingAlgorithmContainer } from "../Containers/SortingAlgorithmContainer";
 
 async function heapSort(view: SortView, abortSignal: AbortSignal) {
 
@@ -55,12 +55,12 @@ async function heapSort(view: SortView, abortSignal: AbortSignal) {
   }
 
   await sort(view);
-  
+
   view.cleanColors();
 }
 
 export default function HeapSort(params: SubViewParams) {
-  return AlgorithmContainer({
+  return SortingAlgorithmContainer({
     params,
     entrypoint: heapSort,
     title: 'Heap sort',

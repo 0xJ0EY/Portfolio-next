@@ -1,16 +1,23 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { AlgorithmOptions } from './Algorithms/AlgorithmContainer';
+import { AlgorithmOptions } from './Algorithms/Containers/Containers';
 
-export type AlgorithmSubView = (
-  'home' |
+type SortingAlgorithms = (
   'bubble-sort' |
   'merge-sort' |
   'bogo-sort' |
   'heap-sort' |
-  'quick-sort' 
-);
+  'quick-sort'
+)
+
+type PathFindingAlgorithm = (
+  'bfs' |
+  'dfs' |
+  'astar'
+)
+
+export type AlgorithmSubView = 'home' | SortingAlgorithms | PathFindingAlgorithm;
 
 export type SubViewParams = {
   windowProps: WindowProps,
@@ -21,11 +28,15 @@ export type SubViewParams = {
 function Loader() { return <></> }
 
 const HomeLoader = dynamic(() => import('./Home/Home'), { loading: Loader });
-const BubbleSortLoader = dynamic(() => import('./Algorithms/BubbleSort'), { loading: Loader });
-const BogoSortLoader = dynamic(() => import('./Algorithms/BogoSort'), { loading: Loader });
-const MergeSortLoader = dynamic(() => import('./Algorithms/MergeSort'), { loading: Loader });
-const QuickSortLoader = dynamic(() => import('./Algorithms/QuickSort'), { loading: Loader });
-const HeapSortLoader = dynamic(() => import('./Algorithms/HeapSort'), { loading: Loader });
+const BubbleSortLoader = dynamic(() => import('./Algorithms/Sorting/BubbleSort'), { loading: Loader });
+const BogoSortLoader = dynamic(() => import('./Algorithms/Sorting/BogoSort'), { loading: Loader });
+const MergeSortLoader = dynamic(() => import('./Algorithms/Sorting/MergeSort'), { loading: Loader });
+const QuickSortLoader = dynamic(() => import('./Algorithms/Sorting/QuickSort'), { loading: Loader });
+const HeapSortLoader = dynamic(() => import('./Algorithms/Sorting/HeapSort'), { loading: Loader });
+
+const BfsPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Bfs'), { loading: Loader });
+const DfsPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Dfs'), { loading: Loader });
+const AstarPathFindingLoader = dynamic(() => import('./Algorithms/PathFinding/Astar'), { loading: Loader });
 
 function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Element {
   switch (view) {
@@ -35,6 +46,9 @@ function RenderSubView(view: AlgorithmSubView, params: SubViewParams): JSX.Eleme
     case 'merge-sort': return <MergeSortLoader {...params} />;
     case 'quick-sort': return <QuickSortLoader {...params} />;
     case 'heap-sort': return <HeapSortLoader {...params} />;
+    case 'bfs': return <BfsPathFindingLoader {...params} />;
+    case 'dfs': return <DfsPathFindingLoader {...params} />;
+    case 'astar': return <AstarPathFindingLoader {...params} />;
   }
 
   return <>No subview found</>;

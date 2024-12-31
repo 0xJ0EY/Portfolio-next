@@ -334,6 +334,7 @@ Please enjoy, and explore as much as you would like.
 Three - https://threejs.org/ Awesome library for 3D web stuff.
 Nextjs - https://nextjs.org/ Great framework to build your React app in.
 Turborepo - https://turbo.build/ Lovely and fast build system for monorepos and great integration with Vercel.
+xtermjs - https://xtermjs.org/ A great terminal emulator that made the terminal possible.
 `;
 
   fileSystem.addTextFile(desktop, 'readme', readmeText, true);

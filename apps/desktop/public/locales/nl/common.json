@@ -22,6 +22,13 @@
     "return_to_overview": "Terug naar overzicht",
     "sorting_options": "Sorteer opties",
     "data_generation_strategy": "Data generatie strategie",
+    "path_finding_width": "Breedte van de omgeving",
+    "path_finding_height": "Hoogte van de omgeving",
+    "path_finding_generation_options": {
+      "maze": "Doolhof",
+      "open_field": "Open veld",
+      "pipes": "Pijpen"
+    },
     "data_generation_options": {
       "randomly_distributed": "Willekeurig verdeeld",
       "sorted_left_to_right": "Gesorteerd van links naar rechts",

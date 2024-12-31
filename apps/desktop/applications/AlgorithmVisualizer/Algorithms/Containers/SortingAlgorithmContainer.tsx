@@ -1,27 +1,50 @@
 import { useEffect, useRef, useState } from "react";
 import { SortView, SortViewEntry, verifySort } from "./SortingView";
-import { generateRandomData, generateSortedDataLeftToRight, generateSortedDataRightToLeft } from "../Util";
 import { BarGraph } from "@/components/GraphViewer/GraphViewer";
-import { DataGenerationEntriesInput, DataGenerationStrategyDropDown } from "../Home/Home";
-import { SubViewParams } from "../AlgorithmVisualizerView";
+import { DataGenerationEntriesInput, SortingGenerationStrategyDropdown } from "../../Home/Home";
 import styles from "./AlgorithmContainer.module.css";
 import { useTranslation } from "react-i18next";
+import { SortingAlgorithmContainerProps } from "./Containers";
 
-export type AlgorithmOptions = {
-  dataGenerationStrategy: DataGenerationStrategy,
-  amountOfEntries: number
+export type SortingDataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
+
+function generateRandomData(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
+
+  for (let i = 0; i < entries; i++) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  // Fisher–Yates shuffle
+  for (let i = entries - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i));
+    [data[i], data[j]] = [data[j], data[i]];
+  }
+
+  return data;
 }
-export type AlgorithmContainerProps = {
-  params: SubViewParams,
-  entrypoint: SortingAlgorithmEntrypoint,
-  options: AlgorithmOptions,
-  title: string,
+
+function generateSortedDataLeftToRight(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
+
+  for (let i = 0; i < entries; i++) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  return data;
 }
 
-export type DataGenerationStrategy = 'randomly-distributed' | 'sorted-left-to-right' | 'sorted-right-to-left';
-export type SortingAlgorithmEntrypoint = (view: SortView, abortSignal: AbortSignal) => Promise<void>;
+function generateSortedDataRightToLeft(entries: number): SortViewEntry[] {
+  let data: SortViewEntry[] = [];
 
-function generateData(strategy: DataGenerationStrategy, entries: number): SortViewEntry[] {
+  for (let i = entries; i > 0; i--) {
+    data.push({ value: i, color: 'white' });
+  }
+
+  return data;
+}
+
+function generateData(strategy: SortingDataGenerationStrategy, entries: number): SortViewEntry[] {
   switch (strategy) {
     case "randomly-distributed": return generateRandomData(entries);
     case "sorted-left-to-right": return generateSortedDataLeftToRight(entries);
@@ -29,15 +52,15 @@ function generateData(strategy: DataGenerationStrategy, entries: number): SortVi
   }
 }
 
-export function AlgorithmContainer(props: AlgorithmContainerProps) { 
+export function SortingAlgorithmContainer(props: SortingAlgorithmContainerProps) { 
   const { entrypoint, params, title } = props;
 
   const apis = params.windowProps.application.apis;
 
   const { t } = useTranslation('common');
 
-  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.dataGenerationStrategy);
-  const [amountOfEntries, setAmountOfEntries] = useState<number | null>(props.options.amountOfEntries);
+  const [dataGenStrategy, setDataGenStrategy] = useState(props.options.sorting.dataGenerationStrategy);
+  const [amountOfEntries, setAmountOfEntries] = useState<number | null>(props.options.sorting.amountOfEntries);
 
   const parent = useRef<HTMLDivElement>(null);
   const graphRef = useRef<HTMLCanvasElement>(null);
@@ -45,10 +68,12 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
   const [isSorting, setSorting] = useState<boolean>(false);
   const abortController = useRef<AbortController>(new AbortController());
 
-  const view = useRef(new SortView(generateData(dataGenStrategy, amountOfEntries ?? 50)));
+  const view = useRef(new SortView([]));
   const graph = useRef(new BarGraph(view.current));
 
   useEffect(() => {
+    view.current.setData(generateData(dataGenStrategy, amountOfEntries ?? 50));
+
     if (!graphRef.current) { return; }
     if (!parent.current) { return; }
 
@@ -99,30 +124,30 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
     gainNode.connect(audioContext.destination);
 
     function playSound() {
-      let indicesList = view.current.accessIndicesList;
+      const indicesList = view.current.accessIndicesList;
 
-        for (let i = 0; i < indicesList.length; i++) {
-          let relativeIndex = indicesList[i] / view.current.getHighestValue();
+      for (let i = 0; i < indicesList.length; i++) {
+        const relativeIndex = indicesList[i] / view.current.getHighestValue();
 
-          const oscillator = audioContext.createOscillator();
-          oscillator.type = "triangle";
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = "triangle";
 
-          const freq = 120 + 1200 * (relativeIndex * relativeIndex);
-          oscillator.frequency.value = freq;
+        const freq = 120 + 1200 * (relativeIndex * relativeIndex);
+        oscillator.frequency.value = freq;
 
-          const offset = i * 0.1;
+        const offset = i * 0.1;
 
-          const duration = 0.1;
-          
-          const start = audioContext.currentTime + offset;
-          const stop = start + duration;
-
-          oscillator.connect(gainNode);
-          oscillator.start(start);
-          oscillator.stop(stop);
-        }
+        const duration = 0.1;
         
-        view.current.accessIndicesList = [];
+        const start = audioContext.currentTime + offset;
+        const stop = start + duration;
+
+        oscillator.connect(gainNode);
+        oscillator.start(start);
+        oscillator.stop(stop);
+      }
+
+      view.current.accessIndicesList = [];
     }
 
     function update() {
@@ -174,11 +199,11 @@ export function AlgorithmContainer(props: AlgorithmContainerProps) {
           <tbody>
             <tr>
             <td><label htmlFor="data-generation-strategy">{t('algorithms.data_generation_strategy')}</label></td>
-              <td>{ DataGenerationStrategyDropDown(dataGenStrategy, setDataGenStrategy, t) }</td>
+              <td>{ SortingGenerationStrategyDropdown("data-generation-strategy", dataGenStrategy, setDataGenStrategy, t) }</td>
             </tr>
             <tr>
             <td><label htmlFor="generated-data-size">{t('algorithms.data_generation_points')}</label></td>
-              <td>{ DataGenerationEntriesInput(amountOfEntries, setAmountOfEntries) }</td>
+              <td>{ DataGenerationEntriesInput("generated-data-size", amountOfEntries, setAmountOfEntries, 1, 2048) }</td>
             </tr>
           </tbody>
         </table>
