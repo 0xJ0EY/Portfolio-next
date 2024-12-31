@@ -1,8 +1,8 @@
 import { Point } from "@/applications/math";
-import { SubViewParams } from "../AlgorithmVisualizerView";
-import { AreaView } from "./Containers/AreaView";
-import { PathFindingAlgorithmContainer } from "./Containers/PathFindingAlgorithmContainer";
-import { adjacentEdges, equals, pointToString } from "../Util";
+import { SubViewParams } from "../../AlgorithmVisualizerView";
+import { AreaView } from "../Containers/AreaView";
+import { PathFindingAlgorithmContainer } from "../Containers/PathFindingAlgorithmContainer";
+import { adjacentEdges, equals, pointToString } from "../../Util";
 
 interface DfsNode {
   value: Point,

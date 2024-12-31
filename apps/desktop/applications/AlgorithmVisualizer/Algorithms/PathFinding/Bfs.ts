@@ -1,9 +1,9 @@
 import { Point } from "@/applications/math";
-import { SubViewParams } from "../AlgorithmVisualizerView";
-import { AreaView } from "./Containers/AreaView";
-import { PathFindingAlgorithmContainer } from "./Containers/PathFindingAlgorithmContainer";
+import { SubViewParams } from "../../AlgorithmVisualizerView";
+import { AreaView } from "../Containers/AreaView";
+import { PathFindingAlgorithmContainer } from "../Containers/PathFindingAlgorithmContainer";
 import { Queue } from "@/data/Queue";
-import { pointToString, equals, adjacentEdges } from "../Util";
+import { pointToString, equals, adjacentEdges } from "../../Util";
 
 interface BfsContainer {
   value: Point,
