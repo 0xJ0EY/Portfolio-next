@@ -4,6 +4,7 @@ const { config } = require('process')
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['rpc'],
+  devIndicators: false,
   webpack: (config) => {
     config.module.rules.push({
       test: /\.frag$/,
