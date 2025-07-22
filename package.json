@@ -21,7 +21,7 @@
     "turbo": "^2.5.5"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": "22.x"
   },
   "packageManager": "npm@11.4.2",
   "dependencies": {
