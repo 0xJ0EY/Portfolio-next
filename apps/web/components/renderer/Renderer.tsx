@@ -1,5 +1,5 @@
 import styles from './Renderer.module.css'
-import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
@@ -177,8 +177,8 @@ export const Renderer = (props: RendererProps) => {
 
   const { loading, showMessage, scenes, actions } = props;
 
-  const cssOutputRef: RefObject<HTMLDivElement> = useRef(null);
-  const webglOutputRef: RefObject<HTMLDivElement> = useRef(null);
+  const cssOutputRef: RefObject<HTMLDivElement | null> = useRef(null);
+  const webglOutputRef: RefObject<HTMLDivElement | null> = useRef(null);
 
   const cameraHandlerRef = useRef<CameraHandler | null>(null);
 
@@ -190,7 +190,7 @@ export const Renderer = (props: RendererProps) => {
   const mouseProgressCircle = HandleMouseInteractionInformation(touchEvents);
   const touchProgressCircle = HandleTouchProgressCircle(touchEvents);
 
-  let then: MutableRefObject<number | null> = useRef(null);
+  let then: RefObject<number | null> = useRef(null);
 
   function handleCameraHandlerStateChange(state: CameraHandlerState): void {
     setCameraHandlerState(state);
