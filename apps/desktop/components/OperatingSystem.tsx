@@ -2,7 +2,7 @@ import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
 import { addDebugAppToFileSystem, createBaseFileSystem, removeDebugAppFromFileSystem } from "@/apis/FileSystem/FileSystem";
-import React, { MutableRefObject, RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
 import { Dock } from "./Dock/Dock";

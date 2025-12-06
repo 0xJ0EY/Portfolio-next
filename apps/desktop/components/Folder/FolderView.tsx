@@ -1,5 +1,5 @@
 import { DirectoryContent, DirectoryEntry, NodeEventType, NodeRenameEvent, DirectorySettings, FileSystemDirectory, FileSystemNode, calculateNodePosition} from '@/apis/FileSystem/FileSystem';
-import { forwardRef, useState, useRef, useEffect, RefObject, MutableRefObject, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, RefObject } from 'react';
 import dynamic from 'next/dynamic';
 import styles from '@/components/Folder/FolderView.module.css';
 import { FolderIconEntry, FolderIconHitBox, IconHeight, IconWidth } from '../Icons/FolderIcon';
@@ -9,7 +9,7 @@ import { DragAndDropSession, FileSystemItemDragData, FileSystemItemDragDrop, Fil
 import { clamp } from '../util';
 import { Err, Ok, Result } from "result";
 import { SystemAPIs } from '../OperatingSystem';
-import { constructPath, generateUniqueNameForDirectory } from '@/apis/FileSystem/util';
+import { constructPath } from '@/apis/FileSystem/util';
 
 const FolderIcon = dynamic(() => import('../Icons/FolderIcon'));
 
