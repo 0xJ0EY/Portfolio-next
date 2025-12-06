@@ -1,5 +1,5 @@
 import { WindowProps } from '@/components/WindowManagement/WindowCompositor';
-import { useEffect, useRef, useState } from 'react';
+import { JSX, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { AlgorithmOptions } from './Algorithms/Containers/Containers';
 

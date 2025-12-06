@@ -67,7 +67,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   const axis = useRef<ResizeAxis>('none');
   const origin = useRef<Origin>(new Origin());
 
-  const output: RefObject<HTMLDivElement> = useRef(null);
+  const output: RefObject<HTMLDivElement | null> = useRef(null);
 
   const getResizeAxis = (evt: PointerEvent): ResizeAxis => {
     const node = output.current;
@@ -298,13 +298,13 @@ const WindowHeader = (
   windowData: Window,
   windowCompositor: WindowCompositor,
   parent: HTMLDivElement,
-  maximized: MutableRefObject<boolean>
+  maximized: RefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
   const [needsMobileView, setNeedsMobileView] = useState(false);
   const apis = windowData.application.apis;
 
-  const output: RefObject<HTMLDivElement> = useRef(null);
+  const output: RefObject<HTMLDivElement | null> = useRef(null);
   const lastTimeHeaderClicked = useRef<number>(0);
   const isMaximized = maximized;
 

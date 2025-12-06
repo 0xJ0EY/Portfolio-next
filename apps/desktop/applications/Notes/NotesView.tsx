@@ -23,7 +23,7 @@ export default function NotesApplicationView(props: WindowProps) {
   const fs = application.apis.fileSystem;
   const { t } = useTranslation('common');
 
-  const textFileRef = useRef<FileSystemTextFile>();
+  const textFileRef = useRef<FileSystemTextFile | null>(null);
 
   const path = args;
 

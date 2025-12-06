@@ -61,8 +61,8 @@ export function FolderView(props: FolderViewProps) {
     setFiles(files.toArray());
   } 
 
-  const ref: RefObject<HTMLDivElement> = useRef(null);
-  const iconContainer: RefObject<HTMLDivElement> = useRef(null);
+  const ref: RefObject<HTMLDivElement | null> = useRef(null);
+  const iconContainer: RefObject<HTMLDivElement | null> = useRef(null);
 
   const dragAndDrop = apis.dragAndDrop;
 
@@ -73,11 +73,11 @@ export function FolderView(props: FolderViewProps) {
   const previousClickedFile = useRef<{ file: ClickedIcon | null, timestamp: number }>({ file: null, timestamp: 0 });
 
   const fileDraggingOrigin = useRef({ x: 0, y: 0 });
-  const fileDraggingFolderOrigin = useRef<Point>();
+  const fileDraggingFolderOrigin = useRef<Point | null>(null);
 
   const fileDraggingSelection  = useRef<FolderIconEntry[]>([]);
-  const fileDraggingCurrentNode: MutableRefObject<Element | undefined> = useRef();
-  const fileDraggingSession: MutableRefObject<DragAndDropSession | null> = useRef(null);
+  const fileDraggingCurrentNode: RefObject<Element | null> = useRef(null);
+  const fileDraggingSession: RefObject<DragAndDropSession | null> = useRef(null);
 
   const [box, setBox] = useState<SelectionBox>({ open: false, x: 0, y: 0, width: 0, height: 0 });
 
@@ -254,7 +254,7 @@ export function FolderView(props: FolderViewProps) {
       }
 
       if (!dropPoint) { 
-        fileDraggingCurrentNode.current = undefined;
+        fileDraggingCurrentNode.current = null;
         return;
       }
 
@@ -321,7 +321,7 @@ export function FolderView(props: FolderViewProps) {
 
     fileDraggingSession.current?.drop(evt.clientX, evt.clientY);
     fileDraggingSession.current = null;
-    fileDraggingCurrentNode.current = undefined;
+    fileDraggingCurrentNode.current = null;
 
     isDragging.current = false;
   }
@@ -418,7 +418,7 @@ export function FolderView(props: FolderViewProps) {
     } else {
       stopRenamingFiles();
 
-      fileDraggingFolderOrigin.current = undefined;
+      fileDraggingFolderOrigin.current = null;
 
       openSelectionBox(position, interaction);
     }

@@ -2,7 +2,7 @@ import { ApplicationManager } from "@/applications/ApplicationManager";
 import { WindowCompositor } from "./WindowManagement/WindowCompositor";
 import { DragAndDropService } from "@/apis/DragAndDrop/DragAndDrop";
 import { addDebugAppToFileSystem, createBaseFileSystem, removeDebugAppFromFileSystem } from "@/apis/FileSystem/FileSystem";
-import React, { MutableRefObject, useEffect, useRef } from "react";
+import React, { MutableRefObject, RefObject, useEffect, useRef } from "react";
 import { MenuBar } from "./MenuBar";
 import { Desktop } from "./Desktop/Desktop";
 import { Dock } from "./Dock/Dock";
@@ -39,8 +39,8 @@ const windowCompositor = new WindowCompositor();
 const applicationManager = new ApplicationManager(windowCompositor, fileSystem, apis);
 
 function handleParentResponsesClosure(
-  initialCamera: MutableRefObject<Camera | null>,
-  camera: MutableRefObject<Camera | null>,
+  initialCamera: RefObject<Camera | null>,
+  camera: RefObject<Camera | null>,
   apis: SystemAPIs
 ) {
   return function(event: MessageEvent) {
