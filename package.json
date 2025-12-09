@@ -15,22 +15,23 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.17",
+    "@types/nodemailer": "^7.0.4",
     "eslint-config-custom": "*",
     "prettier": "latest",
-    "turbo": "^2.5.5"
+    "raw-loader": "^4.0.2",
+    "turbo": "^2.6.3"
   },
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
-  "packageManager": "npm@11.4.2",
+  "packageManager": "npm@11.6.4",
   "dependencies": {
     "@xterm/xterm": "^5.5.0",
     "emulators-ui": "^0.73.9",
-    "i18next": "^25.3.2",
-    "next-i18next": "^15.4.2",
-    "nodemailer": "^7.0.5",
-    "react-i18next": "^15.6.1",
-    "zod": "^4.0.5"
+    "i18next": "^25.7.1",
+    "next-i18next": "^15.4.3",
+    "nodemailer": "^7.0.11",
+    "react-i18next": "^16.4.0",
+    "zod": "^4.1.13"
   }
 }

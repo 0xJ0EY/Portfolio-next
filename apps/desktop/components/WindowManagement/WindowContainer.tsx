@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, RefObject, MutableRefObject, useReducer, FormEvent } from 'react';
+import { useRef, useEffect, useState, RefObject, useReducer, FormEvent } from 'react';
 import { Window, WindowAction, WindowActionAlert, WindowActionPrompt, WindowApplication, WindowCompositor, WindowContext } from "./WindowCompositor";
 import styles from '@/styles/WindowContainer.module.css';
 import { clamp } from '../util';
@@ -57,7 +57,7 @@ class Origin {
 
 // TODO: Maybe performance gain? It should be possible to bind the window events to a singular component before these get rendered.
 // So we don't have to process all these window events
-const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor, parent: HTMLDivElement, isMaximized: MutableRefObject<boolean> }) => {
+const Resizable = (props: { windowData: Window, windowCompositor: WindowCompositor, parent: HTMLDivElement, isMaximized: RefObject<boolean> }) => {
   const { windowData, windowCompositor, parent, isMaximized } = props;
 
   const [resizing, setResizing] = useState(false);
@@ -67,7 +67,7 @@ const Resizable = (props: { windowData: Window, windowCompositor: WindowComposit
   const axis = useRef<ResizeAxis>('none');
   const origin = useRef<Origin>(new Origin());
 
-  const output: RefObject<HTMLDivElement> = useRef(null);
+  const output: RefObject<HTMLDivElement | null> = useRef(null);
 
   const getResizeAxis = (evt: PointerEvent): ResizeAxis => {
     const node = output.current;
@@ -298,13 +298,13 @@ const WindowHeader = (
   windowData: Window,
   windowCompositor: WindowCompositor,
   parent: HTMLDivElement,
-  maximized: MutableRefObject<boolean>
+  maximized: RefObject<boolean>
 ) => {
   const [dragging, setDragging] = useState(false);
   const [needsMobileView, setNeedsMobileView] = useState(false);
   const apis = windowData.application.apis;
 
-  const output: RefObject<HTMLDivElement> = useRef(null);
+  const output: RefObject<HTMLDivElement | null> = useRef(null);
   const lastTimeHeaderClicked = useRef<number>(0);
   const isMaximized = maximized;
 

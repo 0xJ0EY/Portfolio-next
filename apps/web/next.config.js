@@ -5,20 +5,17 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['rpc'],
   devIndicators: false,
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.frag$/,
-      // This is the asset module.
-      type: 'asset/source',
-    });
-
-    config.module.rules.push({
-      test: /\.vert$/,
-      // This is the asset module.
-      type: 'asset/source',
-    });
-
-    return config;
+  turbopack: {
+    rules: {
+      "*.frag": {
+        loaders: ['raw-loader'],
+        as: "*.js"
+      },
+      "*.vert": {
+        loaders: ['raw-loader'],
+        as: "*.js"
+      }
+    }
   },
   async headers() {
     return [

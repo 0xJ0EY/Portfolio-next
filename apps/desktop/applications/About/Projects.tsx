@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { SubViewNavigation, SubViewParams } from "./AboutView";
 import styles from './AboutView.module.css';
 import Image from 'next/image';
