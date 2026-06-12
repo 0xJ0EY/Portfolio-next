@@ -1,5 +1,5 @@
 import { LoadingManager, TextureLoader, WebGLRenderer } from "three";
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RendererScenes } from "../renderer/Renderer";
 import { sleep } from "./util";
 

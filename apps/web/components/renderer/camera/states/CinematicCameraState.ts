@@ -2,7 +2,7 @@ import { MouseData, PointerCoordinates, TouchData, UserInteractionEvent } from "
 import { UpdatableCameraState } from "../CameraState";
 import { CameraHandler, CameraHandlerContext, CameraHandlerState } from "../CameraHandler";
 import { clickedDOMButton, constructIsOverDisplay, easeInOutSine, getDisplay } from "./util";
-import { degToRad } from "three/src/math/MathUtils";
+import { degToRad } from "three/src/math/MathUtils.js";
 import { Spherical, Vector3 } from "three";
 import { easeOutCubicErp } from "../util";
 import { CameraController } from "../Camera";

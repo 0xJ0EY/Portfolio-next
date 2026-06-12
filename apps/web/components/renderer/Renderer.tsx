@@ -2,9 +2,9 @@ import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
 import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isFirefox, isSafari, sendMessageToIframe } from './util';
-import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
+import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass.js";
 import { CutOutRenderShaderPass } from './shaders/CutOutRenderShaderPass';
 import { FXAAShaderPass } from './shaders/FXAAShaderPass';
 import { CameraController } from './camera/Camera';
@@ -19,7 +19,7 @@ import { SoundService } from './sound/SoundService';
 import { BackgroundSounds } from './BackgroundSounds';
 import { UpdateAction } from '../scene-loader/AssetManager';
 import { getBrowserDimensions, isDebug } from '../scene-loader/util';
-import Stats from "three/examples/jsm/libs/stats.module";
+import Stats from "three/examples/jsm/libs/stats.module.js";
 import { setInitialCameraPosition } from './camera/states/CinematicCameraState';
 
 export interface RendererScenes {

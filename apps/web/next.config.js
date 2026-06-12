@@ -5,6 +5,9 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['rpc'],
   devIndicators: false,
+  images: {
+    qualities: [75, 100]
+  },
   turbopack: {
     rules: {
       "*.frag": {

@@ -10,7 +10,7 @@ import {
   UnsignedIntType,
   WebGLRenderTarget
 } from 'three';
-import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass";
+import { FullScreenQuad, Pass } from "three/examples/jsm/postprocessing/Pass.js";
 import { CutOutShader } from "./CutOutRenderShader";
 
 const RENDER_SAMPLES: number = 4;
