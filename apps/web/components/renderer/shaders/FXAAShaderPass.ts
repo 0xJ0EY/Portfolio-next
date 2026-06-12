@@ -1,6 +1,6 @@
-import { Pass } from "three/examples/jsm/postprocessing/Pass";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
+import { Pass } from "three/examples/jsm/postprocessing/Pass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 
 export class FXAAShaderPass extends ShaderPass {
   private updateUniformResolution(width: number, height: number) {

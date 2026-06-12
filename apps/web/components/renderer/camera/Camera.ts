@@ -1,8 +1,7 @@
 import { AssetKeys } from "@/components/scene-loader/AssetKeys";
 import { Vector3, Spherical, PerspectiveCamera, Quaternion, Raycaster, Scene, Object3D, Intersection } from "three";
-import { clamp, degToRad, radToDeg } from "three/src/math/MathUtils";
+import { clamp, degToRad } from "three/src/math/MathUtils.js";
 import { Erp, lerp } from "./util";
-
 
 type Action = (deltaTime: number) => ActionResult;
 

@@ -3,9 +3,9 @@ import { AssetLoader, AssetManagerContext, OptionalUpdateAction } from "./AssetM
 import { AssetKeys } from "./AssetKeys";
 import { RendererScenes } from "../renderer/Renderer";
 import { isSafari } from "../renderer/util";
-import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
-import { degToRad } from "three/src/math/MathUtils";
-import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer.js";
+import { degToRad } from "three/src/math/MathUtils.js";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export const DisplayParentName = "DisplayParent";
 export const DisplayName = "Display";

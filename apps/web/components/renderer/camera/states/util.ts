@@ -2,7 +2,7 @@ import { Mesh, Raycaster, Scene, Spherical, Vector2, Vector3 } from "three";
 import { CameraHandlerContext } from "../CameraHandler";
 import { MouseData, PointerCoordinates, TouchData } from "@/events/UserInteractionEvents";
 import { CameraController } from "../Camera";
-import { degToRad } from "three/src/math/MathUtils";
+import { degToRad } from "three/src/math/MathUtils.js";
 import { calculateAspectRatio } from "../../util";
 import { DisplayName, DisplayParentName } from "@/components/scene-loader/AssetLoaders";
 

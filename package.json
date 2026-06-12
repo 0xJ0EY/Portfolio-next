@@ -30,7 +30,7 @@
     "emulators-ui": "^0.73.9",
     "i18next": "^25.7.1",
     "next-i18next": "^15.4.3",
-    "nodemailer": "^7.0.11",
+    "nodemailer": "^8.0.11",
     "react-i18next": "^16.4.0",
     "zod": "^4.1.13"
   }
