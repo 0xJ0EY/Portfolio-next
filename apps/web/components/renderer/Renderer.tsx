@@ -1,7 +1,7 @@
 import styles from './Renderer.module.css'
 import { RefObject, useEffect, useRef, useState } from "react";
 import { DepthTexture, LinearFilter, PerspectiveCamera, RGBAFormat, Scene, VSMShadowMap, WebGLRenderer, WebGLRenderTarget } from "three";
-import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isSafari, sendMessageToIframe } from './util';
+import { calculateAspectRatio, disableTouchInteraction, enableTouchInteraction, isFirefox, isSafari, sendMessageToIframe } from './util';
 import { CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
@@ -37,7 +37,8 @@ const createCamera = (fov: number, aspectRatio: number): PerspectiveCamera => {
 }
 
 function createRenderers(width: number, height: number): [WebGLRenderer, CSS3DRenderer] {
-  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'default' });
+  const powerPreference = isFirefox() ? 'default' : 'high-performance' // TODO: Check if Firefox fixed the bug and this can be removed
+  const webglRenderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference });
 
   webglRenderer.shadowMap.enabled = true;
   webglRenderer.shadowMap.type = VSMShadowMap;
